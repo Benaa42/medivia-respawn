@@ -1,0 +1,14 @@
+{
+ "molten-mine": {
+  "name": "Molten Mine",
+  "monsters": [
+   { "name": "Dragon Lord", "count": 11, "base": 300 },
+   { "name": "Dwarf Dragoneater", "count": 26, "base": 300 },
+   { "name": "Dragon", "count": 9, "base": 300 },
+   { "name": "Dwarf", "count": 45, "base": 150 }
+  ],
+  "cost10": 62000,
+  "duration": 60,
+  "readAt": 10
+ }
+}

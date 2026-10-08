@@ -1,0 +1,1261 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<title>Medivia Respawn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: aplicativo escuro e liso. Coluna estreita com a lista de respawns; ao lado, o respawn aberto:
+   um bloco grande com os cronômetros em anéis, depois os controles e a lista de monstros.
+   Sem sombras nem gradientes: a hierarquia vem do raio dos cantos, do tom da superfície e do espaço.
+   Do jogo ficam as cores (âmbar nos nomes, verde nos números) e os textos da janela de bônus. */
+:root {
+  color-scheme: dark;
+  --ground: #0f1314;
+  --box: #171d1e;       /* superfície dos blocos */
+  --card: #1e2627;      /* superfície interna: itens e campos */
+  --edge: #2c3637;      /* linhas */
+  --band: #1b3a2c;      /* item selecionado */
+  --title: #f1f5f3;
+  --label: #c2cbc8;
+  --faint: #8b9894;
+  --amber: #f0ad4d;     /* nomes de monstro */
+  --value: #3ae374;     /* números e ação */
+  --teal: #3ae374;      /* ação, na janela flutuante */
+  --red: #ff7468;
+  --btn: #1e2627;
+  --btn-edge: #2c3637;
+  --ink: #06170d;       /* texto sobre o verde */
+  --font-ui: "Onest", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Onest", "Segoe UI", sans-serif;
+  --r-lg: 22px;
+  --r-md: 14px;
+  --r-sm: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--label);
+  font: 400 15px/1.45 var(--font-ui);
+  font-variant-numeric: lining-nums;
+}
+h1, h2, h3, h4, p, ul, ol { margin: 0; }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--value); outline-offset: 2px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+a { color: var(--value); text-underline-offset: 3px; }
+kbd {
+  padding: 2px 7px;
+  border: 1px solid var(--edge);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--card);
+  font: 600 13px/1.2 var(--font-ui);
+  color: var(--title);
+}
+
+.wrap {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: 20px;
+  padding-block: 28px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.masthead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 28px; }
+.masthead > div { flex: 1 1 320px; min-width: 0; }
+.masthead h1 { font: 800 32px/1.05 var(--font-display); letter-spacing: -0.01em; color: var(--title); }
+.masthead p { max-width: 60ch; margin-top: 6px; }
+.masthead nav { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; font-weight: 600; }
+.maker { display: block; flex: none; }
+.maker img { display: block; width: auto; height: 46px; }
+.colophon { max-width: 78ch; font-size: 13px; color: var(--faint); }
+
+/* A única instrução que a pessoa precisa para usar o site */
+.paste {
+  padding: 13px 18px;
+  border-radius: var(--r-md);
+  background: var(--box);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--title);
+}
+.paste kbd { margin-inline: 2px; }
+
+.desk { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; align-items: start; }
+.win { display: flex; flex-direction: column; min-width: 0; }
+.win.over { outline: 2px solid var(--value); outline-offset: 6px; border-radius: var(--r-lg); }
+.win-body { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+#sheet { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* Botões */
+.dlg {
+  padding: 9px 18px;
+  border: 1px solid var(--edge);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--title);
+  font: 600 14px/1.2 var(--font-ui);
+  cursor: pointer;
+}
+.dlg:hover { border-color: var(--faint); }
+.dlg:active { transform: translateY(1px); }
+.clock .dlg.go { border-color: var(--value); background: var(--value); color: var(--ink); }
+.clock .dlg.go:hover { filter: brightness(1.08); }
+.stage-all .dlg.go { border-color: var(--value); background: none; color: var(--value); }
+.dlg.stop { background: none; color: var(--label); }
+
+/* Respawn aberto: nome e cronômetros */
+.bonus { gap: 16px; }
+.bonus .win-title { display: flex; align-items: center; gap: 12px; }
+.win-name { font: 800 28px/1.15 var(--font-display); letter-spacing: -0.01em; color: var(--title); }
+input.win-name {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: none;
+}
+input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { border-bottom-color: var(--edge); outline: none; }
+.win-x { flex: none; padding: 6px 10px; border: 0; border-radius: 999px; background: none; color: var(--faint); font: 600 13px/1.2 var(--font-ui); cursor: pointer; }
+.win-x:hover, .win-x.sure { color: var(--red); }
+
+.stage { display: flex; flex-direction: column; gap: 20px; padding: 26px 24px 20px; border-radius: var(--r-lg); background: var(--box); }
+.clocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px 16px; }
+.clock { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; text-align: center; }
+.ring { position: relative; width: 184px; max-width: 100%; aspect-ratio: 1; margin-bottom: 8px; }
+.ring svg { display: block; width: 100%; height: 100%; }
+.ring circle { fill: none; stroke-width: 7; }
+.ring-track { stroke: var(--card); }
+.ring-arc { stroke: var(--value); stroke-linecap: round; stroke-dasharray: 326.73; stroke-dashoffset: 326.73; }
+.clock[data-state="idle"] .ring-arc { stroke: none; }
+.clock[data-state="warn"] .ring-arc { stroke: var(--amber); }
+.clock[data-state="done"] .ring-arc { stroke: var(--title); }
+.ring-in { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.clock-digits { font: 800 58px/1 var(--font-display); font-variant-numeric: lining-nums tabular-nums; color: var(--title); }
+.clock[data-state="run"] .clock-digits { color: var(--value); }
+.clock[data-state="warn"] .clock-digits { color: var(--amber); }
+.clock-unit { font-size: 13px; font-weight: 500; color: var(--faint); }
+.clock-note { min-height: 1.45em; font-weight: 500; }
+.clock-who { font-weight: 600; color: var(--amber); overflow-wrap: anywhere; }
+.clock-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
+.stage-all {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--edge);
+  font-size: 13px;
+  color: var(--faint);
+}
+
+/* Controles */
+.controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ctl { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px 16px 16px; border-radius: var(--r-md); background: var(--box); }
+.ctl-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; }
+.ctl h3 { font: 600 14px/1.3 var(--font-ui); color: var(--title); }
+.ctl-val { font-size: 13px; color: var(--faint); }
+.seg { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); }
+.seg button {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 4px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--label);
+  font: 600 14px/1.2 var(--font-ui);
+  font-variant-numeric: lining-nums tabular-nums;
+  cursor: pointer;
+}
+.seg button:hover { color: var(--title); }
+.seg button[aria-pressed="true"] { background: var(--title); color: var(--ground); }
+.slide { display: flex; align-items: center; gap: 8px; }
+.slide button {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  padding: 0 0 2px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--title);
+  font: 600 18px/1 var(--font-ui);
+  cursor: pointer;
+}
+.slide button:disabled { opacity: 0.35; cursor: default; }
+.slide input { flex: 1; min-width: 0; height: 30px; margin: 0; accent-color: var(--value); cursor: pointer; }
+.stops { display: flex; justify-content: space-between; padding-inline: 38px; }
+.stops button { padding: 0 2px; border: 0; background: none; color: var(--faint); font: 500 12px/1.2 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; cursor: pointer; }
+.stops button:hover { color: var(--title); }
+.stops button.on { color: var(--value); font-weight: 700; }
+.cost { display: flex; align-items: center; gap: 8px; font: 800 30px/1 var(--font-display); font-variant-numeric: lining-nums tabular-nums; color: var(--title); }
+.coin svg { display: block; width: 24px; height: 16px; }
+.ctl-note { font-size: 13px; color: var(--faint); }
+
+/* Monstros */
+.band { margin-top: 6px; font: 600 16px/1.3 var(--font-ui); color: var(--title); }
+.mobs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.mob { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 14px 16px 16px; border-radius: var(--r-md); background: var(--box); }
+.mob h4 { padding-right: 24px; font: 600 17px/1.3 var(--font-display); color: var(--amber); overflow-wrap: anywhere; }
+.mob p b { font-weight: 700; color: var(--value); }
+.mob-x { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; padding: 0 0 2px; border: 0; border-radius: 50%; background: none; color: var(--faint); font: 500 18px/1 var(--font-ui); cursor: pointer; }
+.mob-x:hover { background: var(--card); color: var(--red); }
+.steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-top: 10px; }
+.steps button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 0 6px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--label);
+  font: 600 14px/1.1 var(--font-ui);
+  font-variant-numeric: lining-nums tabular-nums;
+  cursor: pointer;
+}
+.steps small { font-size: 11px; font-weight: 500; color: var(--faint); }
+.steps button:hover { background: var(--edge); }
+.steps button.on { background: var(--band); color: var(--value); }
+.steps button.on small { color: var(--label); }
+.hint { max-width: 78ch; font-size: 13px; color: var(--faint); }
+.howto { display: flex; flex-direction: column; gap: 10px; max-width: 54ch; padding: 24px; border-radius: var(--r-lg); background: var(--box); }
+.howto ol { display: flex; flex-direction: column; gap: 4px; padding-left: 1.3em; color: var(--title); }
+
+/* Opções e botões do respawn */
+.win-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; }
+.bonus > .win-foot { padding-top: 16px; border-top: 1px solid var(--edge); }
+.opts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.toggle { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; cursor: pointer; }
+.toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--value); }
+.volume { width: 110px; accent-color: var(--value); cursor: pointer; }
+.dlgs { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.status { min-height: 1.45em; font-size: 13px; color: var(--faint); }
+.status[data-kind="busy"] { color: var(--amber); }
+.status[data-kind="ok"] { color: var(--value); }
+.status[data-kind="err"] { color: var(--red); }
+
+/* Lista de respawns */
+.bank { gap: 14px; padding: 18px 16px 16px; border-radius: var(--r-lg); background: var(--box); }
+.bank .win-name { font: 600 16px/1.3 var(--font-ui); letter-spacing: 0; }
+.bank .win-body { gap: 10px; }
+#search { width: 100%; padding: 9px 12px; border: 1px solid transparent; border-radius: var(--r-sm); background: var(--card); color: var(--title); }
+#search::placeholder { color: var(--faint); }
+#search:focus { border-color: var(--edge); }
+.bank-list { display: flex; flex-direction: column; gap: 4px; max-height: 440px; overflow-y: auto; padding: 0; list-style: none; }
+.bank-item { display: flex; flex-direction: column; gap: 2px; width: 100%; padding: 9px 12px 10px; border: 0; border-radius: var(--r-sm); background: none; text-align: left; cursor: pointer; }
+.bank-item b { font-weight: 600; color: var(--title); overflow-wrap: anywhere; }
+.bank-item small { font-size: 12px; color: var(--faint); overflow-wrap: anywhere; }
+.bank-item:hover { background: var(--card); }
+.bank-item[aria-current="true"] { background: var(--band); }
+.bank-item[aria-current="true"] b { color: var(--amber); }
+.bank-item[aria-current="true"] small { color: var(--label); }
+.bank-empty { padding: 4px 2px; font-size: 13px; color: var(--faint); }
+.bank-foot { flex-direction: column; align-items: stretch; gap: 8px; padding-top: 12px; border-top: 1px solid var(--edge); }
+.sync { font-size: 12px; color: var(--faint); }
+details.backup { font-size: 13px; }
+details.backup summary { color: var(--faint); cursor: pointer; }
+details.backup textarea {
+  width: 100%;
+  min-height: 110px;
+  margin-block: 8px;
+  padding: 8px;
+  border: 1px solid var(--edge);
+  border-radius: var(--r-sm);
+  background: var(--card);
+  font: 12px/1.4 Consolas, ui-monospace, monospace;
+  color: var(--label);
+  resize: vertical;
+}
+.backup .dlgs { margin-left: 0; }
+.backup .dlg { padding: 7px 12px; font-size: 13px; }
+
+.unit-toggle { display: inline-flex; gap: 2px; margin-left: auto; padding: 3px; border-radius: 999px; background: var(--card); }
+.unit-toggle button { padding: 5px 12px; border: 0; border-radius: 999px; background: none; color: var(--label); font: 600 12px/1.2 var(--font-ui); cursor: pointer; }
+.unit-toggle button:hover { color: var(--title); }
+.unit-toggle button[aria-pressed="true"] { background: var(--title); color: var(--ground); }
+.clock.mmss .clock-digits { font-size: 50px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ring-arc { transition: stroke-dashoffset 0.25s linear; }
+}
+@media (max-width: 860px) {
+  .desk { grid-template-columns: minmax(0, 1fr); }
+  .win.bonus { order: -1; }
+}
+@media (max-width: 620px) {
+  .controls, .mobs { grid-template-columns: minmax(0, 1fr); }
+  .stage { padding: 20px 16px 16px; }
+  .win-name { font-size: 24px; }
+}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div>
+      <h1>Medivia Respawn</h1>
+      <p>Cronômetro de respawn para as suas caçadas no Medivia, com o grupo e o bônus já calculados.</p>
+      <nav aria-label="Medivia">
+        <a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener">Mapper da wiki</a>
+      </nav>
+    </div>
+    <a class="maker" href="https://github.com/Benaa42" target="_blank" rel="noopener"><img src="vibeforge.svg" width="252" height="72" alt="Vibeforge, produzido por Bena"></a>
+  </header>
+
+  <p class="paste">Com o print da janela de bônus copiado, aperte <kbd>Ctrl</kbd> + <kbd>V</kbd> em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</p>
+
+  <div class="desk">
+    <aside class="win bank" aria-labelledby="bank-title">
+      <header class="win-title"><h2 class="win-name" id="bank-title">Respawns</h2></header>
+      <div class="win-body">
+        <input type="search" id="search" placeholder="Buscar área ou monstro" aria-label="Buscar área ou monstro" autocomplete="off">
+        <ul class="bank-list" id="bank-list"></ul>
+      </div>
+      <footer class="win-foot bank-foot">
+        <p class="sync" id="sync"></p>
+        <details class="backup" id="backup">
+          <summary>Cópia de segurança</summary>
+          <textarea id="backup-text" spellcheck="false" aria-label="Banco em JSON"></textarea>
+          <div class="dlgs">
+            <button class="dlg go" type="button" id="backup-copy">Copiar</button>
+            <button class="dlg go" type="button" id="backup-import">Importar o texto acima</button>
+          </div>
+        </details>
+      </footer>
+    </aside>
+
+    <main class="win bonus" id="drop">
+      <div id="sheet"></div>
+      <footer class="win-foot">
+        <div class="opts">
+          <label class="toggle"><input type="checkbox" id="opt-loop"> Repetir ao zerar</label>
+          <label class="toggle"><input type="checkbox" id="opt-sound"> Som</label>
+          <input type="range" class="volume" id="opt-volume" min="0" max="100" step="5" aria-label="Volume do som" title="Volume do som">
+        </div>
+        <div class="dlgs">
+          <button class="dlg go" type="button" id="float-btn">Janela flutuante</button>
+          <button class="dlg go" type="button" id="read-btn">Ler print</button>
+        </div>
+        <input class="sr" type="file" id="file" accept="image/*" tabindex="-1" aria-hidden="true">
+      </footer>
+      <p class="status" id="status" role="status" data-kind="info">Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print.</p>
+    </main>
+  </div>
+
+  <footer class="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</footer>
+</div>
+
+<script src="vendor/tesseract.min.js"></script>
+<script>
+(() => {
+'use strict';
+document.documentElement.lang = 'pt-BR';
+
+const PCTS = [0, 10, 20, 30, 40, 50];
+const DURS = Array.from({ length: 16 }, (_, i) => 30 + i * 10);
+const $ = (s, r = document) => r.querySelector(s);
+
+function el(tag, props, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v == null || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else if (k in n) n[k] = v;
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat()) {
+    if (c == null || c === false) continue;
+    n.append(c.nodeType ? c : document.createTextNode(c));
+  }
+  return n;
+}
+
+/* ---------- Contas do jogo ----------
+   Conferidas contra prints de 10% a 50%: respawn = piso(base / (1 + bônus));
+   abates por hora = piso(3600 × quantidade / respawn).
+   O grupo de caça acelera o respawn antes do bônus: base ÷ grupo ÷ (1 + bônus), com um só arredondamento no fim. */
+const PARTIES = [
+  { mult: 100, label: 'Solo' },
+  { mult: 134, label: 'Dupla' },
+  { mult: 160, label: 'Trio' },
+  { mult: 178, label: 'Squad 4+' },
+];
+function baseRange(sec, pct) {
+  const lo = Math.ceil(sec * (100 + pct) / 100);
+  const hi = Math.ceil((sec + 1) * (100 + pct) / 100) - 1;
+  return [lo, Math.max(lo, hi)];
+}
+function pickBase([lo, hi]) {
+  for (const m of [60, 30, 10, 5]) {
+    const c = Math.ceil(lo / m) * m;
+    if (c <= hi) return c;
+  }
+  return lo;
+}
+const respawnAt = (base, pct, party = 100) => Math.floor(base * 10000 / ((100 + pct) * party));
+const killsPerHour = (sec, count) => Math.floor(3600 * count / sec);
+const fmtInt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const fmtClock = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+// Tempos em segundos (272) ou em minutos (4:32), conforme a escolha de quem usa.
+const fmtTime = s => ui.unit === 'm' ? fmtClock(s) : String(s);
+const unitName = () => ui.unit === 'm' ? 'minutos' : 'segundos';
+const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+
+/* ---------- Leitura do print ---------- */
+function parsePrint(lines) {
+  const names = [], resp = [], kills = [], other = [];
+  let pct = null, pctLine = null, dur = null;
+  for (const l of lines) {
+    const t = l.text;
+    let m;
+    if ((m = t.match(/\(\s*(\d{1,2})\s*%\s*\)/))) { pct = +m[1]; pctLine = l; }
+    else if ((m = t.match(/\(\s*(\d{1,4})\s*min/i))) dur = +m[1];
+    else if ((m = t.match(/^(.*[A-Za-z].*?)\s*\(\s*(\d[\d ]{0,3})\s*[xX×]\s*\)\s*$/))) {
+      const name = m[1].replace(/^[^A-Za-z]+/, '').replace(/\s+/g, ' ').trim();
+      if (name) names.push({ name, count: +m[2].replace(/ /g, ''), x: l.x, y: l.y, h: l.h });
+    }
+    else if ((m = t.match(/(\d{1,5})\s*(?:seg|sec)/i))) resp.push({ v: +m[1], x: l.x, y: l.y });
+    else if ((m = t.match(/(?:hora|hour)\D{0,3}(\d{1,6})\s*$/i))) kills.push({ v: +m[1], x: l.x, y: l.y });
+    else other.push(l);
+  }
+  // Cada card tem o nome em cima e as duas linhas de números logo abaixo, na mesma coluna.
+  const below = (list, n) => list
+    .filter(r => Math.abs(r.x - n.x) <= n.h * 3 && r.y > n.y && r.y - n.y <= n.h * 4.5)
+    .sort((a, b) => a.y - b.y)[0];
+  const monsters = [];
+  for (const n of names) {
+    const r = below(resp, n);
+    if (!r || !r.v) continue;
+    const k = below(kills, n);
+    monsters.push({ name: n.name, count: n.count, sec: r.v, kills: k ? k.v : null });
+  }
+  let cost = null, name = null;
+  if (pctLine) {
+    const firstY = names.length ? Math.min(...names.map(n => n.y)) : Infinity;
+    for (const l of other) {
+      const m = l.text.match(/^(\d{1,3}(?:[ .,]\d{3})+|\d{3,})/);
+      if (m && l.y > pctLine.y && l.y < firstY && l.y - pctLine.y < pctLine.h * 5) { cost = +m[1].replace(/\D/g, ''); break; }
+    }
+    const title = other
+      .filter(l => l.conf >= 75 && l.y < pctLine.y - pctLine.h && /[A-Za-z]{3,}/.test(l.text) && l.text.length <= 40)
+      .sort((a, b) => b.y - a.y)[0];
+    if (title) name = title.text.replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ');
+  }
+  return { name, pct, dur, cost, monsters };
+}
+
+let workerP = null;
+function getWorker() {
+  if (!workerP) {
+    if (!window.Tesseract) return Promise.reject(new Error('leitor indisponível'));
+    const base = new URL('vendor/', document.baseURI).href;
+    // ocr-worker.js carrega o worker do Tesseract e aponta o modelo de leitura para o arquivo que vai junto com o site.
+    workerP = Tesseract.createWorker('eng', 1, {
+      workerPath: base + 'ocr-worker.js',
+      corePath: base,
+      langPath: base,
+      workerBlobURL: false,
+    }).then(async w => { await w.setParameters({ tessedit_pageseg_mode: '11' }); return w; });
+    workerP.catch(() => { workerP = null; });
+  }
+  return workerP;
+}
+
+async function ocrLines(blob) {
+  const bmp = await createImageBitmap(blob);
+  const scale = Math.min(3, Math.max(1, Math.sqrt(12e6 / (bmp.width * bmp.height))));
+  const c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * scale);
+  c.height = Math.round(bmp.height * scale);
+  const g = c.getContext('2d', { willReadFrequently: true });
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(bmp, 0, 0, c.width, c.height);
+  bmp.close();
+  // Texto claro em fundo escuro: vira preto no branco, que o leitor acerta mais.
+  const d = g.getImageData(0, 0, c.width, c.height);
+  const p = d.data;
+  for (let i = 0; i < p.length; i += 4) {
+    const v = 255 - Math.max(p[i], p[i + 1], p[i + 2]);
+    p[i] = p[i + 1] = p[i + 2] = v;
+  }
+  g.putImageData(d, 0, 0);
+  const w = await getWorker();
+  const { data } = await w.recognize(c, {}, { blocks: true });
+  c.width = c.height = 0;
+  const lines = [];
+  for (const b of data.blocks || []) for (const par of b.paragraphs) for (const l of par.lines) {
+    const text = l.text.trim();
+    if (text) lines.push({ text, conf: l.confidence, x: l.bbox.x0 / scale, y: l.bbox.y0 / scale, h: (l.bbox.y1 - l.bbox.y0) / scale });
+  }
+  return lines;
+}
+
+/* ---------- Banco ---------- */
+const LS_DB = 'medivia-respawn.banco.v1';
+const LS_UI = 'medivia-respawn.ui.v1';
+const lsGet = (k, f) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch { return f; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sem armazenamento */ } };
+const int = (v, lo, hi) => { v = Math.round(Number(v)); return Number.isFinite(v) && v >= lo && v <= hi ? v : null; };
+
+function normalize(d) {
+  if (!d || typeof d.name !== 'string' || !d.name.trim()) return null;
+  const monsters = (Array.isArray(d.monsters) ? d.monsters : [])
+    .map(m => ({ name: String(m && m.name || '').trim().slice(0, 60), count: int(m && m.count, 0, 9999) || 0, base: int(m && m.base, 1, 1e6) }))
+    .filter(m => m.name && m.base);
+  return {
+    name: d.name.trim().slice(0, 60),
+    monsters,
+    cost10: int(d.cost10, 1, 1e12),
+    duration: int(d.duration, 1, 100000),
+    readAt: int(d.readAt, 0, 100),
+    updatedAt: typeof d.updatedAt === 'string' ? d.updatedAt.slice(0, 40) : null,
+  };
+}
+
+const pending = { seed: true, db: !!(window.claude && typeof window.claude.use === 'function') };
+const store = { seed: new Map(), shared: new Map(), local: new Map(), db: null, canWrite: null, queue: new Map() };
+for (const [id, d] of Object.entries(lsGet(LS_DB, {}))) {
+  const n = normalize(d);
+  if (n && slug(id) === id) store.local.set(id, n);
+}
+const persistLocal = () => lsSet(LS_DB, Object.fromEntries(store.local));
+const getRespawn = id => store.local.get(id) || store.shared.get(id) || store.seed.get(id) || null;
+function allRespawns() {
+  const m = new Map(store.seed);
+  for (const [k, v] of store.shared) m.set(k, v);
+  for (const [k, v] of store.local) m.set(k, v);
+  return [...m].map(([id, r]) => ({ id, ...r })).sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+}
+function enqueue(id, fn) {
+  const p = (store.queue.get(id) || Promise.resolve()).then(fn, fn);
+  store.queue.set(id, p);
+  return p;
+}
+async function saveRespawn(id, r) {
+  r = { ...r, updatedAt: new Date().toISOString() };
+  store.local.set(id, r);
+  persistLocal();
+  renderAll();
+  if (!store.db || store.canWrite === false) return 'local';
+  try {
+    await enqueue(id, () => store.db.doc('respawns/' + id).set(r));
+    if (store.local.get(id) === r) {
+      store.local.delete(id);
+      store.shared.set(id, r);
+      persistLocal();
+    }
+    return 'shared';
+  } catch (e) {
+    if (e && e.code === 'invalid_argument') { store.canWrite = false; renderSync(); }
+    return 'local';
+  }
+}
+async function removeRespawn(id) {
+  const wasShared = store.shared.has(id);
+  store.local.delete(id);
+  persistLocal();
+  if (wasShared && store.db) {
+    try {
+      await enqueue(id, () => store.db.doc('respawns/' + id).delete());
+      store.shared.delete(id);
+    } catch {
+      setStatus('err', 'Não deu para excluir do banco compartilhado. Só quem pode editar o banco consegue.');
+    }
+  }
+  renderAll();
+}
+
+// respawns.json é o banco que vai junto com o site: todo visitante já abre com ele.
+// Tem o mesmo formato do texto da "Cópia de segurança", então basta colar lá e publicar de novo.
+async function loadSeed() {
+  try {
+    const res = await fetch(new URL('respawns.json', document.baseURI), { cache: 'no-cache' });
+    if (res.ok) {
+      const data = await res.json();
+      for (const [key, d] of Object.entries(data && typeof data === 'object' ? data : {})) {
+        const n = normalize(d);
+        const id = slug(key);
+        if (n && id) store.seed.set(id, n);
+      }
+    }
+  } catch { /* site sem banco embutido */ }
+  pending.seed = false;
+  renderAll();
+}
+
+async function initShared() {
+  if (!window.claude || typeof window.claude.use !== 'function') return;
+  let db = null, user = null;
+  try { [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]); } catch { /* sem banco compartilhado */ }
+  if (!db) { pending.db = false; renderAll(); return; }
+  store.db = db;
+  try { store.canWrite = user ? await user.can('data.write') : null; } catch { store.canWrite = null; }
+  renderSync();
+  let pushed = false;
+  db.collection('respawns').onSnapshot(snap => {
+    pending.db = false;
+    const m = new Map();
+    for (const d of snap.docs) {
+      const n = normalize(d.data());
+      if (n) m.set(d.id, n);
+    }
+    store.shared = m;
+    if (!pushed && !snap.metadata.fromCache) {
+      pushed = true;
+      // O que foi lido antes de o banco compartilhado responder sobe agora.
+      for (const [id, r] of [...store.local]) if (!m.has(id)) saveRespawn(id, r);
+    }
+    renderAll();
+  }, () => { store.db = null; pending.db = false; renderAll(); });
+}
+
+/* ---------- Estado da tela ---------- */
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', loop: false, sound: true, volume: 60 }, lsGet(LS_UI, {}));
+if (!PCTS.includes(ui.pct)) ui.pct = 10;
+if (!PARTIES.some(p => p.mult === ui.party)) ui.party = 100;
+if (!DURS.includes(ui.dur)) ui.dur = 60;
+if (ui.unit !== 'm') ui.unit = 's';
+if (!(ui.volume >= 0 && ui.volume <= 100)) ui.volume = 60;
+const saveUi = () => lsSet(LS_UI, ui);
+
+const statusEl = $('#status');
+function setStatus(kind, text) { statusEl.dataset.kind = kind; statusEl.textContent = text; }
+
+function renderSync() {
+  $('#sync').textContent = !store.db
+    ? (store.seed.size ? 'Banco do site, mais o que você ler neste navegador.' : 'Banco salvo neste navegador.')
+    : store.canWrite === false
+      ? 'Banco compartilhado, só para consulta. O que você ler fica salvo neste navegador.'
+      : 'Banco compartilhado: o que for lido aqui aparece para todos.';
+}
+
+function renderBank() {
+  const q = $('#search').value.trim().toLowerCase();
+  const all = allRespawns();
+  const hits = all.filter(r => !q || r.name.toLowerCase().includes(q) || r.monsters.some(m => m.name.toLowerCase().includes(q)));
+  const list = $('#bank-list');
+  list.replaceChildren(...hits.map(r => el('li', null,
+    el('button', {
+      class: 'bank-item', type: 'button', 'aria-current': r.id === ui.id ? 'true' : null,
+      onclick: () => select(r.id),
+    }, el('b', { text: r.name }), el('small', { text: r.monsters.map(m => m.name).join(', ') || 'sem monstros' })))));
+  if (!hits.length) {
+    list.append(el('li', { class: 'bank-empty', text: all.length
+      ? 'Nenhuma área ou monstro com esse nome.'
+      : 'Ainda não há respawns. Cada print lido entra aqui com o nome da área.' }));
+  }
+}
+
+function select(id, pct) {
+  if (id !== ui.id || (pct != null && pct !== ui.pct)) clearTimers();
+  ui.id = id;
+  if (pct != null) ui.pct = pct;
+  saveUi();
+  renderAll();
+}
+
+function setParty(mult) {
+  if (mult === ui.party) return;
+  clearTimers();
+  ui.party = mult;
+  saveUi();
+  renderAll();
+}
+
+// A duração só muda o custo, então os cronômetros em andamento continuam.
+function setDur(min) {
+  if (min === ui.dur) return;
+  ui.dur = min;
+  saveUi();
+  renderAll();
+}
+
+// A unidade só muda como os tempos aparecem; os cronômetros em andamento continuam.
+function setUnit(unit) {
+  if (unit === ui.unit) return;
+  ui.unit = unit;
+  saveUi();
+  renderAll();
+}
+
+/* ---------- Cronômetros ---------- */
+const timers = new Map();   // segundos do grupo -> { dur, endAt, doneAt, nodes }
+let timerEls = new Map();
+let audio = null;
+let master = null;
+let wake = null;
+// Curva quadrática: o ouvido percebe o volume assim, então o controle anda de forma uniforme. 60 é o volume padrão.
+const volGain = () => 3 * (ui.volume / 100) ** 2;
+
+function armAudio() {
+  try {
+    if (!audio) {
+      audio = new (window.AudioContext || window.webkitAudioContext)();
+      master = audio.createGain();
+      master.gain.value = volGain();
+      master.connect(audio.destination);
+    }
+    if (audio.state === 'suspended') audio.resume().catch(() => {});
+  } catch { audio = null; master = null; }
+}
+function tone(freq, at, len, vol) {
+  const o = audio.createOscillator(), g = audio.createGain();
+  o.type = 'sine';
+  o.frequency.value = freq;
+  o.connect(g); g.connect(master);
+  const t = audio.currentTime + Math.max(0, at);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+  o.start(t); o.stop(t + len + 0.05);
+  return { o, at: t };
+}
+// Cancela só o que ainda não começou a tocar: um aviso em andamento termina sozinho.
+function cancelSounds(t) {
+  for (const n of t.nodes || []) {
+    if (audio && n.at > audio.currentTime) { try { n.o.stop(); n.o.disconnect(); } catch { /* já parou */ } }
+  }
+  t.nodes = [];
+}
+// Os avisos são agendados no relógio do áudio já na largada, então tocam na hora certa
+// mesmo com a aba em segundo plano, atrás do jogo.
+function scheduleSounds(t) {
+  cancelSounds(t);
+  if (!ui.sound || !audio || t.endAt == null) return;
+  const left = (t.endAt - Date.now()) / 1000;
+  if (left <= 0) return;
+  if (left > 10) t.nodes.push(tone(523, left - 10, 0.14, 0.05));           // faltam 10 s
+  t.nodes.push(tone(784, left, 0.3, 0.12), tone(1047, left + 0.17, 0.5, 0.1)); // zerou
+}
+function keepAwake() {
+  if (!wake && navigator.wakeLock) {
+    navigator.wakeLock.request('screen').then(w => { wake = w; w.addEventListener('release', () => { wake = null; }); }).catch(() => {});
+  }
+}
+function startTimer(sec) {
+  const t = timers.get(sec);
+  if (!t) return;
+  armAudio();
+  keepAwake();
+  t.endAt = Date.now() + t.dur * 1000;
+  t.doneAt = null;
+  scheduleSounds(t);
+  tick();
+}
+function resetTimer(sec) {
+  const t = timers.get(sec);
+  if (t) { t.endAt = null; t.doneAt = null; cancelSounds(t); }
+  tick();
+}
+function clearTimers() {
+  for (const t of timers.values()) cancelSounds(t);
+  timers.clear();
+}
+const startAll = () => { for (const sec of timers.keys()) startTimer(sec); };
+const resetAll = () => { for (const sec of timers.keys()) resetTimer(sec); };
+const setText = (node, s) => { s = String(s); if (node.textContent !== s) node.textContent = s; };
+
+function timerView(t, now) {
+  if (t.endAt != null) {
+    const left = Math.max(0, Math.ceil((t.endAt - now) / 1000));
+    return { state: left <= 10 ? 'warn' : 'run', left, note: 'faltam ' + (ui.unit === 'm' ? left + ' s' : fmtClock(left)), frac: 1 - (t.endAt - now) / (t.dur * 1000) };
+  }
+  if (t.doneAt != null) {
+    return { state: 'done', left: 0, note: 'nasceu há ' + fmtClock(Math.floor((now - t.doneAt) / 1000)), frac: 1 };
+  }
+  return { state: 'idle', left: t.dur, note: (ui.unit === 'm' ? t.dur + ' s' : fmtClock(t.dur)) + ' de respawn', frac: 0 };
+}
+
+function tick() {
+  const now = Date.now();
+  let soonest = null;
+  for (const [sec, t] of timers) {
+    if (t.endAt != null && t.endAt <= now) {
+      if (ui.loop) { while (t.endAt <= now) t.endAt += t.dur * 1000; scheduleSounds(t); }
+      else { t.doneAt = t.endAt; t.endAt = null; }
+    }
+    const v = timerView(t, now);
+    if (t.endAt != null && (soonest == null || v.left < soonest)) soonest = v.left;
+    const e = timerEls.get(sec);
+    if (e) {
+      e.root.dataset.state = v.state;
+      setText(e.digits, fmtTime(v.left));
+      setText(e.note, v.note);
+      e.setFrac(Math.min(1, Math.max(0, v.frac)));
+      setText(e.start, v.state === 'idle' || v.state === 'done' ? 'Iniciar' : 'Reiniciar');
+    }
+  }
+  const r = ui.id && getRespawn(ui.id);
+  document.title = soonest != null && r ? fmtTime(soonest) + (ui.unit === 'm' ? ' · ' : ' s · ') + r.name : 'Medivia Respawn';
+  if (soonest == null && wake) { wake.release().catch(() => {}); wake = null; }
+  paintFloat(now);
+}
+setInterval(tick, 250);
+
+/* Janela flutuante: fica por cima do jogo (em janela ou sem bordas). */
+const float = { win: null, list: null, all: null, rowEls: new Map(), sig: '', canvas: null, video: null };
+function groupsNow() {
+  const r = ui.id && getRespawn(ui.id);
+  const out = [];
+  for (const [sec, t] of timers) {
+    out.push({ sec, t, who: r ? r.monsters.filter(m => respawnAt(m.base, ui.pct, ui.party) === sec).map(m => m.name).join(', ') : '' });
+  }
+  return out;
+}
+function paintFloat(now) {
+  if (float.win && float.list) {
+    const gs = groupsNow();
+    const sig = gs.map(g => g.sec + ':' + g.who).join('|');
+    if (sig !== float.sig) {
+      // As linhas só são refeitas quando os cronômetros mudam; refazer a cada atualização engoliria cliques.
+      float.sig = sig;
+      float.rowEls = new Map();
+      float.list.replaceChildren(...gs.map(g => {
+        const b = el('b');
+        const btn = el('button', { type: 'button', onclick: () => startTimer(g.sec) });
+        const root = el('div', { class: 'f-row' }, el('div', { class: 'f-main' }, b, el('span', { text: g.who, title: g.who })), btn);
+        float.rowEls.set(g.sec, { root, b, btn });
+        return root;
+      }));
+      float.all.hidden = gs.length < 2;
+    }
+    for (const g of gs) {
+      const e = float.rowEls.get(g.sec);
+      const v = timerView(g.t, now);
+      e.root.dataset.state = v.state;
+      setText(e.b, fmtTime(v.left) + (ui.unit === 'm' ? '' : ' s'));
+      setText(e.btn, v.state === 'idle' || v.state === 'done' ? 'Iniciar' : 'Reiniciar');
+    }
+  }
+  if (float.canvas && document.pictureInPictureElement === float.video) {
+    const cs = getComputedStyle(document.documentElement);
+    const col = n => cs.getPropertyValue(n).trim();
+    const gs = groupsNow();
+    const c = float.canvas, g = c.getContext('2d');
+    c.height = Math.max(1, gs.length) * 96 + 8;
+    g.fillStyle = col('--ground'); g.fillRect(0, 0, c.width, c.height);
+    gs.forEach((gr, i) => {
+      const v = timerView(gr.t, now);
+      g.fillStyle = col(v.state === 'warn' ? '--amber' : v.state === 'done' ? '--title' : v.state === 'idle' ? '--label' : '--value');
+      g.font = '800 58px "Bricolage Grotesque", "Segoe UI", sans-serif';
+      g.fillText(fmtTime(v.left) + (ui.unit === 'm' ? '' : ' s'), 14, i * 96 + 58);
+      g.fillStyle = col('--amber');
+      g.font = '600 18px Onest, "Segoe UI", sans-serif';
+      g.fillText(gr.who.slice(0, 44), 16, i * 96 + 86);
+    });
+  }
+}
+async function toggleFloat() {
+  if (float.win) { float.win.close(); return; }
+  if (float.video && document.pictureInPictureElement === float.video) { document.exitPictureInPicture().catch(() => {}); return; }
+  armAudio();   // o clique aqui libera o som mesmo que os cronômetros sejam iniciados pela janela flutuante
+  try {
+    if ('documentPictureInPicture' in window) {
+      const w = await window.documentPictureInPicture.requestWindow({ width: 320, height: 70 + Math.max(1, timers.size) * 92 });
+      const cs = getComputedStyle(document.documentElement);
+      const vars = ['--ground', '--title', '--label', '--amber', '--value', '--teal', '--btn', '--btn-edge', '--edge']
+        .map(n => n + ':' + cs.getPropertyValue(n)).join(';');
+      w.document.head.append(
+        el('link', { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Onest:wght@500;600&display=swap' }),
+        el('style', { text:
+          ':root{' + vars + '}body{margin:0;padding:8px 12px 12px;background:var(--ground);color:var(--label);font:500 14px Onest,"Segoe UI",sans-serif;font-variant-numeric:lining-nums tabular-nums}' +
+          '.f-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 8px;border-bottom:1px solid var(--edge)}' +
+          '.f-main{display:flex;flex-direction:column;min-width:0}' +
+          '.f-main b{font:800 40px/1 "Bricolage Grotesque",Onest,"Segoe UI",sans-serif;color:var(--value)}' +
+          '.f-row[data-state=idle] b{color:var(--label)}.f-row[data-state=warn] b{color:var(--amber)}.f-row[data-state=done] b{color:var(--title)}' +
+          '.f-main span{color:var(--amber);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+          'button{flex:none;padding:5px 12px 4px;border:1px solid var(--btn-edge);background:var(--btn);color:var(--teal);border-radius:999px;font:600 13px Onest,"Segoe UI",sans-serif;cursor:pointer}' +
+          'button:hover{border-color:var(--teal)}' +
+          'button.all{margin-top:10px;width:100%}' }));
+      float.list = el('div');
+      float.all = el('button', { class: 'all', type: 'button', text: 'Iniciar todos', onclick: startAll });
+      float.sig = null;
+      w.document.body.append(float.list, float.all);
+      w.document.addEventListener('pointerdown', armAudio);
+      // A janela flutuante está sempre visível, então o relógio dela não é freado quando a aba fica atrás do jogo.
+      w.setInterval(tick, 250);
+      w.addEventListener('pagehide', () => { float.win = null; float.list = null; float.all = null; });
+      float.win = w;
+      tick();
+      return;
+    }
+  } catch { /* tenta o modo de vídeo */ }
+  try {
+    if (!float.video) {
+      float.canvas = el('canvas', { width: 420, height: 104 });
+      float.video = el('video', { muted: true, playsInline: true });
+      float.video.srcObject = float.canvas.captureStream(5);
+    }
+    float.canvas.getContext('2d').fillRect(0, 0, 1, 1);
+    await float.video.play();
+    await float.video.requestPictureInPicture();
+    tick();
+  } catch {
+    setStatus('err', 'A janela flutuante não abre nesta visualização. Use o Chrome ou o Edge com o site aberto direto na aba.');
+  }
+}
+
+/* ---------- Janela do respawn ---------- */
+function coin() {
+  const s = el('span', { class: 'coin', 'aria-hidden': 'true' });
+  s.innerHTML = '<svg viewBox="0 0 20 13"><g fill="#f2c230" stroke="#7a5a0c" stroke-width="1"><circle cx="5" cy="8.5" r="3.6"/><circle cx="15" cy="8.5" r="3.6"/><circle cx="10" cy="4.6" r="3.6"/></g></svg>';
+  return s;
+}
+
+// Os controles devolvem o elemento e um set(i) que atualiza tudo no lugar. Nada é recriado a cada mudança,
+// então o foco do teclado fica onde estava e a barra pode ser arrastada com o valor mudando em tempo real.
+const ctlHead = (label, val) => el('div', { class: 'ctl-head' }, el('h3', { text: label }), val);
+
+// Poucas opções: botões lado a lado.
+function segment(id, label, stops, onPick) {
+  const val = el('span', { class: 'ctl-val' });
+  const buttons = stops.map((s, i) => el('button', { type: 'button', id: id + '-' + i, text: s.short, onclick: () => onPick(s.value) }));
+  return {
+    root: el('div', { class: 'ctl' }, ctlHead(label, val), el('div', { class: 'seg', role: 'group', 'aria-label': label }, buttons)),
+    set(i) {
+      setText(val, stops[i].text);
+      buttons.forEach((b, k) => b.setAttribute('aria-pressed', String(k === i)));
+    },
+  };
+}
+
+// Muitas opções: barra deslizante com botões de passo e atalhos embaixo.
+function slider(id, label, stops, onPick) {
+  let index = -1;
+  const pick = i => { if (stops[i] && i !== index) onPick(stops[i].value); };
+  const val = el('span', { class: 'ctl-val' });
+  const range = el('input', { type: 'range', id, min: 0, max: stops.length - 1, step: 1, 'aria-label': label,
+    oninput: () => pick(+range.value) });
+  const less = el('button', { type: 'button', id: id + '-menos', text: '−', 'aria-label': 'Diminuir ' + label.toLowerCase(), onclick: () => pick(index - 1) });
+  const more = el('button', { type: 'button', id: id + '-mais', text: '+', 'aria-label': 'Aumentar ' + label.toLowerCase(), onclick: () => pick(index + 1) });
+  const marks = stops.map((s, i) => s.short == null ? null
+    : el('button', { type: 'button', id: id + '-' + i, text: s.short, onclick: () => pick(i) }));
+  return {
+    root: el('div', { class: 'ctl' }, ctlHead(label, val), el('div', { class: 'slide' }, less, range, more), el('div', { class: 'stops' }, marks)),
+    set(i) {
+      index = i;
+      setText(val, stops[i].text);
+      if (+range.value !== i) range.value = i;
+      range.setAttribute('aria-valuetext', stops[i].text);
+      less.disabled = i === 0;
+      more.disabled = i === stops.length - 1;
+      marks.forEach((m, k) => { if (m) m.classList.toggle('on', k === i); });
+    },
+  };
+}
+
+// Escolha da unidade dos tempos, ao lado dos cronômetros
+function unitToggle() {
+  return el('span', { class: 'unit-toggle', role: 'group', 'aria-label': 'Mostrar os tempos em' },
+    el('button', { type: 'button', id: 'unit-s', 'aria-pressed': String(ui.unit !== 'm'), text: 'Segundos', onclick: () => setUnit('s') }),
+    el('button', { type: 'button', id: 'unit-m', 'aria-pressed': String(ui.unit === 'm'), text: 'Minutos', onclick: () => setUnit('m') }));
+}
+
+let sheetSig = '';
+let parts = null;   // esqueleto do respawn aberto; só é refeito quando muda o respawn
+
+function buildSheet(id, fixed) {
+  const nameInput = el('input', {
+    class: 'win-name', id: 'area-name', maxLength: 60, readOnly: fixed,
+    'aria-label': 'Nome da área', title: fixed ? null : 'Clique para renomear',
+    onchange: () => rename(id, nameInput),
+  });
+  nameInput.spellcheck = false;
+  const del = el('button', { class: 'win-x', type: 'button', text: 'Excluir', onclick: () => {
+    if (del.classList.contains('sure')) { removeRespawn(id); return; }
+    del.classList.add('sure'); del.textContent = 'Excluir mesmo?';
+    setTimeout(() => { del.classList.remove('sure'); del.textContent = 'Excluir'; }, 4000);
+  } });
+  const p = {
+    id, fixed, nameInput,
+    stage: el('section', { class: 'stage', 'aria-label': 'Cronômetros de respawn' }),
+    party: segment('ctl-party', 'Grupo de caça',
+      PARTIES.map(x => ({ value: x.mult, text: x.mult + '% de velocidade', short: x.label })), setParty),
+    bonus: segment('ctl-bonus', 'Percentual de bônus',
+      PCTS.map(x => ({ value: x, text: x ? 'respawn ' + x + '% mais rápido' : 'sem bônus', short: x ? x + '%' : 'Sem' })), v => select(id, v)),
+    dur: slider('ctl-dur', 'Duração',
+      DURS.map(d => ({ value: d, text: d + ' minutos', short: d % 30 === 0 ? String(d) : null })), setDur),
+    cost: el('p', { class: 'cost' }),
+    costNote: el('span', { class: 'ctl-val' }),
+    mobs: el('div', { class: 'mobs' }),
+    hint: el('p', { class: 'hint' }),
+  };
+  // Em cima o que muda o tempo (grupo e bônus); embaixo o que muda o preço (duração e custo).
+  $('#sheet').replaceChildren(
+    el('header', { class: 'win-title' }, nameInput, fixed ? null : del),
+    el('div', { class: 'win-body' },
+      p.stage,
+      el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root,
+        el('div', { class: 'ctl' }, ctlHead('Custo do bônus', p.costNote), p.cost)),
+      el('h3', { class: 'band', text: 'Monstros potencializados' }),
+      p.mobs,
+      p.hint));
+  return p;
+}
+
+const RING = 2 * Math.PI * 52;   // comprimento do anel do cronômetro
+
+function renderSheet() {
+  const sheet = $('#sheet');
+  const r = ui.id && getRespawn(ui.id);
+  const loading = pending.seed || pending.db;
+  const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id);
+  const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, fixed, loading, r]);
+  if (sig === sheetSig) return;
+  sheetSig = sig;
+  timerEls = new Map();
+  if (!r) {
+    clearTimers();
+    parts = null;
+    sheet.replaceChildren(
+      el('header', { class: 'win-title' }, el('h2', { class: 'win-name', text: loading ? 'Abrindo o banco de respawns' : 'Nenhum respawn aberto' })),
+      loading ? el('div', { class: 'win-body' }) : el('div', { class: 'win-body' }, el('div', { class: 'howto' },
+        el('p', { text: 'Para abrir um respawn que ainda não está na lista:' }),
+        el('ol', null,
+          el('li', { text: 'No Medivia, abra a janela de bônus do respawn.' }),
+          el('li', { text: 'Tire um print da janela inteira.' }),
+          el('li', null, 'Volte aqui e aperte ', el('kbd', { text: 'Ctrl' }), ' + ', el('kbd', { text: 'V' }), '.')),
+        el('p', { text: 'O print pode estar em qualquer percentual de bônus. Os outros são calculados.' }))));
+    return;
+  }
+  const id = ui.id;
+  if (!parts || parts.id !== id || parts.fixed !== fixed) parts = buildSheet(id, fixed);
+  const focusId = sheet.contains(document.activeElement) ? document.activeElement.id : '';
+  if (document.activeElement !== parts.nameInput) parts.nameInput.value = r.name;
+  const partyNow = PARTIES.find(p => p.mult === ui.party);
+
+  // Cronômetros: um anel por tempo de respawn diferente; o anel vai se fechando até o monstro nascer
+  const groups = new Map();
+  for (const m of r.monsters) {
+    const s = respawnAt(m.base, ui.pct, ui.party);
+    if (!groups.has(s)) groups.set(s, []);
+    groups.get(s).push(m.name);
+  }
+  for (const k of [...timers.keys()]) if (!groups.has(k)) { cancelSounds(timers.get(k)); timers.delete(k); }
+  const clocks = [...groups].sort((a, b) => b[0] - a[0]).map(([sec, who]) => {
+    if (!timers.has(sec)) timers.set(sec, { dur: sec, endAt: null, doneAt: null, nodes: [] });
+    const digits = el('b', { class: 'clock-digits', text: fmtTime(sec) });
+    const note = el('p', { class: 'clock-note' });
+    const ring = el('div', { class: 'ring' });
+    ring.innerHTML = '<svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="52"/><circle class="ring-arc" cx="60" cy="60" r="52" transform="rotate(-90 60 60)"/></svg>';
+    const arc = ring.querySelector('.ring-arc');
+    ring.append(el('div', { class: 'ring-in' }, digits, el('span', { class: 'clock-unit', text: unitName() })));
+    const start = el('button', { class: 'dlg go', type: 'button', id: 'clock-' + sec, text: 'Iniciar', onclick: () => startTimer(sec) });
+    const root = el('article', { class: ui.unit === 'm' ? 'clock mmss' : 'clock', 'data-state': 'idle' },
+      ring,
+      note,
+      el('p', { class: 'clock-who', text: who.join(', ') }),
+      el('div', { class: 'clock-actions' }, start, el('button', { class: 'dlg stop', type: 'button', text: 'Zerar', onclick: () => resetTimer(sec) })));
+    timerEls.set(sec, { root, digits, note, start, setFrac: f => { arc.style.strokeDashoffset = (RING * (1 - f)).toFixed(2); } });
+    return root;
+  });
+  parts.stage.replaceChildren(
+    el('div', { class: 'clocks' }, clocks),
+    el('div', { class: 'stage-all' },
+      clocks.length > 1 ? [
+        el('button', { class: 'dlg go', type: 'button', text: 'Iniciar todos', onclick: startAll }),
+        el('button', { class: 'dlg stop', type: 'button', text: 'Zerar todos', onclick: resetAll }),
+      ] : null,
+      el('span', null, clocks.length > 1 ? 'Atalho para iniciar todos: ' : 'Atalho para iniciar: ', el('kbd', { text: 'Espaço' })),
+      unitToggle()));
+
+  // Controles: atualizados no lugar
+  parts.party.set(PARTIES.indexOf(partyNow));
+  parts.bonus.set(PCTS.indexOf(ui.pct));
+  parts.dur.set(DURS.indexOf(ui.dur));
+  const cost = r.cost10 ? Math.round(r.cost10 * ui.pct / 10 * ui.dur / (r.duration || 60)) : null;
+  parts.cost.replaceChildren(cost == null ? 'não lido' : cost === 0 ? '0' : fmtInt(cost), ...(cost ? [coin()] : []));
+  setText(parts.costNote, cost ? ui.pct + '% por ' + ui.dur + ' minutos' : cost === 0 ? 'sem bônus' : '');
+
+  // Monstros: os mesmos dados do card do jogo, mais o tempo em cada percentual
+  parts.mobs.replaceChildren(...r.monsters.map((m, mi) => {
+    const now = respawnAt(m.base, ui.pct, ui.party);
+    return el('article', { class: 'mob' },
+      el('h4', { text: m.name + ' (' + m.count + 'x)' }),
+      el('button', { class: 'mob-x', type: 'button', text: '×', 'aria-label': 'Remover ' + m.name, title: 'Remover ' + m.name,
+        onclick: () => saveRespawn(id, { ...r, monsters: r.monsters.filter(x => x !== m) }) }),
+      el('p', null, 'Abates por hora: ', el('b', { text: killsPerHour(now, m.count) })),
+      el('p', null, 'Tempo de respawn: ', el('b', { text: fmtTime(now) }), ' ' + unitName()),
+      el('div', { class: 'steps' }, PCTS.map(p => {
+        const s = respawnAt(m.base, p, ui.party);
+        return el('button', {
+          type: 'button', id: 'step-' + mi + '-' + p, class: p === ui.pct ? 'on' : null,
+          title: m.name + ' com ' + p + '% de bônus: ' + fmtTime(s) + ' ' + unitName(), onclick: () => select(id, p),
+        }, el('small', { text: p + '%' }), el('span', { text: fmtTime(s) }));
+      })));
+  }));
+  setText(parts.hint,
+    (r.readAt != null ? 'Lido de um print a ' + r.readAt + '%, tratado como caça solo. ' : '') +
+    'O grupo entra na conta antes do bônus. A lista do jogo rola: se faltou monstro, role a janela, tire outro print e cole. Ele entra nesta mesma área.');
+
+  if (focusId && document.activeElement.id !== focusId) { const f = document.getElementById(focusId); if (f) f.focus(); }
+  tick();
+}
+
+async function rename(id, input) {
+  const r = getRespawn(id);
+  const name = input.value.trim();
+  if (!r || !name) { input.value = r ? r.name : ''; return; }
+  const nid = slug(name);
+  if (!nid) { input.value = r.name; return; }
+  if (nid !== id && getRespawn(nid)) {
+    input.value = r.name;
+    setStatus('err', 'Já existe um respawn chamado "' + getRespawn(nid).name + '".');
+    return;
+  }
+  if (nid !== id) {
+    const keep = new Map(timers);
+    await removeRespawn(id);
+    ui.id = nid; saveUi();
+    for (const [k, v] of keep) { timers.set(k, v); scheduleSounds(v); }
+  }
+  saveRespawn(nid, { ...r, name });
+}
+
+function renderAll() {
+  // A seleção só muda depois que o banco terminou de carregar: antes disso o respawn salvo pode não ter chegado.
+  if (!pending.seed && !pending.db && !getRespawn(ui.id)) {
+    const first = allRespawns()[0];
+    ui.id = first ? first.id : null;
+  }
+  renderSync();
+  renderBank();
+  renderSheet();
+  if ($('#backup').open && document.activeElement !== $('#backup-text')) fillBackup();
+}
+
+/* ---------- Entrada do print ---------- */
+let reading = false;
+async function readImage(blob) {
+  if (!blob || reading) return;
+  reading = true;
+  setStatus('busy', workerP ? 'Lendo o print…' : 'Preparando o leitor de imagem (só na primeira vez) e lendo o print…');
+  try {
+    const p = parsePrint(await ocrLines(blob));
+    if (!p.monsters.length) throw new Error('Não achei monstros nem tempos de respawn nessa imagem. Tire o print com a janela de bônus inteira aparecendo.');
+    if (p.pct == null) throw new Error('Li os monstros, mas não o percentual de bônus. Deixe o título "Percentual de bônus (10%)" aparecer no print.');
+    const name = p.name || 'Respawn sem nome';
+    const id = slug(name) || 'respawn';
+    const prev = getRespawn(id);
+    const monsters = prev ? prev.monsters.map(m => ({ ...m })) : [];
+    const doubt = [];
+    for (const pm of p.monsters) {
+      const range = baseRange(pm.sec, p.pct);
+      const i = monsters.findIndex(m => m.name.toLowerCase() === pm.name.toLowerCase());
+      const old = i >= 0 ? monsters[i].base : null;
+      const m = { name: pm.name, count: pm.count, base: old != null && old >= range[0] && old <= range[1] ? old : pickBase(range) };
+      if (i >= 0) monsters[i] = m; else monsters.push(m);
+      if (pm.kills != null && pm.count && killsPerHour(pm.sec, pm.count) !== pm.kills) doubt.push(pm.name);
+    }
+    const cost10 = p.cost && p.pct ? Math.round(p.cost * 10 / p.pct) : null;
+    const where = await saveRespawn(id, {
+      name: prev ? prev.name : name,
+      monsters,
+      cost10: cost10 || (prev && prev.cost10) || null,
+      duration: cost10 ? p.dur : (prev && prev.duration) || p.dur || null,
+      readAt: p.pct,
+    });
+    if (DURS.includes(p.dur)) ui.dur = p.dur;
+    select(id, p.pct);
+    let msg = (prev ? prev.name : name) + ' lido a ' + p.pct + '%, ' + p.monsters.length + (p.monsters.length === 1 ? ' monstro' : ' monstros') + '. ' +
+      (where === 'shared' ? 'Salvo no banco compartilhado.' : 'Salvo no banco deste navegador.') + ' Imagem descartada.';
+    if (!p.name) msg += ' Não li o nome da área: digite no título.';
+    if (doubt.length) msg += ' Confira ' + doubt.join(', ') + ': os números não bateram com os abates por hora do print.';
+    setStatus(doubt.length || !p.name ? 'busy' : 'ok', msg);
+    if (!p.name) { const n = $('#area-name'); if (n) { n.focus(); n.select(); } }
+  } catch (e) {
+    setStatus('err', e && e.message && /^[A-ZÀ-Ú]/.test(e.message) ? e.message : 'Não consegui ler essa imagem. Tente um print novo, só da janela de bônus.');
+  } finally {
+    reading = false;
+  }
+}
+
+document.addEventListener('paste', e => {
+  const item = [...(e.clipboardData ? e.clipboardData.items : [])].find(i => i.type.startsWith('image/'));
+  if (!item) return;
+  e.preventDefault();
+  readImage(item.getAsFile());
+});
+const drop = $('#drop');
+document.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+document.addEventListener('dragleave', e => { if (!e.relatedTarget) drop.classList.remove('over'); });
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  drop.classList.remove('over');
+  const f = [...(e.dataTransfer ? e.dataTransfer.files : [])].find(x => x.type.startsWith('image/'));
+  if (f) readImage(f); else setStatus('err', 'Isso não é uma imagem. Arraste o arquivo do print.');
+});
+$('#file').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) readImage(f); });
+$('#read-btn').addEventListener('pointerenter', () => { getWorker().catch(() => {}); }, { once: true });
+
+document.addEventListener('keydown', e => {
+  if (e.code !== 'Space' || e.repeat || !timers.size) return;
+  if (e.target.closest && e.target.closest('input, textarea, button, select, summary, [contenteditable]')) return;
+  e.preventDefault();
+  startAll();
+});
+$('#search').addEventListener('input', renderBank);
+
+/* ---------- Cópia de segurança ---------- */
+function fillBackup() {
+  $('#backup-text').value = JSON.stringify(Object.fromEntries(allRespawns().map(({ id, ...r }) => [id, r])), null, 1);
+}
+$('#backup').addEventListener('toggle', e => { if (e.target.open) fillBackup(); });
+$('#backup-copy').addEventListener('click', async () => {
+  const t = $('#backup-text');
+  try { await navigator.clipboard.writeText(t.value); setStatus('ok', 'Banco copiado. Cole em um arquivo de texto para guardar.'); }
+  catch { t.focus(); t.select(); setStatus('info', 'Texto selecionado: aperte Ctrl + C para copiar.'); }
+});
+$('#backup-import').addEventListener('click', async () => {
+  let data;
+  try { data = JSON.parse($('#backup-text').value); } catch { setStatus('err', 'Esse texto não é uma cópia do banco. Cole o texto copiado daqui, inteiro.'); return; }
+  let n = 0;
+  for (const [key, d] of Object.entries(data && typeof data === 'object' ? data : {})) {
+    const r = normalize(d);
+    const id = r && (slug(key) || slug(r.name));
+    if (id) { await saveRespawn(id, r); n++; }
+  }
+  setStatus(n ? 'ok' : 'err', n ? n + (n === 1 ? ' respawn importado.' : ' respawns importados.') : 'Não achei nenhum respawn nesse texto.');
+});
+
+/* ---------- Rodapé da janela: opções e botões ---------- */
+const optVolume = $('#opt-volume');
+$('#opt-loop').checked = ui.loop;
+$('#opt-sound').checked = ui.sound;
+optVolume.value = ui.volume;
+optVolume.hidden = !ui.sound;
+$('#opt-loop').addEventListener('change', e => { ui.loop = e.target.checked; saveUi(); });
+$('#opt-sound').addEventListener('change', e => {
+  ui.sound = e.target.checked;
+  saveUi();
+  if (ui.sound) armAudio();
+  for (const t of timers.values()) scheduleSounds(t);
+  optVolume.hidden = !ui.sound;
+});
+// Ao soltar o controle de volume toca o aviso de zerar como amostra.
+optVolume.addEventListener('input', e => { ui.volume = +e.target.value; if (master) master.gain.value = volGain(); });
+optVolume.addEventListener('change', () => {
+  saveUi();
+  armAudio();
+  if (audio) { tone(784, 0, 0.3, 0.12); tone(1047, 0.17, 0.5, 0.1); }
+});
+$('#float-btn').addEventListener('click', toggleFloat);
+$('#read-btn').addEventListener('click', () => $('#file').click());
+
+renderAll();
+loadSeed();
+initShared();
+})();
+</script>
+
+</body></html>
