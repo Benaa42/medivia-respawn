@@ -71,7 +71,28 @@ kbd {
 .masthead nav { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; font-weight: 600; }
 .maker { display: block; flex: none; }
 .maker img { display: block; width: auto; height: 46px; }
-.colophon { max-width: 78ch; font-size: 13px; color: var(--faint); }
+.colophon { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; font-size: 13px; color: var(--faint); }
+.colophon p { max-width: 78ch; }
+/* Apoiar o projeto: um link discreto no rodapé que abre uma caixa com Pix e Ko-fi */
+.support-btn { padding: 0; border: 0; background: none; color: var(--faint); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.support-btn:hover { color: var(--title); }
+dialog.support { width: min(420px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 22px; border: 1px solid var(--edge); border-radius: var(--r-lg); background: var(--box); color: var(--label); overflow-y: auto; }
+dialog.support::backdrop { background: rgba(6, 9, 10, 0.74); }
+dialog.support[open] { display: flex; flex-direction: column; gap: 14px; }
+.support h2 { font: 800 22px/1.2 var(--font-display); color: var(--title); }
+.support-ways { display: flex; flex-direction: column; gap: 12px; }
+.support-ways.intl #support-kofi { order: -1; }
+.support-way { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 14px; border-radius: var(--r-md); background: var(--card); }
+.support-way h3 { font: 600 15px/1.3 var(--font-ui); color: var(--title); }
+.support-way .dlg { background: var(--ground); text-decoration: none; }
+.support-qr { width: 172px; padding: 8px; border-radius: 8px; background: #ffffff; }
+.support-qr svg { display: block; width: 100%; height: auto; }
+.support-code { width: 100%; padding: 8px; border: 1px solid var(--edge); border-radius: 8px; background: var(--ground); font: 11px/1.4 Consolas, ui-monospace, monospace; color: var(--label); resize: none; }
+.support-note { font-size: 13px; color: var(--faint); }
+.support-end { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+#support-msg { color: var(--value); }
+.support-link { font-size: 13px; color: var(--faint); text-underline-offset: 3px; }
+.support-link:hover { color: var(--title); }
 
 /* A única instrução que a pessoa precisa para usar o site */
 .paste {
@@ -277,6 +298,39 @@ details.backup textarea {
 .backup .dlgs { margin-left: 0; }
 .backup .dlg { padding: 7px 12px; font-size: 13px; }
 
+/* Última hunt */
+.side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.hunt { gap: 12px; padding: 18px 16px 16px; border-radius: var(--r-lg); background: var(--box); }
+.hunt .win-name { font: 600 16px/1.3 var(--font-ui); letter-spacing: 0; }
+#hunt-body { display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
+.hunt-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 8px; }
+.hunt-when { color: var(--label); font-variant-numeric: lining-nums tabular-nums; }
+.hunt-nav { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--faint); font-variant-numeric: lining-nums tabular-nums; }
+.hunt-nav button { width: 24px; height: 24px; padding: 0 0 2px; border: 0; border-radius: 50%; background: var(--card); color: var(--title); font: 600 15px/1 var(--font-ui); cursor: pointer; }
+.hunt-nav button:disabled { opacity: 0.35; cursor: default; }
+.hunt-totals { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 12px; margin: 0; }
+.hunt-totals dt { color: var(--label); overflow-wrap: anywhere; }
+.hunt-totals dd { margin: 0; text-align: right; font-weight: 600; color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
+.hunt-totals dd.gain { color: var(--value); }
+.hunt-totals dd.loss { color: var(--red); }
+.hunt-table { width: 100%; border-collapse: collapse; font-variant-numeric: lining-nums tabular-nums; }
+.hunt-table th { padding: 0 0 5px; font-size: 12px; font-weight: 500; color: var(--faint); text-align: right; }
+.hunt-table td { padding: 6px 0; border-top: 1px solid var(--edge); text-align: right; white-space: nowrap; }
+.hunt-table th:first-child, .hunt-table td:first-child { text-align: left; white-space: normal; }
+.hunt-table td:first-child { padding-right: 8px; font-weight: 600; color: var(--amber); overflow-wrap: anywhere; }
+.hunt-table td:last-child { padding-left: 10px; font-weight: 700; color: var(--value); }
+.hunt-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.hunt .dlg { padding: 7px 14px; font-size: 13px; }
+.hunt-link { padding: 0; border: 0; background: none; color: var(--faint); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.hunt-link:hover { color: var(--title); }
+.hunt-note { font-size: 12px; color: var(--faint); }
+.hunt-live::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: var(--value); }
+.hunt-path { padding: 7px 9px; border-radius: 8px; background: var(--card); font: 12px/1.4 Consolas, ui-monospace, monospace; color: var(--title); overflow-wrap: anywhere; user-select: all; }
+@media (prefers-reduced-motion: no-preference) {
+  .hunt.fresh { animation: hunt-nova 1.8s ease-out 1; }
+  @keyframes hunt-nova { from { background: var(--band); } to { background: var(--box); } }
+}
+
 .unit-toggle { display: inline-flex; gap: 2px; margin-left: auto; padding: 3px; border-radius: 999px; background: var(--card); }
 .unit-toggle button { padding: 5px 12px; border: 0; border-radius: 999px; background: none; color: var(--label); font: 600 12px/1.2 var(--font-ui); cursor: pointer; }
 .unit-toggle button:hover { color: var(--title); }
@@ -321,6 +375,7 @@ details.backup textarea {
   <p class="paste"><span data-i18n="paste.a">Com o print da janela de bônus copiado, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="paste.b">em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</span></p>
 
   <div class="desk">
+    <div class="side">
     <aside class="win bank" aria-labelledby="bank-title">
       <header class="win-title"><h2 class="win-name" id="bank-title">Respawns</h2></header>
       <div class="win-body">
@@ -339,6 +394,12 @@ details.backup textarea {
         </details>
       </footer>
     </aside>
+    <aside class="win hunt" id="hunt" aria-labelledby="hunt-title">
+      <h2 class="win-name" id="hunt-title" data-i18n="hunt.title">Última hunt</h2>
+      <div id="hunt-body"></div>
+      <input class="sr" type="file" id="hunt-file" accept=".txt,text/plain" tabindex="-1" aria-hidden="true">
+    </aside>
+    </div>
 
     <main class="win bonus" id="drop">
       <div id="sheet"></div>
@@ -363,8 +424,36 @@ details.backup textarea {
     </main>
   </div>
 
-  <footer class="colophon" data-i18n="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</footer>
+  <footer class="colophon">
+    <p data-i18n="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</p>
+    <button class="support-btn" type="button" id="support-btn" data-i18n="support.open" hidden>Apoiar o projeto</button>
+  </footer>
 </div>
+
+<dialog class="support" id="support" aria-labelledby="support-title">
+  <h2 id="support-title" data-i18n="support.open">Apoiar o projeto</h2>
+  <p data-i18n="support.text">O Medivia Respawn é gratuito e feito nas horas vagas. Se ele ajuda nas suas caçadas, você pode apoiar quem desenvolve. A doação é opcional e não dá nenhuma vantagem no jogo.</p>
+  <div class="support-ways" id="support-ways">
+    <section class="support-way" id="support-pix" hidden>
+      <h3 data-i18n="support.pix">Pix (Brasil)</h3>
+      <div class="support-qr" id="support-qr" role="img" aria-label="Código QR do Pix" data-i18n-attr="aria-label:support.qr" hidden></div>
+      <p class="support-note" data-i18n="support.pix.hint">Aponte a câmera do app do banco para o código, ou copie o Pix copia e cola.</p>
+      <p class="support-note" id="support-pix-to"></p>
+      <textarea class="support-code" id="support-pix-code" rows="3" readonly spellcheck="false" aria-label="Pix copia e cola" data-i18n-attr="aria-label:support.pix.copy"></textarea>
+      <button class="dlg" type="button" id="support-pix-copy" data-i18n="support.pix.copy">Copiar Pix copia e cola</button>
+      <a class="support-link" id="support-pix-link" target="_blank" rel="noopener" data-i18n="support.pix.link" hidden>Abrir o link de pagamento do banco</a>
+    </section>
+    <section class="support-way" id="support-kofi" hidden>
+      <h3 data-i18n="support.kofi">Ko-fi (qualquer país)</h3>
+      <p class="support-note" data-i18n="support.kofi.hint">Cartão ou PayPal, em qualquer moeda.</p>
+      <a class="dlg" id="support-kofi-link" target="_blank" rel="noopener" data-i18n="support.kofi.go">Abrir o Ko-fi</a>
+    </section>
+  </div>
+  <div class="support-end">
+    <p class="support-note" id="support-msg" role="status"></p>
+    <button class="dlg stop" type="button" id="support-close" data-i18n="support.close" autofocus>Fechar</button>
+  </div>
+</dialog>
 
 <script src="vendor/tesseract.min.js"></script>
 <script>
@@ -503,6 +592,50 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'support.open': 'Apoiar o projeto',
+    'support.text': 'O Medivia Respawn é gratuito e feito nas horas vagas. Se ele ajuda nas suas caçadas, você pode apoiar quem desenvolve. A doação é opcional e não dá nenhuma vantagem no jogo.',
+    'support.pix': 'Pix (Brasil)',
+    'support.qr': 'Código QR do Pix',
+    'support.pix.hint': 'Aponte a câmera do app do banco para o código, ou copie o Pix copia e cola.',
+    'support.pix.to': 'Recebedor: {x}',
+    'support.pix.copy': 'Copiar Pix copia e cola',
+    'support.pix.copied': 'Código Pix copiado.',
+    'support.copyFail': 'Não deu para copiar. Selecione o código e copie.',
+    'support.kofi': 'Ko-fi (qualquer país)',
+    'support.kofi.hint': 'Cartão ou PayPal, em qualquer moeda.',
+    'support.kofi.go': 'Abrir o Ko-fi',
+    'support.close': 'Fechar',
+    'support.pix.link': 'Abrir o link de pagamento do banco',
+    'hunt.title': 'Última hunt',
+    'hunt.intro': 'Veja aqui o resumo de cada hunt salva no jogo: quanto cada jogador gastou e quanto recebe.',
+    'hunt.connect': 'Conectar hunts.txt',
+    'hunt.tip': 'Na janela que abrir, cole este caminho no campo do nome do arquivo:',
+    'hunt.privacy': 'O arquivo é lido só no seu navegador. Nada é enviado.',
+    'hunt.ask': 'O navegador pede a sua permissão de novo a cada visita para ler o hunts.txt.',
+    'hunt.reconnect': 'Reconectar hunts.txt',
+    'hunt.other': 'Escolher outro arquivo',
+    'hunt.empty': 'Esse arquivo ainda não tem nenhuma hunt salva.',
+    'hunt.bad': 'Esse arquivo não parece ser o hunts.txt do jogo.',
+    'hunt.loot': 'Loot',
+    'hunt.supply': 'Supplies',
+    'hunt.balance': 'Saldo',
+    'hunt.exp': 'Exp de {x}',
+    'hunt.player': 'Jogador',
+    'hunt.spent': 'Gastou',
+    'hunt.gets': 'Recebe',
+    'hunt.copy': 'Copiar resumo',
+    'hunt.copied': 'Resumo da hunt copiado.',
+    'hunt.copyFail': 'Não deu para copiar o resumo neste navegador.',
+    'hunt.disconnect': 'Desconectar',
+    'hunt.live': 'Acompanhando o hunts.txt. O resumo muda quando você salvar uma hunt no jogo.',
+    'hunt.once': 'Arquivo lido uma vez. No Chrome ou no Edge, com o site aberto direto na aba, o resumo acompanha o arquivo sozinho.',
+    'hunt.new': 'Nova hunt salva: resumo atualizado.',
+    'hunt.prev': 'Hunt anterior',
+    'hunt.next': 'Hunt seguinte',
+    'hunt.copy.head': 'Hunt {when} ({time})',
+    'hunt.copy.totals': 'Loot {loot} | Supplies {supply} | Saldo {balance}',
+    'hunt.copy.player': '{x}: gastou {spent}, recebe {payout}',
+    'hunt.copy.solo': '{x}: gastou {spent}',
   },
   en: {
     'html.lang': 'en',
@@ -610,6 +743,50 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'support.open': 'Support the project',
+    'support.text': 'Medivia Respawn is free and built in spare time. If it helps your hunts, you can support the developer. Donating is optional and gives no advantage in the game.',
+    'support.pix': 'Pix (Brazil only)',
+    'support.qr': 'Pix QR code',
+    'support.pix.hint': 'Scan the code with a Brazilian banking app, or copy the Pix code.',
+    'support.pix.to': 'Recipient: {x}',
+    'support.pix.copy': 'Copy Pix code',
+    'support.pix.copied': 'Pix code copied.',
+    'support.copyFail': 'Could not copy. Select the code and copy it.',
+    'support.kofi': 'Ko-fi (any country)',
+    'support.kofi.hint': 'Card or PayPal, in any currency.',
+    'support.kofi.go': 'Open Ko-fi',
+    'support.close': 'Close',
+    'support.pix.link': 'Open the bank payment link',
+    'hunt.title': 'Last hunt',
+    'hunt.intro': 'See a summary of each hunt you save in the game: how much each player spent and how much each one gets.',
+    'hunt.connect': 'Connect hunts.txt',
+    'hunt.tip': 'In the dialog that opens, paste this path into the file name field:',
+    'hunt.privacy': 'The file is read only in your browser. Nothing is sent anywhere.',
+    'hunt.ask': 'The browser asks for your permission again on each visit to read hunts.txt.',
+    'hunt.reconnect': 'Reconnect hunts.txt',
+    'hunt.other': 'Choose another file',
+    'hunt.empty': 'This file has no saved hunts yet.',
+    'hunt.bad': 'That file does not look like the hunts.txt from the game.',
+    'hunt.loot': 'Loot',
+    'hunt.supply': 'Supplies',
+    'hunt.balance': 'Balance',
+    'hunt.exp': 'Exp gained by {x}',
+    'hunt.player': 'Player',
+    'hunt.spent': 'Spent',
+    'hunt.gets': 'Gets',
+    'hunt.copy': 'Copy summary',
+    'hunt.copied': 'Hunt summary copied.',
+    'hunt.copyFail': 'Could not copy the summary in this browser.',
+    'hunt.disconnect': 'Disconnect',
+    'hunt.live': 'Watching hunts.txt. The summary updates when you save a hunt in the game.',
+    'hunt.once': 'File read once. In Chrome or Edge, with the site open directly in a tab, the summary follows the file on its own.',
+    'hunt.new': 'New hunt saved: summary updated.',
+    'hunt.prev': 'Previous hunt',
+    'hunt.next': 'Next hunt',
+    'hunt.copy.head': 'Hunt {when} ({time})',
+    'hunt.copy.totals': 'Loot {loot} | Supplies {supply} | Balance {balance}',
+    'hunt.copy.player': '{x}: spent {spent}, gets {payout}',
+    'hunt.copy.solo': '{x}: spent {spent}',
   },
   es: {
     'html.lang': 'es',
@@ -717,6 +894,50 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'support.open': 'Apoyar el proyecto',
+    'support.text': 'Medivia Respawn es gratuito y se hace en ratos libres. Si te ayuda en tus cacerías, puedes apoyar a quien lo desarrolla. La donación es opcional y no da ninguna ventaja en el juego.',
+    'support.pix': 'Pix (solo Brasil)',
+    'support.qr': 'Código QR de Pix',
+    'support.pix.hint': 'Escanea el código con la app de un banco brasileño, o copia el código Pix.',
+    'support.pix.to': 'Destinatario: {x}',
+    'support.pix.copy': 'Copiar código Pix',
+    'support.pix.copied': 'Código Pix copiado.',
+    'support.copyFail': 'No se pudo copiar. Selecciona el código y cópialo.',
+    'support.kofi': 'Ko-fi (cualquier país)',
+    'support.kofi.hint': 'Tarjeta o PayPal, en cualquier moneda.',
+    'support.kofi.go': 'Abrir Ko-fi',
+    'support.close': 'Cerrar',
+    'support.pix.link': 'Abrir el enlace de pago del banco',
+    'hunt.title': 'Última cacería',
+    'hunt.intro': 'Mira aquí el resumen de cada cacería guardada en el juego: cuánto gastó cada jugador y cuánto recibe.',
+    'hunt.connect': 'Conectar hunts.txt',
+    'hunt.tip': 'En la ventana que se abra, pega esta ruta en el campo del nombre del archivo:',
+    'hunt.privacy': 'El archivo se lee solo en tu navegador. No se envía nada.',
+    'hunt.ask': 'El navegador vuelve a pedir tu permiso en cada visita para leer hunts.txt.',
+    'hunt.reconnect': 'Reconectar hunts.txt',
+    'hunt.other': 'Elegir otro archivo',
+    'hunt.empty': 'Ese archivo aún no tiene ninguna cacería guardada.',
+    'hunt.bad': 'Ese archivo no parece ser el hunts.txt del juego.',
+    'hunt.loot': 'Botín',
+    'hunt.supply': 'Suministros',
+    'hunt.balance': 'Saldo',
+    'hunt.exp': 'Exp de {x}',
+    'hunt.player': 'Jugador',
+    'hunt.spent': 'Gastó',
+    'hunt.gets': 'Recibe',
+    'hunt.copy': 'Copiar resumen',
+    'hunt.copied': 'Resumen de la cacería copiado.',
+    'hunt.copyFail': 'No se pudo copiar el resumen en este navegador.',
+    'hunt.disconnect': 'Desconectar',
+    'hunt.live': 'Siguiendo hunts.txt. El resumen cambia cuando guardes una cacería en el juego.',
+    'hunt.once': 'Archivo leído una vez. En Chrome o Edge, con el sitio abierto directamente en la pestaña, el resumen sigue el archivo solo.',
+    'hunt.new': 'Nueva cacería guardada: resumen actualizado.',
+    'hunt.prev': 'Cacería anterior',
+    'hunt.next': 'Cacería siguiente',
+    'hunt.copy.head': 'Cacería {when} ({time})',
+    'hunt.copy.totals': 'Botín {loot} | Suministros {supply} | Saldo {balance}',
+    'hunt.copy.player': '{x}: gastó {spent}, recibe {payout}',
+    'hunt.copy.solo': '{x}: gastó {spent}',
   },
 };
 // Texto no idioma escolhido; {chaves} são trocadas pelos valores passados.
@@ -1078,6 +1299,7 @@ function setLang(lang) {
     float.sig = null;
   }
   renderAll();
+  renderHunt();
 }
 
 /* ---------- Cronômetros ---------- */
@@ -1615,6 +1837,8 @@ document.addEventListener('dragleave', e => { if (!e.relatedTarget) drop.classLi
 document.addEventListener('drop', e => {
   e.preventDefault();
   drop.classList.remove('over');
+  const txt = [...(e.dataTransfer ? e.dataTransfer.items : [])].find(i => i.kind === 'file' && i.type === 'text/plain');
+  if (txt) { dropHunt(txt); return; }
   const f = [...(e.dataTransfer ? e.dataTransfer.files : [])].find(x => x.type.startsWith('image/'));
   if (f) readImage(f); else setStatus('err', tr('err.notimage'));
 });
@@ -1650,6 +1874,329 @@ $('#backup-import').addEventListener('click', async () => {
   }
   setStatus(n ? 'ok' : 'err', n === 1 ? tr('backup.imported1') : n ? tr('backup.importedN', { n }) : tr('backup.none'));
 });
+
+/* ---------- Resumo da hunt (hunts.txt) ----------
+   O jogo acrescenta cada sessão salva ao arquivo hunts.txt, na pasta "medivia" do usuário do Windows.
+   No Chrome e no Edge a página guarda o acesso ao arquivo e confere de tempos em tempos se há sessão nova.
+   O arquivo é lido só no navegador: nada dele é enviado para lugar nenhum. */
+const HUNT_PATH = '%USERPROFILE%\\medivia\\hunts.txt';
+const HUNT_TAIL = 300 * 1024;   // as últimas sessões cabem com folga neste final do arquivo
+const hunt = { handle: null, state: 'off', sessions: [], index: 0, seen: '', done: '', timer: null };
+
+// Lê as sessões de um trecho do hunts.txt. Uma sessão pela metade (arquivo ainda sendo gravado) é ignorada.
+function parseHunts(text) {
+  const from = text.search(/^Hunt saved at /m);
+  if (from < 0) return [];
+  const out = [];
+  for (const block of text.slice(from).split(/\n(?=Hunt saved at )/)) {
+    const one = re => { const m = block.match(re); return m ? m[1].trim() : null; };
+    const num = re => { const v = one(re); return v == null ? null : Number(v); };
+    const exp = block.match(/^Exp gained \((.+)\): (-?\d+)/m);
+    const s = {
+      saved: one(/^Hunt saved at (.+)$/m), start: one(/^Start time: (.+)$/m), end: one(/^End time: (.+)$/m), time: one(/^Session time: (.+)$/m),
+      me: exp ? exp[1] : null, exp: exp ? Number(exp[2]) : null,
+      supply: num(/^Supply value: (-?\d+)/m), loot: num(/^Loot value: (-?\d+)/m), balance: num(/^Balance: (-?\d+)/m),
+      players: [],
+    };
+    for (const m of block.matchAll(/^Supplies used \((.+)\): (-?\d+)/gm)) s.players.push({ name: m[1], spent: Number(m[2]), payout: null });
+    const pay = block.match(/^Suggested payout:\n((?:- .*\n?)*)/m);
+    if (pay) for (const m of pay[1].matchAll(/^- (.+): (-?\d+)\s*$/gm)) {
+      const p = s.players.find(x => x.name === m[1]);
+      if (p) p.payout = Number(m[2]); else s.players.push({ name: m[1], spent: null, payout: Number(m[2]) });
+    }
+    if (s.saved && s.balance != null) out.push(s);
+  }
+  return out;
+}
+async function readHuntFile(file) {
+  let sessions = parseHunts(await file.slice(Math.max(0, file.size - HUNT_TAIL)).text());
+  if (!sessions.length && file.size > HUNT_TAIL) sessions = parseHunts(await file.text());
+  return sessions;
+}
+
+// Guarda o acesso ao arquivo entre visitas (IndexedDB aceita esse tipo de objeto; localStorage, não).
+function idb(mode, fn) {
+  return new Promise((resolve, reject) => {
+    let open;
+    try { open = indexedDB.open('medivia-respawn', 1); } catch (e) { reject(e); return; }
+    open.onupgradeneeded = () => open.result.createObjectStore('kv');
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      try {
+        const tx = open.result.transaction('kv', mode);
+        const rq = fn(tx.objectStore('kv'));
+        tx.oncomplete = () => { resolve(rq && rq.result); open.result.close(); };
+        tx.onerror = tx.onabort = () => { reject(tx.error); open.result.close(); };
+      } catch (e) { reject(e); }
+    };
+  });
+}
+const idbGet = k => idb('readonly', s => s.get(k)).catch(() => null);
+const idbSet = (k, v) => idb('readwrite', s => s.put(v, k)).catch(() => {});
+const idbDel = k => idb('readwrite', s => s.delete(k)).catch(() => {});
+
+// Recebe as sessões lidas. Se chegou uma sessão nova, o painel pula para ela e avisa.
+function applySessions(sessions, announce) {
+  const last = hunt.sessions.length ? hunt.sessions[hunt.sessions.length - 1].saved : null;
+  hunt.sessions = sessions.slice(-30);
+  const newest = hunt.sessions[hunt.sessions.length - 1];
+  const fresh = !!(announce && newest && last && newest.saved !== last);
+  if (fresh || !last || hunt.index >= hunt.sessions.length) hunt.index = Math.max(0, hunt.sessions.length - 1);
+  renderHunt();
+  if (fresh) {
+    setStatus('ok', tr('hunt.new'));
+    const card = $('#hunt');
+    card.classList.remove('fresh');
+    void card.offsetWidth;
+    card.classList.add('fresh');
+  }
+}
+
+async function connectHunt(handle, ask) {
+  hunt.handle = handle;
+  try {
+    let perm = handle.queryPermission ? await handle.queryPermission({ mode: 'read' }) : 'granted';
+    if (perm !== 'granted' && ask && handle.requestPermission) perm = await handle.requestPermission({ mode: 'read' });
+    if (perm !== 'granted') { hunt.state = 'ask'; renderHunt(); return; }
+    const f = await handle.getFile();
+    const sessions = await readHuntFile(f);
+    // Arquivo vazio é válido (ainda sem hunts); com conteúdo, precisa ter a cara do hunts.txt.
+    if (!sessions.length && f.size > 0 && !/Hunt saved at /.test(await f.slice(0, 4096).text())) {
+      disconnectHunt();
+      setStatus('err', tr('hunt.bad'));
+      return;
+    }
+    hunt.seen = hunt.done = f.size + ':' + f.lastModified;
+    hunt.state = 'on';
+    applySessions(sessions, false);
+    idbSet('hunt-handle', handle);
+    if (!hunt.timer) hunt.timer = setInterval(pollHunt, 2500);
+  } catch { hunt.state = 'ask'; renderHunt(); }
+}
+async function pollHunt() {
+  if (!hunt.handle || hunt.state !== 'on') return;
+  try {
+    const f = await hunt.handle.getFile();
+    const sig = f.size + ':' + f.lastModified;
+    if (sig === hunt.done) return;
+    // O jogo pode estar no meio da gravação: só lê quando o arquivo ficou igual entre duas conferências.
+    if (sig !== hunt.seen) { hunt.seen = sig; return; }
+    hunt.done = sig;
+    applySessions(await readHuntFile(f), true);
+  } catch { hunt.state = 'ask'; renderHunt(); }
+}
+// Sem acesso contínuo (outro navegador, ou o site aberto dentro de outra página): lê o arquivo uma vez.
+async function openHuntOnce(file) {
+  if (!file) return;
+  const sessions = await readHuntFile(file).catch(() => []);
+  if (!sessions.length) { setStatus('err', tr('hunt.bad')); return; }
+  hunt.handle = null;
+  hunt.state = 'once';
+  hunt.sessions = [];
+  applySessions(sessions, false);
+}
+async function pickHunt() {
+  if (!window.showOpenFilePicker) { $('#hunt-file').click(); return; }
+  try {
+    const [handle] = await window.showOpenFilePicker({ id: 'medivia-hunts', types: [{ description: 'hunts.txt', accept: { 'text/plain': ['.txt'] } }] });
+    await connectHunt(handle, true);
+  } catch (e) {
+    if (!e || e.name !== 'AbortError') $('#hunt-file').click();
+  }
+}
+function disconnectHunt() {
+  if (hunt.timer) { clearInterval(hunt.timer); hunt.timer = null; }
+  hunt.handle = null;
+  hunt.state = 'off';
+  hunt.sessions = [];
+  hunt.index = 0;
+  idbDel('hunt-handle');
+  renderHunt();
+}
+// Arquivo arrastado para a página: no Chrome e no Edge isso já dá o acesso contínuo.
+function dropHunt(item) {
+  const file = item.getAsFile();
+  const handle = item.getAsFileSystemHandle ? item.getAsFileSystemHandle() : null;
+  Promise.resolve(handle).then(h => (h && h.kind === 'file' ? connectHunt(h, true) : openHuntOnce(file))).catch(() => openHuntOnce(file));
+}
+
+function huntWhen(s) {
+  const a = new Date(s.start || s.saved), b = new Date(s.end || s.saved);
+  if (isNaN(a) || isNaN(b)) return s.saved || '';
+  const tag = tr('html.lang');
+  const hm = d => d.toLocaleTimeString(tag, { hour: '2-digit', minute: '2-digit' });
+  return a.toLocaleDateString(tag, { day: '2-digit', month: '2-digit' }) + ' ' + hm(a) + ' – ' + hm(b);
+}
+// Texto simples do resumo, para colar no chat do grupo.
+function huntText(s) {
+  const n = v => v == null ? '?' : Math.round(v).toLocaleString(tr('html.lang'));
+  const lines = [
+    tr('hunt.copy.head', { when: huntWhen(s), time: s.time || '?' }),
+    tr('hunt.copy.totals', { loot: n(s.loot), supply: n(s.supply), balance: n(s.balance) }),
+  ];
+  for (const p of s.players) lines.push(tr(p.payout != null ? 'hunt.copy.player' : 'hunt.copy.solo', { x: p.name, spent: n(p.spent), payout: n(p.payout) }));
+  return lines.join('\n');
+}
+async function copyHunt(s) {
+  const text = huntText(s);
+  try { await navigator.clipboard.writeText(text); setStatus('ok', tr('hunt.copied')); return; } catch { /* tenta o modo antigo */ }
+  const ta = el('textarea', { class: 'sr', value: text });
+  document.body.append(ta);
+  ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch { ok = false; }
+  ta.remove();
+  setStatus(ok ? 'ok' : 'err', tr(ok ? 'hunt.copied' : 'hunt.copyFail'));
+}
+
+function renderHunt() {
+  const body = $('#hunt-body');
+  const s = hunt.sessions[hunt.index];
+  const link = (key, fn) => el('button', { class: 'hunt-link', type: 'button', text: tr(key), onclick: fn });
+  if (!s) {
+    if (hunt.state === 'ask') {
+      body.replaceChildren(
+        el('p', { text: tr('hunt.ask') }),
+        el('div', { class: 'hunt-foot' },
+          el('button', { class: 'dlg', type: 'button', id: 'hunt-connect', text: tr('hunt.reconnect'), onclick: () => connectHunt(hunt.handle, true) }),
+          link('hunt.other', pickHunt)));
+    } else if (hunt.state === 'on' || hunt.state === 'once') {
+      body.replaceChildren(el('p', { text: tr('hunt.empty') }), el('div', { class: 'hunt-foot' }, link('hunt.disconnect', disconnectHunt)));
+    } else {
+      body.replaceChildren(
+        el('p', { text: tr('hunt.intro') }),
+        el('div', { class: 'hunt-foot' }, el('button', { class: 'dlg', type: 'button', id: 'hunt-connect', text: tr('hunt.connect'), onclick: pickHunt })),
+        el('p', { class: 'hunt-note', text: tr('hunt.tip') }),
+        el('p', { class: 'hunt-path', text: HUNT_PATH }),
+        el('p', { class: 'hunt-note', text: tr('hunt.privacy') }));
+    }
+    return;
+  }
+  const many = hunt.sessions.length > 1;
+  const go = d => { hunt.index = Math.min(hunt.sessions.length - 1, Math.max(0, hunt.index + d)); renderHunt(); };
+  const money = v => v == null ? '?' : fmtInt(v);
+  const group = s.players.length > 1 || s.players.some(p => p.payout != null);
+  body.replaceChildren(
+    el('div', { class: 'hunt-head' },
+      el('span', { class: 'hunt-when', text: huntWhen(s) + (s.time ? ' (' + s.time + ')' : '') }),
+      many ? el('span', { class: 'hunt-nav' },
+        el('button', { type: 'button', id: 'hunt-prev', text: '‹', 'aria-label': tr('hunt.prev'), title: tr('hunt.prev'), disabled: hunt.index === 0, onclick: () => go(-1) }),
+        (hunt.index + 1) + '/' + hunt.sessions.length,
+        el('button', { type: 'button', id: 'hunt-next', text: '›', 'aria-label': tr('hunt.next'), title: tr('hunt.next'), disabled: hunt.index === hunt.sessions.length - 1, onclick: () => go(1) })) : null),
+    el('dl', { class: 'hunt-totals' },
+      el('dt', { text: tr('hunt.loot') }), el('dd', { text: money(s.loot) }),
+      el('dt', { text: tr('hunt.supply') }), el('dd', { text: money(s.supply) }),
+      el('dt', { text: tr('hunt.balance') }), el('dd', { class: s.balance < 0 ? 'loss' : 'gain', text: (s.balance > 0 ? '+' : '') + money(s.balance) }),
+      s.exp != null ? [el('dt', { text: tr('hunt.exp', { x: s.me || '?' }) }), el('dd', { text: money(s.exp) })] : null),
+    group ? el('table', { class: 'hunt-table' },
+      el('thead', null, el('tr', null,
+        el('th', { scope: 'col', text: tr('hunt.player') }), el('th', { scope: 'col', text: tr('hunt.spent') }), el('th', { scope: 'col', text: tr('hunt.gets') }))),
+      el('tbody', null, s.players.map(p => el('tr', null,
+        el('td', { text: p.name }), el('td', { text: money(p.spent) }), el('td', { text: money(p.payout) }))))) : null,
+    el('div', { class: 'hunt-foot' },
+      el('button', { class: 'dlg', type: 'button', id: 'hunt-copy', text: tr('hunt.copy'), onclick: () => copyHunt(s) }),
+      link('hunt.disconnect', disconnectHunt)),
+    el('p', { class: hunt.state === 'on' ? 'hunt-note hunt-live' : 'hunt-note', text: tr(hunt.state === 'on' ? 'hunt.live' : 'hunt.once') }));
+}
+
+$('#hunt-file').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; openHuntOnce(f); });
+renderHunt();
+idbGet('hunt-handle').then(h => { if (h && hunt.state === 'off') connectHunt(h, false); });
+
+/* ---------- Apoiar o projeto ----------
+   Dados de doação. Um campo vazio esconde aquela opção; com os dois vazios, o botão "Apoiar" não aparece.
+   - pix.key: a chave Pix (de preferência uma chave aleatória, criada só para isto);
+     pix.name e pix.city: nome e cidade que vão no código (o app do banco mostra o nome real ao pagar);
+     pix.link: link de cobrança do banco, opcional.
+   - kofi: endereço completo da página, por exemplo https://ko-fi.com/usuario */
+const DONATE = {
+  pix: {
+    key: 'ccf01518-3882-4d5d-9694-8f653045b67a',
+    name: 'Bena',
+    city: 'Brasil',
+    link: 'https://nubank.com.br/cobrar/2jt14/6ac8016c-f14a-46d6-832d-baee49a75d91',
+  },
+  kofi: 'https://ko-fi.com/benavibeforge',
+};
+
+// Monta o "Pix copia e cola" (BR Code estático, sem valor fixo), com o CRC16 que o padrão exige.
+function pixPayload({ key, name, city }) {
+  const clean = (v, max) => String(v || '').normalize('NFD').replace(/\p{M}/gu, '').replace(/[^A-Za-z0-9 .-]/g, '').trim().slice(0, max).trim();
+  const f = (id, v) => id + String(v.length).padStart(2, '0') + v;
+  const body = f('00', '01') +
+    f('26', f('00', 'br.gov.bcb.pix') + f('01', String(key).trim())) +
+    f('52', '0000') + f('53', '986') + f('58', 'BR') +
+    f('59', clean(name, 25) || 'N') + f('60', clean(city, 15) || 'BRASIL') +
+    f('62', f('05', '***')) + '6304';
+  let crc = 0xFFFF;
+  for (let i = 0; i < body.length; i++) {
+    crc ^= body.charCodeAt(i) << 8;
+    for (let b = 0; b < 8; b++) crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) & 0xFFFF : (crc << 1) & 0xFFFF;
+  }
+  return body + crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+const support = {
+  pix: !!(DONATE.pix && String(DONATE.pix.key || '').trim()),
+  kofi: /^https:\/\/ko-fi\.com\/[\w-]*$/.test(DONATE.kofi || ''),
+  qr: null,
+};
+// A biblioteca do QR code só é baixada quando alguém abre a caixa de apoio.
+function loadQr() {
+  if (!support.qr) {
+    support.qr = new Promise((resolve, reject) => {
+      const sc = el('script', { src: new URL('vendor/qrcode.js', document.baseURI).href });
+      sc.onload = () => (window.qrcode ? resolve(window.qrcode) : reject(new Error('qr')));
+      sc.onerror = () => reject(new Error('qr'));
+      document.head.append(sc);
+    });
+    support.qr.catch(() => { support.qr = null; });
+  }
+  return support.qr;
+}
+function openSupport() {
+  const dlg = $('#support');
+  // Em português o Pix vem primeiro; nos outros idiomas, o Ko-fi.
+  $('#support-ways').classList.toggle('intl', ui.lang !== 'pt');
+  setText($('#support-msg'), '');
+  if (support.pix) {
+    const code = pixPayload(DONATE.pix);
+    $('#support-pix').hidden = false;
+    $('#support-pix-code').value = code;
+    setText($('#support-pix-to'), tr('support.pix.to', { x: DONATE.pix.name || '?' }));
+    const bank = $('#support-pix-link');
+    const okLink = /^https:\/\/nubank\.com\.br\/cobrar\/[\w/-]+$/.test(DONATE.pix.link || '');
+    bank.hidden = !okLink;
+    if (okLink) bank.href = DONATE.pix.link;
+    const box = $('#support-qr');
+    loadQr().then(qrcode => {
+      const qr = qrcode(0, 'M');
+      qr.addData(code);
+      qr.make();
+      box.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+      box.hidden = false;
+    }).catch(() => { box.hidden = true; });
+  }
+  if (support.kofi) {
+    $('#support-kofi').hidden = false;
+    $('#support-kofi-link').href = DONATE.kofi;
+  }
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+}
+if (support.pix || support.kofi) {
+  const dlg = $('#support');
+  $('#support-btn').hidden = false;
+  $('#support-btn').addEventListener('click', openSupport);
+  $('#support-close').addEventListener('click', () => { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+  dlg.addEventListener('click', e => { if (e.target === dlg && dlg.close) dlg.close(); });   // clique fora da caixa fecha
+  $('#support-pix-copy').addEventListener('click', async () => {
+    const ta = $('#support-pix-code');
+    let ok = true;
+    try { await navigator.clipboard.writeText(ta.value); }
+    catch { ta.focus(); ta.select(); try { ok = document.execCommand('copy'); } catch { ok = false; } }
+    setText($('#support-msg'), tr(ok ? 'support.pix.copied' : 'support.copyFail'));
+  });
+}
 
 /* ---------- Rodapé da janela: opções e botões ---------- */
 const optVolume = $('#opt-volume');
