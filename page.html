@@ -283,6 +283,10 @@ details.backup textarea {
 .unit-toggle button[aria-pressed="true"] { background: var(--title); color: var(--ground); }
 .clock.mmss .clock-digits { font-size: 50px; }
 
+.masthead nav { align-items: center; }
+.lang { margin-left: 0; }
+.tone { padding: 6px 10px; border: 1px solid var(--edge); border-radius: 999px; background: var(--card); color: var(--title); font: 500 13px/1.2 var(--font-ui); cursor: pointer; }
+
 @media (prefers-reduced-motion: no-preference) {
   .ring-arc { transition: stroke-dashoffset 0.25s linear; }
 }
@@ -301,31 +305,36 @@ details.backup textarea {
   <header class="masthead">
     <div>
       <h1>Medivia Respawn</h1>
-      <p>Cronômetro de respawn para as suas caçadas no Medivia, com o grupo e o bônus já calculados.</p>
+      <p data-i18n="tagline">Cronômetro de respawn para as suas caçadas no Medivia, com o grupo e o bônus já calculados.</p>
       <nav aria-label="Medivia">
-        <a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener">Mapper da wiki</a>
+        <a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a>
+        <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
+          <button type="button" data-lang="pt" lang="pt-BR" title="Português">PT</button>
+          <button type="button" data-lang="en" lang="en" title="English">EN</button>
+          <button type="button" data-lang="es" lang="es" title="Español">ES</button>
+        </span>
       </nav>
     </div>
-    <a class="maker" href="https://github.com/Benaa42" target="_blank" rel="noopener"><img src="vibeforge.svg" width="252" height="72" alt="Vibeforge, produzido por Bena"></a>
+    <a class="maker" href="https://github.com/Benaa42" target="_blank" rel="noopener"><img src="vibeforge.svg" width="252" height="72" alt="Vibeforge, produzido por Bena" data-i18n-attr="alt:maker.alt"></a>
   </header>
 
-  <p class="paste">Com o print da janela de bônus copiado, aperte <kbd>Ctrl</kbd> + <kbd>V</kbd> em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</p>
+  <p class="paste"><span data-i18n="paste.a">Com o print da janela de bônus copiado, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="paste.b">em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</span></p>
 
   <div class="desk">
     <aside class="win bank" aria-labelledby="bank-title">
       <header class="win-title"><h2 class="win-name" id="bank-title">Respawns</h2></header>
       <div class="win-body">
-        <input type="search" id="search" placeholder="Buscar área ou monstro" aria-label="Buscar área ou monstro" autocomplete="off">
+        <input type="search" id="search" placeholder="Buscar área ou monstro" aria-label="Buscar área ou monstro" autocomplete="off" data-i18n-attr="placeholder:search;aria-label:search">
         <ul class="bank-list" id="bank-list"></ul>
       </div>
       <footer class="win-foot bank-foot">
         <p class="sync" id="sync"></p>
         <details class="backup" id="backup">
-          <summary>Cópia de segurança</summary>
-          <textarea id="backup-text" spellcheck="false" aria-label="Banco em JSON"></textarea>
+          <summary data-i18n="backup">Cópia de segurança</summary>
+          <textarea id="backup-text" spellcheck="false" aria-label="Banco em JSON" data-i18n-attr="aria-label:backup.aria"></textarea>
           <div class="dlgs">
-            <button class="dlg go" type="button" id="backup-copy">Copiar</button>
-            <button class="dlg go" type="button" id="backup-import">Importar o texto acima</button>
+            <button class="dlg go" type="button" id="backup-copy" data-i18n="backup.copy">Copiar</button>
+            <button class="dlg go" type="button" id="backup-import" data-i18n="backup.import">Importar o texto acima</button>
           </div>
         </details>
       </footer>
@@ -335,28 +344,32 @@ details.backup textarea {
       <div id="sheet"></div>
       <footer class="win-foot">
         <div class="opts">
-          <label class="toggle"><input type="checkbox" id="opt-loop"> Repetir ao zerar</label>
-          <label class="toggle"><input type="checkbox" id="opt-sound"> Som</label>
-          <input type="range" class="volume" id="opt-volume" min="0" max="100" step="5" aria-label="Volume do som" title="Volume do som">
+          <label class="toggle"><input type="checkbox" id="opt-loop"> <span data-i18n="loop">Repetir ao zerar</span></label>
+          <label class="toggle"><input type="checkbox" id="opt-sound"> <span data-i18n="sound">Som</span></label>
+          <input type="range" class="volume" id="opt-volume" min="0" max="100" step="5" aria-label="Volume do som" title="Volume do som" data-i18n-attr="aria-label:volume;title:volume">
+          <select class="tone" id="opt-tone" aria-label="Tipo de alerta" title="Tipo de alerta" data-i18n-attr="aria-label:tone.label;title:tone.label">
+            <option value="sino" data-i18n="tone.sino">Sino</option>
+            <option value="bipe" data-i18n="tone.bipe">Bipe</option>
+            <option value="trompa" data-i18n="tone.trompa">Trompa</option>
+          </select>
         </div>
         <div class="dlgs">
-          <button class="dlg go" type="button" id="float-btn">Janela flutuante</button>
-          <button class="dlg go" type="button" id="read-btn">Ler print</button>
+          <button class="dlg go" type="button" id="float-btn" data-i18n="float">Janela flutuante</button>
+          <button class="dlg go" type="button" id="read-btn" data-i18n="read">Ler print</button>
         </div>
         <input class="sr" type="file" id="file" accept="image/*" tabindex="-1" aria-hidden="true">
       </footer>
-      <p class="status" id="status" role="status" data-kind="info">Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print.</p>
+      <p class="status" id="status" role="status" data-kind="info" data-i18n="status.default">Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print.</p>
     </main>
   </div>
 
-  <footer class="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</footer>
+  <footer class="colophon" data-i18n="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</footer>
 </div>
 
 <script src="vendor/tesseract.min.js"></script>
 <script>
 (() => {
 'use strict';
-document.documentElement.lang = 'pt-BR';
 
 const PCTS = [0, 10, 20, 30, 40, 50];
 const DURS = Array.from({ length: 16 }, (_, i) => 30 + i * 10);
@@ -378,6 +391,358 @@ function el(tag, props, ...kids) {
   }
   return n;
 }
+
+/* ---------- Idiomas ----------
+   Todo texto da tela sai daqui. Para corrigir uma tradução, basta mudar a linha do idioma.
+   Os nomes de áreas e de monstros não são traduzidos: aparecem como o jogo os escreve. */
+const LANGS = ['pt', 'en', 'es'];
+const I18N = {
+  pt: {
+    'html.lang': 'pt-BR',
+    'tagline': 'Cronômetro de respawn para as suas caçadas no Medivia, com o grupo e o bônus já calculados.',
+    'mapper': 'Mapper da wiki',
+    'maker.alt': 'Vibeforge, produzido por Bena',
+    'lang.label': 'Idioma',
+    'paste.a': 'Com o print da janela de bônus copiado, aperte',
+    'paste.b': 'em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.',
+    'search': 'Buscar área ou monstro',
+    'backup': 'Cópia de segurança',
+    'backup.aria': 'Banco em JSON',
+    'backup.copy': 'Copiar',
+    'backup.import': 'Importar o texto acima',
+    'backup.copied': 'Banco copiado. Cole em um arquivo de texto para guardar.',
+    'backup.selected': 'Texto selecionado: aperte Ctrl + C para copiar.',
+    'backup.bad': 'Esse texto não é uma cópia do banco. Cole o texto copiado daqui, inteiro.',
+    'backup.imported1': '1 respawn importado.',
+    'backup.importedN': '{n} respawns importados.',
+    'backup.none': 'Não achei nenhum respawn nesse texto.',
+    'loop': 'Repetir ao zerar',
+    'sound': 'Som',
+    'volume': 'Volume do som',
+    'tone.label': 'Tipo de alerta',
+    'tone.sino': 'Sino',
+    'tone.bipe': 'Bipe',
+    'tone.trompa': 'Trompa',
+    'float': 'Janela flutuante',
+    'read': 'Ler print',
+    'status.default': 'Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print.',
+    'colophon': 'Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.',
+    'unit.aria': 'Mostrar os tempos em',
+    'unit.s': 'Segundos',
+    'unit.m': 'Minutos',
+    'seconds': 'segundos',
+    'minutes': 'minutos',
+    'party.100': 'Solo',
+    'party.134': 'Dupla',
+    'party.160': 'Trio',
+    'party.178': 'Squad 4+',
+    'party.speed': '{n}% de velocidade',
+    'sync.site': 'Banco do site, mais o que você ler neste navegador.',
+    'sync.local': 'Banco salvo neste navegador.',
+    'sync.ro': 'Banco compartilhado, só para consulta. O que você ler fica salvo neste navegador.',
+    'sync.rw': 'Banco compartilhado: o que for lido aqui aparece para todos.',
+    'bank.nomobs': 'sem monstros',
+    'bank.nohit': 'Nenhuma área ou monstro com esse nome.',
+    'bank.empty': 'Ainda não há respawns. Cada print lido entra aqui com o nome da área.',
+    'err.sharedDelete': 'Não deu para excluir do banco compartilhado. Só quem pode editar o banco consegue.',
+    'err.float': 'A janela flutuante não abre nesta visualização. Use o Chrome ou o Edge com o site aberto direto na aba.',
+    'err.exists': 'Já existe um respawn chamado "{x}".',
+    'err.nomobs': 'Não achei monstros nem tempos de respawn nessa imagem. Tire o print com a janela de bônus inteira aparecendo.',
+    'err.nopct': 'Li os monstros, mas não o percentual de bônus. Deixe o título "Percentual de bônus (10%)" aparecer no print.',
+    'err.read': 'Não consegui ler essa imagem. Tente um print novo, só da janela de bônus.',
+    'err.notimage': 'Isso não é uma imagem. Arraste o arquivo do print.',
+    'note.left': 'faltam {t}',
+    'note.born': 'nasceu há {t}',
+    'note.idle': '{t} de respawn',
+    'start': 'Iniciar',
+    'restart': 'Reiniciar',
+    'reset': 'Zerar',
+    'startAll': 'Iniciar todos',
+    'resetAll': 'Zerar todos',
+    'shortcut.all': 'Atalho para iniciar todos: ',
+    'shortcut.one': 'Atalho para iniciar: ',
+    'key.space': 'Espaço',
+    'empty.loading': 'Abrindo o banco de respawns',
+    'empty.none': 'Nenhum respawn aberto',
+    'howto.intro': 'Para abrir um respawn que ainda não está na lista:',
+    'howto.1': 'No Medivia, abra a janela de bônus do respawn.',
+    'howto.2': 'Tire um print da janela inteira.',
+    'howto.3': 'Volte aqui e aperte ',
+    'howto.note': 'O print pode estar em qualquer percentual de bônus. Os outros são calculados.',
+    'name.aria': 'Nome da área',
+    'name.title': 'Clique para renomear',
+    'delete': 'Excluir',
+    'delete.sure': 'Excluir mesmo?',
+    'stage.aria': 'Cronômetros de respawn',
+    'ctl.party': 'Grupo de caça',
+    'ctl.bonus': 'Percentual de bônus',
+    'ctl.dur': 'Duração',
+    'ctl.cost': 'Custo do bônus',
+    'dur.value': '{n} minutos',
+    'bonus.faster': 'respawn {n}% mais rápido',
+    'bonus.none': 'sem bônus',
+    'bonus.noneShort': 'Sem',
+    'cost.unread': 'não lido',
+    'cost.note': '{p}% por {n} minutos',
+    'less': 'Diminuir {x}',
+    'more': 'Aumentar {x}',
+    'band': 'Monstros potencializados',
+    'mob.kills': 'Abates por hora: ',
+    'mob.time': 'Tempo de respawn: ',
+    'mob.remove': 'Remover {x}',
+    'step.title': '{m} com {p}% de bônus: {t}',
+    'hint.read': 'Lido de um print a {p}%, tratado como caça solo. ',
+    'hint.rest': 'O grupo entra na conta antes do bônus. A lista do jogo rola: se faltou monstro, role a janela, tire outro print e cole. Ele entra nesta mesma área.',
+    'read.busy': 'Lendo o print…',
+    'read.first': 'Preparando o leitor de imagem (só na primeira vez) e lendo o print…',
+    'read.ok1': '{x} lido a {p}%, 1 monstro.',
+    'read.okN': '{x} lido a {p}%, {n} monstros.',
+    'read.shared': 'Salvo no banco compartilhado.',
+    'read.local': 'Salvo no banco deste navegador.',
+    'read.discarded': 'Imagem descartada.',
+    'read.noname': 'Não li o nome da área: digite no título.',
+    'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
+    'noname': 'Respawn sem nome',
+  },
+  en: {
+    'html.lang': 'en',
+    'tagline': 'Respawn timer for your Medivia hunts, with party size and bonus already worked out.',
+    'mapper': 'Wiki mapper',
+    'maker.alt': 'Vibeforge, made by Bena',
+    'lang.label': 'Language',
+    'paste.a': 'With the bonus window screenshot copied, press',
+    'paste.b': 'anywhere on this page. It is read right away, with no need to click anything first.',
+    'search': 'Search area or monster',
+    'backup': 'Backup',
+    'backup.aria': 'Bank as JSON',
+    'backup.copy': 'Copy',
+    'backup.import': 'Import the text above',
+    'backup.copied': 'Bank copied. Paste it into a text file to keep it.',
+    'backup.selected': 'Text selected: press Ctrl + C to copy.',
+    'backup.bad': 'This text is not a bank backup. Paste the whole text copied from here.',
+    'backup.imported1': '1 respawn imported.',
+    'backup.importedN': '{n} respawns imported.',
+    'backup.none': 'No respawn found in that text.',
+    'loop': 'Repeat at zero',
+    'sound': 'Sound',
+    'volume': 'Sound volume',
+    'tone.label': 'Alert sound',
+    'tone.sino': 'Chime',
+    'tone.bipe': 'Beep',
+    'tone.trompa': 'Horn',
+    'float': 'Floating window',
+    'read': 'Read screenshot',
+    'status.default': 'You can also drag the screenshot image here or pick the file with Read screenshot.',
+    'colophon': 'Fan-made tool, not officially affiliated with Medivia. Times come from the game\'s bonus window. The screenshot is read in your browser and discarded right after.',
+    'unit.aria': 'Show times in',
+    'unit.s': 'Seconds',
+    'unit.m': 'Minutes',
+    'seconds': 'seconds',
+    'minutes': 'minutes',
+    'party.100': 'Solo',
+    'party.134': 'Duo',
+    'party.160': 'Trio',
+    'party.178': 'Squad 4+',
+    'party.speed': '{n}% speed',
+    'sync.site': 'The site\'s bank, plus whatever you read in this browser.',
+    'sync.local': 'Bank saved in this browser.',
+    'sync.ro': 'Shared bank, read-only. What you read is saved in this browser.',
+    'sync.rw': 'Shared bank: what is read here shows up for everyone.',
+    'bank.nomobs': 'no monsters',
+    'bank.nohit': 'No area or monster with that name.',
+    'bank.empty': 'No respawns yet. Each screenshot you read is added here under the area name.',
+    'err.sharedDelete': 'Could not delete from the shared bank. Only people who can edit the bank can do that.',
+    'err.float': 'The floating window cannot open in this view. Use Chrome or Edge with the site open directly in a tab.',
+    'err.exists': 'There is already a respawn called "{x}".',
+    'err.nomobs': 'No monsters or respawn times found in this image. Take the screenshot with the whole bonus window showing.',
+    'err.nopct': 'The monsters were read, but not the bonus percentage. Make sure the "Bonus percentage (10%)" title shows in the screenshot.',
+    'err.read': 'Could not read this image. Try a new screenshot of just the bonus window.',
+    'err.notimage': 'That is not an image. Drag the screenshot file.',
+    'note.left': '{t} left',
+    'note.born': 'spawned {t} ago',
+    'note.idle': '{t} respawn',
+    'start': 'Start',
+    'restart': 'Restart',
+    'reset': 'Reset',
+    'startAll': 'Start all',
+    'resetAll': 'Reset all',
+    'shortcut.all': 'Shortcut to start all: ',
+    'shortcut.one': 'Shortcut to start: ',
+    'key.space': 'Space',
+    'empty.loading': 'Opening the respawn bank',
+    'empty.none': 'No respawn open',
+    'howto.intro': 'To open a respawn that is not on the list yet:',
+    'howto.1': 'In Medivia, open the bonus window of the respawn.',
+    'howto.2': 'Take a screenshot of the whole window.',
+    'howto.3': 'Come back here and press ',
+    'howto.note': 'The screenshot can be at any bonus percentage. The others are calculated.',
+    'name.aria': 'Area name',
+    'name.title': 'Click to rename',
+    'delete': 'Delete',
+    'delete.sure': 'Really delete?',
+    'stage.aria': 'Respawn timers',
+    'ctl.party': 'Hunting party',
+    'ctl.bonus': 'Bonus percentage',
+    'ctl.dur': 'Duration',
+    'ctl.cost': 'Bonus cost',
+    'dur.value': '{n} minutes',
+    'bonus.faster': 'respawn {n}% faster',
+    'bonus.none': 'no bonus',
+    'bonus.noneShort': 'None',
+    'cost.unread': 'not read',
+    'cost.note': '{p}% for {n} minutes',
+    'less': 'Decrease {x}',
+    'more': 'Increase {x}',
+    'band': 'Boosted monsters',
+    'mob.kills': 'Kills per hour: ',
+    'mob.time': 'Respawn time: ',
+    'mob.remove': 'Remove {x}',
+    'step.title': '{m} with {p}% bonus: {t}',
+    'hint.read': 'Read from a screenshot at {p}%, treated as solo hunting. ',
+    'hint.rest': 'Party size is applied before the bonus. The list in the game scrolls: if a monster is missing, scroll the window, take another screenshot and paste it. It is added to this same area.',
+    'read.busy': 'Reading the screenshot…',
+    'read.first': 'Getting the image reader ready (first time only) and reading the screenshot…',
+    'read.ok1': '{x} read at {p}%, 1 monster.',
+    'read.okN': '{x} read at {p}%, {n} monsters.',
+    'read.shared': 'Saved to the shared bank.',
+    'read.local': 'Saved to the bank in this browser.',
+    'read.discarded': 'Image discarded.',
+    'read.noname': 'The area name could not be read: type it in the title.',
+    'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
+    'noname': 'Unnamed respawn',
+  },
+  es: {
+    'html.lang': 'es',
+    'tagline': 'Cronómetro de respawn para tus cacerías en Medivia, con el grupo y el bonus ya calculados.',
+    'mapper': 'Mapper de la wiki',
+    'maker.alt': 'Vibeforge, producido por Bena',
+    'lang.label': 'Idioma',
+    'paste.a': 'Con la captura de la ventana de bonus copiada, pulsa',
+    'paste.b': 'en cualquier parte de esta página. Se lee al instante, sin hacer clic en nada antes.',
+    'search': 'Buscar área o monstruo',
+    'backup': 'Copia de seguridad',
+    'backup.aria': 'Banco en JSON',
+    'backup.copy': 'Copiar',
+    'backup.import': 'Importar el texto de arriba',
+    'backup.copied': 'Banco copiado. Pégalo en un archivo de texto para guardarlo.',
+    'backup.selected': 'Texto seleccionado: pulsa Ctrl + C para copiar.',
+    'backup.bad': 'Ese texto no es una copia del banco. Pega entero el texto copiado desde aquí.',
+    'backup.imported1': '1 respawn importado.',
+    'backup.importedN': '{n} respawns importados.',
+    'backup.none': 'No encontré ningún respawn en ese texto.',
+    'loop': 'Repetir al llegar a cero',
+    'sound': 'Sonido',
+    'volume': 'Volumen del sonido',
+    'tone.label': 'Tipo de alerta',
+    'tone.sino': 'Campana',
+    'tone.bipe': 'Pitido',
+    'tone.trompa': 'Cuerno',
+    'float': 'Ventana flotante',
+    'read': 'Leer captura',
+    'status.default': 'También puedes arrastrar aquí la imagen de la captura o elegir el archivo en Leer captura.',
+    'colophon': 'Herramienta hecha por fans, sin vínculo oficial con Medivia. Los tiempos vienen de la ventana de bonus del juego. La captura se lee en tu navegador y se descarta enseguida.',
+    'unit.aria': 'Mostrar los tiempos en',
+    'unit.s': 'Segundos',
+    'unit.m': 'Minutos',
+    'seconds': 'segundos',
+    'minutes': 'minutos',
+    'party.100': 'Solo',
+    'party.134': 'Dúo',
+    'party.160': 'Trío',
+    'party.178': 'Squad 4+',
+    'party.speed': '{n}% de velocidad',
+    'sync.site': 'Banco del sitio, más lo que leas en este navegador.',
+    'sync.local': 'Banco guardado en este navegador.',
+    'sync.ro': 'Banco compartido, solo de consulta. Lo que leas se guarda en este navegador.',
+    'sync.rw': 'Banco compartido: lo que se lea aquí aparece para todos.',
+    'bank.nomobs': 'sin monstruos',
+    'bank.nohit': 'Ninguna área o monstruo con ese nombre.',
+    'bank.empty': 'Aún no hay respawns. Cada captura leída entra aquí con el nombre del área.',
+    'err.sharedDelete': 'No se pudo eliminar del banco compartido. Solo quien puede editar el banco puede hacerlo.',
+    'err.float': 'La ventana flotante no se abre en esta vista. Usa Chrome o Edge con el sitio abierto directamente en la pestaña.',
+    'err.exists': 'Ya existe un respawn llamado "{x}".',
+    'err.nomobs': 'No encontré monstruos ni tiempos de respawn en esta imagen. Haz la captura con la ventana de bonus entera a la vista.',
+    'err.nopct': 'Leí los monstruos, pero no el porcentaje de bonus. Deja que el título "Porcentaje de bonus (10%)" aparezca en la captura.',
+    'err.read': 'No pude leer esta imagen. Prueba con una captura nueva, solo de la ventana de bonus.',
+    'err.notimage': 'Eso no es una imagen. Arrastra el archivo de la captura.',
+    'note.left': 'faltan {t}',
+    'note.born': 'nació hace {t}',
+    'note.idle': '{t} de respawn',
+    'start': 'Iniciar',
+    'restart': 'Reiniciar',
+    'reset': 'Restablecer',
+    'startAll': 'Iniciar todos',
+    'resetAll': 'Restablecer todos',
+    'shortcut.all': 'Atajo para iniciar todos: ',
+    'shortcut.one': 'Atajo para iniciar: ',
+    'key.space': 'Espacio',
+    'empty.loading': 'Abriendo el banco de respawns',
+    'empty.none': 'Ningún respawn abierto',
+    'howto.intro': 'Para abrir un respawn que aún no está en la lista:',
+    'howto.1': 'En Medivia, abre la ventana de bonus del respawn.',
+    'howto.2': 'Haz una captura de la ventana entera.',
+    'howto.3': 'Vuelve aquí y pulsa ',
+    'howto.note': 'La captura puede estar en cualquier porcentaje de bonus. Los demás se calculan.',
+    'name.aria': 'Nombre del área',
+    'name.title': 'Haz clic para renombrar',
+    'delete': 'Eliminar',
+    'delete.sure': '¿Eliminar de verdad?',
+    'stage.aria': 'Cronómetros de respawn',
+    'ctl.party': 'Grupo de caza',
+    'ctl.bonus': 'Porcentaje de bonus',
+    'ctl.dur': 'Duración',
+    'ctl.cost': 'Coste del bonus',
+    'dur.value': '{n} minutos',
+    'bonus.faster': 'respawn {n}% más rápido',
+    'bonus.none': 'sin bonus',
+    'bonus.noneShort': 'Sin',
+    'cost.unread': 'no leído',
+    'cost.note': '{p}% por {n} minutos',
+    'less': 'Disminuir {x}',
+    'more': 'Aumentar {x}',
+    'band': 'Monstruos potenciados',
+    'mob.kills': 'Muertes por hora: ',
+    'mob.time': 'Tiempo de respawn: ',
+    'mob.remove': 'Quitar {x}',
+    'step.title': '{m} con {p}% de bonus: {t}',
+    'hint.read': 'Leído de una captura al {p}%, tratado como caza en solitario. ',
+    'hint.rest': 'El grupo se aplica antes del bonus. La lista del juego se desplaza: si falta algún monstruo, desplaza la ventana, haz otra captura y pégala. Entra en esta misma área.',
+    'read.busy': 'Leyendo la captura…',
+    'read.first': 'Preparando el lector de imagen (solo la primera vez) y leyendo la captura…',
+    'read.ok1': '{x} leído al {p}%, 1 monstruo.',
+    'read.okN': '{x} leído al {p}%, {n} monstruos.',
+    'read.shared': 'Guardado en el banco compartido.',
+    'read.local': 'Guardado en el banco de este navegador.',
+    'read.discarded': 'Imagen descartada.',
+    'read.noname': 'No leí el nombre del área: escríbelo en el título.',
+    'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
+    'noname': 'Respawn sin nombre',
+  },
+};
+// Texto no idioma escolhido; {chaves} são trocadas pelos valores passados.
+function tr(key, vars) {
+  let s = (I18N[ui.lang] || I18N.pt)[key];
+  if (s == null) s = I18N.pt[key] != null ? I18N.pt[key] : key;
+  return vars ? s.replace(/\{(\w+)\}/g, (_, k) => vars[k] != null ? vars[k] : '') : s;
+}
+
+/* ---------- Sons de alerta ----------
+   Três tipos, cada um com o aviso dos 10 segundos e o de zerar.
+   Cada nota: [forma da onda, frequência em Hz, atraso em s, duração em s, volume]. */
+const TONES = {
+  sino: {
+    warn: [['sine', 523, 0, 0.14, 0.05]],
+    done: [['sine', 784, 0, 0.3, 0.12], ['sine', 1047, 0.17, 0.5, 0.1]],
+  },
+  bipe: {
+    warn: [['square', 880, 0, 0.07, 0.022]],
+    done: [['square', 1175, 0, 0.09, 0.045], ['square', 1175, 0.16, 0.09, 0.045], ['square', 1175, 0.32, 0.15, 0.045]],
+  },
+  trompa: {
+    warn: [['triangle', 196, 0, 0.24, 0.1]],
+    done: [['sawtooth', 196, 0, 0.42, 0.04], ['triangle', 196, 0, 0.42, 0.12], ['sawtooth', 294, 0.36, 0.75, 0.04], ['triangle', 294, 0.36, 0.75, 0.12]],
+  },
+};
 
 /* ---------- Contas do jogo ----------
    Conferidas contra prints de 10% a 50%: respawn = piso(base / (1 + bônus));
@@ -407,7 +772,7 @@ const fmtInt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 const fmtClock = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 // Tempos em segundos (272) ou em minutos (4:32), conforme a escolha de quem usa.
 const fmtTime = s => ui.unit === 'm' ? fmtClock(s) : String(s);
-const unitName = () => ui.unit === 'm' ? 'minutos' : 'segundos';
+const unitName = () => tr(ui.unit === 'm' ? 'minutes' : 'seconds');
 const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
 
 /* ---------- Leitura do print ---------- */
@@ -568,7 +933,7 @@ async function removeRespawn(id) {
       await enqueue(id, () => store.db.doc('respawns/' + id).delete());
       store.shared.delete(id);
     } catch {
-      setStatus('err', 'Não deu para excluir do banco compartilhado. Só quem pode editar o banco consegue.');
+      setStatus('err', tr('err.sharedDelete'));
     }
   }
   renderAll();
@@ -619,11 +984,17 @@ async function initShared() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', loop: false, sound: true, volume: 60 }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60 }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PARTIES.some(p => p.mult === ui.party)) ui.party = 100;
 if (!DURS.includes(ui.dur)) ui.dur = 60;
 if (ui.unit !== 'm') ui.unit = 's';
+if (!TONES[ui.tone]) ui.tone = 'sino';
+// Sem escolha salva, o site abre no idioma do navegador; fora dos três, em inglês.
+if (!LANGS.includes(ui.lang)) {
+  const nav = String(navigator.language || 'pt').slice(0, 2).toLowerCase();
+  ui.lang = LANGS.includes(nav) ? nav : 'en';
+}
 if (!(ui.volume >= 0 && ui.volume <= 100)) ui.volume = 60;
 const saveUi = () => lsSet(LS_UI, ui);
 
@@ -631,11 +1002,9 @@ const statusEl = $('#status');
 function setStatus(kind, text) { statusEl.dataset.kind = kind; statusEl.textContent = text; }
 
 function renderSync() {
-  $('#sync').textContent = !store.db
-    ? (store.seed.size ? 'Banco do site, mais o que você ler neste navegador.' : 'Banco salvo neste navegador.')
-    : store.canWrite === false
-      ? 'Banco compartilhado, só para consulta. O que você ler fica salvo neste navegador.'
-      : 'Banco compartilhado: o que for lido aqui aparece para todos.';
+  $('#sync').textContent = tr(!store.db
+    ? (store.seed.size ? 'sync.site' : 'sync.local')
+    : store.canWrite === false ? 'sync.ro' : 'sync.rw');
 }
 
 function renderBank() {
@@ -647,11 +1016,9 @@ function renderBank() {
     el('button', {
       class: 'bank-item', type: 'button', 'aria-current': r.id === ui.id ? 'true' : null,
       onclick: () => select(r.id),
-    }, el('b', { text: r.name }), el('small', { text: r.monsters.map(m => m.name).join(', ') || 'sem monstros' })))));
+    }, el('b', { text: r.name }), el('small', { text: r.monsters.map(m => m.name).join(', ') || tr('bank.nomobs') })))));
   if (!hits.length) {
-    list.append(el('li', { class: 'bank-empty', text: all.length
-      ? 'Nenhuma área ou monstro com esse nome.'
-      : 'Ainda não há respawns. Cada print lido entra aqui com o nome da área.' }));
+    list.append(el('li', { class: 'bank-empty', text: tr(all.length ? 'bank.nohit' : 'bank.empty') }));
   }
 }
 
@@ -687,6 +1054,32 @@ function setUnit(unit) {
   renderAll();
 }
 
+// Textos fixos da página: cada elemento marcado com data-i18n recebe o texto no idioma escolhido.
+function applyStatic() {
+  document.documentElement.lang = tr('html.lang');
+  for (const n of document.querySelectorAll('[data-i18n]')) n.textContent = tr(n.dataset.i18n);
+  for (const n of document.querySelectorAll('[data-i18n-attr]')) {
+    for (const pair of n.dataset.i18nAttr.split(';')) {
+      const [attr, key] = pair.split(':');
+      n.setAttribute(attr, tr(key));
+    }
+  }
+  for (const b of document.querySelectorAll('.lang button')) b.setAttribute('aria-pressed', String(b.dataset.lang === ui.lang));
+}
+function setLang(lang) {
+  if (lang === ui.lang || !LANGS.includes(lang)) return;
+  ui.lang = lang;
+  saveUi();
+  applyStatic();
+  parts = null;   // os rótulos do respawn aberto estão no idioma antigo: o esqueleto é refeito
+  if (float.all) {   // janela flutuante aberta: botões e linhas no idioma novo
+    float.all.textContent = tr('startAll');
+    float.none.textContent = tr('resetAll');
+    float.sig = null;
+  }
+  renderAll();
+}
+
 /* ---------- Cronômetros ---------- */
 const timers = new Map();   // segundos do grupo -> { dur, endAt, doneAt, nodes }
 let timerEls = new Map();
@@ -707,9 +1100,9 @@ function armAudio() {
     if (audio.state === 'suspended') audio.resume().catch(() => {});
   } catch { audio = null; master = null; }
 }
-function tone(freq, at, len, vol) {
+function tone(freq, at, len, vol, wave = 'sine') {
   const o = audio.createOscillator(), g = audio.createGain();
-  o.type = 'sine';
+  o.type = wave;
   o.frequency.value = freq;
   o.connect(g); g.connect(master);
   const t = audio.currentTime + Math.max(0, at);
@@ -718,6 +1111,10 @@ function tone(freq, at, len, vol) {
   g.gain.exponentialRampToValueAtTime(0.0001, t + len);
   o.start(t); o.stop(t + len + 0.05);
   return { o, at: t };
+}
+// Toca um dos avisos ('warn' ou 'done') do tipo de alerta escolhido, daqui a "at" segundos.
+function play(kind, at) {
+  return TONES[ui.tone][kind].map(([wave, freq, delay, len, vol]) => tone(freq, at + delay, len, vol, wave));
 }
 // Cancela só o que ainda não começou a tocar: um aviso em andamento termina sozinho.
 function cancelSounds(t) {
@@ -733,8 +1130,8 @@ function scheduleSounds(t) {
   if (!ui.sound || !audio || t.endAt == null) return;
   const left = (t.endAt - Date.now()) / 1000;
   if (left <= 0) return;
-  if (left > 10) t.nodes.push(tone(523, left - 10, 0.14, 0.05));           // faltam 10 s
-  t.nodes.push(tone(784, left, 0.3, 0.12), tone(1047, left + 0.17, 0.5, 0.1)); // zerou
+  if (left > 10) t.nodes.push(...play('warn', left - 10));
+  t.nodes.push(...play('done', left));
 }
 function keepAwake() {
   if (!wake && navigator.wakeLock) {
@@ -767,12 +1164,12 @@ const setText = (node, s) => { s = String(s); if (node.textContent !== s) node.t
 function timerView(t, now) {
   if (t.endAt != null) {
     const left = Math.max(0, Math.ceil((t.endAt - now) / 1000));
-    return { state: left <= 10 ? 'warn' : 'run', left, note: 'faltam ' + (ui.unit === 'm' ? left + ' s' : fmtClock(left)), frac: 1 - (t.endAt - now) / (t.dur * 1000) };
+    return { state: left <= 10 ? 'warn' : 'run', left, note: tr('note.left', { t: ui.unit === 'm' ? left + ' s' : fmtClock(left) }), frac: 1 - (t.endAt - now) / (t.dur * 1000) };
   }
   if (t.doneAt != null) {
-    return { state: 'done', left: 0, note: 'nasceu há ' + fmtClock(Math.floor((now - t.doneAt) / 1000)), frac: 1 };
+    return { state: 'done', left: 0, note: tr('note.born', { t: fmtClock(Math.floor((now - t.doneAt) / 1000)) }), frac: 1 };
   }
-  return { state: 'idle', left: t.dur, note: (ui.unit === 'm' ? t.dur + ' s' : fmtClock(t.dur)) + ' de respawn', frac: 0 };
+  return { state: 'idle', left: t.dur, note: tr('note.idle', { t: ui.unit === 'm' ? t.dur + ' s' : fmtClock(t.dur) }), frac: 0 };
 }
 
 function tick() {
@@ -791,7 +1188,7 @@ function tick() {
       setText(e.digits, fmtTime(v.left));
       setText(e.note, v.note);
       e.setFrac(Math.min(1, Math.max(0, v.frac)));
-      setText(e.start, v.state === 'idle' || v.state === 'done' ? 'Iniciar' : 'Reiniciar');
+      setText(e.start, tr(v.state === 'idle' || v.state === 'done' ? 'start' : 'restart'));
     }
   }
   const r = ui.id && getRespawn(ui.id);
@@ -802,7 +1199,7 @@ function tick() {
 setInterval(tick, 250);
 
 /* Janela flutuante: fica por cima do jogo (em janela ou sem bordas). */
-const float = { win: null, list: null, all: null, rowEls: new Map(), sig: '', canvas: null, video: null };
+const float = { win: null, list: null, all: null, none: null, rowEls: new Map(), sig: '', canvas: null, video: null };
 function groupsNow() {
   const r = ui.id && getRespawn(ui.id);
   const out = [];
@@ -822,18 +1219,20 @@ function paintFloat(now) {
       float.list.replaceChildren(...gs.map(g => {
         const b = el('b');
         const btn = el('button', { type: 'button', onclick: () => startTimer(g.sec) });
-        const root = el('div', { class: 'f-row' }, el('div', { class: 'f-main' }, b, el('span', { text: g.who, title: g.who })), btn);
+        const zero = el('button', { class: 'zero', type: 'button', text: tr('reset'), onclick: () => resetTimer(g.sec) });
+        const root = el('div', { class: 'f-row' }, el('div', { class: 'f-main' }, b, el('span', { text: g.who, title: g.who })),
+          el('div', { class: 'f-btns' }, btn, zero));
         float.rowEls.set(g.sec, { root, b, btn });
         return root;
       }));
-      float.all.hidden = gs.length < 2;
+      float.all.hidden = float.none.hidden = gs.length < 2;
     }
     for (const g of gs) {
       const e = float.rowEls.get(g.sec);
       const v = timerView(g.t, now);
       e.root.dataset.state = v.state;
       setText(e.b, fmtTime(v.left) + (ui.unit === 'm' ? '' : ' s'));
-      setText(e.btn, v.state === 'idle' || v.state === 'done' ? 'Iniciar' : 'Reiniciar');
+      setText(e.btn, tr(v.state === 'idle' || v.state === 'done' ? 'start' : 'restart'));
     }
   }
   if (float.canvas && document.pictureInPictureElement === float.video) {
@@ -860,7 +1259,7 @@ async function toggleFloat() {
   armAudio();   // o clique aqui libera o som mesmo que os cronômetros sejam iniciados pela janela flutuante
   try {
     if ('documentPictureInPicture' in window) {
-      const w = await window.documentPictureInPicture.requestWindow({ width: 320, height: 70 + Math.max(1, timers.size) * 92 });
+      const w = await window.documentPictureInPicture.requestWindow({ width: 320, height: 112 + Math.max(1, timers.size) * 96 });
       const cs = getComputedStyle(document.documentElement);
       const vars = ['--ground', '--title', '--label', '--amber', '--value', '--teal', '--btn', '--btn-edge', '--edge']
         .map(n => n + ':' + cs.getPropertyValue(n)).join(';');
@@ -875,15 +1274,18 @@ async function toggleFloat() {
           '.f-main span{color:var(--amber);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
           'button{flex:none;padding:5px 12px 4px;border:1px solid var(--btn-edge);background:var(--btn);color:var(--teal);border-radius:999px;font:600 13px Onest,"Segoe UI",sans-serif;cursor:pointer}' +
           'button:hover{border-color:var(--teal)}' +
-          'button.all{margin-top:10px;width:100%}' }));
+          '.f-btns{display:flex;flex:none;flex-direction:column;gap:4px}' +
+          'button.zero{border-color:var(--edge);color:var(--label)}' +
+          'button.all{margin-top:10px;width:100%}button.all+button.all{margin-top:6px}' }));
       float.list = el('div');
-      float.all = el('button', { class: 'all', type: 'button', text: 'Iniciar todos', onclick: startAll });
+      float.all = el('button', { class: 'all', type: 'button', text: tr('startAll'), onclick: startAll });
+      float.none = el('button', { class: 'all zero', type: 'button', text: tr('resetAll'), onclick: resetAll });
       float.sig = null;
-      w.document.body.append(float.list, float.all);
+      w.document.body.append(float.list, float.all, float.none);
       w.document.addEventListener('pointerdown', armAudio);
       // A janela flutuante está sempre visível, então o relógio dela não é freado quando a aba fica atrás do jogo.
       w.setInterval(tick, 250);
-      w.addEventListener('pagehide', () => { float.win = null; float.list = null; float.all = null; });
+      w.addEventListener('pagehide', () => { float.win = null; float.list = null; float.all = null; float.none = null; });
       float.win = w;
       tick();
       return;
@@ -900,7 +1302,7 @@ async function toggleFloat() {
     await float.video.requestPictureInPicture();
     tick();
   } catch {
-    setStatus('err', 'A janela flutuante não abre nesta visualização. Use o Chrome ou o Edge com o site aberto direto na aba.');
+    setStatus('err', tr('err.float'));
   }
 }
 
@@ -935,8 +1337,8 @@ function slider(id, label, stops, onPick) {
   const val = el('span', { class: 'ctl-val' });
   const range = el('input', { type: 'range', id, min: 0, max: stops.length - 1, step: 1, 'aria-label': label,
     oninput: () => pick(+range.value) });
-  const less = el('button', { type: 'button', id: id + '-menos', text: '−', 'aria-label': 'Diminuir ' + label.toLowerCase(), onclick: () => pick(index - 1) });
-  const more = el('button', { type: 'button', id: id + '-mais', text: '+', 'aria-label': 'Aumentar ' + label.toLowerCase(), onclick: () => pick(index + 1) });
+  const less = el('button', { type: 'button', id: id + '-menos', text: '−', 'aria-label': tr('less', { x: label.toLowerCase() }), onclick: () => pick(index - 1) });
+  const more = el('button', { type: 'button', id: id + '-mais', text: '+', 'aria-label': tr('more', { x: label.toLowerCase() }), onclick: () => pick(index + 1) });
   const marks = stops.map((s, i) => s.short == null ? null
     : el('button', { type: 'button', id: id + '-' + i, text: s.short, onclick: () => pick(i) }));
   return {
@@ -953,37 +1355,101 @@ function slider(id, label, stops, onPick) {
   };
 }
 
+let sheetSig = '';
+let parts = null;   // esqueleto do respawn aberto; é refeito quando muda o respawn ou o idioma
+
 // Escolha da unidade dos tempos, ao lado dos cronômetros
 function unitToggle() {
-  return el('span', { class: 'unit-toggle', role: 'group', 'aria-label': 'Mostrar os tempos em' },
-    el('button', { type: 'button', id: 'unit-s', 'aria-pressed': String(ui.unit !== 'm'), text: 'Segundos', onclick: () => setUnit('s') }),
-    el('button', { type: 'button', id: 'unit-m', 'aria-pressed': String(ui.unit === 'm'), text: 'Minutos', onclick: () => setUnit('m') }));
+  return el('span', { class: 'unit-toggle', role: 'group', 'aria-label': tr('unit.aria') },
+    el('button', { type: 'button', id: 'unit-s', 'aria-pressed': String(ui.unit !== 'm'), text: tr('unit.s'), onclick: () => setUnit('s') }),
+    el('button', { type: 'button', id: 'unit-m', 'aria-pressed': String(ui.unit === 'm'), text: tr('unit.m'), onclick: () => setUnit('m') }));
 }
 
-let sheetSig = '';
-let parts = null;   // esqueleto do respawn aberto; só é refeito quando muda o respawn
-
-function buildSheet(id, fixed) {
+function sheetHead(id, fixed) {
   const nameInput = el('input', {
     class: 'win-name', id: 'area-name', maxLength: 60, readOnly: fixed,
-    'aria-label': 'Nome da área', title: fixed ? null : 'Clique para renomear',
+    'aria-label': tr('name.aria'), title: fixed ? null : tr('name.title'),
     onchange: () => rename(id, nameInput),
   });
   nameInput.spellcheck = false;
-  const del = el('button', { class: 'win-x', type: 'button', text: 'Excluir', onclick: () => {
+  const del = el('button', { class: 'win-x', type: 'button', text: tr('delete'), onclick: () => {
     if (del.classList.contains('sure')) { removeRespawn(id); return; }
-    del.classList.add('sure'); del.textContent = 'Excluir mesmo?';
-    setTimeout(() => { del.classList.remove('sure'); del.textContent = 'Excluir'; }, 4000);
+    del.classList.add('sure'); del.textContent = tr('delete.sure');
+    setTimeout(() => { del.classList.remove('sure'); del.textContent = tr('delete'); }, 4000);
   } });
+  return { nameInput, head: el('header', { class: 'win-title' }, nameInput, fixed ? null : del) };
+}
+
+function emptySheet(loading) {
+  return [
+    el('header', { class: 'win-title' }, el('h2', { class: 'win-name', text: tr(loading ? 'empty.loading' : 'empty.none') })),
+    loading ? el('div', { class: 'win-body' }) : el('div', { class: 'win-body' }, el('div', { class: 'howto' },
+      el('p', { text: tr('howto.intro') }),
+      el('ol', null,
+        el('li', { text: tr('howto.1') }),
+        el('li', { text: tr('howto.2') }),
+        el('li', null, tr('howto.3'), el('kbd', { text: 'Ctrl' }), ' + ', el('kbd', { text: 'V' }), '.')),
+      el('p', { text: tr('howto.note') }))),
+  ];
+}
+
+// Linha abaixo dos cronômetros: iniciar ou zerar todos, o atalho e a unidade dos tempos.
+function stageAll(many) {
+  return el('div', { class: 'stage-all' },
+    many ? [
+      el('button', { class: 'dlg go', type: 'button', text: tr('startAll'), onclick: startAll }),
+      el('button', { class: 'dlg stop', type: 'button', text: tr('resetAll'), onclick: resetAll }),
+    ] : null,
+    el('span', null, tr(many ? 'shortcut.all' : 'shortcut.one'), el('kbd', { text: tr('key.space') })),
+    unitToggle());
+}
+
+// Cards de monstro: os mesmos dados do card do jogo, mais o tempo em cada percentual.
+function mobCards(id, r) {
+  return r.monsters.map((m, mi) => {
+    const now = respawnAt(m.base, ui.pct, ui.party);
+    return el('article', { class: 'mob' },
+      el('h4', { text: m.name + ' (' + m.count + 'x)' }),
+      el('button', { class: 'mob-x', type: 'button', text: '×', 'aria-label': tr('mob.remove', { x: m.name }), title: tr('mob.remove', { x: m.name }),
+        onclick: () => saveRespawn(id, { ...r, monsters: r.monsters.filter(x => x !== m) }) }),
+      el('p', null, tr('mob.kills'), el('b', { text: killsPerHour(now, m.count) })),
+      el('p', null, tr('mob.time'), el('b', { text: fmtTime(now) }), ' ' + unitName()),
+      el('div', { class: 'steps' }, PCTS.map(p => {
+        const s = respawnAt(m.base, p, ui.party);
+        return el('button', {
+          type: 'button', id: 'step-' + mi + '-' + p, class: p === ui.pct ? 'on' : null,
+          title: tr('step.title', { m: m.name, p, t: fmtTime(s) + ' ' + unitName() }), onclick: () => select(id, p),
+        }, el('small', { text: p + '%' }), el('span', { text: fmtTime(s) }));
+      })));
+  });
+}
+const sheetHint = r => (r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest');
+const bonusCost = r => r.cost10 ? Math.round(r.cost10 * ui.pct / 10 * ui.dur / (r.duration || 60)) : null;
+
+// Agrupa os monstros pelo tempo de respawn atual: cada grupo ganha um cronômetro.
+function clockGroups(r) {
+  const groups = new Map();
+  for (const m of r.monsters) {
+    const s = respawnAt(m.base, ui.pct, ui.party);
+    if (!groups.has(s)) groups.set(s, []);
+    groups.get(s).push(m.name);
+  }
+  for (const k of [...timers.keys()]) if (!groups.has(k)) { cancelSounds(timers.get(k)); timers.delete(k); }
+  for (const sec of groups.keys()) if (!timers.has(sec)) timers.set(sec, { dur: sec, endAt: null, doneAt: null, nodes: [] });
+  return [...groups].sort((a, b) => b[0] - a[0]);
+}
+
+function buildSheet(id, fixed) {
+  const { nameInput, head } = sheetHead(id, fixed);
   const p = {
     id, fixed, nameInput,
-    stage: el('section', { class: 'stage', 'aria-label': 'Cronômetros de respawn' }),
-    party: segment('ctl-party', 'Grupo de caça',
-      PARTIES.map(x => ({ value: x.mult, text: x.mult + '% de velocidade', short: x.label })), setParty),
-    bonus: segment('ctl-bonus', 'Percentual de bônus',
-      PCTS.map(x => ({ value: x, text: x ? 'respawn ' + x + '% mais rápido' : 'sem bônus', short: x ? x + '%' : 'Sem' })), v => select(id, v)),
-    dur: slider('ctl-dur', 'Duração',
-      DURS.map(d => ({ value: d, text: d + ' minutos', short: d % 30 === 0 ? String(d) : null })), setDur),
+    stage: el('section', { class: 'stage', 'aria-label': tr('stage.aria') }),
+    party: segment('ctl-party', tr('ctl.party'),
+      PARTIES.map(x => ({ value: x.mult, text: tr('party.speed', { n: x.mult }), short: tr('party.' + x.mult) })), setParty),
+    bonus: slider('ctl-bonus', tr('ctl.bonus'),
+      PCTS.map(x => ({ value: x, text: x ? tr('bonus.faster', { n: x }) : tr('bonus.none'), short: x ? x + '%' : tr('bonus.noneShort') })), v => select(id, v)),
+    dur: slider('ctl-dur', tr('ctl.dur'),
+      DURS.map(d => ({ value: d, text: tr('dur.value', { n: d }), short: d % 30 === 0 ? String(d) : null })), setDur),
     cost: el('p', { class: 'cost' }),
     costNote: el('span', { class: 'ctl-val' }),
     mobs: el('div', { class: 'mobs' }),
@@ -991,12 +1457,12 @@ function buildSheet(id, fixed) {
   };
   // Em cima o que muda o tempo (grupo e bônus); embaixo o que muda o preço (duração e custo).
   $('#sheet').replaceChildren(
-    el('header', { class: 'win-title' }, nameInput, fixed ? null : del),
+    head,
     el('div', { class: 'win-body' },
       p.stage,
       el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root,
-        el('div', { class: 'ctl' }, ctlHead('Custo do bônus', p.costNote), p.cost)),
-      el('h3', { class: 'band', text: 'Monstros potencializados' }),
+        el('div', { class: 'ctl' }, ctlHead(tr('ctl.cost'), p.costNote), p.cost)),
+      el('h3', { class: 'band', text: tr('band') }),
       p.mobs,
       p.hint));
   return p;
@@ -1009,93 +1475,50 @@ function renderSheet() {
   const r = ui.id && getRespawn(ui.id);
   const loading = pending.seed || pending.db;
   const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id);
-  const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, fixed, loading, r]);
+  const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r]);
   if (sig === sheetSig) return;
   sheetSig = sig;
   timerEls = new Map();
   if (!r) {
     clearTimers();
     parts = null;
-    sheet.replaceChildren(
-      el('header', { class: 'win-title' }, el('h2', { class: 'win-name', text: loading ? 'Abrindo o banco de respawns' : 'Nenhum respawn aberto' })),
-      loading ? el('div', { class: 'win-body' }) : el('div', { class: 'win-body' }, el('div', { class: 'howto' },
-        el('p', { text: 'Para abrir um respawn que ainda não está na lista:' }),
-        el('ol', null,
-          el('li', { text: 'No Medivia, abra a janela de bônus do respawn.' }),
-          el('li', { text: 'Tire um print da janela inteira.' }),
-          el('li', null, 'Volte aqui e aperte ', el('kbd', { text: 'Ctrl' }), ' + ', el('kbd', { text: 'V' }), '.')),
-        el('p', { text: 'O print pode estar em qualquer percentual de bônus. Os outros são calculados.' }))));
+    sheet.replaceChildren(...emptySheet(loading));
     return;
   }
   const id = ui.id;
   if (!parts || parts.id !== id || parts.fixed !== fixed) parts = buildSheet(id, fixed);
   const focusId = sheet.contains(document.activeElement) ? document.activeElement.id : '';
   if (document.activeElement !== parts.nameInput) parts.nameInput.value = r.name;
-  const partyNow = PARTIES.find(p => p.mult === ui.party);
 
   // Cronômetros: um anel por tempo de respawn diferente; o anel vai se fechando até o monstro nascer
-  const groups = new Map();
-  for (const m of r.monsters) {
-    const s = respawnAt(m.base, ui.pct, ui.party);
-    if (!groups.has(s)) groups.set(s, []);
-    groups.get(s).push(m.name);
-  }
-  for (const k of [...timers.keys()]) if (!groups.has(k)) { cancelSounds(timers.get(k)); timers.delete(k); }
-  const clocks = [...groups].sort((a, b) => b[0] - a[0]).map(([sec, who]) => {
-    if (!timers.has(sec)) timers.set(sec, { dur: sec, endAt: null, doneAt: null, nodes: [] });
+  const clocks = clockGroups(r).map(([sec, who]) => {
     const digits = el('b', { class: 'clock-digits', text: fmtTime(sec) });
     const note = el('p', { class: 'clock-note' });
     const ring = el('div', { class: 'ring' });
     ring.innerHTML = '<svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="52"/><circle class="ring-arc" cx="60" cy="60" r="52" transform="rotate(-90 60 60)"/></svg>';
     const arc = ring.querySelector('.ring-arc');
     ring.append(el('div', { class: 'ring-in' }, digits, el('span', { class: 'clock-unit', text: unitName() })));
-    const start = el('button', { class: 'dlg go', type: 'button', id: 'clock-' + sec, text: 'Iniciar', onclick: () => startTimer(sec) });
+    const start = el('button', { class: 'dlg go', type: 'button', id: 'clock-' + sec, text: tr('start'), onclick: () => startTimer(sec) });
     const root = el('article', { class: ui.unit === 'm' ? 'clock mmss' : 'clock', 'data-state': 'idle' },
       ring,
       note,
       el('p', { class: 'clock-who', text: who.join(', ') }),
-      el('div', { class: 'clock-actions' }, start, el('button', { class: 'dlg stop', type: 'button', text: 'Zerar', onclick: () => resetTimer(sec) })));
+      el('div', { class: 'clock-actions' }, start, el('button', { class: 'dlg stop', type: 'button', text: tr('reset'), onclick: () => resetTimer(sec) })));
     timerEls.set(sec, { root, digits, note, start, setFrac: f => { arc.style.strokeDashoffset = (RING * (1 - f)).toFixed(2); } });
     return root;
   });
-  parts.stage.replaceChildren(
-    el('div', { class: 'clocks' }, clocks),
-    el('div', { class: 'stage-all' },
-      clocks.length > 1 ? [
-        el('button', { class: 'dlg go', type: 'button', text: 'Iniciar todos', onclick: startAll }),
-        el('button', { class: 'dlg stop', type: 'button', text: 'Zerar todos', onclick: resetAll }),
-      ] : null,
-      el('span', null, clocks.length > 1 ? 'Atalho para iniciar todos: ' : 'Atalho para iniciar: ', el('kbd', { text: 'Espaço' })),
-      unitToggle()));
+  parts.stage.replaceChildren(el('div', { class: 'clocks' }, clocks), stageAll(clocks.length > 1));
 
   // Controles: atualizados no lugar
-  parts.party.set(PARTIES.indexOf(partyNow));
+  parts.party.set(PARTIES.findIndex(p => p.mult === ui.party));
   parts.bonus.set(PCTS.indexOf(ui.pct));
   parts.dur.set(DURS.indexOf(ui.dur));
-  const cost = r.cost10 ? Math.round(r.cost10 * ui.pct / 10 * ui.dur / (r.duration || 60)) : null;
-  parts.cost.replaceChildren(cost == null ? 'não lido' : cost === 0 ? '0' : fmtInt(cost), ...(cost ? [coin()] : []));
-  setText(parts.costNote, cost ? ui.pct + '% por ' + ui.dur + ' minutos' : cost === 0 ? 'sem bônus' : '');
+  const cost = bonusCost(r);
+  parts.cost.replaceChildren(cost == null ? tr('cost.unread') : cost === 0 ? '0' : fmtInt(cost), ...(cost ? [coin()] : []));
+  setText(parts.costNote, cost ? tr('cost.note', { p: ui.pct, n: ui.dur }) : cost === 0 ? tr('bonus.none') : '');
 
-  // Monstros: os mesmos dados do card do jogo, mais o tempo em cada percentual
-  parts.mobs.replaceChildren(...r.monsters.map((m, mi) => {
-    const now = respawnAt(m.base, ui.pct, ui.party);
-    return el('article', { class: 'mob' },
-      el('h4', { text: m.name + ' (' + m.count + 'x)' }),
-      el('button', { class: 'mob-x', type: 'button', text: '×', 'aria-label': 'Remover ' + m.name, title: 'Remover ' + m.name,
-        onclick: () => saveRespawn(id, { ...r, monsters: r.monsters.filter(x => x !== m) }) }),
-      el('p', null, 'Abates por hora: ', el('b', { text: killsPerHour(now, m.count) })),
-      el('p', null, 'Tempo de respawn: ', el('b', { text: fmtTime(now) }), ' ' + unitName()),
-      el('div', { class: 'steps' }, PCTS.map(p => {
-        const s = respawnAt(m.base, p, ui.party);
-        return el('button', {
-          type: 'button', id: 'step-' + mi + '-' + p, class: p === ui.pct ? 'on' : null,
-          title: m.name + ' com ' + p + '% de bônus: ' + fmtTime(s) + ' ' + unitName(), onclick: () => select(id, p),
-        }, el('small', { text: p + '%' }), el('span', { text: fmtTime(s) }));
-      })));
-  }));
-  setText(parts.hint,
-    (r.readAt != null ? 'Lido de um print a ' + r.readAt + '%, tratado como caça solo. ' : '') +
-    'O grupo entra na conta antes do bônus. A lista do jogo rola: se faltou monstro, role a janela, tire outro print e cole. Ele entra nesta mesma área.');
+  parts.mobs.replaceChildren(...mobCards(id, r));
+  setText(parts.hint, sheetHint(r));
 
   if (focusId && document.activeElement.id !== focusId) { const f = document.getElementById(focusId); if (f) f.focus(); }
   tick();
@@ -1109,7 +1532,7 @@ async function rename(id, input) {
   if (!nid) { input.value = r.name; return; }
   if (nid !== id && getRespawn(nid)) {
     input.value = r.name;
-    setStatus('err', 'Já existe um respawn chamado "' + getRespawn(nid).name + '".');
+    setStatus('err', tr('err.exists', { x: getRespawn(nid).name }));
     return;
   }
   if (nid !== id) {
@@ -1134,16 +1557,17 @@ function renderAll() {
 }
 
 /* ---------- Entrada do print ---------- */
+class UserError extends Error {}   // erro com mensagem já pronta para mostrar a quem usa
 let reading = false;
 async function readImage(blob) {
   if (!blob || reading) return;
   reading = true;
-  setStatus('busy', workerP ? 'Lendo o print…' : 'Preparando o leitor de imagem (só na primeira vez) e lendo o print…');
+  setStatus('busy', tr(workerP ? 'read.busy' : 'read.first'));
   try {
     const p = parsePrint(await ocrLines(blob));
-    if (!p.monsters.length) throw new Error('Não achei monstros nem tempos de respawn nessa imagem. Tire o print com a janela de bônus inteira aparecendo.');
-    if (p.pct == null) throw new Error('Li os monstros, mas não o percentual de bônus. Deixe o título "Percentual de bônus (10%)" aparecer no print.');
-    const name = p.name || 'Respawn sem nome';
+    if (!p.monsters.length) throw new UserError(tr('err.nomobs'));
+    if (p.pct == null) throw new UserError(tr('err.nopct'));
+    const name = p.name || tr('noname');
     const id = slug(name) || 'respawn';
     const prev = getRespawn(id);
     const monsters = prev ? prev.monsters.map(m => ({ ...m })) : [];
@@ -1166,14 +1590,14 @@ async function readImage(blob) {
     });
     if (DURS.includes(p.dur)) ui.dur = p.dur;
     select(id, p.pct);
-    let msg = (prev ? prev.name : name) + ' lido a ' + p.pct + '%, ' + p.monsters.length + (p.monsters.length === 1 ? ' monstro' : ' monstros') + '. ' +
-      (where === 'shared' ? 'Salvo no banco compartilhado.' : 'Salvo no banco deste navegador.') + ' Imagem descartada.';
-    if (!p.name) msg += ' Não li o nome da área: digite no título.';
-    if (doubt.length) msg += ' Confira ' + doubt.join(', ') + ': os números não bateram com os abates por hora do print.';
+    let msg = tr(p.monsters.length === 1 ? 'read.ok1' : 'read.okN', { x: prev ? prev.name : name, p: p.pct, n: p.monsters.length }) + ' ' +
+      tr(where === 'shared' ? 'read.shared' : 'read.local') + ' ' + tr('read.discarded');
+    if (!p.name) msg += ' ' + tr('read.noname');
+    if (doubt.length) msg += ' ' + tr('read.doubt', { x: doubt.join(', ') });
     setStatus(doubt.length || !p.name ? 'busy' : 'ok', msg);
     if (!p.name) { const n = $('#area-name'); if (n) { n.focus(); n.select(); } }
   } catch (e) {
-    setStatus('err', e && e.message && /^[A-ZÀ-Ú]/.test(e.message) ? e.message : 'Não consegui ler essa imagem. Tente um print novo, só da janela de bônus.');
+    setStatus('err', e instanceof UserError ? e.message : tr('err.read'));
   } finally {
     reading = false;
   }
@@ -1192,7 +1616,7 @@ document.addEventListener('drop', e => {
   e.preventDefault();
   drop.classList.remove('over');
   const f = [...(e.dataTransfer ? e.dataTransfer.files : [])].find(x => x.type.startsWith('image/'));
-  if (f) readImage(f); else setStatus('err', 'Isso não é uma imagem. Arraste o arquivo do print.');
+  if (f) readImage(f); else setStatus('err', tr('err.notimage'));
 });
 $('#file').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) readImage(f); });
 $('#read-btn').addEventListener('pointerenter', () => { getWorker().catch(() => {}); }, { once: true });
@@ -1212,45 +1636,57 @@ function fillBackup() {
 $('#backup').addEventListener('toggle', e => { if (e.target.open) fillBackup(); });
 $('#backup-copy').addEventListener('click', async () => {
   const t = $('#backup-text');
-  try { await navigator.clipboard.writeText(t.value); setStatus('ok', 'Banco copiado. Cole em um arquivo de texto para guardar.'); }
-  catch { t.focus(); t.select(); setStatus('info', 'Texto selecionado: aperte Ctrl + C para copiar.'); }
+  try { await navigator.clipboard.writeText(t.value); setStatus('ok', tr('backup.copied')); }
+  catch { t.focus(); t.select(); setStatus('info', tr('backup.selected')); }
 });
 $('#backup-import').addEventListener('click', async () => {
   let data;
-  try { data = JSON.parse($('#backup-text').value); } catch { setStatus('err', 'Esse texto não é uma cópia do banco. Cole o texto copiado daqui, inteiro.'); return; }
+  try { data = JSON.parse($('#backup-text').value); } catch { setStatus('err', tr('backup.bad')); return; }
   let n = 0;
   for (const [key, d] of Object.entries(data && typeof data === 'object' ? data : {})) {
     const r = normalize(d);
     const id = r && (slug(key) || slug(r.name));
     if (id) { await saveRespawn(id, r); n++; }
   }
-  setStatus(n ? 'ok' : 'err', n ? n + (n === 1 ? ' respawn importado.' : ' respawns importados.') : 'Não achei nenhum respawn nesse texto.');
+  setStatus(n ? 'ok' : 'err', n === 1 ? tr('backup.imported1') : n ? tr('backup.importedN', { n }) : tr('backup.none'));
 });
 
 /* ---------- Rodapé da janela: opções e botões ---------- */
 const optVolume = $('#opt-volume');
+const optTone = $('#opt-tone');
+optTone.value = ui.tone;
 $('#opt-loop').checked = ui.loop;
 $('#opt-sound').checked = ui.sound;
 optVolume.value = ui.volume;
-optVolume.hidden = !ui.sound;
+optVolume.hidden = optTone.hidden = !ui.sound;
 $('#opt-loop').addEventListener('change', e => { ui.loop = e.target.checked; saveUi(); });
 $('#opt-sound').addEventListener('change', e => {
   ui.sound = e.target.checked;
   saveUi();
   if (ui.sound) armAudio();
   for (const t of timers.values()) scheduleSounds(t);
-  optVolume.hidden = !ui.sound;
+  optVolume.hidden = optTone.hidden = !ui.sound;
 });
 // Ao soltar o controle de volume toca o aviso de zerar como amostra.
 optVolume.addEventListener('input', e => { ui.volume = +e.target.value; if (master) master.gain.value = volGain(); });
 optVolume.addEventListener('change', () => {
   saveUi();
   armAudio();
-  if (audio) { tone(784, 0, 0.3, 0.12); tone(1047, 0.17, 0.5, 0.1); }
+  if (audio) play('done', 0);
 });
+// Trocar o tipo de alerta toca uma amostra e reagenda os avisos dos cronômetros em andamento.
+optTone.addEventListener('change', () => {
+  ui.tone = TONES[optTone.value] ? optTone.value : 'sino';
+  saveUi();
+  armAudio();
+  if (audio) play('done', 0);
+  for (const t of timers.values()) scheduleSounds(t);
+});
+for (const b of document.querySelectorAll('.lang button')) b.addEventListener('click', () => setLang(b.dataset.lang));
 $('#float-btn').addEventListener('click', toggleFloat);
 $('#read-btn').addEventListener('click', () => $('#file').click());
 
+applyStatic();
 renderAll();
 loadSeed();
 initShared();
