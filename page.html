@@ -246,6 +246,22 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .steps button:hover { background: var(--edge); }
 .steps button.on { background: var(--band); color: var(--value); }
 .steps button.on small { color: var(--label); }
+/* Task: abates que faltam e o tempo para terminar */
+.task { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 8px; font-size: 13px; }
+.task-in {
+  width: 76px;
+  padding: 5px 8px;
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--title);
+  font: 600 14px/1.2 var(--font-ui);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.task-in::placeholder { color: var(--faint); }
+.task-out { margin-left: auto; font-weight: 700; color: var(--value); }
+.steps i { font-size: 11px; font-style: normal; font-weight: 600; color: var(--title); }
+.steps i:empty { display: none; }
 .hint { max-width: 78ch; font-size: 13px; color: var(--faint); }
 .howto { display: flex; flex-direction: column; gap: 10px; max-width: 54ch; padding: 24px; border-radius: var(--r-lg); background: var(--box); }
 .howto ol { display: flex; flex-direction: column; gap: 4px; padding-left: 1.3em; color: var(--title); }
@@ -592,6 +608,14 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'task.label': 'Task: faltam',
+    'task.kills': 'abates',
+    'task.aria': 'Quantos abates de {x} faltam na task',
+    'task.time': 'leva {t}',
+    'task.never': 'sem previsão',
+    'task.tip': 'O tempo da task usa os abates por hora, ou seja, vale se cada monstro for morto assim que nascer.',
+    'span.hm': '{h} h {m} min',
+    'span.m': '{m} min',
     'support.open': 'Apoiar o projeto',
     'support.text': 'O Medivia Respawn é gratuito e feito nas horas vagas. Se ele ajuda nas suas caçadas, você pode apoiar quem desenvolve. A doação é opcional e não dá nenhuma vantagem no jogo.',
     'support.pix': 'Pix (Brasil)',
@@ -743,6 +767,14 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'task.label': 'Task: left',
+    'task.kills': 'kills',
+    'task.aria': 'How many {x} kills are left for the task',
+    'task.time': 'takes {t}',
+    'task.never': 'no estimate',
+    'task.tip': 'Task time uses kills per hour, so it holds if every monster is killed as soon as it spawns.',
+    'span.hm': '{h} h {m} min',
+    'span.m': '{m} min',
     'support.open': 'Support the project',
     'support.text': 'Medivia Respawn is free and built in spare time. If it helps your hunts, you can support the developer. Donating is optional and gives no advantage in the game.',
     'support.pix': 'Pix (Brazil only)',
@@ -894,6 +926,14 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'task.label': 'Tarea: faltan',
+    'task.kills': 'muertes',
+    'task.aria': 'Cuántas muertes de {x} faltan en la tarea',
+    'task.time': 'tarda {t}',
+    'task.never': 'sin previsión',
+    'task.tip': 'El tiempo de la tarea usa las muertes por hora, así que vale si matas cada monstruo en cuanto nace.',
+    'span.hm': '{h} h {m} min',
+    'span.m': '{m} min',
     'support.open': 'Apoyar el proyecto',
     'support.text': 'Medivia Respawn es gratuito y se hace en ratos libres. Si te ayuda en tus cacerías, puedes apoyar a quien lo desarrolla. La donación es opcional y no da ninguna ventaja en el juego.',
     'support.pix': 'Pix (solo Brasil)',
@@ -1205,12 +1245,13 @@ async function initShared() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60 }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {} }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PARTIES.some(p => p.mult === ui.party)) ui.party = 100;
 if (!DURS.includes(ui.dur)) ui.dur = 60;
 if (ui.unit !== 'm') ui.unit = 's';
 if (!TONES[ui.tone]) ui.tone = 'sino';
+if (!ui.tasks || typeof ui.tasks !== 'object' || Array.isArray(ui.tasks)) ui.tasks = {};
 // Sem escolha salva, o site abre no idioma do navegador; fora dos três, em inglês.
 if (!LANGS.includes(ui.lang)) {
   const nav = String(navigator.language || 'pt').slice(0, 2).toLowerCase();
@@ -1626,26 +1667,58 @@ function stageAll(many) {
     unitToggle());
 }
 
-// Cards de monstro: os mesmos dados do card do jogo, mais o tempo em cada percentual.
+// Task: quantos abates faltam de cada monstro, guardado por respawn.
+const taskGet = (id, name) => ((ui.tasks[id] || {})[name.toLowerCase()]) || 0;
+function taskSet(id, name, n) {
+  const mine = ui.tasks[id] || (ui.tasks[id] = {});
+  if (n) mine[name.toLowerCase()] = n; else delete mine[name.toLowerCase()];
+  if (!Object.keys(mine).length) delete ui.tasks[id];
+  saveUi();
+}
+// Tempo para completar a task: abates que faltam ÷ abates por hora daquele tempo de respawn.
+function taskSeconds(n, sec, count) {
+  const kph = killsPerHour(sec, count);
+  return n > 0 && kph > 0 ? n / kph * 3600 : null;
+}
+// "1 h 23 min" por extenso, ou "1h23" na forma curta da régua.
+function fmtSpan(seconds, short) {
+  if (seconds == null) return short ? '' : tr('task.never');
+  const total = Math.max(1, Math.round(seconds / 60)), h = Math.floor(total / 60), m = total % 60;
+  if (short) return h ? h + 'h' + String(m).padStart(2, '0') : m + 'min';
+  return h ? tr('span.hm', { h, m }) : tr('span.m', { m });
+}
+
+// Cards de monstro: os mesmos dados do card do jogo, a task e o tempo em cada percentual.
 function mobCards(id, r) {
   return r.monsters.map((m, mi) => {
     const now = respawnAt(m.base, ui.pct, ui.party);
+    const cells = PCTS.map(p => ({ p, sec: respawnAt(m.base, p, ui.party), task: el('i') }));
+    const out = el('span', { class: 'task-out', role: 'status' });
+    // A conta é refeita no lugar enquanto a pessoa digita, sem redesenhar o card.
+    const paint = n => {
+      setText(out, n ? tr('task.time', { t: fmtSpan(taskSeconds(n, now, m.count)) }) : '');
+      for (const c of cells) setText(c.task, n ? fmtSpan(taskSeconds(n, c.sec, m.count), true) : '');
+    };
+    const input = el('input', {
+      class: 'task-in', id: 'task-' + mi, type: 'number', min: 0, max: 99999, step: 1, inputMode: 'numeric', placeholder: '0',
+      value: taskGet(id, m.name) || '', 'aria-label': tr('task.aria', { x: m.name }), title: tr('task.tip'),
+      oninput: () => { const n = int(input.value, 1, 99999) || 0; taskSet(id, m.name, n); paint(n); },
+    });
+    paint(taskGet(id, m.name));
     return el('article', { class: 'mob' },
       el('h4', { text: m.name + ' (' + m.count + 'x)' }),
       el('button', { class: 'mob-x', type: 'button', text: '×', 'aria-label': tr('mob.remove', { x: m.name }), title: tr('mob.remove', { x: m.name }),
         onclick: () => saveRespawn(id, { ...r, monsters: r.monsters.filter(x => x !== m) }) }),
       el('p', null, tr('mob.kills'), el('b', { text: killsPerHour(now, m.count) })),
       el('p', null, tr('mob.time'), el('b', { text: fmtTime(now) }), ' ' + unitName()),
-      el('div', { class: 'steps' }, PCTS.map(p => {
-        const s = respawnAt(m.base, p, ui.party);
-        return el('button', {
-          type: 'button', id: 'step-' + mi + '-' + p, class: p === ui.pct ? 'on' : null,
-          title: tr('step.title', { m: m.name, p, t: fmtTime(s) + ' ' + unitName() }), onclick: () => select(id, p),
-        }, el('small', { text: p + '%' }), el('span', { text: fmtTime(s) }));
-      })));
+      el('label', { class: 'task' }, el('span', { text: tr('task.label') }), input, el('span', { text: tr('task.kills') }), out),
+      el('div', { class: 'steps' }, cells.map(c => el('button', {
+        type: 'button', id: 'step-' + mi + '-' + c.p, class: c.p === ui.pct ? 'on' : null,
+        title: tr('step.title', { m: m.name, p: c.p, t: fmtTime(c.sec) + ' ' + unitName() }), onclick: () => select(id, c.p),
+      }, el('small', { text: c.p + '%' }), el('span', { text: fmtTime(c.sec) }), c.task))));
   });
 }
-const sheetHint = r => (r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest');
+const sheetHint = r => (r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest') + ' ' + tr('task.tip');
 const bonusCost = r => r.cost10 ? Math.round(r.cost10 * ui.pct / 10 * ui.dur / (r.duration || 60)) : null;
 
 // Agrupa os monstros pelo tempo de respawn atual: cada grupo ganha um cronômetro.
