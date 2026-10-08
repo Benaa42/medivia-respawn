@@ -1,0 +1,51 @@
+rules_version = '2';
+
+// Banco de respawns do Medivia Respawn.
+// - Qualquer pessoa lê.
+// - Para gravar é preciso a identidade anônima que o site cria no primeiro envio.
+// - Quem enviou um respawn pode corrigi-lo ou apagá-lo.
+// - Os demais só podem acrescentar monstros: não alteram nem removem o que já existe.
+// - Ninguém grava nada fora do formato esperado.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /respawns/{id} {
+      function shape(d) {
+        return d.keys().hasOnly(['name', 'monsters', 'cost10', 'duration', 'readAt', 'owner', 'at'])
+          && d.name is string && d.name.size() >= 1 && d.name.size() <= 60
+          && d.monsters is map && d.monsters.size() >= 1 && d.monsters.size() <= 80
+          && d.owner is string
+          && d.at == request.time
+          && (!('cost10' in d) || (d.cost10 is int && d.cost10 > 0 && d.cost10 <= 100000000))
+          && (!('duration' in d) || (d.duration is int && d.duration >= 10 && d.duration <= 1000))
+          && (!('readAt' in d) || (d.readAt is int && d.readAt >= 0 && d.readAt <= 100));
+      }
+      function kept(field) {
+        return !(field in resource.data)
+          || (field in request.resource.data && request.resource.data[field] == resource.data[field]);
+      }
+
+      allow read: if true;
+
+      allow create: if request.auth != null
+        && id.matches('^[a-z0-9-]{1,80}$')
+        && shape(request.resource.data)
+        && request.resource.data.owner == request.auth.uid;
+
+      allow update: if request.auth != null
+        && shape(request.resource.data)
+        && request.resource.data.owner == resource.data.owner
+        && (
+          resource.data.owner == request.auth.uid
+          || (
+            request.resource.data.name == resource.data.name
+            && request.resource.data.monsters.diff(resource.data.monsters).removedKeys().size() == 0
+            && request.resource.data.monsters.diff(resource.data.monsters).changedKeys().size() == 0
+            && kept('cost10')
+            && kept('duration')
+          )
+        );
+
+      allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
+    }
+  }
+}

@@ -609,6 +609,12 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'sync.cloud': 'Banco de todos: o que qualquer pessoa ler aparece aqui.',
+    'sync.wait1': '1 leitura sua ainda não foi enviada.',
+    'sync.waitN': '{n} leituras suas ainda não foram enviadas.',
+    'read.cloud': 'Enviado para o banco de todos.',
+    'read.notshared': 'Ficou só neste navegador: acerte os pontos acima e leia de novo para enviar a todos.',
+    'err.cloudDelete': 'Não deu para excluir do banco de todos. Só quem enviou o respawn consegue.',
     'task.label': 'Task: faltam',
     'task.kills': 'abates',
     'task.aria': 'Quantos abates de {x} faltam na task',
@@ -768,6 +774,12 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'sync.cloud': 'Shared bank: whatever anyone reads shows up here.',
+    'sync.wait1': '1 of your reads has not been sent yet.',
+    'sync.waitN': '{n} of your reads have not been sent yet.',
+    'read.cloud': 'Sent to the shared bank.',
+    'read.notshared': 'Kept only in this browser: fix the points above and read it again to share it with everyone.',
+    'err.cloudDelete': 'Could not delete from the shared bank. Only the person who sent the respawn can do that.',
     'task.label': 'Task: left',
     'task.kills': 'kills',
     'task.aria': 'How many {x} kills are left for the task',
@@ -927,6 +939,12 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'sync.cloud': 'Banco de todos: lo que cualquiera lea aparece aquí.',
+    'sync.wait1': '1 lectura tuya aún no se ha enviado.',
+    'sync.waitN': '{n} lecturas tuyas aún no se han enviado.',
+    'read.cloud': 'Enviado al banco de todos.',
+    'read.notshared': 'Quedó solo en este navegador: corrige los puntos de arriba y léelo de nuevo para enviarlo a todos.',
+    'err.cloudDelete': 'No se pudo eliminar del banco de todos. Solo quien envió el respawn puede hacerlo.',
     'task.label': 'Tarea: faltan',
     'task.kills': 'muertes',
     'task.aria': 'Cuántas muertes de {x} faltan en la tarea',
@@ -1149,15 +1167,16 @@ function normalize(d) {
 }
 
 const pending = { seed: true, db: !!(window.claude && typeof window.claude.use === 'function') };
-const store = { seed: new Map(), shared: new Map(), local: new Map(), db: null, canWrite: null, queue: new Map() };
+const store = { seed: new Map(), cloud: new Map(), shared: new Map(), local: new Map(), db: null, canWrite: null, queue: new Map() };
 for (const [id, d] of Object.entries(lsGet(LS_DB, {}))) {
   const n = normalize(d);
   if (n && slug(id) === id) store.local.set(id, n);
 }
 const persistLocal = () => lsSet(LS_DB, Object.fromEntries(store.local));
-const getRespawn = id => store.local.get(id) || store.shared.get(id) || store.seed.get(id) || null;
+const getRespawn = id => store.local.get(id) || store.shared.get(id) || store.cloud.get(id) || store.seed.get(id) || null;
 function allRespawns() {
   const m = new Map(store.seed);
+  for (const [k, v] of store.cloud) m.set(k, v);
   for (const [k, v] of store.shared) m.set(k, v);
   for (const [k, v] of store.local) m.set(k, v);
   return [...m].map(([id, r]) => ({ id, ...r })).sort((a, b) => a.name.localeCompare(b.name, 'pt'));
@@ -1167,11 +1186,17 @@ function enqueue(id, fn) {
   store.queue.set(id, p);
   return p;
 }
-async function saveRespawn(id, r) {
+// share = true: a leitura vai para o banco de todos. Sem rede, fica na fila e sobe na próxima visita.
+async function saveRespawn(id, r, share) {
   r = { ...r, updatedAt: new Date().toISOString() };
   store.local.set(id, r);
   persistLocal();
   renderAll();
+  if (share && cloud.on) {
+    cloud.queue.add(id);
+    saveQueue();
+    if (await sendNow(id)) return 'cloud';
+  }
   if (!store.db || store.canWrite === false) return 'local';
   try {
     await enqueue(id, () => store.db.doc('respawns/' + id).set(r));
@@ -1190,6 +1215,12 @@ async function removeRespawn(id) {
   const wasShared = store.shared.has(id);
   store.local.delete(id);
   persistLocal();
+  cloud.queue.delete(id);
+  saveQueue();
+  // Quem enviou o respawn ao banco de todos pode apagá-lo de lá.
+  if (owns(id)) {
+    try { await cloudDelete(id); } catch { setStatus('err', tr('err.cloudDelete')); }
+  }
   if (wasShared && store.db) {
     try {
       await enqueue(id, () => store.db.doc('respawns/' + id).delete());
@@ -1245,6 +1276,239 @@ async function initShared() {
   }, () => { store.db = null; pending.db = false; renderAll(); });
 }
 
+/* ---------- Banco de todos (Firestore) ----------
+   Os respawns lidos por qualquer visitante ficam num banco online e aparecem para todo mundo.
+   A página fala direto com a API do Firestore, sem biblioteca. Quem só consulta não ganha identidade nenhuma.
+   Ao enviar um respawn, o navegador recebe uma identidade anônima: é ela que permite a quem enviou
+   corrigir ou apagar o próprio envio. Os outros só conseguem acrescentar monstros (regras em firestore.rules).
+   Para gastar poucas leituras, o banco fica copiado no navegador e depois só as novidades são buscadas. */
+const CLOUD = { apiKey: 'AIzaSyAq8PRqSUEobNTbdtmuDvDx44vmLVN4018', projectId: 'mediviaresp' };
+const LS_CLOUD = 'medivia-respawn.nuvem.v1';        // cópia local do banco de todos
+const LS_AUTH = 'medivia-respawn.identidade.v1';    // identidade anônima deste navegador
+const LS_SEND = 'medivia-respawn.enviar.v1';        // lidos aqui que ainda não subiram
+const LS_MOVED = 'medivia-respawn.migrado.v1';
+const cloud = {
+  on: !!(CLOUD.apiKey && CLOUD.projectId),
+  root: 'projects/' + CLOUD.projectId + '/databases/(default)/documents',
+  raw: new Map(),      // id -> documento como está no banco
+  fullAt: 0,           // quando o banco inteiro foi baixado pela última vez
+  uid: (lsGet(LS_AUTH, null) || {}).uid || null,
+  token: null,
+  exp: 0,
+  loading: false,
+  queue: new Set(lsGet(LS_SEND, [])),
+};
+
+// A API do Firestore escreve cada valor com o tipo ao lado: { stringValue: "x" }, { integerValue: "3" }...
+const toFs = v => typeof v === 'string' ? { stringValue: v }
+  : Number.isInteger(v) ? { integerValue: String(v) }
+  : { mapValue: { fields: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, toFs(x)])) } };
+const fromFs = v => v == null ? null
+  : 'stringValue' in v ? v.stringValue
+  : 'integerValue' in v ? Number(v.integerValue)
+  : 'doubleValue' in v ? v.doubleValue
+  : 'timestampValue' in v ? v.timestampValue
+  : 'mapValue' in v ? Object.fromEntries(Object.entries(v.mapValue.fields || {}).map(([k, x]) => [k, fromFs(x)]))
+  : null;
+const docName = id => cloud.root + '/respawns/' + id;
+const docRaw = d => fromFs({ mapValue: { fields: d.fields || {} } });
+
+async function cloudFetch(path, opts) {
+  const url = 'https://firestore.googleapis.com/v1/' + cloud.root + path + (path.includes('?') ? '&' : '?') + 'key=' + CLOUD.apiKey;
+  const res = await fetch(url, opts);
+  let json = null;
+  try { json = await res.json(); } catch { /* resposta sem corpo */ }
+  return { ok: res.ok, status: res.status, json };
+}
+
+// Documento do banco -> respawn no formato da página. Os monstros voltam na ordem em que foram incluídos.
+function rawToRespawn(raw) {
+  const monsters = Object.values(raw.monsters && typeof raw.monsters === 'object' ? raw.monsters : {})
+    .filter(m => m && typeof m === 'object')
+    .sort((a, b) => (a.i || 0) - (b.i || 0));
+  return normalize({ name: raw.name, monsters, cost10: raw.cost10, duration: raw.duration, readAt: raw.readAt, updatedAt: raw.at });
+}
+// Respawn da página -> documento do banco. Com "prev", só acrescenta: o que já está lá fica como está.
+function respawnToRaw(r, owner, prev) {
+  const monsters = {};
+  let next = 0;
+  for (const [k, m] of Object.entries(prev ? prev.monsters || {} : {})) { monsters[k] = m; next = Math.max(next, (m.i || 0) + 1); }
+  for (const m of r.monsters) {
+    const k = slug(m.name);
+    if (k && !monsters[k]) monsters[k] = { name: m.name, count: m.count, base: m.base, i: next++ };
+  }
+  const raw = { name: prev ? prev.name : r.name, monsters, owner };
+  for (const f of ['cost10', 'duration']) {
+    const v = prev && prev[f] != null ? prev[f] : r[f];
+    if (v != null) raw[f] = v;
+  }
+  if (r.readAt != null) raw.readAt = r.readAt;
+  return raw;
+}
+// Mesma informação? Compara nome, custo e monstros, sem olhar ordem nem datas.
+const rawKey = raw => JSON.stringify([raw.name, raw.cost10 || null, raw.duration || null, raw.owner || null,
+  Object.keys(raw.monsters || {}).sort().map(k => [k, raw.monsters[k].name, raw.monsters[k].count, raw.monsters[k].base])]);
+const dataKey = r => JSON.stringify([r.name, r.cost10 || null, r.duration || null,
+  r.monsters.map(m => [slug(m.name), m.name, m.count, m.base]).sort((a, b) => a[0] < b[0] ? -1 : 1)]);
+
+function setCloudDoc(id, raw) {
+  const r = raw && rawToRespawn(raw);
+  if (r && r.monsters.length) { cloud.raw.set(id, raw); store.cloud.set(id, r); }
+  else { cloud.raw.delete(id); store.cloud.delete(id); }
+}
+const saveCloudCache = () => lsSet(LS_CLOUD, { fullAt: cloud.fullAt, docs: Object.fromEntries(cloud.raw) });
+const saveQueue = () => lsSet(LS_SEND, [...cloud.queue]);
+const owns = id => !!cloud.uid && cloud.raw.has(id) && cloud.raw.get(id).owner === cloud.uid;
+
+// Baixa o banco inteiro uma vez por dia; nas outras vezes, só o que mudou desde a última leitura.
+async function loadCloud() {
+  if (!cloud.on || cloud.loading) return;
+  cloud.loading = true;
+  try {
+    if (!cloud.fullAt || Date.now() - cloud.fullAt > 24 * 3600e3) {
+      const docs = [];
+      let page = '';
+      do {
+        const r = await cloudFetch('/respawns?pageSize=300' + (page ? '&pageToken=' + encodeURIComponent(page) : ''));
+        if (!r.ok) throw new Error('nuvem');
+        for (const d of r.json.documents || []) docs.push([d.name.split('/').pop(), docRaw(d)]);
+        page = r.json.nextPageToken || '';
+      } while (page);
+      cloud.raw = new Map();
+      store.cloud = new Map();
+      for (const [id, raw] of docs) setCloudDoc(id, raw);
+      cloud.fullAt = Date.now();
+    } else {
+      let since = 0;
+      for (const raw of cloud.raw.values()) since = Math.max(since, Date.parse(raw.at) || 0);
+      const r = await cloudFetch(':runQuery', {
+        method: 'POST',
+        body: JSON.stringify({ structuredQuery: {
+          from: [{ collectionId: 'respawns' }],
+          where: { fieldFilter: { field: { fieldPath: 'at' }, op: 'GREATER_THAN', value: { timestampValue: new Date(Math.max(0, since - 1000)).toISOString() } } },
+          orderBy: [{ field: { fieldPath: 'at' } }],
+          limit: 300,
+        } }),
+      });
+      if (!r.ok) throw new Error('nuvem');
+      for (const row of Array.isArray(r.json) ? r.json : []) if (row.document) setCloudDoc(row.document.name.split('/').pop(), docRaw(row.document));
+    }
+    saveCloudCache();
+  } catch { /* sem rede ou cota esgotada: segue com a cópia local */ }
+  cloud.loading = false;
+  cloud.loadedAt = Date.now();
+  pending.cloud = false;
+  renderAll();
+}
+
+// Identidade anônima deste navegador, criada só na hora do primeiro envio.
+async function cloudAuth() {
+  if (cloud.token && Date.now() < cloud.exp - 60000) return cloud.uid;
+  const saved = lsGet(LS_AUTH, null);
+  let out = null;
+  if (saved && saved.refresh) {
+    const res = await fetch('https://securetoken.googleapis.com/v1/token?key=' + CLOUD.apiKey, {
+      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(saved.refresh),
+    });
+    if (res.ok) { const j = await res.json(); out = { token: j.id_token, refresh: j.refresh_token, uid: j.user_id, ttl: Number(j.expires_in) }; }
+  }
+  if (!out) {
+    const res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + CLOUD.apiKey, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ returnSecureToken: true }),
+    });
+    if (!res.ok) throw new Error('identidade');
+    const j = await res.json();
+    out = { token: j.idToken, refresh: j.refreshToken, uid: j.localId, ttl: Number(j.expiresIn) };
+  }
+  cloud.token = out.token;
+  cloud.uid = out.uid;
+  cloud.exp = Date.now() + (out.ttl || 3600) * 1000;
+  lsSet(LS_AUTH, { refresh: out.refresh, uid: out.uid });
+  return cloud.uid;
+}
+async function cloudCommit(write) {
+  await cloudAuth();
+  return cloudFetch(':commit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + cloud.token },
+    body: JSON.stringify({ writes: [write] }),
+  });
+}
+
+// Envia um respawn deste navegador. Devolve 'sent', 'rejected' (as regras do banco não aceitam) ou 'later'.
+async function pushCloud(id) {
+  const mine = store.local.get(id);
+  if (!cloud.on || !mine || !mine.monsters.length) return 'rejected';
+  const uid = await cloudAuth();
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const got = await cloudFetch('/respawns/' + id);
+    if (!got.ok && got.status !== 404) return 'later';
+    const cur = got.ok ? docRaw(got.json) : null;
+    // Quem enviou primeiro pode corrigir à vontade; os demais só acrescentam o que falta.
+    const raw = !cur || cur.owner === uid ? respawnToRaw(mine, uid, null) : respawnToRaw(mine, cur.owner, cur);
+    if (cur && rawKey(cur) === rawKey(raw)) setCloudDoc(id, cur);
+    else {
+      const res = await cloudCommit({
+        update: { name: docName(id), fields: toFs(raw).mapValue.fields },
+        updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
+      });
+      if (res.status === 403 || res.status === 409) continue;   // alguém mexeu no meio do caminho, ou as regras recusaram: tenta de novo com a cópia nova
+      if (!res.ok) return 'later';
+      raw.at = res.json.commitTime || new Date().toISOString();
+      setCloudDoc(id, raw);
+    }
+    // Se o que está aqui ficou igual ao banco de todos, a cópia local deixa de ser necessária.
+    if (store.local.get(id) === mine && store.cloud.has(id) && dataKey(mine) === dataKey(store.cloud.get(id))) {
+      store.local.delete(id);
+      persistLocal();
+    }
+    saveCloudCache();
+    return 'sent';
+  }
+  return 'rejected';
+}
+async function sendNow(id) {
+  let result = 'later';
+  try { result = await pushCloud(id); } catch { result = 'later'; }
+  if (result !== 'later') { cloud.queue.delete(id); saveQueue(); }
+  renderAll();
+  return result === 'sent';
+}
+async function flushSend() {
+  for (const id of [...cloud.queue]) {
+    if (!store.local.has(id)) { cloud.queue.delete(id); saveQueue(); continue; }
+    await sendNow(id);
+  }
+}
+async function cloudDelete(id) {
+  const res = await cloudCommit({ delete: docName(id) });
+  if (!res.ok) throw new Error('nuvem');
+  setCloudDoc(id, null);
+  saveCloudCache();
+}
+
+function initCloud() {
+  if (!cloud.on) return;
+  const cache = lsGet(LS_CLOUD, null);
+  if (cache && cache.docs && typeof cache.docs === 'object') {
+    for (const [id, raw] of Object.entries(cache.docs)) if (raw && slug(id) === id) setCloudDoc(id, raw);
+    cloud.fullAt = Number(cache.fullAt) || 0;
+  } else pending.cloud = true;
+  // Quem já tinha respawns lidos antes de existir o banco de todos: eles sobem uma vez, na primeira visita.
+  if (!lsGet(LS_MOVED, false)) {
+    const unnamed = new Set(LANGS.map(l => slug(I18N[l].noname)));
+    for (const id of store.local.keys()) if (!unnamed.has(id)) cloud.queue.add(id);
+    saveQueue();
+    lsSet(LS_MOVED, true);
+  }
+  loadCloud().then(flushSend);
+  setInterval(() => { if (document.visibilityState === 'visible') loadCloud().then(flushSend); }, 5 * 60000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && Date.now() - (cloud.loadedAt || 0) > 2 * 60000) loadCloud().then(flushSend);
+  });
+}
+
 /* ---------- Estado da tela ---------- */
 const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {} }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
@@ -1265,9 +1529,12 @@ const statusEl = $('#status');
 function setStatus(kind, text) { statusEl.dataset.kind = kind; statusEl.textContent = text; }
 
 function renderSync() {
-  $('#sync').textContent = tr(!store.db
-    ? (store.seed.size ? 'sync.site' : 'sync.local')
-    : store.canWrite === false ? 'sync.ro' : 'sync.rw');
+  const waiting = cloud.queue.size;
+  $('#sync').textContent = cloud.on && !store.db
+    ? tr('sync.cloud') + (waiting ? ' ' + tr(waiting === 1 ? 'sync.wait1' : 'sync.waitN', { n: waiting }) : '')
+    : tr(!store.db
+      ? (store.seed.size ? 'sync.site' : 'sync.local')
+      : store.canWrite === false ? 'sync.ro' : 'sync.rw');
 }
 
 function renderBank() {
@@ -1709,7 +1976,7 @@ function mobCards(id, r) {
     return el('article', { class: 'mob' },
       el('h4', { text: m.name + ' (' + m.count + 'x)' }),
       el('button', { class: 'mob-x', type: 'button', text: '×', 'aria-label': tr('mob.remove', { x: m.name }), title: tr('mob.remove', { x: m.name }),
-        onclick: () => saveRespawn(id, { ...r, monsters: r.monsters.filter(x => x !== m) }) }),
+        onclick: () => saveRespawn(id, { ...r, monsters: r.monsters.filter(x => x !== m) }, owns(id) || cloud.queue.has(id)) }),
       el('p', null, tr('mob.kills'), el('b', { text: killsPerHour(now, m.count) })),
       el('p', null, tr('mob.time'), el('b', { text: fmtTime(now) }), ' ' + unitName()),
       el('label', { class: 'task' }, el('span', { text: tr('task.label') }), input, el('span', { text: tr('task.kills') }), out),
@@ -1769,8 +2036,8 @@ const RING = 2 * Math.PI * 52;   // comprimento do anel do cronômetro
 function renderSheet() {
   const sheet = $('#sheet');
   const r = ui.id && getRespawn(ui.id);
-  const loading = pending.seed || pending.db;
-  const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id);
+  const loading = pending.seed || pending.db || !!pending.cloud;
+  const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id) && !owns(ui.id);
   const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r]);
   if (sig === sheetSig) return;
   sheetSig = sig;
@@ -1831,18 +2098,19 @@ async function rename(id, input) {
     setStatus('err', tr('err.exists', { x: getRespawn(nid).name }));
     return;
   }
+  const share = owns(id) || cloud.queue.has(id);
   if (nid !== id) {
     const keep = new Map(timers);
     await removeRespawn(id);
     ui.id = nid; saveUi();
     for (const [k, v] of keep) { timers.set(k, v); scheduleSounds(v); }
   }
-  saveRespawn(nid, { ...r, name });
+  saveRespawn(nid, { ...r, name }, share);
 }
 
 function renderAll() {
   // A seleção só muda depois que o banco terminou de carregar: antes disso o respawn salvo pode não ter chegado.
-  if (!pending.seed && !pending.db && !getRespawn(ui.id)) {
+  if (!pending.seed && !pending.db && !pending.cloud && !getRespawn(ui.id)) {
     const first = allRespawns()[0];
     ui.id = first ? first.id : null;
   }
@@ -1883,13 +2151,14 @@ async function readImage(blob) {
       cost10: cost10 || (prev && prev.cost10) || null,
       duration: cost10 ? p.dur : (prev && prev.duration) || p.dur || null,
       readAt: p.pct,
-    });
+    }, !!p.name && !doubt.length);
     if (DURS.includes(p.dur)) ui.dur = p.dur;
     select(id, p.pct);
     let msg = tr(p.monsters.length === 1 ? 'read.ok1' : 'read.okN', { x: prev ? prev.name : name, p: p.pct, n: p.monsters.length }) + ' ' +
-      tr(where === 'shared' ? 'read.shared' : 'read.local') + ' ' + tr('read.discarded');
+      tr(where === 'cloud' ? 'read.cloud' : where === 'shared' ? 'read.shared' : 'read.local') + ' ' + tr('read.discarded');
     if (!p.name) msg += ' ' + tr('read.noname');
     if (doubt.length) msg += ' ' + tr('read.doubt', { x: doubt.join(', ') });
+    if (cloud.on && (!p.name || doubt.length)) msg += ' ' + tr('read.notshared');
     setStatus(doubt.length || !p.name ? 'busy' : 'ok', msg);
     if (!p.name) { const n = $('#area-name'); if (n) { n.focus(); n.select(); } }
   } catch (e) {
@@ -2311,6 +2580,7 @@ applyStatic();
 renderAll();
 loadSeed();
 initShared();
+initCloud();
 })();
 </script>
 
