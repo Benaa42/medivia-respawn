@@ -686,10 +686,10 @@ const I18N = {
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
     'read.unread': 'Não li o tempo de {x}: tire outro print e cole de novo.',
-    'disc.label': 'Desconto das tasks: {d}%',
+    'disc.label': 'Desconto das tasks: {v}',
     'disc.full': 'Sem desconto: {v}',
     'disc.tip': 'Desconto das tasks diárias ou semanais, lido no print. Desmarque quando ele acabar.',
-    'read.disc': 'Desconto de {d}% das tasks aplicado ao custo.',
+    'read.disc': 'Desconto das tasks de {v} aplicado ao custo.',
     'bank.more': 'Mostrando {n} de {t} respawns. Busque para ver os outros.',
     'raffle.open': 'Sortear itens',
     'raffle.title': 'Sorteio de itens',
@@ -888,10 +888,10 @@ const I18N = {
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
     'read.unread': 'The respawn time of {x} could not be read: take another screenshot and paste it again.',
-    'disc.label': 'Task discount: {d}%',
+    'disc.label': 'Task discount: {v}',
     'disc.full': 'Without discount: {v}',
     'disc.tip': 'Discount from daily or weekly tasks, read from the screenshot. Untick it when it ends.',
-    'read.disc': 'Task discount of {d}% applied to the cost.',
+    'read.disc': 'Task discount of {v} applied to the cost.',
     'bank.more': 'Showing {n} of {t} respawns. Search to see the others.',
     'raffle.open': 'Raffle items',
     'raffle.title': 'Item raffle',
@@ -1090,10 +1090,10 @@ const I18N = {
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
     'read.unread': 'No leí el tiempo de {x}: haz otra captura y pégala de nuevo.',
-    'disc.label': 'Descuento de tareas: {d}%',
+    'disc.label': 'Descuento de tareas: {v}',
     'disc.full': 'Sin descuento: {v}',
     'disc.tip': 'Descuento de las tareas diarias o semanales, leído en la captura. Desmárcalo cuando termine.',
-    'read.disc': 'Descuento de {d}% de las tareas aplicado al coste.',
+    'read.disc': 'Descuento de tareas de {v} aplicado al coste.',
     'bank.more': 'Mostrando {n} de {t} respawns. Busca para ver los demás.',
     'raffle.open': 'Sortear objetos',
     'raffle.title': 'Sorteo de objetos',
@@ -1286,7 +1286,8 @@ function parsePrint(lines) {
     if (c) {
       cost = c.v;
       const d = nums.find(n => n.y > c.y + pctLine.h * 2);
-      if (d && d.v > 0 && d.v < cost * 3) discount = d.v;
+      // Desconto maior que o preço: o custo do print não diz mais qual é o preço cheio, então não é usado.
+      if (d && d.v > 0) { if (d.v < cost * 3) discount = d.v; else cost = null; }
     }
     const title = other
       .filter(l => l.conf >= 75 && l.y < pctLine.y - pctLine.h && /[A-Za-z]{3,}/.test(l.text) && l.text.length <= 40)
@@ -1744,6 +1745,7 @@ if (!TONES[ui.tone]) ui.tone = 'sino';
 if (!ui.tasks || typeof ui.tasks !== 'object' || Array.isArray(ui.tasks)) ui.tasks = {};
 if (!ui.laps || typeof ui.laps !== 'object' || Array.isArray(ui.laps)) ui.laps = {};
 if (!ui.disc || typeof ui.disc !== 'object' || Array.isArray(ui.disc)) ui.disc = {};
+for (const k of Object.keys(ui.disc)) if (!(ui.disc[k] && ui.disc[k].gold > 0)) delete ui.disc[k];
 ui.recent = (Array.isArray(ui.recent) ? ui.recent : []).filter(x => typeof x === 'string').slice(0, 12);   // respawns abertos, do mais recente para o mais antigo
 if (typeof ui.raffleNames !== 'string') ui.raffleNames = '';
 ui.pause = int(ui.pause, 0, 600) || 0;   // segundos de espera entre uma volta e outra, com "Repetir ao zerar"
@@ -2285,17 +2287,28 @@ function mobCards(id, r) {
 const sheetHint = r => (r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest') + ' ' + tr('task.tip');
 // Desconto das tasks diárias ou semanais. É de quem joga, não do respawn: fica só neste navegador, por respawn,
 // e o banco guarda sempre o preço cheio.
-const discOf = id => { const d = ui.disc[id]; return d && d.pct > 0 && d.pct < 100 ? d : null; };
-function discSet(id, pct) {
-  pct = Math.round(pct * 100) / 100;
-  if (pct > 0 && pct < 100) ui.disc[id] = { pct, on: true }; else delete ui.disc[id];
+// O jogo tira um valor fixo em gold, o mesmo em qualquer percentual e duração.
+const discOf = id => { const d = ui.disc[id]; return d && d.gold > 0 ? d : null; };
+function discSet(id, gold) {
+  if (gold > 0) ui.disc[id] = { gold: Math.round(gold), on: true }; else delete ui.disc[id];
   saveUi();
 }
-const fmtPct = n => String(Math.round(n * 100) / 100).replace('.', tr('html.lang').startsWith('en') ? '.' : ',');
-const fullCost = r => r.cost10 ? Math.round(r.cost10 * ui.pct / 10 * ui.dur / (r.duration || 60)) : null;
+// Preço cheio do bônus em qualquer percentual e duração. O jogo mostra o preço arredondado para a centena.
+const priceAt = (r, pct, dur) => Math.round(r.cost10 * pct / 10 * dur / (r.duration || 60) / 100) * 100;
+const fullCost = r => r.cost10 ? priceAt(r, ui.pct, ui.dur) : null;
 function bonusCost(r, id) {
   const full = fullCost(r), d = discOf(id);
-  return full && d && d.on ? Math.round(full * (100 - d.pct) / 100) : full;
+  return full && d && d.on ? Math.max(0, full - d.gold) : full;
+}
+// Preço de 10% por 60 minutos a partir do preço cheio de um print. Como o print vem arredondado, fica o valor mais
+// redondo que reproduz o print: assim qualquer print do mesmo respawn chega ao mesmo número.
+function baseCost(full, pct, dur) {
+  const raw = full * 10 / pct * 60 / dur;
+  for (const m of [1000, 100, 10, 1]) {
+    const c = Math.round(raw / m) * m;
+    if (c > 0 && priceAt({ cost10: c, duration: 60 }, pct, dur) === full) return c;
+  }
+  return null;
 }
 
 // Agrupa os monstros pelo tempo de respawn atual: cada grupo ganha um cronômetro.
@@ -2410,14 +2423,14 @@ function renderSheet() {
   parts.dur.set(DURS.indexOf(ui.dur));
   const cost = bonusCost(r, id);
   parts.cost.replaceChildren(cost == null ? tr('cost.unread') : cost === 0 ? '0' : fmtInt(cost), ...(cost ? [coin()] : []));
-  setText(parts.costNote, cost ? tr('cost.note', { p: ui.pct, n: ui.dur }) : cost === 0 ? tr('bonus.none') : '');
+  setText(parts.costNote, cost != null && ui.pct ? tr('cost.note', { p: ui.pct, n: ui.dur }) : cost === 0 ? tr('bonus.none') : '');
   // Desconto das tasks: aparece quando o print trouxe a faixa de desconto; dá para desligar quando ele acabar.
   const disc = r.cost10 ? discOf(id) : null;
   parts.disc.hidden = !disc;
   if (disc) {
     parts.discBox.checked = disc.on;
-    setText(parts.discText, tr('disc.label', { d: fmtPct(disc.pct) }));
-    setText(parts.discFull, disc.on && cost ? tr('disc.full', { v: fmtInt(fullCost(r)) }) : '');
+    setText(parts.discText, tr('disc.label', { v: fmtInt(disc.gold) }));
+    setText(parts.discFull, disc.on && fullCost(r) ? tr('disc.full', { v: fmtInt(fullCost(r)) }) : '');
   }
 
   parts.mobs.replaceChildren(...mobCards(id, r));
@@ -2488,20 +2501,21 @@ async function readImage(blob) {
     }
     // Com desconto das tasks, o print mostra o preço já reduzido. O banco guarda o preço cheio, que vale para todos.
     const full = p.cost ? p.cost + (p.discount || 0) : null;
-    const cost10 = full && p.pct ? Math.round(full * 10 / p.pct) : null;
+    const base60 = full && p.pct && p.dur ? baseCost(full, p.pct, p.dur) : null;
+    const cost10 = base60 || (full && p.pct ? Math.round(full * 10 / p.pct) : null);
     const where = await saveRespawn(id, {
       name: prev ? prev.name : name,
       monsters,
       cost10: cost10 || (prev && prev.cost10) || null,
-      duration: cost10 ? p.dur : (prev && prev.duration) || p.dur || null,
+      duration: base60 ? 60 : cost10 ? p.dur : (prev && prev.duration) || p.dur || null,
       readAt: p.pct,
     }, !!p.name && !doubt.length);
     if (DURS.includes(p.dur)) ui.dur = p.dur;
-    if (cost10) discSet(id, p.discount ? p.discount * 100 / full : 0);   // print sem a faixa de desconto: o desconto acabou
+    if (cost10) discSet(id, p.discount || 0);   // print sem a faixa de desconto: o desconto acabou
     select(id, p.pct);
     let msg = tr(p.monsters.length === 1 ? 'read.ok1' : 'read.okN', { x: prev ? prev.name : name, p: p.pct, n: p.monsters.length }) + ' ' +
       tr(where === 'cloud' ? 'read.cloud' : where === 'shared' ? 'read.shared' : 'read.local') + ' ' + tr('read.discarded');
-    if (cost10 && p.discount) msg += ' ' + tr('read.disc', { d: fmtPct(p.discount * 100 / full) });
+    if (cost10 && p.discount) msg += ' ' + tr('read.disc', { v: fmtInt(p.discount) });
     if (p.unread.length) msg += ' ' + tr('read.unread', { x: p.unread.join(', ') });
     if (!p.name) msg += ' ' + tr('read.noname');
     if (doubt.length) msg += ' ' + tr('read.doubt', { x: doubt.join(', ') });
@@ -2927,6 +2941,11 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-08 23:55',
+    pt: ['Desconto das tasks: o valor em gold é fixo, igual ao do jogo, em qualquer percentual e duração.', 'Custo do bônus arredondado para a centena, como o jogo mostra.'],
+    en: ['Task discount: the gold amount is fixed, the same as in the game, at any percentage and duration.', 'Bonus cost rounded to the hundred, as the game shows it.'],
+    es: ['Descuento de tareas: el valor en oro es fijo, igual que en el juego, en cualquier porcentaje y duración.', 'Coste del bonus redondeado a la centena, como lo muestra el juego.'],
+  },
   { at: '2026-10-08 23:45',
     pt: ['Desconto das tasks: quando o print traz a faixa "Desconto disponível", o site aplica o desconto ao custo do bônus e mostra o preço sem desconto. Dá para desligar quando o desconto acabar.', 'Leitura do print: quando o tempo de um monstro não é lido, o site relê só aquele monstro e avisa se mesmo assim não conseguir.'],
     en: ['Task discount: when the screenshot has the "Discount available" band, the site applies the discount to the bonus cost and shows the price without it. You can switch it off when the discount ends.', 'Screenshot reading: when a monster time is not read, the site reads that monster again on its own and tells you if it still fails.'],
