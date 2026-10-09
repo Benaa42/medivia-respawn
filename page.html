@@ -335,6 +335,15 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .bank-item[aria-current="true"] b { color: var(--amber); }
 .bank-item[aria-current="true"] small { color: var(--label); }
 .bank-empty { padding: 4px 2px; font-size: 13px; color: var(--faint); }
+/* Dois respawns abertos: a lista marca qual é o primeiro e qual é o segundo */
+.duo { padding: 0 2px; font-size: 13px; color: var(--label); }
+.bank-item { position: relative; }
+.bank-item.picked b { padding-right: 28px; }
+.bank-n { position: absolute; top: 10px; right: 10px; min-width: 20px; border-radius: 999px; background: var(--amber); color: var(--ground); font: 700 12px/1.65 var(--font-ui); font-style: normal; text-align: center; }
+.second { display: flex; flex-direction: column; gap: 16px; padding-top: 20px; border-top: 1px solid var(--edge); }
+.second-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.second-name { font: 800 22px/1.2 var(--font-display); letter-spacing: -0.01em; color: var(--title); overflow-wrap: anywhere; }
+.clock-area { font-size: 12px; color: var(--faint); overflow-wrap: anywhere; }
 .bank-foot { flex-direction: column; align-items: stretch; gap: 8px; padding-top: 12px; border-top: 1px solid var(--edge); }
 .sync { font-size: 12px; color: var(--faint); }
 details.backup { font-size: 13px; }
@@ -446,7 +455,9 @@ details.backup textarea {
     <aside class="win bank" aria-labelledby="bank-title">
       <header class="win-title"><h2 class="win-name" id="bank-title">Respawns</h2></header>
       <div class="win-body">
-        <input type="search" id="search" placeholder="Buscar área ou monstro" aria-label="Buscar área ou monstro" autocomplete="off" data-i18n-attr="placeholder:search;aria-label:search">
+        <input type="search" id="search" placeholder="Buscar área ou criatura" aria-label="Buscar área ou criatura" autocomplete="off" data-i18n-attr="placeholder:search;aria-label:search">
+        <label class="toggle duo"><input type="checkbox" id="opt-duo"> <span data-i18n="duo.label">Abrir dois respawns</span></label>
+        <p class="bank-empty" id="duo-hint" data-i18n="duo.hint" hidden>Clique em dois respawns da lista. Clique de novo em um deles para fechar.</p>
         <ul class="bank-list" id="bank-list"></ul>
       </div>
       <footer class="win-foot bank-foot">
@@ -593,7 +604,7 @@ const I18N = {
     'lang.label': 'Idioma',
     'paste.a': 'Com o print da janela de bônus copiado, aperte',
     'paste.b': 'em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.',
-    'search': 'Buscar área ou monstro',
+    'search': 'Buscar área ou criatura',
     'backup': 'Cópia de segurança',
     'backup.aria': 'Banco em JSON',
     'backup.copy': 'Copiar',
@@ -629,14 +640,14 @@ const I18N = {
     'sync.local': 'Banco salvo neste navegador.',
     'sync.ro': 'Banco compartilhado, só para consulta. O que você ler fica salvo neste navegador.',
     'sync.rw': 'Banco compartilhado: o que for lido aqui aparece para todos.',
-    'bank.nomobs': 'sem monstros',
-    'bank.nohit': 'Nenhuma área ou monstro com esse nome.',
+    'bank.nomobs': 'sem criaturas',
+    'bank.nohit': 'Nenhuma área ou criatura com esse nome.',
     'bank.empty': 'Ainda não há respawns. Cada print lido entra aqui com o nome da área.',
     'err.sharedDelete': 'Não deu para excluir do banco compartilhado. Só quem pode editar o banco consegue.',
     'err.float': 'A janela flutuante não abre nesta visualização. Use o Chrome ou o Edge com o site aberto direto na aba.',
     'err.exists': 'Já existe um respawn chamado "{x}".',
-    'err.nomobs': 'Não achei monstros nem tempos de respawn nessa imagem. Tire o print com a janela de bônus inteira aparecendo.',
-    'err.nopct': 'Li os monstros, mas não o percentual de bônus. Deixe o título "Percentual de bônus (10%)" aparecer no print.',
+    'err.nomobs': 'Não achei criaturas nem tempos de respawn nessa imagem. Tire o print com a janela de bônus inteira aparecendo.',
+    'err.nopct': 'Li as criaturas, mas não o percentual de bônus. Deixe o título "Percentual de bônus (10%)" aparecer no print.',
     'err.read': 'Não consegui ler essa imagem. Tente um print novo, só da janela de bônus.',
     'err.notimage': 'Isso não é uma imagem. Arraste o arquivo do print.',
     'note.left': 'faltam {t}',
@@ -674,23 +685,27 @@ const I18N = {
     'cost.note': '{p}% por {n} minutos',
     'less': 'Diminuir {x}',
     'more': 'Aumentar {x}',
-    'band': 'Monstros potencializados',
+    'band': 'Criaturas potencializadas',
     'mob.kills': 'Abates por hora: ',
     'mob.time': 'Tempo de respawn: ',
     'mob.remove': 'Remover {x}',
     'step.title': '{m} com {p}% de bônus: {t}',
     'hint.read': 'Lido de um print a {p}%, tratado como caça solo. ',
-    'hint.rest': 'O grupo entra na conta antes do bônus. A lista do jogo rola: se faltou monstro, role a janela, tire outro print e cole. Ele entra nesta mesma área.',
+    'hint.rest': 'O grupo entra na conta antes do bônus. A lista do jogo rola: se faltou criatura, role a janela, tire outro print e cole. Ela entra nesta mesma área.',
     'read.busy': 'Lendo o print…',
     'read.first': 'Preparando o leitor de imagem (só na primeira vez) e lendo o print…',
-    'read.ok1': '{x} lido a {p}%, 1 monstro.',
-    'read.okN': '{x} lido a {p}%, {n} monstros.',
+    'read.ok1': '{x} lido a {p}%, 1 criatura.',
+    'read.okN': '{x} lido a {p}%, {n} criaturas.',
     'read.shared': 'Salvo no banco compartilhado.',
     'read.local': 'Salvo no banco deste navegador.',
     'read.discarded': 'Imagem descartada.',
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'duo.label': 'Abrir dois respawns',
+    'duo.hint': 'Clique em dois respawns da lista. Clique de novo em um deles para fechar.',
+    'duo.second': 'Segundo respawn: {x}',
+    'duo.close': 'Fechar este respawn',
     'read.unread': 'Não li o tempo de {x}: tire outro print e cole de novo.',
     'disc.label': 'Desconto das tasks: {v}',
     'disc.full': 'Sem desconto: {v}',
@@ -739,7 +754,7 @@ const I18N = {
     'task.aria': 'Quantos abates de {x} faltam na task',
     'task.time': 'leva {t}',
     'task.never': 'sem previsão',
-    'task.tip': 'O tempo da task usa os abates por hora, ou seja, vale se cada monstro for morto assim que nascer.',
+    'task.tip': 'O tempo da task usa os abates por hora, ou seja, vale se cada criatura for morta assim que nascer.',
     'span.hm': '{h} h {m} min',
     'span.m': '{m} min',
     'support.open': 'Apoiar o projeto',
@@ -795,7 +810,7 @@ const I18N = {
     'lang.label': 'Language',
     'paste.a': 'With the bonus window screenshot copied, press',
     'paste.b': 'anywhere on this page. It is read right away, with no need to click anything first.',
-    'search': 'Search area or monster',
+    'search': 'Search area or creature',
     'backup': 'Backup',
     'backup.aria': 'Bank as JSON',
     'backup.copy': 'Copy',
@@ -831,14 +846,14 @@ const I18N = {
     'sync.local': 'Bank saved in this browser.',
     'sync.ro': 'Shared bank, read-only. What you read is saved in this browser.',
     'sync.rw': 'Shared bank: what is read here shows up for everyone.',
-    'bank.nomobs': 'no monsters',
-    'bank.nohit': 'No area or monster with that name.',
+    'bank.nomobs': 'no creatures',
+    'bank.nohit': 'No area or creature with that name.',
     'bank.empty': 'No respawns yet. Each screenshot you read is added here under the area name.',
     'err.sharedDelete': 'Could not delete from the shared bank. Only people who can edit the bank can do that.',
     'err.float': 'The floating window cannot open in this view. Use Chrome or Edge with the site open directly in a tab.',
     'err.exists': 'There is already a respawn called "{x}".',
-    'err.nomobs': 'No monsters or respawn times found in this image. Take the screenshot with the whole bonus window showing.',
-    'err.nopct': 'The monsters were read, but not the bonus percentage. Make sure the "Bonus percentage (10%)" title shows in the screenshot.',
+    'err.nomobs': 'No creatures or respawn times found in this image. Take the screenshot with the whole bonus window showing.',
+    'err.nopct': 'The creatures were read, but not the bonus percentage. Make sure the "Bonus percentage (10%)" title shows in the screenshot.',
     'err.read': 'Could not read this image. Try a new screenshot of just the bonus window.',
     'err.notimage': 'That is not an image. Drag the screenshot file.',
     'note.left': '{t} left',
@@ -876,23 +891,27 @@ const I18N = {
     'cost.note': '{p}% for {n} minutes',
     'less': 'Decrease {x}',
     'more': 'Increase {x}',
-    'band': 'Boosted monsters',
+    'band': 'Boosted creatures',
     'mob.kills': 'Kills per hour: ',
     'mob.time': 'Respawn time: ',
     'mob.remove': 'Remove {x}',
     'step.title': '{m} with {p}% bonus: {t}',
     'hint.read': 'Read from a screenshot at {p}%, treated as solo hunting. ',
-    'hint.rest': 'Party size is applied before the bonus. The list in the game scrolls: if a monster is missing, scroll the window, take another screenshot and paste it. It is added to this same area.',
+    'hint.rest': 'Party size is applied before the bonus. The list in the game scrolls: if a creature is missing, scroll the window, take another screenshot and paste it. It is added to this same area.',
     'read.busy': 'Reading the screenshot…',
     'read.first': 'Getting the image reader ready (first time only) and reading the screenshot…',
-    'read.ok1': '{x} read at {p}%, 1 monster.',
-    'read.okN': '{x} read at {p}%, {n} monsters.',
+    'read.ok1': '{x} read at {p}%, 1 creature.',
+    'read.okN': '{x} read at {p}%, {n} creatures.',
     'read.shared': 'Saved to the shared bank.',
     'read.local': 'Saved to the bank in this browser.',
     'read.discarded': 'Image discarded.',
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'duo.label': 'Open two respawns',
+    'duo.hint': 'Click two respawns in the list. Click one of them again to close it.',
+    'duo.second': 'Second respawn: {x}',
+    'duo.close': 'Close this respawn',
     'read.unread': 'The respawn time of {x} could not be read: take another screenshot and paste it again.',
     'disc.label': 'Task discount: {v}',
     'disc.full': 'Without discount: {v}',
@@ -941,7 +960,7 @@ const I18N = {
     'task.aria': 'How many {x} kills are left for the task',
     'task.time': 'takes {t}',
     'task.never': 'no estimate',
-    'task.tip': 'Task time uses kills per hour, so it holds if every monster is killed as soon as it spawns.',
+    'task.tip': 'Task time uses kills per hour, so it holds if every creature is killed as soon as it spawns.',
     'span.hm': '{h} h {m} min',
     'span.m': '{m} min',
     'support.open': 'Support the project',
@@ -997,7 +1016,7 @@ const I18N = {
     'lang.label': 'Idioma',
     'paste.a': 'Con la captura de la ventana de bonus copiada, pulsa',
     'paste.b': 'en cualquier parte de esta página. Se lee al instante, sin hacer clic en nada antes.',
-    'search': 'Buscar área o monstruo',
+    'search': 'Buscar área o criatura',
     'backup': 'Copia de seguridad',
     'backup.aria': 'Banco en JSON',
     'backup.copy': 'Copiar',
@@ -1033,14 +1052,14 @@ const I18N = {
     'sync.local': 'Banco guardado en este navegador.',
     'sync.ro': 'Banco compartido, solo de consulta. Lo que leas se guarda en este navegador.',
     'sync.rw': 'Banco compartido: lo que se lea aquí aparece para todos.',
-    'bank.nomobs': 'sin monstruos',
-    'bank.nohit': 'Ninguna área o monstruo con ese nombre.',
+    'bank.nomobs': 'sin criaturas',
+    'bank.nohit': 'Ninguna área o criatura con ese nombre.',
     'bank.empty': 'Aún no hay respawns. Cada captura leída entra aquí con el nombre del área.',
     'err.sharedDelete': 'No se pudo eliminar del banco compartido. Solo quien puede editar el banco puede hacerlo.',
     'err.float': 'La ventana flotante no se abre en esta vista. Usa Chrome o Edge con el sitio abierto directamente en la pestaña.',
     'err.exists': 'Ya existe un respawn llamado "{x}".',
-    'err.nomobs': 'No encontré monstruos ni tiempos de respawn en esta imagen. Haz la captura con la ventana de bonus entera a la vista.',
-    'err.nopct': 'Leí los monstruos, pero no el porcentaje de bonus. Deja que el título "Porcentaje de bonus (10%)" aparezca en la captura.',
+    'err.nomobs': 'No encontré criaturas ni tiempos de respawn en esta imagen. Haz la captura con la ventana de bonus entera a la vista.',
+    'err.nopct': 'Leí las criaturas, pero no el porcentaje de bonus. Deja que el título "Porcentaje de bonus (10%)" aparezca en la captura.',
     'err.read': 'No pude leer esta imagen. Prueba con una captura nueva, solo de la ventana de bonus.',
     'err.notimage': 'Eso no es una imagen. Arrastra el archivo de la captura.',
     'note.left': 'faltan {t}',
@@ -1078,23 +1097,27 @@ const I18N = {
     'cost.note': '{p}% por {n} minutos',
     'less': 'Disminuir {x}',
     'more': 'Aumentar {x}',
-    'band': 'Monstruos potenciados',
+    'band': 'Criaturas potenciadas',
     'mob.kills': 'Muertes por hora: ',
     'mob.time': 'Tiempo de respawn: ',
     'mob.remove': 'Quitar {x}',
     'step.title': '{m} con {p}% de bonus: {t}',
     'hint.read': 'Leído de una captura al {p}%, tratado como caza en solitario. ',
-    'hint.rest': 'El grupo se aplica antes del bonus. La lista del juego se desplaza: si falta algún monstruo, desplaza la ventana, haz otra captura y pégala. Entra en esta misma área.',
+    'hint.rest': 'El grupo se aplica antes del bonus. La lista del juego se desplaza: si falta alguna criatura, desplaza la ventana, haz otra captura y pégala. Entra en esta misma área.',
     'read.busy': 'Leyendo la captura…',
     'read.first': 'Preparando el lector de imagen (solo la primera vez) y leyendo la captura…',
-    'read.ok1': '{x} leído al {p}%, 1 monstruo.',
-    'read.okN': '{x} leído al {p}%, {n} monstruos.',
+    'read.ok1': '{x} leído al {p}%, 1 criatura.',
+    'read.okN': '{x} leído al {p}%, {n} criaturas.',
     'read.shared': 'Guardado en el banco compartido.',
     'read.local': 'Guardado en el banco de este navegador.',
     'read.discarded': 'Imagen descartada.',
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'duo.label': 'Abrir dos respawns',
+    'duo.hint': 'Haz clic en dos respawns de la lista. Haz clic de nuevo en uno de ellos para cerrarlo.',
+    'duo.second': 'Segundo respawn: {x}',
+    'duo.close': 'Cerrar este respawn',
     'read.unread': 'No leí el tiempo de {x}: haz otra captura y pégala de nuevo.',
     'disc.label': 'Descuento de tareas: {v}',
     'disc.full': 'Sin descuento: {v}',
@@ -1143,7 +1166,7 @@ const I18N = {
     'task.aria': 'Cuántas muertes de {x} faltan en la tarea',
     'task.time': 'tarda {t}',
     'task.never': 'sin previsión',
-    'task.tip': 'El tiempo de la tarea usa las muertes por hora, así que vale si matas cada monstruo en cuanto nace.',
+    'task.tip': 'El tiempo de la tarea usa las muertes por hora, así que vale si matas cada criatura en cuanto nace.',
     'span.hm': '{h} h {m} min',
     'span.m': '{m} min',
     'support.open': 'Apoyar el proyecto',
@@ -1742,8 +1765,11 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {} }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
+if (!PCTS.includes(ui.pct2)) ui.pct2 = ui.pct;
+ui.duo = ui.duo === true;
+if (typeof ui.id2 !== 'string') ui.id2 = null;
 if (!PARTIES.some(p => p.mult === ui.party)) ui.party = 100;
 if (!DURS.includes(ui.dur)) ui.dur = 60;
 if (ui.unit !== 'm') ui.unit = 's';
@@ -1762,6 +1788,10 @@ if (!LANGS.includes(ui.lang)) {
 }
 if (!(ui.volume >= 0 && ui.volume <= 100)) ui.volume = 60;
 const saveUi = () => lsSet(LS_UI, ui);
+// Respawns abertos: o principal e, com "Abrir dois respawns" ligado, um segundo. Cada um tem o seu percentual
+// de bônus (ui.pct e ui.pct2); o grupo de caça e a duração valem para os dois.
+const secondId = () => ui.duo && ui.id2 && ui.id2 !== ui.id && getRespawn(ui.id) && getRespawn(ui.id2) ? ui.id2 : null;
+const pctOf = id => id === secondId() ? ui.pct2 : ui.pct;
 
 const statusEl = $('#status');
 function setStatus(kind, text) { statusEl.dataset.kind = kind; statusEl.textContent = text; }
@@ -1780,8 +1810,9 @@ function renderSync() {
 let bankFill = [];
 function bankShort(all) {
   const byId = new Map(all.map(r => [r.id, r]));
-  const ids = ui.recent.filter(id => byId.has(id)).slice(0, 3);
-  if (ui.id && byId.has(ui.id) && !ids.includes(ui.id)) { ids.unshift(ui.id); ids.length = Math.min(ids.length, 3); }
+  // Os abertos aparecem sempre; o resto são os últimos abertos.
+  const open = [ui.id, secondId()].filter(id => id && byId.has(id));
+  const ids = [...open, ...ui.recent.filter(id => byId.has(id) && !open.includes(id))].slice(0, 3);
   bankFill = bankFill.filter(id => byId.has(id));
   const pool = all.map(r => r.id).filter(id => !bankFill.includes(id));
   while (bankFill.length < 3 && pool.length) bankFill.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
@@ -1796,11 +1827,16 @@ function renderBank() {
     ? all.filter(r => r.name.toLowerCase().includes(q) || r.monsters.some(m => m.name.toLowerCase().includes(q)))
     : bankShort(all);
   const list = $('#bank-list');
-  list.replaceChildren(...hits.map(r => el('li', null,
-    el('button', {
-      class: 'bank-item', type: 'button', 'aria-current': r.id === ui.id ? 'true' : null,
-      onclick: () => select(r.id),
-    }, el('b', { text: r.name }), el('small', { text: r.monsters.map(m => m.name).join(', ') || tr('bank.nomobs') })))));
+  const second = secondId();
+  list.replaceChildren(...hits.map(r => {
+    const n = !ui.duo ? 0 : r.id === ui.id ? 1 : r.id === second ? 2 : 0;   // com dois respawns, a ordem em que estão abertos
+    return el('li', null,
+      el('button', {
+        class: n ? 'bank-item picked' : 'bank-item', type: 'button', 'aria-current': r.id === ui.id || r.id === second ? 'true' : null,
+        onclick: () => pick(r.id),
+      }, el('b', { text: r.name }), el('small', { text: r.monsters.map(m => m.name).join(', ') || tr('bank.nomobs') }),
+        n ? el('i', { class: 'bank-n', text: n }) : null));
+  }));
   if (!hits.length) {
     list.append(el('li', { class: 'bank-empty', text: tr(all.length ? 'bank.nohit' : 'bank.empty') }));
   } else if (!q && all.length > hits.length) {
@@ -1808,12 +1844,35 @@ function renderBank() {
   }
 }
 
+// Abre um respawn e, se vier, o percentual lido ou escolhido. Com "Abrir dois respawns" ligado, o principal
+// fica onde está e o respawn novo entra como segundo. Os cronômetros de um respawn que saiu são tirados no desenho.
 function select(id, pct) {
-  if (id !== ui.id || (pct != null && pct !== ui.pct)) clearTimers();
-  ui.id = id;
+  if (ui.duo && ui.id && id !== ui.id && getRespawn(ui.id)) {
+    if (pct != null && pct !== ui.pct2) clearTimers(id);
+    ui.id2 = id;
+    if (pct != null) ui.pct2 = pct;
+  } else {
+    if (pct != null && pct !== ui.pct) clearTimers(id);
+    ui.id = id;
+    if (pct != null) ui.pct = pct;
+  }
   ui.recent = [id, ...ui.recent.filter(x => x !== id)].slice(0, 12);
-  if (pct != null) ui.pct = pct;
   saveUi();
+  renderAll();
+}
+// Clique na lista. Com dois respawns, clicar de novo em um dos abertos fecha esse; se era o principal, o segundo assume.
+function pick(id) {
+  const second = secondId();
+  if (id === second) ui.id2 = null;
+  else if (second && id === ui.id) { ui.id = second; ui.id2 = null; [ui.pct, ui.pct2] = [ui.pct2, ui.pct]; }
+  else { select(id); return; }
+  saveUi();
+  renderAll();
+}
+function setDuo(on) {
+  ui.duo = on;
+  saveUi();
+  $('#duo-hint').hidden = !on;
   renderAll();
 }
 
@@ -1882,11 +1941,13 @@ function lapsSet(id, base, n) {
   paintLaps();
 }
 function lapsAdd(t, n) {
-  if (ui.id && t.base != null && n > 0) lapsSet(ui.id, t.base, lapsGet(ui.id, t.base) + n);
+  if (t.id && t.base != null && n > 0) lapsSet(t.id, t.base, lapsGet(t.id, t.base) + n);
 }
 
 /* ---------- Cronômetros ---------- */
-const timers = new Map();   // segundos do grupo -> { dur, endAt, doneAt, nodes }
+// Um cronômetro por respawn aberto e por tempo de respawn: "respawn|segundos" -> { id, sec, dur, endAt, doneAt, nodes, ... }
+const timers = new Map();
+const timerKey = (id, sec) => id + '|' + sec;
 let timerEls = new Map();
 let audio = null;
 let master = null;
@@ -1943,8 +2004,8 @@ function keepAwake() {
     navigator.wakeLock.request('screen').then(w => { wake = w; w.addEventListener('release', () => { wake = null; }); }).catch(() => {});
   }
 }
-function startTimer(sec) {
-  const t = timers.get(sec);
+function startTimer(key) {
+  const t = timers.get(key);
   if (!t) return;
   armAudio();
   keepAwake();
@@ -1955,17 +2016,17 @@ function startTimer(sec) {
   lapsAdd(t, 1);
   tick();
 }
-function resetTimer(sec) {
-  const t = timers.get(sec);
+function resetTimer(key) {
+  const t = timers.get(key);
   if (t) { t.endAt = null; t.doneAt = null; t.pauseUntil = null; cancelSounds(t); }
   tick();
 }
-function clearTimers() {
-  for (const t of timers.values()) cancelSounds(t);
-  timers.clear();
+// Tira os cronômetros de um respawn; sem id, todos.
+function clearTimers(id) {
+  for (const [key, t] of [...timers]) if (id == null || t.id === id) { cancelSounds(t); timers.delete(key); }
 }
-const startAll = () => { for (const sec of timers.keys()) startTimer(sec); };
-const resetAll = () => { for (const sec of timers.keys()) resetTimer(sec); };
+const startAll = () => { for (const key of timers.keys()) startTimer(key); };
+const resetAll = () => { for (const key of timers.keys()) resetTimer(key); };
 const setText = (node, s) => { s = String(s); if (node.textContent !== s) node.textContent = s; };
 
 function timerView(t, now) {
@@ -1985,8 +2046,8 @@ function timerView(t, now) {
 
 function tick() {
   const now = Date.now();
-  let soonest = null;
-  for (const [sec, t] of timers) {
+  let soonest = null, soonId = null;
+  for (const [key, t] of timers) {
     // Zerou. Sem repetir, fica parado. Repetindo, recomeça sozinho, depois da pausa entre voltas se houver.
     // O laço cobre o caso de a aba ter ficado parada por mais de uma volta.
     let turns = 0;
@@ -2006,8 +2067,8 @@ function tick() {
       lapsAdd(t, turns);   // cada recomeço automático é uma volta
     }
     const v = timerView(t, now);
-    if (t.endAt != null && (soonest == null || v.left < soonest)) soonest = v.left;
-    const e = timerEls.get(sec);
+    if (t.endAt != null && (soonest == null || v.left < soonest)) { soonest = v.left; soonId = t.id; }
+    const e = timerEls.get(key);
     if (e) {
       e.root.dataset.state = v.state;
       setText(e.digits, fmtTime(v.left));
@@ -2016,7 +2077,7 @@ function tick() {
       setText(e.start, tr(v.state === 'idle' || v.state === 'done' ? 'start' : 'restart'));
     }
   }
-  const r = ui.id && getRespawn(ui.id);
+  const r = soonId && getRespawn(soonId);
   document.title = soonest != null && r ? fmtTime(soonest) + (ui.unit === 'm' ? ' · ' : ' s · ') + r.name : 'Medivia Respawn';
   if (soonest == null && wake) { wake.release().catch(() => {}); wake = null; }
   paintFloat(now);
@@ -2025,41 +2086,38 @@ setInterval(tick, 250);
 
 /* Janela flutuante: fica por cima do jogo (em janela ou sem bordas). */
 const float = { win: null, list: null, all: null, none: null, rowEls: new Map(), sig: '', canvas: null, video: null };
+// Na mesma ordem da página: primeiro o respawn principal, e em cada um do tempo maior para o menor.
 function groupsNow() {
-  const r = ui.id && getRespawn(ui.id);
-  const out = [];
-  for (const [sec, t] of timers) {
-    out.push({ sec, t, who: r ? r.monsters.filter(m => respawnAt(m.base, ui.pct, ui.party) === sec).map(m => m.name).join(', ') : '' });
-  }
-  return out;
+  return [...timers].map(([key, t]) => ({ key, sec: t.sec, t, who: t.label || '' }))
+    .sort((a, b) => (a.t.slot - b.t.slot) || (b.sec - a.sec));
 }
 function paintFloat(now) {
   if (float.win && float.list) {
     const gs = groupsNow();
-    const sig = gs.map(g => g.sec + ':' + g.who).join('|');
+    const sig = gs.map(g => g.key + ':' + g.who).join('||');
     if (sig !== float.sig) {
       // As linhas só são refeitas quando os cronômetros mudam; refazer a cada atualização engoliria cliques.
       float.sig = sig;
       float.rowEls = new Map();
       float.list.replaceChildren(...gs.map(g => {
         const b = el('b');
-        const btn = el('button', { type: 'button', onclick: () => startTimer(g.sec) });
-        const zero = el('button', { class: 'zero', type: 'button', text: tr('reset'), onclick: () => resetTimer(g.sec) });
+        const btn = el('button', { type: 'button', onclick: () => startTimer(g.key) });
+        const zero = el('button', { class: 'zero', type: 'button', text: tr('reset'), onclick: () => resetTimer(g.key) });
         const who = el('span', { title: g.who });
         const root = el('div', { class: 'f-row' }, el('div', { class: 'f-main' }, b, who),
           el('div', { class: 'f-btns' }, btn, zero));
-        float.rowEls.set(g.sec, { root, b, btn, zero, who });
+        float.rowEls.set(g.key, { root, b, btn, zero, who });
         return root;
       }));
       float.all.hidden = float.none.hidden = gs.length < 2;
     }
     for (const g of gs) {
-      const e = float.rowEls.get(g.sec);
+      const e = float.rowEls.get(g.key);
       const v = timerView(g.t, now);
       e.root.dataset.state = v.state;
       setText(e.b, fmtTime(v.left) + (ui.unit === 'm' ? '' : ' s'));
       setText(e.btn, tr(v.state === 'idle' || v.state === 'done' ? 'start' : 'restart'));
-      const laps = ui.id && g.t.base != null ? lapsGet(ui.id, g.t.base) : 0;
+      const laps = g.t.id && g.t.base != null ? lapsGet(g.t.id, g.t.base) : 0;
       setText(e.who, g.who + (laps ? ' · ' + tr('lap.short', { n: laps }) : '') + (v.state === 'pause' ? ' · ' + tr('note.pauseShort') : ''));
     }
   }
@@ -2255,12 +2313,14 @@ function fmtSpan(seconds, short) {
 
 // Cards de monstro: os mesmos dados do card do jogo, a task e o tempo em cada percentual.
 function mobCards(id, r) {
+  const pct = pctOf(id);
+  const tag = id === secondId() ? 'b' : '';   // os campos do segundo respawn têm ids próprios
   return r.monsters.map((m, mi) => {
-    const now = respawnAt(m.base, ui.pct, ui.party);
+    const now = respawnAt(m.base, pct, ui.party);
     const cells = PCTS.map(p => ({ p, sec: respawnAt(m.base, p, ui.party), task: el('i') }));
     const out = el('span', { class: 'task-out', role: 'status' });
     const lapsOut = el('span', { class: 'task-laps' });
-    const group = (timers.get(now) || {}).base;   // grupo de cronômetro deste monstro
+    const group = (timers.get(timerKey(id, now)) || {}).base;   // grupo de cronômetro desta criatura
     // A conta é refeita no lugar enquanto a pessoa digita, sem redesenhar o card.
     const paint = n => {
       setText(out, n ? tr('task.time', { t: fmtSpan(taskSeconds(n, now, m.count)) }) : '');
@@ -2271,7 +2331,7 @@ function mobCards(id, r) {
       for (const c of cells) setText(c.task, n ? fmtSpan(taskSeconds(n, c.sec, m.count), true) : '');
     };
     const input = el('input', {
-      class: 'task-in', id: 'task-' + mi, type: 'number', min: 0, max: 99999, step: 1, inputMode: 'numeric', placeholder: '0',
+      class: 'task-in', id: 'task' + tag + '-' + mi, type: 'number', min: 0, max: 99999, step: 1, inputMode: 'numeric', placeholder: '0',
       value: taskGet(id, m.name) || '', 'aria-label': tr('task.aria', { x: m.name }), title: tr('task.tip'),
       oninput: () => { const n = int(input.value, 1, 99999) || 0; taskSet(id, m.name, n); paint(n); },
     });
@@ -2285,7 +2345,7 @@ function mobCards(id, r) {
       el('p', null, tr('mob.time'), el('b', { text: fmtTime(now) }), ' ' + unitName()),
       el('label', { class: 'task' }, el('span', { text: tr('task.label') }), input, el('span', { text: tr('task.kills') }), out, lapsOut),
       el('div', { class: 'steps' }, cells.map(c => el('button', {
-        type: 'button', id: 'step-' + mi + '-' + c.p, class: c.p === ui.pct ? 'on' : null,
+        type: 'button', id: 'step' + tag + '-' + mi + '-' + c.p, class: c.p === pct ? 'on' : null,
         title: tr('step.title', { m: m.name, p: c.p, t: fmtTime(c.sec) + ' ' + unitName() }), onclick: () => select(id, c.p),
       }, el('small', { text: c.p + '%' }), el('span', { text: fmtTime(c.sec) }), c.task))));
   });
@@ -2301,9 +2361,9 @@ function discSet(id, gold) {
 }
 // Preço cheio do bônus em qualquer percentual e duração. O jogo mostra o preço arredondado para a centena.
 const priceAt = (r, pct, dur) => Math.round(r.cost10 * pct / 10 * dur / (r.duration || 60) / 100) * 100;
-const fullCost = r => r.cost10 ? priceAt(r, ui.pct, ui.dur) : null;
+const fullCost = (r, id) => r.cost10 ? priceAt(r, pctOf(id), ui.dur) : null;
 function bonusCost(r, id) {
-  const full = fullCost(r), d = discOf(id);
+  const full = fullCost(r, id), d = discOf(id);
   return full && d && d.on ? Math.max(0, full - d.gold) : full;
 }
 // Preço de 10% por 60 minutos a partir do preço cheio de um print. Como o print vem arredondado, fica o valor mais
@@ -2317,43 +2377,87 @@ function baseCost(full, pct, dur) {
   return null;
 }
 
-// Agrupa os monstros pelo tempo de respawn atual: cada grupo ganha um cronômetro.
-function clockGroups(r) {
-  const groups = new Map();
-  for (const m of r.monsters) {
-    const sec = respawnAt(m.base, ui.pct, ui.party);
-    if (!groups.has(sec)) groups.set(sec, { who: [], base: m.base });
-    const g = groups.get(sec);
-    g.who.push(m.name);
-    g.base = Math.min(g.base, m.base);
-  }
-  for (const k of [...timers.keys()]) if (!groups.has(k)) { cancelSounds(timers.get(k)); timers.delete(k); }
-  for (const [sec, g] of groups) {
-    if (!timers.has(sec)) timers.set(sec, { dur: sec, endAt: null, doneAt: null, nodes: [] });
-    timers.get(sec).base = g.base;   // identifica o grupo na contagem de voltas, qualquer que seja o bônus
-  }
-  return [...groups].sort((a, b) => b[0] - a[0]).map(([sec, g]) => [sec, g.who, g.base]);
+// Agrupa as criaturas de cada respawn aberto pelo tempo de respawn atual: cada grupo ganha um cronômetro.
+// Devolve os grupos na ordem em que aparecem: respawn principal primeiro, do tempo maior para o menor.
+function clockGroups(open) {
+  const out = [], keep = new Set();
+  open.forEach((o, slot) => {
+    const pct = pctOf(o.id);
+    const groups = new Map();
+    for (const m of o.r.monsters) {
+      const sec = respawnAt(m.base, pct, ui.party);
+      if (!groups.has(sec)) groups.set(sec, { who: [], base: m.base });
+      const g = groups.get(sec);
+      g.who.push(m.name);
+      g.base = Math.min(g.base, m.base);
+    }
+    for (const [sec, g] of [...groups].sort((a, b) => b[0] - a[0])) {
+      const key = timerKey(o.id, sec);
+      keep.add(key);
+      if (!timers.has(key)) timers.set(key, { dur: sec, endAt: null, doneAt: null, nodes: [] });
+      // "base" identifica o grupo na contagem de voltas, qualquer que seja o bônus; "label" é o texto da janela flutuante.
+      Object.assign(timers.get(key), { id: o.id, sec, slot, base: g.base, label: g.who.join(', ') + (open.length > 1 ? ' · ' + o.r.name : '') });
+      out.push({ key, sec, who: g.who, base: g.base, id: o.id, slot, area: o.r.name });
+    }
+  });
+  for (const k of [...timers.keys()]) if (!keep.has(k)) { cancelSounds(timers.get(k)); timers.delete(k); }
+  return out;
 }
 
-function buildSheet(id, fixed) {
+const bonusStops = () => PCTS.map(x => ({ value: x, text: x ? tr('bonus.faster', { n: x }) : tr('bonus.none'), short: x ? x + '%' : tr('bonus.noneShort') }));
+
+// Card do custo do bônus de um respawn, com o desconto das tasks quando o print trouxe a faixa de desconto.
+function costCard(id, tag) {
+  const cost = el('p', { class: 'cost' }), note = el('span', { class: 'ctl-val' });
+  const box = el('input', { type: 'checkbox', id: 'ctl-disc' + tag, onchange: e => { const d = discOf(id); if (d) { d.on = e.target.checked; saveUi(); renderSheet(); } } });
+  const text = el('span'), full = el('span', { class: 'ctl-val' });
+  const disc = el('div', { class: 'disc' }, el('label', { class: 'toggle', title: tr('disc.tip') }, box, text), full);
+  return {
+    root: el('div', { class: 'ctl' }, ctlHead(tr('ctl.cost'), note), cost, disc),
+    set(r) {
+      const pct = pctOf(id), value = bonusCost(r, id);
+      cost.replaceChildren(value == null ? tr('cost.unread') : value === 0 ? '0' : fmtInt(value), ...(value ? [coin()] : []));
+      setText(note, value != null && pct ? tr('cost.note', { p: pct, n: ui.dur }) : value === 0 ? tr('bonus.none') : '');
+      // O desconto dá para desligar quando ele acabar.
+      const d = r.cost10 ? discOf(id) : null;
+      disc.hidden = !d;
+      if (d) {
+        box.checked = d.on;
+        setText(text, tr('disc.label', { v: fmtInt(d.gold) }));
+        setText(full, d.on && fullCost(r, id) ? tr('disc.full', { v: fmtInt(fullCost(r, id)) }) : '');
+      }
+    },
+  };
+}
+
+function buildSheet(id, fixed, id2) {
   const { nameInput, head } = sheetHead(id, fixed);
   const p = {
-    id, fixed, nameInput,
+    id, fixed, id2, nameInput,
     stage: el('section', { class: 'stage', 'aria-label': tr('stage.aria') }),
     party: segment('ctl-party', tr('ctl.party'),
       PARTIES.map(x => ({ value: x.mult, text: tr('party.speed', { n: x.mult }), short: tr('party.' + x.mult) })), setParty),
-    bonus: slider('ctl-bonus', tr('ctl.bonus'),
-      PCTS.map(x => ({ value: x, text: x ? tr('bonus.faster', { n: x }) : tr('bonus.none'), short: x ? x + '%' : tr('bonus.noneShort') })), v => select(id, v)),
+    bonus: slider('ctl-bonus', tr('ctl.bonus'), bonusStops(), v => select(id, v)),
     dur: slider('ctl-dur', tr('ctl.dur'),
       DURS.map(d => ({ value: d, text: tr('dur.value', { n: d }), short: d % 30 === 0 ? String(d) : null })), setDur),
-    cost: el('p', { class: 'cost' }),
-    costNote: el('span', { class: 'ctl-val' }),
-    discBox: el('input', { type: 'checkbox', id: 'ctl-disc', onchange: e => { const d = discOf(id); if (d) { d.on = e.target.checked; saveUi(); renderSheet(); } } }),
-    discText: el('span'),
-    discFull: el('span', { class: 'ctl-val' }),
+    cost: costCard(id, ''),
     mobs: el('div', { class: 'mobs' }),
     hint: el('p', { class: 'hint' }),
   };
+  // Segundo respawn: o nome, o percentual de bônus dele, o custo e as criaturas.
+  let second = null;
+  if (id2) {
+    p.name2 = el('h3', { class: 'second-name' });
+    p.bonus2 = slider('ctl-bonus2', tr('ctl.bonus'), bonusStops(), v => select(id2, v));
+    p.cost2 = costCard(id2, '2');
+    p.mobs2 = el('div', { class: 'mobs' });
+    second = el('section', { class: 'second' },
+      el('header', { class: 'second-head' }, p.name2,
+        el('button', { class: 'hunt-link', type: 'button', id: 'second-close', text: tr('duo.close'), onclick: () => pick(id2) })),
+      el('div', { class: 'controls' }, p.bonus2.root, p.cost2.root),
+      el('h3', { class: 'band', text: tr('band') }),
+      p.mobs2);
+  }
   // Em cima o que muda o tempo (grupo e bônus); embaixo o que muda o preço (duração e custo).
   $('#sheet').replaceChildren(
     head,
@@ -2361,11 +2465,10 @@ function buildSheet(id, fixed) {
       p.stage,
       optsBar,
       statusEl,
-      el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root,
-        el('div', { class: 'ctl' }, ctlHead(tr('ctl.cost'), p.costNote), p.cost,
-          p.disc = el('div', { class: 'disc' }, el('label', { class: 'toggle', title: tr('disc.tip') }, p.discBox, p.discText), p.discFull))),
+      el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root, p.cost.root),
       el('h3', { class: 'band', text: tr('band') }),
       p.mobs,
+      second,
       p.hint));
   return p;
 }
@@ -2375,9 +2478,12 @@ const RING = 2 * Math.PI * 52;   // comprimento do anel do cronômetro
 function renderSheet() {
   const sheet = $('#sheet');
   const r = ui.id && getRespawn(ui.id);
+  const id2 = secondId();
+  const r2 = id2 ? getRespawn(id2) : null;
   const loading = pending.seed || pending.db || !!pending.cloud;
   const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id) && !owns(ui.id);
-  const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r, ui.disc[ui.id] || null]);
+  const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r, ui.disc[ui.id] || null,
+    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null]]);
   if (sig === sheetSig) return;
   sheetSig = sig;
   timerEls = new Map();
@@ -2390,35 +2496,38 @@ function renderSheet() {
     return;
   }
   const id = ui.id;
-  if (!parts || parts.id !== id || parts.fixed !== fixed) parts = buildSheet(id, fixed);
+  if (!parts || parts.id !== id || parts.fixed !== fixed || parts.id2 !== id2) parts = buildSheet(id, fixed, id2);
   const focusId = sheet.contains(document.activeElement) ? document.activeElement.id : '';
   if (document.activeElement !== parts.nameInput) parts.nameInput.value = r.name;
 
-  // Cronômetros: um anel por tempo de respawn diferente; o anel vai se fechando até o monstro nascer
-  const clocks = clockGroups(r).map(([sec, who, base]) => {
+  // Cronômetros: um anel por respawn aberto e por tempo de respawn diferente; o anel vai se fechando até a criatura nascer
+  const open = r2 ? [{ id, r }, { id: id2, r: r2 }] : [{ id, r }];
+  const clocks = clockGroups(open).map(({ key, sec, who, base, id: rid, slot, area }) => {
+    const tag = (slot ? 'b' : '') + sec;   // ids dos botões; os do segundo respawn levam um "b"
     const digits = el('b', { class: 'clock-digits', text: fmtTime(sec) });
     const note = el('p', { class: 'clock-note' });
     const ring = el('div', { class: 'ring' });
     ring.innerHTML = '<svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="52"/><circle class="ring-arc" cx="60" cy="60" r="52" transform="rotate(-90 60 60)"/></svg>';
     const arc = ring.querySelector('.ring-arc');
     ring.append(el('div', { class: 'ring-in' }, digits, el('span', { class: 'clock-unit', text: unitName() })));
-    const start = el('button', { class: 'dlg go', type: 'button', id: 'clock-' + sec, text: tr('start'), onclick: () => startTimer(sec) });
+    const start = el('button', { class: 'dlg go', type: 'button', id: 'clock-' + tag, text: tr('start'), onclick: () => startTimer(key) });
     const lapText = el('span', { class: 'lap-count', title: tr('lap.tip') });
-    lapPainters.push(() => setText(lapText, tr('lap.count', { n: lapsGet(id, base) })));
+    lapPainters.push(() => setText(lapText, tr('lap.count', { n: lapsGet(rid, base) })));
     const laps = el('div', { class: 'laps' },
-      el('button', { type: 'button', id: 'lap-less-' + sec, text: '−', 'aria-label': tr('lap.less'), title: tr('lap.less'),
-        onclick: () => lapsSet(id, base, Math.max(0, lapsGet(id, base) - 1)) }),
+      el('button', { type: 'button', id: 'lap-less-' + tag, text: '−', 'aria-label': tr('lap.less'), title: tr('lap.less'),
+        onclick: () => lapsSet(rid, base, Math.max(0, lapsGet(rid, base) - 1)) }),
       lapText,
-      el('button', { type: 'button', id: 'lap-more-' + sec, text: '+', 'aria-label': tr('lap.more'), title: tr('lap.more'),
-        onclick: () => lapsSet(id, base, lapsGet(id, base) + 1) }),
-      el('button', { class: 'hunt-link', type: 'button', id: 'lap-zero-' + sec, text: tr('lap.reset'), onclick: () => lapsSet(id, base, 0) }));
+      el('button', { type: 'button', id: 'lap-more-' + tag, text: '+', 'aria-label': tr('lap.more'), title: tr('lap.more'),
+        onclick: () => lapsSet(rid, base, lapsGet(rid, base) + 1) }),
+      el('button', { class: 'hunt-link', type: 'button', id: 'lap-zero-' + tag, text: tr('lap.reset'), onclick: () => lapsSet(rid, base, 0) }));
     const root = el('article', { class: ui.unit === 'm' ? 'clock mmss' : 'clock', 'data-state': 'idle' },
       ring,
       note,
       el('p', { class: 'clock-who', text: who.join(', ') }),
-      el('div', { class: 'clock-actions' }, start, el('button', { class: 'dlg stop', type: 'button', text: tr('reset'), onclick: () => resetTimer(sec) })),
+      r2 ? el('p', { class: 'clock-area', text: area }) : null,   // com dois respawns, de qual deles é o cronômetro
+      el('div', { class: 'clock-actions' }, start, el('button', { class: 'dlg stop', type: 'button', text: tr('reset'), onclick: () => resetTimer(key) })),
       laps);
-    timerEls.set(sec, { root, digits, note, start, setFrac: f => { arc.style.strokeDashoffset = (RING * (1 - f)).toFixed(2); } });
+    timerEls.set(key, { root, digits, note, start, setFrac: f => { arc.style.strokeDashoffset = (RING * (1 - f)).toFixed(2); } });
     return root;
   });
   parts.stage.replaceChildren(el('div', { class: 'clocks' }, clocks), stageAll(clocks.length > 1));
@@ -2427,19 +2536,14 @@ function renderSheet() {
   parts.party.set(PARTIES.findIndex(p => p.mult === ui.party));
   parts.bonus.set(PCTS.indexOf(ui.pct));
   parts.dur.set(DURS.indexOf(ui.dur));
-  const cost = bonusCost(r, id);
-  parts.cost.replaceChildren(cost == null ? tr('cost.unread') : cost === 0 ? '0' : fmtInt(cost), ...(cost ? [coin()] : []));
-  setText(parts.costNote, cost != null && ui.pct ? tr('cost.note', { p: ui.pct, n: ui.dur }) : cost === 0 ? tr('bonus.none') : '');
-  // Desconto das tasks: aparece quando o print trouxe a faixa de desconto; dá para desligar quando ele acabar.
-  const disc = r.cost10 ? discOf(id) : null;
-  parts.disc.hidden = !disc;
-  if (disc) {
-    parts.discBox.checked = disc.on;
-    setText(parts.discText, tr('disc.label', { v: fmtInt(disc.gold) }));
-    setText(parts.discFull, disc.on && fullCost(r) ? tr('disc.full', { v: fmtInt(fullCost(r)) }) : '');
-  }
-
+  parts.cost.set(r);
   parts.mobs.replaceChildren(...mobCards(id, r));
+  if (r2) {
+    setText(parts.name2, tr('duo.second', { x: r2.name }));
+    parts.bonus2.set(PCTS.indexOf(ui.pct2));
+    parts.cost2.set(r2);
+    parts.mobs2.replaceChildren(...mobCards(id2, r2));
+  }
   setText(parts.hint, sheetHint(r));
 
   if (focusId && document.activeElement.id !== focusId) { const f = document.getElementById(focusId); if (f) f.focus(); }
@@ -2460,11 +2564,12 @@ async function rename(id, input) {
   }
   const share = owns(id) || cloud.queue.has(id);
   if (nid !== id) {
-    const keep = new Map(timers);
+    const keep = [...timers.values()];
+    const was = { id2: ui.id2, pct: ui.pct, pct2: ui.pct2 };   // tirar o respawn antigo não pode mexer no segundo
     await removeRespawn(id);
     if (ui.disc[id]) { ui.disc[nid] = ui.disc[id]; delete ui.disc[id]; }
-    ui.id = nid; saveUi();
-    for (const [k, v] of keep) { timers.set(k, v); scheduleSounds(v); }
+    Object.assign(ui, was, { id: nid }); saveUi();
+    for (const v of keep) { if (v.id === id) v.id = nid; timers.set(timerKey(v.id, v.sec), v); scheduleSounds(v); }
   }
   saveRespawn(nid, { ...r, name }, share);
 }
@@ -2472,8 +2577,12 @@ async function rename(id, input) {
 function renderAll() {
   // A seleção só muda depois que o banco terminou de carregar: antes disso o respawn salvo pode não ter chegado.
   if (!pending.seed && !pending.db && !pending.cloud && !getRespawn(ui.id)) {
-    const first = bankShort(allRespawns())[0];
-    ui.id = first ? first.id : null;
+    if (ui.duo && ui.id2 && getRespawn(ui.id2)) {   // o principal sumiu: o segundo assume
+      ui.id = ui.id2; ui.id2 = null; [ui.pct, ui.pct2] = [ui.pct2, ui.pct];
+    } else {
+      const first = bankShort(allRespawns())[0];
+      ui.id = first ? first.id : null;
+    }
   }
   renderSync();
   renderBank();
@@ -2562,6 +2671,9 @@ document.addEventListener('keydown', e => {
   startAll();
 });
 $('#search').addEventListener('input', renderBank);
+$('#opt-duo').checked = ui.duo;
+$('#duo-hint').hidden = !ui.duo;
+$('#opt-duo').addEventListener('change', e => setDuo(e.target.checked));
 
 /* ---------- Cópia de segurança ---------- */
 function fillBackup() {
@@ -2947,6 +3059,11 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 09:30',
+    pt: ['Dois respawns ao mesmo tempo: marque "Abrir dois respawns" e escolha dois na lista para ter os cronômetros de todas as criaturas dos dois, cada respawn com o seu percentual de bônus.', 'Os textos do site passam a dizer "criaturas" em vez de "monstros".'],
+    en: ['Two respawns at once: tick "Open two respawns" and pick two in the list to get the timers of every creature of both, each respawn with its own bonus percentage.', 'The site now says "creatures" instead of "monsters".'],
+    es: ['Dos respawns a la vez: marca "Abrir dos respawns" y elige dos en la lista para tener los cronómetros de todas las criaturas de ambos, cada respawn con su porcentaje de bonus.', 'Los textos del sitio ahora dicen "criaturas" en lugar de "monstruos".'],
+  },
   { at: '2026-10-08 23:37',
     pt: ['Link para as Novidades no topo da página, abaixo do link do mapper.'],
     en: ['Link to What is new at the top of the page, below the mapper link.'],
@@ -2963,9 +3080,9 @@ const CHANGES = [
     es: ['Descuento de tareas: el valor en oro es fijo, igual que en el juego, en cualquier porcentaje y duración.', 'Coste del bonus redondeado a la centena, como lo muestra el juego.'],
   },
   { at: '2026-10-08 23:09',
-    pt: ['Desconto das tasks: quando o print traz a faixa "Desconto disponível", o site aplica o desconto ao custo do bônus e mostra o preço sem desconto. Dá para desligar quando o desconto acabar.', 'Leitura do print: quando o tempo de um monstro não é lido, o site relê só aquele monstro e avisa se mesmo assim não conseguir.'],
-    en: ['Task discount: when the screenshot has the "Discount available" band, the site applies the discount to the bonus cost and shows the price without it. You can switch it off when the discount ends.', 'Screenshot reading: when a monster time is not read, the site reads that monster again on its own and tells you if it still fails.'],
-    es: ['Descuento de tareas: cuando la captura trae la franja "Descuento disponible", el sitio aplica el descuento al coste del bonus y muestra el precio sin descuento. Puedes desactivarlo cuando el descuento termine.', 'Lectura de la captura: cuando no se lee el tiempo de un monstruo, el sitio vuelve a leer solo ese monstruo y avisa si aun así no lo consigue.'],
+    pt: ['Desconto das tasks: quando o print traz a faixa "Desconto disponível", o site aplica o desconto ao custo do bônus e mostra o preço sem desconto. Dá para desligar quando o desconto acabar.', 'Leitura do print: quando o tempo de uma criatura não é lido, o site relê só aquela criatura e avisa se mesmo assim não conseguir.'],
+    en: ['Task discount: when the screenshot has the "Discount available" band, the site applies the discount to the bonus cost and shows the price without it. You can switch it off when the discount ends.', 'Screenshot reading: when a creature time is not read, the site reads that creature again on its own and tells you if it still fails.'],
+    es: ['Descuento de tareas: cuando la captura trae la franja "Descuento disponible", el sitio aplica el descuento al coste del bonus y muestra el precio sin descuento. Puedes desactivarlo cuando el descuento termine.', 'Lectura de la captura: cuando no se lee el tiempo de una criatura, el sitio vuelve a leer solo esa criatura y avisa si aun así no lo consigue.'],
   },
   { at: '2026-10-08 23:00',
     pt: ['Pausa entre voltas: com "Repetir ao zerar" ligado, o cronômetro espera os segundos que você definir antes de recomeçar.', 'Botão "Apoiar o projeto" no topo da página.', 'Esta lista de novidades.', 'A lista de respawns mostra só os três últimos abertos; os demais aparecem ao buscar.', 'Sorteio de itens entre os jogadores da última hunt ou entre nomes digitados.'],
@@ -3003,9 +3120,9 @@ const CHANGES = [
     es: ['Sitio en portugués, inglés y español.', 'Tres tipos de alerta sonora: Campana, Pitido y Cuerno.', 'Tiempos en segundos o en minutos.', 'Porcentaje de bonus en barra deslizante.', 'Ventana flotante con botón Restablecer en cada cronómetro.'],
   },
   { at: '2026-10-08 16:20',
-    pt: ['Visual novo, com os cronômetros em anéis que se fecham até o monstro nascer.'],
-    en: ['New look, with timers as rings that close until the monster spawns.'],
-    es: ['Nuevo aspecto, con los cronómetros en anillos que se cierran hasta que nace el monstruo.'],
+    pt: ['Visual novo, com os cronômetros em anéis que se fecham até a criatura nascer.'],
+    en: ['New look, with timers as rings that close until the creature spawns.'],
+    es: ['Nuevo aspecto, con los cronómetros en anillos que se cierran hasta que nace la criatura.'],
   },
   { at: '2026-10-08 16:01',
     pt: ['Duração do bônus de 30 a 180 minutos, com o custo calculado.', 'Faixa no topo explicando que basta um Ctrl + V com o print.', 'Assinatura Vibeforge no cabeçalho.'],
