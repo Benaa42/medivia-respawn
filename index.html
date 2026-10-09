@@ -230,6 +230,10 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .clock-who { font-weight: 600; color: var(--amber); overflow-wrap: anywhere; }
 .clock-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: auto; padding-top: 10px; }
 .clock-float { margin-top: 8px; font-size: 13px; color: var(--label); }
+/* Comando de voz: o ponto verde mostra que o site está ouvindo; o número no canto do anel é o que se fala */
+.toggle.voice.live span::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 7px; border-radius: 50%; background: var(--value); }
+.voice-note { flex: 1 0 100%; order: 9; max-width: 78ch; font-size: 13px; color: var(--label); }
+.clock-n { position: absolute; top: 0; left: 0; min-width: 24px; border-radius: 999px; background: var(--card); color: var(--title); font: 700 13px/1.85 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; text-align: center; }
 .clock-float input:disabled { opacity: 0.5; }
 /* Cronômetros lado a lado ficam alinhados linha a linha (anel, nota, nomes, respawn, botões, voltas), mesmo quando
    os nomes de um deles ocupam mais linhas. Sem subgrid no navegador, os botões ao menos descem para o pé do bloco. */
@@ -565,7 +569,9 @@ details.backup textarea {
             <option value="message" data-i18n="tone.message">Mensagem</option>
             <option value="onscreen" data-i18n="tone.onscreen">Jogador na tela</option>
           </select>
+          <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <span data-i18n="voice.label">Comando de voz</span></label>
         </div>
+        <p class="voice-note" id="voice-note" role="status" hidden></p>
         <div class="dlgs">
           <button class="dlg go" type="button" id="float-btn" data-i18n="float">Janela flutuante</button>
           <button class="dlg go" type="button" id="read-btn" data-i18n="read">Ler print</button>
@@ -849,6 +855,19 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'voice.nomic': 'Nenhum microfone encontrado. Ligue um microfone e marque o comando de voz de novo.',
+    'voice.network': 'Voz: o serviço de reconhecimento do navegador não respondeu. Só funciona no Chrome e no Edge, com internet.',
+    'voice.label': 'Comando de voz',
+    'voice.info': 'Comando de voz ligado. Só funciona no Chrome e no Edge, e com internet: a fala é reconhecida pelo serviço do navegador. Diga "iniciar" ou "iniciar todos" para todos os cronômetros, "iniciar um" ou "iniciar dois" para um só, e "zerar" ou "zerar um".',
+    'voice.unsupported': 'O comando de voz só funciona no Chrome e no Edge. Este navegador não tem reconhecimento de voz.',
+    'voice.denied': 'O navegador não liberou o microfone. Libere o microfone para este site e ligue o comando de voz de novo. Ele só funciona no Chrome e no Edge.',
+    'voice.did.start': 'Voz: cronômetros iniciados.',
+    'voice.did.startOne': 'Voz: cronômetro {n} iniciado.',
+    'voice.did.reset': 'Voz: cronômetros zerados.',
+    'voice.did.resetOne': 'Voz: cronômetro {n} zerado.',
+    'voice.noTimer': 'Voz: não há cronômetro {n}.',
+    'voice.on': 'voz ligada',
+    'voice.num': 'Cronômetro {n} no comando de voz',
     'float.show': 'Na janela flutuante',
     'float.showTip': 'Desmarque para este cronômetro não aparecer na janela flutuante',
     'err.mapperRows': 'Reconheci o print do mapper, mas não consegui ler a tabela de criaturas: o texto do painel está pequeno demais. Aumente o zoom do navegador na página do mapper (Ctrl e +) e tire outro print.',
@@ -1136,6 +1155,19 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'voice.nomic': 'No microphone found. Connect a microphone and turn voice command on again.',
+    'voice.network': 'Voice: the browser\'s recognition service did not answer. It only works in Chrome and Edge, with an internet connection.',
+    'voice.label': 'Voice command',
+    'voice.info': 'Voice command on. It only works in Chrome and Edge, and with an internet connection: speech is recognised by the browser\'s service. Say "start" or "start all" for every timer, "start one" or "start two" for a single one, and "reset" or "reset one".',
+    'voice.unsupported': 'Voice command only works in Chrome and Edge. This browser has no speech recognition.',
+    'voice.denied': 'The browser did not allow the microphone. Allow the microphone for this site and turn voice command on again. It only works in Chrome and Edge.',
+    'voice.did.start': 'Voice: timers started.',
+    'voice.did.startOne': 'Voice: timer {n} started.',
+    'voice.did.reset': 'Voice: timers reset.',
+    'voice.did.resetOne': 'Voice: timer {n} reset.',
+    'voice.noTimer': 'Voice: there is no timer {n}.',
+    'voice.on': 'voice on',
+    'voice.num': 'Timer {n} for voice command',
     'float.show': 'In the floating window',
     'float.showTip': 'Untick to keep this timer out of the floating window',
     'err.mapperRows': 'This is a mapper screenshot, but the creature table could not be read: the panel text is too small. Zoom in on the mapper page in your browser (Ctrl and +) and take another screenshot.',
@@ -1423,6 +1455,19 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'voice.nomic': 'No se encontró ningún micrófono. Conecta un micrófono y activa de nuevo el comando de voz.',
+    'voice.network': 'Voz: el servicio de reconocimiento del navegador no respondió. Solo funciona en Chrome y Edge, con internet.',
+    'voice.label': 'Comando de voz',
+    'voice.info': 'Comando de voz activado. Solo funciona en Chrome y Edge, y con internet: el habla la reconoce el servicio del navegador. Di "iniciar" o "iniciar todos" para todos los cronómetros, "iniciar uno" o "iniciar dos" para uno solo, y "restablecer" o "restablecer uno".',
+    'voice.unsupported': 'El comando de voz solo funciona en Chrome y Edge. Este navegador no tiene reconocimiento de voz.',
+    'voice.denied': 'El navegador no permitió el micrófono. Permite el micrófono para este sitio y activa de nuevo el comando de voz. Solo funciona en Chrome y Edge.',
+    'voice.did.start': 'Voz: cronómetros iniciados.',
+    'voice.did.startOne': 'Voz: cronómetro {n} iniciado.',
+    'voice.did.reset': 'Voz: cronómetros restablecidos.',
+    'voice.did.resetOne': 'Voz: cronómetro {n} restablecido.',
+    'voice.noTimer': 'Voz: no hay cronómetro {n}.',
+    'voice.on': 'voz activada',
+    'voice.num': 'Cronómetro {n} en el comando de voz',
     'float.show': 'En la ventana flotante',
     'float.showTip': 'Desmarca para que este cronómetro no aparezca en la ventana flotante',
     'err.mapperRows': 'Reconocí la captura del mapper, pero no pude leer la tabla de criaturas: el texto del panel es demasiado pequeño. Aumenta el zoom del navegador en la página del mapper (Ctrl y +) y haz otra captura.',
@@ -1710,6 +1755,19 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'voice.nomic': 'Nie znaleziono mikrofonu. Podłącz mikrofon i włącz polecenia głosowe ponownie.',
+    'voice.network': 'Głos: usługa rozpoznawania mowy przeglądarki nie odpowiedziała. Działa tylko w Chrome i Edge, z internetem.',
+    'voice.label': 'Polecenia głosowe',
+    'voice.info': 'Polecenia głosowe włączone. Działają tylko w Chrome i Edge, i z internetem: mowę rozpoznaje usługa przeglądarki. Powiedz „start” lub „start wszystkie” dla wszystkich liczników, „start jeden” lub „start dwa” dla jednego, oraz „zeruj” lub „zeruj jeden”.',
+    'voice.unsupported': 'Polecenia głosowe działają tylko w Chrome i Edge. Ta przeglądarka nie ma rozpoznawania mowy.',
+    'voice.denied': 'Przeglądarka nie zezwoliła na mikrofon. Zezwól tej stronie na mikrofon i włącz polecenia głosowe ponownie. Działają tylko w Chrome i Edge.',
+    'voice.did.start': 'Głos: liczniki uruchomione.',
+    'voice.did.startOne': 'Głos: licznik {n} uruchomiony.',
+    'voice.did.reset': 'Głos: liczniki wyzerowane.',
+    'voice.did.resetOne': 'Głos: licznik {n} wyzerowany.',
+    'voice.noTimer': 'Głos: nie ma licznika {n}.',
+    'voice.on': 'głos włączony',
+    'voice.num': 'Licznik {n} w poleceniach głosowych',
     'float.show': 'W pływającym oknie',
     'float.showTip': 'Odznacz, aby ten licznik nie pojawiał się w pływającym oknie',
     'err.mapperRows': 'To zrzut z mappera, ale nie udało się odczytać tabeli stworzeń: tekst w panelu jest za mały. Powiększ stronę mappera w przeglądarce (Ctrl i +) i zrób kolejny zrzut.',
@@ -2633,7 +2691,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {} }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PCTS.includes(ui.pct2)) ui.pct2 = ui.pct;
 ui.duo = ui.duo === true;
@@ -2651,6 +2709,7 @@ if (typeof ui.raffleNames !== 'string') ui.raffleNames = '';
 if (ui.raffleMode !== 'room') ui.raffleMode = 'names';
 if (!/^\d{4,6}$/.test(ui.room || '')) ui.room = null;
 if (typeof ui.rollName !== 'string') ui.rollName = '';
+ui.voice = false;   // o microfone nunca liga sozinho ao abrir a página: a pessoa marca a opção a cada visita
 if (!ui.floatHide || typeof ui.floatHide !== 'object' || Array.isArray(ui.floatHide)) ui.floatHide = {};
 if (!ui.huntExtra || typeof ui.huntExtra !== 'object' || Array.isArray(ui.huntExtra)) ui.huntExtra = {};
 ui.pause = int(ui.pause, 0, 600) || 0;   // segundos de espera entre uma volta e outra, com "Repetir ao zerar"
@@ -2796,6 +2855,7 @@ function setLang(lang) {
   renderAll();
   renderHunt();
   renderRoom();
+  voiceLang();
 }
 
 // Voltas: cada vez que o cronômetro de um grupo é iniciado conta uma volta, ou seja, uma limpa do respawn.
@@ -2930,12 +2990,12 @@ function keepAwake() {
     navigator.wakeLock.request('screen').then(w => { wake = w; w.addEventListener('release', () => { wake = null; }); }).catch(() => {});
   }
 }
-function startTimer(key) {
+function startTimer(key, at) {   // "at": de quando contar (o comando de voz conta do começo da fala); sem ele, agora
   const t = timers.get(key);
   if (!t) return;
   armAudio();
   keepAwake();
-  t.endAt = Date.now() + t.dur * 1000;
+  t.endAt = (at || Date.now()) + t.dur * 1000;
   t.doneAt = null;
   t.pauseUntil = null;
   scheduleSounds(t);
@@ -3014,9 +3074,11 @@ setInterval(tick, 250);
 const float = { win: null, list: null, all: null, none: null, rowEls: new Map(), sig: '', canvas: null, video: null };
 // Na mesma ordem da página: primeiro o respawn principal, e em cada um do tempo maior para o menor.
 // Só os cronômetros que a pessoa deixou na janela flutuante; se tirou todos, aparecem todos (ela nunca fica vazia).
+// Todos os cronômetros, na ordem em que aparecem na página.
+const groupsAll = () => [...timers].map(([key, t]) => ({ key, sec: t.sec, t, who: t.label || '' }))
+  .sort((a, b) => (a.t.slot - b.t.slot) || (b.sec - a.sec));
 function groupsNow() {
-  const all = [...timers].map(([key, t]) => ({ key, sec: t.sec, t, who: t.label || '' }))
-    .sort((a, b) => (a.t.slot - b.t.slot) || (b.sec - a.sec));
+  const all = groupsAll();
   const shown = all.filter(g => !floatOff(g.t.id, g.t.base));
   return shown.length ? shown : all;
 }
@@ -3040,6 +3102,7 @@ function paintFloat(now) {
       }));
       float.all.hidden = float.none.hidden = gs.length < 2;
     }
+    if (float.voice) setText(float.voice, voice.on ? tr('voice.on') : '');
     for (const g of gs) {
       const e = float.rowEls.get(g.key);
       const v = timerView(g.t, now);
@@ -3091,16 +3154,18 @@ async function toggleFloat() {
           'button:hover{border-color:var(--teal)}' +
           '.f-btns{display:flex;flex:none;flex-direction:column;gap:4px}' +
           'button.zero{border-color:var(--edge);color:var(--label)}' +
-          'button.all{margin-top:10px;width:100%}button.all+button.all{margin-top:6px}' }));
+          'button.all{margin-top:10px;width:100%}button.all+button.all{margin-top:6px}' +
+          'p.voice{margin:8px 0 0;font-size:12px;color:var(--label)}' }));
       float.list = el('div');
       float.all = el('button', { class: 'all', type: 'button', text: tr('startAll'), onclick: () => { for (const g of groupsNow()) startTimer(g.key); } });
       float.none = el('button', { class: 'all zero', type: 'button', text: tr('resetAll'), onclick: () => { for (const g of groupsNow()) resetTimer(g.key); } });
       float.sig = null;
-      w.document.body.append(float.list, float.all, float.none);
+      float.voice = el('p', { class: 'voice' });
+      w.document.body.append(float.list, float.all, float.none, float.voice);
       w.document.addEventListener('pointerdown', armAudio);
       // A janela flutuante está sempre visível, então o relógio dela não é freado quando a aba fica atrás do jogo.
       w.setInterval(tick, 250);
-      w.addEventListener('pagehide', () => { float.win = null; float.list = null; float.all = null; float.none = null; });
+      w.addEventListener('pagehide', () => { float.win = null; float.list = null; float.all = null; float.none = null; float.voice = null; });
       float.win = w;
       tick();
       return;
@@ -3412,7 +3477,7 @@ function renderSheet() {
   const loading = pending.seed || pending.db || !!pending.cloud;
   const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id) && !owns(ui.id);
   const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r, ui.disc[ui.id] || null,
-    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null], ui.floatHide[ui.id] || null, id2 && ui.floatHide[id2] || null]);
+    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null], ui.floatHide[ui.id] || null, id2 && ui.floatHide[id2] || null, ui.voice]);
   if (sig === sheetSig) return;
   sheetSig = sig;
   timerEls = new Map();
@@ -3434,7 +3499,7 @@ function renderSheet() {
   // Com mais de um cronômetro, cada um tem a caixa "Na janela flutuante"; o último que resta nela não pode sair.
   const groups = clockGroups(open), many = groups.length > 1;
   const inFloat = groups.filter(g => !floatOff(g.id, g.base)).length;
-  const clocks = groups.map(({ key, sec, who, base, id: rid, slot, area }) => {
+  const clocks = groups.map(({ key, sec, who, base, id: rid, slot, area }, index) => {
     const tag = (slot ? 'b' : '') + sec;   // ids dos botões; os do segundo respawn levam um "b"
     const off = floatOff(rid, base);
     const digits = el('b', { class: 'clock-digits', text: fmtTime(sec) });
@@ -3443,6 +3508,7 @@ function renderSheet() {
     ring.innerHTML = '<svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="52"/><circle class="ring-arc" cx="60" cy="60" r="52" transform="rotate(-90 60 60)"/></svg>';
     const arc = ring.querySelector('.ring-arc');
     ring.append(el('div', { class: 'ring-in' }, digits, el('span', { class: 'clock-unit', text: unitName() })));
+    if (ui.voice && many) ring.append(el('span', { class: 'clock-n', title: tr('voice.num', { n: index + 1 }), text: index + 1 }));   // o número que se fala no comando de voz
     const start = el('button', { class: 'dlg go', type: 'button', id: 'clock-' + tag, text: tr('start'), onclick: () => startTimer(key) });
     const lapText = el('span', { class: 'lap-count', title: tr('lap.tip') });
     lapPainters.push(() => setText(lapText, tr('lap.count', { n: lapsGet(rid, base) })));
@@ -4070,6 +4136,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 16:55',
+    pt: ['Comando de voz (Chrome e Edge): com a opção ligada, diga "iniciar", "iniciar um", "iniciar dois" ou "zerar" para comandar os cronômetros sem sair do jogo.'],
+    en: ['Voice command (Chrome and Edge): with the option on, say "start", "start one", "start two" or "reset" to drive the timers without leaving the game.'],
+    es: ['Comando de voz (Chrome y Edge): con la opción activada, di "iniciar", "iniciar uno", "iniciar dos" o "restablecer" para manejar los cronómetros sin salir del juego.'],
+    pl: ['Polecenia głosowe (Chrome i Edge): po włączeniu opcji powiedz „start”, „start jeden”, „start dwa” lub „zeruj”, aby sterować licznikami bez wychodzenia z gry.'],
+  },
   { at: '2026-10-09 16:20',
     pt: ['Janela flutuante: quando o respawn tem mais de um cronômetro, cada um tem a caixa "Na janela flutuante" para escolher quais aparecem nela.'],
     en: ['Floating window: when a respawn has more than one timer, each has an "In the floating window" box to choose which ones show there.'],
@@ -4118,7 +4190,7 @@ const CHANGES = [
     es: ['Salas de sorteo: el dado D100 ahora rueda en pantalla y se detiene en el número obtenido.', 'Cada persona de la ronda tiene su dado en la mesa, de un color distinto.'],
     pl: ['Pokoje losowania: kość k100 toczy się teraz po ekranie i zatrzymuje na wylosowanej liczbie.', 'Każda osoba w rundzie ma na stole własną kość w innym kolorze.'],
   },
-  { at: '2026-10-09 12:00',
+  { at: '2026-10-09 16:55',
     pt: ['Novo alerta sonoro: Jogador na tela.', 'Alerta Batimento mais curto.'],
     en: ['New alert sound: Player on screen.', 'Shorter Heartbeat alert.'],
     es: ['Nueva alerta sonora: Jugador en pantalla.', 'Alerta Latido más corta.'],
@@ -5029,6 +5101,106 @@ optTone.addEventListener('change', () => {
   preview();
   for (const t of timers.values()) scheduleSounds(t);
 });
+/* ---------- Comando de voz ----------
+   Com a opção ligada, o site ouve o microfone pelo reconhecimento de voz do navegador (só o Chrome e o Edge têm) e
+   obedece a comandos curtos, no idioma do site: iniciar todos, iniciar um cronômetro pelo número e zerar.
+   O número é a ordem dos cronômetros na página, mostrada ao lado de cada um.
+   Só vale a fala que é o comando e mais nada: numa conversa ("vou iniciar a hunt agora") nada acontece.
+   O navegador só entrega a frase pronta perto de um segundo depois; por isso o cronômetro conta de quando a fala começou. */
+const VOICE = {
+  pt: { lang: 'pt-BR', start: ['iniciar', 'inicia', 'inicie'], reset: ['zerar', 'zera', 'zere'], all: ['todos', 'tudo'], skip: ['o', 'os', 'cronometro', 'cronometros', 'timer', 'numero'],
+    nums: [['um', 'uma', 'hum'], ['dois', 'duas'], ['tres'], ['quatro'], ['cinco'], ['seis']] },
+  en: { lang: 'en-US', start: ['start'], reset: ['reset'], all: ['all', 'everything'], skip: ['the', 'timer', 'timers', 'number'],
+    nums: [['one', 'won'], ['two', 'too', 'to'], ['three'], ['four', 'for'], ['five'], ['six']] },
+  es: { lang: 'es-ES', start: ['iniciar', 'inicia', 'inicie'], reset: ['restablecer', 'restablece'], all: ['todos', 'todo'], skip: ['el', 'los', 'cronometro', 'cronometros', 'numero'],
+    nums: [['uno', 'un', 'una'], ['dos'], ['tres'], ['cuatro'], ['cinco'], ['seis']] },
+  pl: { lang: 'pl-PL', start: ['start', 'startuj'], reset: ['zeruj', 'wyzeruj'], all: ['wszystkie', 'wszystko', 'wszystkich'], skip: ['licznik', 'liczniki', 'numer'],
+    nums: [['jeden', 'raz'], ['dwa'], ['trzy'], ['cztery'], ['piec'], ['szesc']] },
+};
+const speechClass = () => window.SpeechRecognition || window.webkitSpeechRecognition;
+const voice = { rec: null, on: false, note: null, heardAt: 0, wait: 0, seen: new Map(), handled: -1 };
+// Entende uma fala. Devolve { cmd: 'start' ou 'reset', n: número do cronômetro (0 = todos) }, ou null se não for comando.
+function voiceParse(text) {
+  const v = VOICE[ui.lang] || VOICE.en;
+  const toks = String(text).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').split(' ').filter(t => t && !v.skip.includes(t));
+  if (!toks.length || toks.length > 2) return null;   // comando é uma palavra, ou duas com o número ou "todos"; o resto é conversa
+  const cmd = v.start.includes(toks[0]) ? 'start' : v.reset.includes(toks[0]) ? 'reset' : null;
+  if (!cmd) return null;
+  if (toks.length === 1 || v.all.includes(toks[1])) return { cmd, n: 0 };
+  const i = v.nums.findIndex(w => w.includes(toks[1]));
+  const n = i >= 0 ? i + 1 : /^[1-9]$/.test(toks[1]) ? +toks[1] : 0;   // o navegador às vezes escreve o número em algarismo
+  return n ? { cmd, n } : null;
+}
+function voiceRun(c, at) {
+  const keys = groupsAll().map(g => g.key);
+  if (!keys.length) return;
+  if (c.n > keys.length) { setStatus('err', tr('voice.noTimer', { n: c.n })); return; }
+  for (const key of c.n ? [keys[c.n - 1]] : keys) { if (c.cmd === 'start') startTimer(key, at); else resetTimer(key); }
+  setStatus('ok', tr('voice.did.' + c.cmd + (c.n ? 'One' : ''), { n: c.n }));
+  if (ui.sound && audio) for (const [wave, freq, delay, len, vol] of TONES.sino.warn) tone(freq, delay, len, vol, wave);   // um toque curto confirma que ouviu
+}
+function voiceListen() {
+  const rec = new (speechClass())();
+  rec.lang = (VOICE[ui.lang] || VOICE.en).lang;
+  rec.continuous = true;
+  rec.interimResults = true;   // o texto parcial não comanda nada: serve para saber quando a fala começou
+  rec.maxAlternatives = 3;
+  voice.seen = new Map();
+  voice.handled = -1;
+  rec.onspeechstart = () => { voice.heardAt = Date.now(); };
+  rec.onresult = e => {
+    const now = Date.now();
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (!voice.seen.has(i)) voice.seen.set(i, now);
+      const r = e.results[i];
+      if (!r.isFinal || i <= voice.handled) continue;
+      voice.handled = i;
+      let c = null;
+      for (let k = 0; k < r.length && !c; k++) c = voiceParse(r[k].transcript);
+      if (!c) continue;
+      // De quando contar: o aviso de começo de fala do navegador, se foi desta frase, ou um pouco antes do primeiro texto dela.
+      const first = voice.seen.get(i);
+      const began = voice.heardAt <= first && first - voice.heardAt < 1500 ? voice.heardAt : first - 400;
+      voiceRun(c, Math.max(now - 4000, Math.min(now, began)));
+    }
+  };
+  rec.onerror = e => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') setVoice(false, 'voice.denied');
+    else if (e.error === 'audio-capture') setVoice(false, 'voice.nomic');
+    else if (e.error === 'network') { voice.wait = 5000; setStatus('err', tr('voice.network')); }   // sem o serviço: tenta de novo com calma
+  };
+  // O navegador encerra a escuta depois de um tempo em silêncio: ela é religada enquanto a opção estiver marcada.
+  rec.onend = () => {
+    if (voice.rec !== rec) return;
+    const wait = voice.wait || 300;
+    voice.wait = 0;
+    setTimeout(() => { if (voice.on && voice.rec === rec) voiceListen(); }, wait);
+  };
+  voice.rec = rec;
+  try { rec.start(); } catch { /* já estava ouvindo */ }
+}
+// Liga ou desliga. "note" é o aviso que fica na tela com a opção desligada (navegador sem voz, microfone negado).
+function setVoice(on, note) {
+  if (on && !speechClass()) { on = false; note = 'voice.unsupported'; }
+  voice.on = ui.voice = on;
+  $('#opt-voice').checked = on;
+  $('#opt-voice-wrap').classList.toggle('live', on);
+  if (voice.rec) { const old = voice.rec; voice.rec = null; try { old.abort(); } catch { /* já tinha parado */ } }
+  if (on) voiceListen();
+  voice.note = on ? 'voice.info' : note || null;
+  $('#voice-note').hidden = !voice.note;
+  setText($('#voice-note'), voice.note ? tr(voice.note) : '');
+  renderSheet();   // os números ao lado dos cronômetros aparecem ou somem
+  tick();
+}
+// Idioma novo: a escuta recomeça nele e o aviso é reescrito.
+function voiceLang() {
+  if (voice.on) setVoice(true);
+  else setText($('#voice-note'), voice.note ? tr(voice.note) : '');
+}
+// O clique que liga a voz também libera o som do navegador: depois os cronômetros são iniciados sem clique nenhum.
+$('#opt-voice').addEventListener('change', e => { if (e.target.checked) armAudio(); setVoice(e.target.checked); });
+
 for (const b of document.querySelectorAll('.lang button')) b.addEventListener('click', () => setLang(b.dataset.lang));
 $('#float-btn').addEventListener('click', toggleFloat);
 $('#read-btn').addEventListener('click', () => $('#file').click());
