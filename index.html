@@ -116,6 +116,7 @@ kbd {
 .room-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 /* Mesa onde os dados rolam */
 .room-tray { display: block; width: 100%; height: 136px; border-radius: var(--r-md); background: var(--ground); }
+.die-dot { display: inline-block; width: 9px; height: 9px; margin-right: 6px; border-radius: 50%; }
 .room-chips li { padding: 3px 10px; border: 1px solid var(--edge); border-radius: 999px; font-size: 13px; color: var(--title); overflow-wrap: anywhere; }
 .room-chips li.rolled { border-color: var(--value); color: var(--value); }
 .room-chips li.rolled::before { content: "✓ "; }
@@ -3679,11 +3680,11 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
-  { at: '2026-10-09 12:20',
-    pt: ['Salas de sorteio: o dado D100 agora rola na tela e para no número sorteado.', 'Cada pessoa da rodada tem o seu dado na mesa.'],
-    en: ['Raffle rooms: the D100 now rolls on screen and stops on the number rolled.', 'Each person in the round has their own die on the table.'],
-    es: ['Salas de sorteo: el dado D100 ahora rueda en pantalla y se detiene en el número obtenido.', 'Cada persona de la ronda tiene su dado en la mesa.'],
-    pl: ['Pokoje losowania: kość k100 toczy się teraz po ekranie i zatrzymuje na wylosowanej liczbie.', 'Każda osoba w rundzie ma na stole własną kość.'],
+  { at: '2026-10-09 12:25',
+    pt: ['Salas de sorteio: o dado D100 agora rola na tela e para no número sorteado.', 'Cada pessoa da rodada tem o seu dado na mesa, de uma cor diferente.'],
+    en: ['Raffle rooms: the D100 now rolls on screen and stops on the number rolled.', 'Each person in the round has their own die on the table, in a different colour.'],
+    es: ['Salas de sorteo: el dado D100 ahora rueda en pantalla y se detiene en el número obtenido.', 'Cada persona de la ronda tiene su dado en la mesa, de un color distinto.'],
+    pl: ['Pokoje losowania: kość k100 toczy się teraz po ekranie i zatrzymuje na wylosowanej liczbie.', 'Każda osoba w rundzie ma na stole własną kość w innym kolorze.'],
   },
   { at: '2026-10-09 12:00',
     pt: ['Novo alerta sonoro: Jogador na tela.', 'Alerta Batimento mais curto.'],
@@ -4022,12 +4023,30 @@ function diceSound() {
 }
 /* ---------- Mesa dos dados ----------
    O D100 é desenhado em canvas como uma esfera coberta pelos números de 1 a 100. A mesa tem um dado para cada
-   pessoa que participa da rodada, com o nome embaixo: apagado enquanto ela não rola. Na jogada, o dado dela quica
-   e gira cada vez mais devagar e para com o número sorteado virado para a frente; aí esse número cresce no meio
-   do dado. O giro termina sempre na posição certa porque o movimento é a posição final mais um resto de giro que
+   pessoa que participa da rodada, com o nome embaixo: apagado enquanto ela não rola. Na jogada, o dado dela entra
+   rolando pela esquerda, quicando e girando cada vez mais devagar, e para no lugar dela com o número sorteado
+   virado para a frente; aí esse número cresce no meio do dado. O giro termina sempre na posição certa porque o movimento é a posição final mais um resto de giro que
    vai a zero no tempo do som. As jogadas que já estavam na sala aparecem paradas.
-   As cores do dado são fixas (o site tem um tema só). */
+   Cada pessoa tem uma cor de dado (dieColors), a mesma na lista de quem está na sala e na lista de jogadas. */
 const DIE = { pts: [], num: [], at: [] };
+// Cores dos dados. Cada pessoa começa pela cor que sai da própria identidade; se ela já estiver com alguém que
+// entrou antes, fica com a próxima livre. Como a conta só usa dados da sala, todo navegador pinta igual.
+// Com mais de doze pessoas as cores voltam a repetir.
+const DIE_COLORS = ['#f0ad4d', '#e2574c', '#4c9be2', '#4fbf6b', '#a674e0', '#35bdb2', '#e86fa6', '#f07f3c', '#b5cf3d', '#58c7ea', '#b9c0c7', '#c08552'];
+function dieColors(people) {
+  const used = new Set(), out = new Map();
+  for (const p of people) {
+    let h = 0;
+    for (let i = 0; i < p.uid.length; i++) h = (h * 31 + p.uid.charCodeAt(i)) >>> 0;
+    let k = h % DIE_COLORS.length;
+    for (let i = 0; i < DIE_COLORS.length && used.has(k); i++) k = (k + 1) % DIE_COLORS.length;
+    used.add(k);
+    out.set(p.uid, DIE_COLORS[k]);
+  }
+  return out;
+}
+// A cor misturada com branco (to = 255) ou preto (to = 0): k = 0 é a própria cor, k = 1 é o branco ou o preto.
+const shade = (hex, to, k) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - k) + to * k).toString(16).padStart(2, '0')).join('');
 for (let i = 0; i < 100; i++) {   // 100 pontos espalhados por igual na esfera (espiral de Fibonacci)
   const y = 1 - (i + 0.5) / 50, r = Math.sqrt(1 - y * y), a = i * Math.PI * (3 - Math.sqrt(5));
   DIE.pts.push([Math.cos(a) * r, y, Math.sin(a) * r]);
@@ -4049,7 +4068,7 @@ function mFront(p) {
   return mAxis([p[1] / len, -p[0] / len, 0], Math.acos(Math.max(-1, Math.min(1, p[2]))));
 }
 // Desenha o dado com o centro em (cx, cy). "target" é o ponto do número sorteado e "pop" (0 a 1) o quanto ele já cresceu.
-function drawDie(g, cx, cy, r, floor, R, target, pop, alpha) {
+function drawDie(g, cx, cy, r, floor, R, target, pop, alpha, color = DIE_COLORS[0]) {
   g.save();
   const lift = Math.max(0, floor - cy - r);   // quanto o dado está acima da mesa: a sombra encolhe
   g.globalAlpha = alpha * 0.4 / (1 + lift / 30);
@@ -4057,7 +4076,8 @@ function drawDie(g, cx, cy, r, floor, R, target, pop, alpha) {
   g.beginPath(); g.ellipse(cx, floor, r * 0.85 / (1 + lift / 60), r * 0.16, 0, 0, 7); g.fill();
   g.globalAlpha = alpha;
   const body = g.createRadialGradient(cx - r * 0.35, cy - r * 0.42, r * 0.08, cx, cy, r);
-  body.addColorStop(0, '#ffe2a6'); body.addColorStop(0.55, '#f0ad4d'); body.addColorStop(1, '#8a5611');
+  body.addColorStop(0, shade(color, 255, 0.6)); body.addColorStop(0.55, color); body.addColorStop(1, shade(color, 0, 0.45));
+  const ink = shade(color, 0, 0.84);
   g.fillStyle = body;
   g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill();
   const front = [];
@@ -4072,7 +4092,7 @@ function drawDie(g, cx, cy, r, floor, R, target, pop, alpha) {
     g.globalAlpha = alpha * Math.min(1, z * 1.5) * (i === target ? 1 : 1 - 0.6 * pop);
     g.fillStyle = k ? 'rgba(255, 249, 235, ' + (0.2 + 0.8 * k) + ')' : 'rgba(255, 255, 255, 0.18)';
     g.beginPath(); g.ellipse(x, y, face * (z + (1 - z) * k), face, Math.atan2(-v[1], v[0]), 0, 7); g.fill();
-    g.fillStyle = '#2a1a04';
+    g.fillStyle = ink;
     g.font = '800 ' + (r * (0.15 + 0.06 * z) * (1 + 2.2 * k)).toFixed(1) + 'px "Bricolage Grotesque", Onest, sans-serif';
     g.fillText(DIE.num[i], x, y + 0.5);
   }
@@ -4086,9 +4106,9 @@ function diceTable(list) {
   const now = Date.now(), calm = !!window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   tray.dice = list.map(x => {
     const old = tray.dice.find(d => d.key === x.key);
-    if (old && (old.value != null || x.value == null)) { old.name = x.name; return old; }
+    if (old && (old.value != null || x.value == null)) { old.name = x.name; old.color = x.color; return old; }
     return {   // dado novo na mesa, ou o dado apagado de quem acabou de rolar (fica no mesmo lugar)
-      key: x.key, name: x.name, value: x.value, t0: now, T: x.value != null ? Math.max(0, x.until - now) : 0, calm,
+      key: x.key, name: x.name, color: x.color, value: x.value, t0: now, T: x.value != null ? Math.max(0, x.until - now) : 0, calm,
       x: old ? old.x : null, y: old ? old.y : null,
       end: x.value != null ? mMul(mAxis([0, 0, 1], Math.random() * 6.283), mFront(DIE.pts[DIE.at[x.value]])) : mAxis(unit([1, 0.6, 0.2]), Math.random() * 6.283),
       axis: unit([0.25 * (Math.random() - 0.5), 1, 0.35 * (Math.random() - 0.5)]),
@@ -4122,11 +4142,11 @@ function trayFrame() {
     const u = d.T ? Math.min(1, (now - d.t0) / d.T) : 1, rest = 1 - u;
     const pop = d.value == null || u < 1 ? 0 : d.T ? Math.min(1, (now - d.t0 - d.T) / 260) : 1;
     if (u < 1 || (d.value != null && pop < 1) || Math.abs(sx - d.x) > 0.5 || Math.abs(sy - d.y) > 0.5) moving = true;
-    if (d.value == null || (d.calm && u < 1)) drawDie(g, d.x, d.y, r, floor, d.end, -1, 0, 0.28);   // ainda não rolou (ou sem animação: espera parado)
+    if (d.value == null || (d.calm && u < 1)) drawDie(g, d.x, d.y, r, floor, d.end, -1, 0, 0.3, d.color);   // ainda não rolou (ou sem animação: espera parado)
     else {
-      const dx = -r * 0.6 * rest * rest;                                                    // um passo de lado, sem sair do lugar dele
+      const dx = -(d.x + r * 2) * rest * rest;                                              // vem rolando de fora, pela borda esquerda, até o lugar da pessoa
       const dy = -Math.abs(Math.sin(u * Math.PI * 3.5)) * r * 0.75 * Math.pow(rest, 1.5);   // quiques cada vez menores
-      drawDie(g, d.x + dx, d.y + dy, r, floor, mMul(d.end, mAxis(d.axis, d.turns * Math.pow(rest, 2.4))), DIE.at[d.value], pop, 1);
+      drawDie(g, d.x + dx, d.y + dy, r, floor, mMul(d.end, mAxis(d.axis, d.turns * Math.pow(rest, 2.4))), DIE.at[d.value], pop, 1, d.color);
     }
     g.font = '600 12px Onest, "Segoe UI", sans-serif';
     g.textAlign = 'center';
@@ -4194,10 +4214,12 @@ function renderRoom() {
     .sort((a, b) => a.at < b.at ? -1 : a.at > b.at ? 1 : 0);
   for (const r of cur.all) if (!people.some(p => p.uid === r.uid)) people.push({ uid: r.uid, name: r.name });
   const rolled = new Set(cur.rolls.map(r => r.uid));
+  const colors = dieColors(people);
+  const dot = uid => el('i', { class: 'die-dot', style: 'background:' + (colors.get(uid) || DIE_COLORS[0]) });   // a cor do dado da pessoa
   setText($('#room-members-title'), tr('room.members', { n: people.length }));
   $('#room-members').replaceChildren(...people.map(p => {
     const state = rolled.has(p.uid) ? 'rolled' : cur.can(p.uid) ? 'waiting' : 'out';
-    return el('li', { class: state, title: tr('room.m.' + state), text: p.name });
+    return el('li', { class: state, title: tr('room.m.' + state) }, dot(p.uid), p.name);
   }));
 
   // Jogada recém-chegada: o dado "gira" um instante antes de mostrar o valor, e só então entra na ordem.
@@ -4208,12 +4230,12 @@ function renderRoom() {
   // Mesa dos dados: um dado para cada pessoa que participa desta rodada; o de quem acabou de rolar gira.
   diceTable(people.filter(p => cur.can(p.uid)).map(p => {
     const roll = cur.rolls.find(r => r.uid === p.uid);
-    return { key: n + '_' + p.uid, name: p.name, value: roll ? roll.value : null, until: roll ? room.rolling.get(roll.key) || 0 : 0 };
+    return { key: n + '_' + p.uid, name: p.name, color: colors.get(p.uid), value: roll ? roll.value : null, until: roll ? room.rolling.get(roll.key) || 0 : 0 };
   }));
   const top = shown.length ? shown[0].value : null;
   $('#room-rolls').replaceChildren(
-    ...shown.map(r => el('li', { class: r.value === top ? 'top' : null }, el('span', { text: r.name }), el('b', { text: r.value }))),
-    ...spinning.map(r => el('li', { class: 'rolling' }, el('span', { text: r.name }), el('b', { text: '…' }))),
+    ...shown.map(r => el('li', { class: r.value === top ? 'top' : null }, el('span', null, dot(r.uid), r.name), el('b', { text: r.value }))),
+    ...spinning.map(r => el('li', { class: 'rolling' }, el('span', null, dot(r.uid), r.name), el('b', { text: '…' }))),
     ...(cur.rolls.length ? [] : [el('li', { class: 'room-empty', text: tr('room.waiting') })]));
 
   // Avisos da rodada: quem rola no desempate, se a pessoa está de fora, se há empate, se todos já rolaram.
