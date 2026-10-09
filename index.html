@@ -3589,6 +3589,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 11:16',
+    pt: ['Salas de sorteio: som de dados gravado no lugar do som gerado; o número aparece quando os dados param.'],
+    en: ['Raffle rooms: a recorded dice sound replaces the generated one; the number shows when the dice stop.'],
+    es: ['Salas de sorteo: sonido de dados grabado en lugar del generado; el número aparece cuando los dados se detienen.'],
+    pl: ['Pokoje losowania: nagrany dźwięk kości zamiast generowanego; liczba pojawia się, gdy kości się zatrzymają.'],
+  },
   { at: '2026-10-09 11:10',
     pt: ['Salas de sorteio: o número da sala passa a ter 4 dígitos.', 'Entrada da sala mais clara, com um bloco para criar e outro para entrar.', 'Som de dados rolando a cada jogada.', 'O modo passa a se chamar "Sala de sorteio".'],
     en: ['Raffle rooms: the room number now has 4 digits.', 'Clearer room entry, with one block to create and another to join.', 'Sound of dice rolling on every roll.', 'The mode is now called "Raffle room".'],
@@ -3799,14 +3805,40 @@ function rollValue(code, key, at) {
   h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16;
   return (h >>> 0) % 100 + 1;
 }
-// Som de dados rolando na mesa, feito na hora (sem arquivo): uma sequência de batidas secas que vão espaçando e
-// enfraquecendo, cada uma com um estalo agudo e um toque grave da mesa. Sai um pouco diferente a cada jogada.
+// Som de dados rolando: a gravação em sounds/dice.mp3, do chacoalhar até os dados pararem ("from" e "len" marcam
+// esse trecho do arquivo, em segundos). Ela é baixada quando a pessoa entra no modo sala. Enquanto não chega, ou se
+// faltar, sai um som feito na hora: batidas secas que vão espaçando e enfraquecendo, com um toque grave da mesa.
 // Segue o botão Som e o volume da página.
+const DICE = { file: 'sounds/dice.mp3', from: 0.4, len: 2.15, gain: 0.7 };
+let diceBuf = null;   // a gravação decodificada, ou a promessa dela enquanto baixa
 let diceNoise = null;
+const diceReady = () => !!diceBuf && typeof diceBuf.then !== 'function';
+// Quanto tempo o dado "gira" na tela antes de mostrar o número: até os dados pararem no som.
+const spinTime = () => diceReady() && ui.sound ? 2100 : 1400;
+function loadDice() {
+  if (!audio || diceBuf) return;
+  diceBuf = fetch(new URL(DICE.file, document.baseURI))
+    .then(r => { if (!r.ok) throw new Error('sem o arquivo'); return r.arrayBuffer(); })
+    .then(b => audio.decodeAudioData(b))
+    .then(buf => { diceBuf = buf; })
+    .catch(() => { diceBuf = null; });
+}
 function diceSound() {
   if (!ui.sound) return;
   armAudio();
   if (!audio || !master) return;
+  if (diceReady()) {
+    const src = audio.createBufferSource(), g = audio.createGain();
+    src.buffer = diceBuf;
+    src.connect(g); g.connect(master);
+    const t = audio.currentTime + 0.02;
+    g.gain.setValueAtTime(DICE.gain, t);
+    g.gain.setValueAtTime(DICE.gain, t + DICE.len - 0.15);
+    g.gain.linearRampToValueAtTime(0.0001, t + DICE.len);
+    src.start(t, DICE.from, DICE.len);
+    return;
+  }
+  loadDice();
   if (!diceNoise) {
     diceNoise = audio.createBuffer(1, Math.round(audio.sampleRate * 0.25), audio.sampleRate);
     const d = diceNoise.getChannelData(0);
@@ -3893,7 +3925,7 @@ function renderRoom() {
 function setRoomDoc(doc) {
   const keys = Object.keys(doc.rolls || {});
   let fresh = false;
-  if (room.seen) for (const k of keys) if (!room.seen.has(k)) { room.rolling.set(k, Date.now() + 1400); fresh = true; }
+  if (room.seen) for (const k of keys) if (!room.seen.has(k)) { room.rolling.set(k, Date.now() + spinTime()); fresh = true; }
   if (fresh && $('#raffle').open) diceSound();   // jogada nova, de quem for: todos ouvem os dados
   room.seen = new Set(keys);
   const sig = JSON.stringify([doc.round, doc.items, keys.length]);
@@ -3961,7 +3993,7 @@ function roomName() {
   return name;
 }
 async function roomCreate() {
-  if (ui.sound) armAudio();
+  if (ui.sound) { armAudio(); loadDice(); }
   if (room.busy || !roomName()) return;
   room.busy = true;
   roomMsg('');
@@ -3990,7 +4022,7 @@ async function roomCreate() {
   } catch { roomMsg(tr('room.fail')); } finally { room.busy = false; renderRoom(); }
 }
 async function roomJoin() {
-  if (ui.sound) armAudio();
+  if (ui.sound) { armAudio(); loadDice(); }
   if (room.busy) return;
   const code = $('#room-code').value.replace(/\D/g, '');
   if (code.length < 4 || code.length > 6) { roomMsg(tr('room.needCode')); $('#room-code').focus(); return; }
@@ -4005,7 +4037,7 @@ async function roomJoin() {
   } catch { roomMsg(tr('room.fail')); } finally { room.busy = false; renderRoom(); }
 }
 async function roomRoll() {
-  if (ui.sound) armAudio();
+  if (ui.sound) { armAudio(); loadDice(); }
   if (!room.code || !room.doc || room.busy) return;
   const name = ui.rollName.trim().slice(0, 24);
   if (!name) { roomLeave(tr('room.needName')); return; }
@@ -4024,7 +4056,7 @@ async function roomRoll() {
     await roomPoll();
     if (room.code !== code || !room.doc) return;
     const mine = roundRolls(room.doc, n).find(r => r.key === key);
-    if (res.ok && mine) setTimeout(() => { if (room.code === code) roomMsg(tr('room.rolled', { v: mine.value })); }, 1400);
+    if (res.ok && mine) setTimeout(() => { if (room.code === code) roomMsg(tr('room.rolled', { v: mine.value })); }, spinTime());
     else if (mine) roomMsg(tr('room.already'));
     else roomMsg(tr((room.doc.round || 1) !== n ? 'room.changed' : 'room.fail'));
   } catch { roomMsg(tr('room.fail')); } finally { room.busy = false; renderRoom(); }
@@ -4074,6 +4106,7 @@ function setRaffleMode(mode) {
   $('#names-pane').hidden = inRoom;
   $('#room-pane').hidden = !inRoom;
   if (!inRoom) { roomWatch(false); return; }
+  if (ui.sound) { armAudio(); loadDice(); }
   if (!$('#room-name').value) $('#room-name').value = ui.rollName;
   // Sala em que a pessoa já estava: volta para ela.
   if (!room.code && ui.room) { room.code = ui.room; room.seen = null; room.sig = ''; }
