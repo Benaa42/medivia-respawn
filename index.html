@@ -846,6 +846,12 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'err.mapperRows': 'Reconheci o print do mapper, mas não consegui ler a tabela de criaturas: o texto do painel está pequeno demais. Aumente o zoom do navegador na página do mapper (Ctrl e +) e tire outro print.',
+    'read.mapperTwin': '{y} no mapper é o {x} do jogo: mesmo preço de boost e mesmas criaturas. Abri o {x}, que ficou como estava.',
+    'read.mapperLocal': 'Leituras do mapper ficam só neste navegador: lá os nomes e os números nem sempre são os do jogo.',
+    'read.mapperGone': 'A cópia "{y}", que tinha vindo do mapper, foi retirada.',
+    'hint.mapper': 'Lido do mapper da wiki: o nome e os números podem ser diferentes dos do jogo, e ele fica só neste navegador. Um print do jogo substitui estes dados. ',
+    'bank.mapper': 'do mapper',
     'read.mapper1': '{x} lido do mapper, 1 criatura.',
     'read.mapperN': '{x} lido do mapper, {n} criaturas.',
     'err.mapperPct': 'O print do mapper está com "Apply zone boost" marcado, mas não li o percentual do boost. Desmarque essa opção e mande o print de novo.',
@@ -1125,6 +1131,12 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'err.mapperRows': 'This is a mapper screenshot, but the creature table could not be read: the panel text is too small. Zoom in on the mapper page in your browser (Ctrl and +) and take another screenshot.',
+    'read.mapperTwin': '{y} on the mapper is {x} in the game: same boost price and same creatures. {x} was opened and left as it was.',
+    'read.mapperLocal': 'Mapper reads stay in this browser only: its names and numbers are not always the ones in the game.',
+    'read.mapperGone': 'The copy "{y}" that came from the mapper was removed.',
+    'hint.mapper': 'Read from the wiki mapper: the name and the numbers may differ from the game, and it stays in this browser only. A screenshot from the game replaces this data. ',
+    'bank.mapper': 'from the mapper',
     'read.mapper1': '{x} read from the mapper, 1 creature.',
     'read.mapperN': '{x} read from the mapper, {n} creatures.',
     'err.mapperPct': 'The mapper screenshot has "Apply zone boost" ticked, but the boost percentage could not be read. Untick it and send the screenshot again.',
@@ -1404,6 +1416,12 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'err.mapperRows': 'Reconocí la captura del mapper, pero no pude leer la tabla de criaturas: el texto del panel es demasiado pequeño. Aumenta el zoom del navegador en la página del mapper (Ctrl y +) y haz otra captura.',
+    'read.mapperTwin': '{y} en el mapper es {x} en el juego: mismo precio de bonus y mismas criaturas. Abrí {x}, que quedó como estaba.',
+    'read.mapperLocal': 'Las lecturas del mapper quedan solo en este navegador: sus nombres y números no siempre son los del juego.',
+    'read.mapperGone': 'La copia "{y}", que venía del mapper, fue retirada.',
+    'hint.mapper': 'Leído del mapper de la wiki: el nombre y los números pueden diferir de los del juego, y queda solo en este navegador. Una captura del juego sustituye estos datos. ',
+    'bank.mapper': 'del mapper',
     'read.mapper1': '{x} leído del mapper, 1 criatura.',
     'read.mapperN': '{x} leído del mapper, {n} criaturas.',
     'err.mapperPct': 'La captura del mapper tiene "Apply zone boost" marcado, pero no leí el porcentaje del bonus. Desmárcalo y envía la captura de nuevo.',
@@ -1683,6 +1701,12 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'err.mapperRows': 'To zrzut z mappera, ale nie udało się odczytać tabeli stworzeń: tekst w panelu jest za mały. Powiększ stronę mappera w przeglądarce (Ctrl i +) i zrób kolejny zrzut.',
+    'read.mapperTwin': '{y} w mapperze to {x} w grze: ta sama cena bonusu i te same stworzenia. Otwarto {x} bez zmian.',
+    'read.mapperLocal': 'Odczyty z mappera zostają tylko w tej przeglądarce: jego nazwy i liczby nie zawsze zgadzają się z grą.',
+    'read.mapperGone': 'Kopia „{y}” pochodząca z mappera została usunięta.',
+    'hint.mapper': 'Odczytano z mappera z wiki: nazwa i liczby mogą różnić się od gry, a wpis zostaje tylko w tej przeglądarce. Zrzut z gry zastąpi te dane. ',
+    'bank.mapper': 'z mappera',
     'read.mapper1': '{x}: odczytano z mappera, 1 stworzenie.',
     'read.mapperN': '{x}: odczytano z mappera, stworzeń: {n}.',
     'err.mapperPct': 'Na zrzucie z mappera zaznaczono „Apply zone boost”, ale nie udało się odczytać procentu bonusu. Odznacz tę opcję i wyślij zrzut ponownie.',
@@ -2102,9 +2126,21 @@ function vote(list) {
 // Devolve null quando o print não é do mapper.
 async function readMapper(ocr) {
   const L = ocr.lines, find = re => L.find(l => re.test(l.text));
-  const hMonster = find(/^Monster$/i), hCount = find(/^Count$/i), hSpawn = find(/^Spawn$/i), hKills = find(/^Kills\s*\/?\s*h$/i);
+  // É um print do mapper quando tem o preço em "gp" e algum título do bloco Zone Boost.
   const priceLine = find(/\d\s*gp$/i);
-  if (!hMonster || !hKills || !(hCount || hSpawn) || !priceLine) return null;
+  if (!priceLine || !(find(/^Zone Boost$/i) || find(/^Boost price$/i) || find(/^Spawn boost$/i))) return null;
+  const failed = { kind: 'mapper', failed: true, monsters: [], unread: [] };   // é do mapper, mas a tabela não deu para ler
+  // Títulos das colunas, palavra por palavra: com o painel pequeno o leitor às vezes os junta numa linha só.
+  const word = re => {
+    for (const l of L) {
+      const toks = l.text.split(/\s+/), i = toks.findIndex(t => re.test(t));
+      if (i >= 0) return { x: l.words.length === toks.length ? l.words[i].x0 : l.x, y: l.y, h: l.h };
+    }
+    return null;
+  };
+  const hCount = word(/^Count$/i), hSpawn = word(/^Spawn$/i), hKills = word(/^Kills\/?h?$/i), anchor = find(/^Boost price$/i) || priceLine;
+  if (!hKills || !(hCount || hSpawn)) return failed;
+  const hMonster = find(/^Monster$/i) || { x: anchor.x, y: hKills.y, h: hKills.h };
   // Colunas: se o leitor pulou um dos títulos, a posição dele sai dos outros dois.
   const xKills = hKills.x;
   const xCount = hCount ? hCount.x : hSpawn.x - (xKills - hSpawn.x) * 0.95;
@@ -2113,7 +2149,8 @@ async function readMapper(ocr) {
   // Linhas da tabela: os nomes abaixo do título "Monster", até o título da seção seguinte (que começa mais à esquerda).
   const below = L.filter(l => l.y > hMonster.y + hMonster.h && l.x < xCount - 6 && /[A-Za-z]{3}/.test(l.text));
   const end = Math.min(hMonster.y + 600, ...below.filter(l => l.x <= hMonster.x - 4).map(l => l.y));
-  const rows = below.filter(l => l.y < end - 4 && l.x >= hMonster.x - 2 && l.conf >= 50).sort((a, b) => a.y - b.y);
+  const rows = below.filter(l => l.y < end - 4 && l.x >= hMonster.x - 2).sort((a, b) => a.y - b.y);
+  if (rows.some(l => l.conf < 60)) return failed;   // algum nome saiu duvidoso: melhor recusar do que guardar o respawn pela metade
   const monsters = [], unread = [];
   for (const r of rows) {
     const name = r.text.replace(/^[^A-Za-z]+/, '').replace(/\s+/g, ' ').trim();
@@ -2140,6 +2177,7 @@ async function readMapper(ocr) {
     if (sec == null) sec = tries[0] ?? null;
     if (sec == null) unread.push(name); else monsters.push({ name, count: count || 0, sec, kills });
   }
+  if (!monsters.length) return failed;
   // Grupo de caça: "Solo (100%)", "… (134%)"; o nome do respawn são as linhas grandes acima dele.
   const team = L.find(l => l.y < hMonster.y && /\(\s*\d{2,3}\s*%\s*\)/.test(l.text));
   const party = team ? +team.text.match(/\(\s*(\d{2,3})\s*%/)[1] : 100;
@@ -2165,8 +2203,8 @@ async function readMapper(ocr) {
   }
   // "Apply zone boost": a caixa fica à esquerda do texto e é verde quando marcada.
   const apply = find(/Apply zone boost/i);
-  const word = apply && apply.words.length === apply.text.split(/\s+/).length ? apply.words[apply.text.split(/\s+/).findIndex(t => /Apply/i.test(t))] : null;
-  const applied = !!apply && ocr.green((word ? word.x0 : apply.x + apply.h * 1.8) - 30, apply.y - 4, 40, apply.h + 12) > 30;
+  const box = apply && apply.words.length === apply.text.split(/\s+/).length ? apply.words[apply.text.split(/\s+/).findIndex(t => /Apply/i.test(t))] : null;
+  const applied = !!apply && ocr.green((box ? box.x0 : apply.x + apply.h * 1.8) - 30, apply.y - 4, 40, apply.h + 12) > 30;
   return {
     kind: 'mapper', name, party, dur, cost, costPct, discount: null, monsters, unread,
     pct: applied ? costPct : 0,   // percentual que acelera os tempos da tabela; sem ele não dá para achar o tempo base
@@ -2216,6 +2254,7 @@ function normalize(d) {
     duration: int(d.duration, 1, 100000),
     readAt: int(d.readAt, 0, 100),
     updatedAt: typeof d.updatedAt === 'string' ? d.updatedAt.slice(0, 40) : null,
+    src: d.src === 'mapper' ? 'mapper' : null,   // veio do print do mapper: fica só neste navegador
   };
 }
 
@@ -2227,6 +2266,13 @@ for (const [id, d] of Object.entries(lsGet(LS_DB, {}))) {
 }
 const persistLocal = () => lsSet(LS_DB, Object.fromEntries(store.local));
 const getRespawn = id => store.local.get(id) || store.shared.get(id) || store.cloud.get(id) || store.seed.get(id) || null;
+// Respawn já conhecido que é o mesmo lugar de uma leitura: mesmo preço de boost e pelo menos metade das criaturas em comum.
+function sameZone(names, cost10, exceptId, only) {
+  if (!cost10) return null;
+  const set = new Set(names.map(n => n.toLowerCase()));
+  return allRespawns().find(r => r.id !== exceptId && r.cost10 === cost10 && (r.duration || 60) === 60 && (!only || only(r))
+    && r.monsters.filter(m => set.has(m.name.toLowerCase())).length * 2 >= Math.max(1, Math.min(set.size, r.monsters.length))) || null;
+}
 function allRespawns() {
   const m = new Map(store.seed);
   for (const [k, v] of store.cloud) m.set(k, v);
@@ -2646,7 +2692,7 @@ function renderBank() {
       el('button', {
         class: n ? 'bank-item picked' : 'bank-item', type: 'button', 'aria-current': r.id === ui.id || r.id === second ? 'true' : null,
         onclick: () => pick(r.id),
-      }, el('b', { text: r.name }), el('small', { text: r.monsters.map(m => m.name).join(', ') || tr('bank.nomobs') }),
+      }, el('b', { text: r.name }), el('small', { text: (r.src === 'mapper' ? tr('bank.mapper') + ': ' : '') + (r.monsters.map(m => m.name).join(', ') || tr('bank.nomobs')) }),
         n ? el('i', { class: 'bank-n', text: n }) : null));
   }));
   if (!hits.length) {
@@ -3207,7 +3253,7 @@ function mobCards(id, r) {
       }, el('small', { text: c.p + '%' }), el('span', { text: fmtTime(c.sec) }), c.task))));
   });
 }
-const sheetHint = r => (r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest') + ' ' + tr('task.tip');
+const sheetHint = r => (r.src === 'mapper' ? tr('hint.mapper') : r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest') + ' ' + tr('task.tip');
 // Desconto das tasks diárias ou semanais. É de quem joga, não do respawn: fica só neste navegador, por respawn,
 // e o banco guarda sempre o preço cheio.
 // O jogo tira um valor fixo em gold, o mesmo em qualquer percentual e duração.
@@ -3456,12 +3502,14 @@ async function readImage(blob) {
   setStatus('busy', tr(workerP ? 'read.busy' : 'read.first'));
   try {
     const p = await readPrint(blob);
+    if (p.failed) throw new UserError(tr('err.mapperRows'));
     if (!p.monsters.length) throw new UserError(tr('err.nomobs'));
     const mapper = p.kind === 'mapper';
     if (p.pct == null) throw new UserError(tr(mapper ? 'err.mapperPct' : 'err.nopct'));
     const name = p.name || tr('noname');
     const id = slug(name) || 'respawn';
-    const prev = getRespawn(id);
+    const found = getRespawn(id);
+    const prev = !mapper && found && found.src === 'mapper' ? null : found;   // print do jogo não aproveita nada que veio do mapper
     const monsters = prev ? prev.monsters.map(m => ({ ...m })) : [];
     const doubt = [];
     for (const pm of p.monsters) {
@@ -3477,13 +3525,31 @@ async function readImage(blob) {
     const full = p.cost ? p.cost + (p.discount || 0) : null, costPct = mapper ? p.costPct : p.pct;
     const base60 = full && costPct && p.dur ? baseCost(full, costPct, p.dur) : null;
     const cost10 = base60 || (full && costPct && !mapper ? Math.round(full * 10 / costPct) : null);
+    // O mapper dá outros nomes aos respawns ("Flamebringers" lá é o "Succubus Lair" do jogo) e os números dele nem
+    // sempre são os do jogo. Por isso a leitura do mapper nunca mexe num respawn que veio do jogo: se o lugar já é
+    // conhecido (pelo nome, ou pelo preço do boost com as mesmas criaturas), ele é só aberto.
+    let gone = null;
+    if (mapper) {
+      const known = prev && prev.src !== 'mapper' ? { id, name: prev.name } : sameZone(p.monsters.map(m => m.name), cost10, id, r => r.src !== 'mapper');
+      if (known) {
+        if (prev && prev.src === 'mapper' && store.local.has(id)) { store.local.delete(id); persistLocal(); }   // sobra de uma leitura antiga do mapper
+        select(known.id);
+        setStatus('ok', tr('read.mapperTwin', { y: name, x: known.name }) + ' ' + tr('read.discarded'));
+        return;
+      }
+    } else {
+      // Print do jogo de um lugar que estava aqui só pelo mapper, com outro nome: a cópia do mapper sai.
+      const ghost = sameZone(monsters.map(m => m.name), cost10, id, r => r.src === 'mapper' && store.local.has(r.id));
+      if (ghost) { store.local.delete(ghost.id); persistLocal(); gone = ghost.name; }
+    }
     const where = await saveRespawn(id, {
       name: prev ? prev.name : name,
       monsters,
       cost10: cost10 || (prev && prev.cost10) || null,
       duration: base60 ? 60 : cost10 ? p.dur : (prev && prev.duration) || p.dur || null,
       readAt: p.pct,
-    }, !!p.name && !doubt.length);
+      src: mapper ? 'mapper' : null,
+    }, !!p.name && !doubt.length && !mapper);   // a leitura do mapper não vai para o banco de todos
     // O print do mapper não diz nada sobre o bônus comprado no jogo: duração, desconto e percentual escolhidos ficam.
     if (!mapper && DURS.includes(p.dur)) ui.dur = p.dur;
     if (cost10 && !mapper) discSet(id, p.discount || 0);   // print sem a faixa de desconto: o desconto acabou
@@ -3494,7 +3560,9 @@ async function readImage(blob) {
     if (p.unread.length) msg += ' ' + tr('read.unread', { x: p.unread.join(', ') });
     if (!p.name) msg += ' ' + tr('read.noname');
     if (doubt.length) msg += ' ' + tr('read.doubt', { x: doubt.join(', ') });
-    if (cloud.on && (!p.name || doubt.length)) msg += ' ' + tr('read.notshared');
+    if (mapper) msg += ' ' + tr('read.mapperLocal');
+    else if (cloud.on && (!p.name || doubt.length)) msg += ' ' + tr('read.notshared');
+    if (gone) msg += ' ' + tr('read.mapperGone', { y: gone });
     setStatus(doubt.length || !p.name || p.unread.length ? 'busy' : 'ok', msg);
     if (!p.name) { const n = $('#area-name'); if (n) { n.focus(); n.select(); } }
   } catch (e) {
@@ -3968,6 +4036,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 15:51',
+    pt: ['Print do mapper: a leitura fica só neste navegador e não altera respawns lidos do jogo, porque o mapper usa outros nomes e alguns números diferentes. Se o lugar já está no banco, o site abre o respawn do jogo.'],
+    en: ['Mapper screenshot: the read stays in this browser only and does not change respawns read from the game, because the mapper uses other names and some different numbers. If the place is already in the bank, the site opens the respawn from the game.'],
+    es: ['Captura del mapper: la lectura queda solo en este navegador y no cambia respawns leídos del juego, porque el mapper usa otros nombres y algunos números distintos. Si el lugar ya está en el banco, el sitio abre el respawn del juego.'],
+    pl: ['Zrzut z mappera: odczyt zostaje tylko w tej przeglądarce i nie zmienia respawnów odczytanych z gry, bo mapper używa innych nazw i części innych liczb. Jeśli miejsce jest już w bazie, strona otwiera respawn z gry.'],
+  },
   { at: '2026-10-09 15:05',
     pt: ['O site também lê o print do mapper da wiki, com o painel do respawn aberto: nome, criaturas, tempos e preço do boost.'],
     en: ['The site also reads a screenshot of the wiki mapper with the respawn panel open: name, creatures, times and boost price.'],
