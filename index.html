@@ -89,6 +89,23 @@ kbd {
 .raffle-result span { color: var(--label); overflow-wrap: anywhere; }
 .raffle-result b { font-weight: 700; color: var(--amber); overflow-wrap: anywhere; text-align: right; }
 #raffle-copy { align-self: flex-start; }
+/* Sorteio: duas formas, por nomes ou em sala com dado D100 */
+.unit-toggle.raffle-mode { margin-left: 0; align-self: flex-start; }
+.raffle-pane, .room-box { display: flex; flex-direction: column; gap: 14px; }
+.raffle-field input { width: 100%; padding: 8px 10px; border: 1px solid var(--edge); border-radius: 8px; background: var(--ground); color: var(--title); font: 500 14px/1.4 var(--font-ui); }
+.room-row { display: flex; align-items: flex-end; gap: 10px; }
+.room-row label { flex: 1; min-width: 0; }
+.room-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.room-label { font-size: 13px; color: var(--faint); }
+.room-number { font: 800 30px/1 var(--font-display); letter-spacing: 0.04em; font-variant-numeric: lining-nums tabular-nums; color: var(--title); }
+.room-round { font-weight: 600; color: var(--amber); overflow-wrap: anywhere; }
+.room-rolls b { font: 800 20px/1 var(--font-display); font-variant-numeric: lining-nums tabular-nums; }
+.room-rolls li.top { outline: 1px solid var(--value); }
+.room-rolls li.top b { color: var(--value); }
+.room-rolls li.rolling b { color: var(--faint); }
+.room-rolls li.room-empty { color: var(--faint); }
+.room-sub { margin-bottom: 6px; font: 600 13px/1.3 var(--font-ui); color: var(--label); }
+#room-pane .dlg:disabled { opacity: 0.45; cursor: default; }
 dialog#changes { width: min(560px, calc(100vw - 32px)); }
 .changes-list { display: flex; flex-direction: column; gap: 16px; }
 .changes-list h3 { margin-bottom: 5px; font: 600 13px/1.3 var(--font-ui); color: var(--amber); font-variant-numeric: lining-nums tabular-nums; }
@@ -542,6 +559,11 @@ details.backup textarea {
     <h2 id="raffle-title" data-i18n="raffle.title">Sorteio de itens</h2>
     <button class="dlg stop" type="button" id="raffle-close" data-i18n="support.close" autofocus>Fechar</button>
   </div>
+  <span class="unit-toggle raffle-mode" role="group" aria-label="Sorteio de itens" data-i18n-attr="aria-label:raffle.title">
+    <button type="button" id="raffle-mode-names" data-i18n="raffle.mode.names">Por nomes</button>
+    <button type="button" id="raffle-mode-room" data-i18n="raffle.mode.room">Sala com dado D100</button>
+  </span>
+  <div class="raffle-pane" id="names-pane">
   <label class="raffle-field"><span data-i18n="raffle.names">Participantes, um por linha</span>
     <textarea id="raffle-names" rows="5" spellcheck="false"></textarea></label>
   <button class="hunt-link raffle-link" type="button" id="raffle-from-hunt" data-i18n="raffle.fromHunt">Usar os nomes da última hunt</button>
@@ -554,6 +576,46 @@ details.backup textarea {
   </div>
   <ol class="raffle-result" id="raffle-result"></ol>
   <button class="dlg" type="button" id="raffle-copy" data-i18n="raffle.copy" hidden>Copiar resultado</button>
+  </div>
+  <div class="raffle-pane" id="room-pane" hidden>
+    <div class="room-box" id="room-lobby">
+      <p class="support-note" data-i18n="room.intro">Crie uma sala e passe o número para o grupo. Cada pessoa entra com o número e rola um dado D100; todos veem as jogadas na hora.</p>
+      <label class="raffle-field"><span data-i18n="room.name">Seu nome</span>
+        <input type="text" id="room-name" maxlength="24" autocomplete="off" spellcheck="false"></label>
+      <button class="dlg raffle-go" type="button" id="room-create" data-i18n="room.create">Criar sala</button>
+      <div class="room-row">
+        <label class="raffle-field"><span data-i18n="room.code">Número da sala</span>
+          <input type="text" id="room-code" inputmode="numeric" maxlength="7" autocomplete="off" placeholder="000 000"></label>
+        <button class="dlg" type="button" id="room-join" data-i18n="room.join">Entrar</button>
+      </div>
+    </div>
+    <div class="room-box" id="room-in" hidden>
+      <div class="room-head">
+        <p><span class="room-label" data-i18n="room.title">Sala</span> <b class="room-number" id="room-number"></b></p>
+        <button class="hunt-link" type="button" id="room-copy" data-i18n="room.copy">copiar número</button>
+      </div>
+      <p class="support-note" data-i18n="room.share">Passe este número para o grupo.</p>
+      <div class="room-row" id="room-owner" hidden>
+        <label class="raffle-field"><span data-i18n="room.item">Item em disputa</span>
+          <input type="text" id="room-item" maxlength="60" autocomplete="off" spellcheck="false"></label>
+        <button class="dlg" type="button" id="room-next" data-i18n="room.next">Nova rodada</button>
+      </div>
+      <p class="room-round" id="room-round"></p>
+      <button class="dlg raffle-go" type="button" id="room-roll" data-i18n="room.roll">Rolar D100</button>
+      <ol class="raffle-result room-rolls" id="room-rolls"></ol>
+      <div id="room-history-wrap" hidden>
+        <h3 class="room-sub" data-i18n="room.history">Rodadas anteriores</h3>
+        <ol class="raffle-result" id="room-history"></ol>
+      </div>
+      <p class="support-note" data-i18n="room.fair">O número sai do instante exato em que o servidor recebe a jogada: ninguém escolhe o resultado.</p>
+      <div class="support-end">
+        <button class="hunt-link" type="button" id="room-leave" data-i18n="room.leave">Sair da sala</button>
+        <button class="hunt-link" type="button" id="room-refresh" data-i18n="room.refresh" hidden>Atualizar</button>
+        <button class="hunt-link" type="button" id="room-end" data-i18n="room.end" hidden>Encerrar sala</button>
+      </div>
+    </div>
+    <p class="support-note" id="room-msg" role="status"></p>
+  </div>
 </dialog>
 
 <dialog class="support" id="changes" aria-labelledby="changes-title">
@@ -735,6 +797,37 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'raffle.mode.names': 'Por nomes',
+    'raffle.mode.room': 'Sala com dado D100',
+    'room.intro': 'Crie uma sala e passe o número para o grupo. Cada pessoa entra com o número e rola um dado D100; todos veem as jogadas na hora.',
+    'room.name': 'Seu nome',
+    'room.create': 'Criar sala',
+    'room.code': 'Número da sala',
+    'room.join': 'Entrar',
+    'room.title': 'Sala',
+    'room.copy': 'copiar número',
+    'room.copied': 'Número da sala copiado.',
+    'room.share': 'Passe este número para o grupo.',
+    'room.item': 'Item em disputa',
+    'room.next': 'Nova rodada',
+    'room.round': 'Rodada {n}: {x}',
+    'room.roundNoItem': 'Rodada {n}',
+    'room.roll': 'Rolar D100',
+    'room.rolled': 'Você tirou {v}.',
+    'room.already': 'Você já rolou nesta rodada.',
+    'room.changed': 'A rodada mudou. Role de novo.',
+    'room.waiting': 'Ninguém rolou ainda.',
+    'room.history': 'Rodadas anteriores',
+    'room.fair': 'O número sai do instante exato em que o servidor recebe a jogada: ninguém escolhe o resultado.',
+    'room.leave': 'Sair da sala',
+    'room.refresh': 'Atualizar',
+    'room.end': 'Encerrar sala',
+    'room.endSure': 'Encerrar mesmo?',
+    'room.needName': 'Informe o seu nome.',
+    'room.needCode': 'Informe o número da sala, com 6 dígitos.',
+    'room.notFound': 'Sala não encontrada. Confira o número.',
+    'room.closed': 'A sala foi encerrada.',
+    'room.fail': 'Não foi possível falar com o servidor. Tente de novo.',
     'duo.label': 'Abrir dois respawns',
     'duo.hint': 'Clique em dois respawns da lista. Clique de novo em um deles para fechar.',
     'duo.second': 'Segundo respawn: {x}',
@@ -950,6 +1043,37 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'raffle.mode.names': 'By names',
+    'raffle.mode.room': 'Room with a D100',
+    'room.intro': 'Create a room and give its number to your party. Everyone joins with the number and rolls a D100; all of you see the rolls live.',
+    'room.name': 'Your name',
+    'room.create': 'Create room',
+    'room.code': 'Room number',
+    'room.join': 'Join',
+    'room.title': 'Room',
+    'room.copy': 'copy number',
+    'room.copied': 'Room number copied.',
+    'room.share': 'Give this number to your party.',
+    'room.item': 'Item being rolled for',
+    'room.next': 'New round',
+    'room.round': 'Round {n}: {x}',
+    'room.roundNoItem': 'Round {n}',
+    'room.roll': 'Roll D100',
+    'room.rolled': 'You rolled {v}.',
+    'room.already': 'You have already rolled this round.',
+    'room.changed': 'The round changed. Roll again.',
+    'room.waiting': 'Nobody has rolled yet.',
+    'room.history': 'Previous rounds',
+    'room.fair': 'The number comes from the exact instant the server receives the roll: nobody picks the result.',
+    'room.leave': 'Leave room',
+    'room.refresh': 'Refresh',
+    'room.end': 'Close room',
+    'room.endSure': 'Really close it?',
+    'room.needName': 'Enter your name.',
+    'room.needCode': 'Enter the 6-digit room number.',
+    'room.notFound': 'Room not found. Check the number.',
+    'room.closed': 'The room was closed.',
+    'room.fail': 'Could not reach the server. Try again.',
     'duo.label': 'Open two respawns',
     'duo.hint': 'Click two respawns in the list. Click one of them again to close it.',
     'duo.second': 'Second respawn: {x}',
@@ -1165,6 +1289,37 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'raffle.mode.names': 'Por nombres',
+    'raffle.mode.room': 'Sala con dado D100',
+    'room.intro': 'Crea una sala y pasa el número al grupo. Cada persona entra con el número y tira un dado D100; todos ven las tiradas al momento.',
+    'room.name': 'Tu nombre',
+    'room.create': 'Crear sala',
+    'room.code': 'Número de la sala',
+    'room.join': 'Entrar',
+    'room.title': 'Sala',
+    'room.copy': 'copiar número',
+    'room.copied': 'Número de la sala copiado.',
+    'room.share': 'Pasa este número al grupo.',
+    'room.item': 'Objeto en disputa',
+    'room.next': 'Nueva ronda',
+    'room.round': 'Ronda {n}: {x}',
+    'room.roundNoItem': 'Ronda {n}',
+    'room.roll': 'Tirar D100',
+    'room.rolled': 'Sacaste {v}.',
+    'room.already': 'Ya tiraste en esta ronda.',
+    'room.changed': 'La ronda cambió. Tira de nuevo.',
+    'room.waiting': 'Nadie ha tirado todavía.',
+    'room.history': 'Rondas anteriores',
+    'room.fair': 'El número sale del instante exacto en que el servidor recibe la tirada: nadie elige el resultado.',
+    'room.leave': 'Salir de la sala',
+    'room.refresh': 'Actualizar',
+    'room.end': 'Cerrar sala',
+    'room.endSure': '¿Cerrar de verdad?',
+    'room.needName': 'Escribe tu nombre.',
+    'room.needCode': 'Escribe el número de la sala, de 6 dígitos.',
+    'room.notFound': 'Sala no encontrada. Revisa el número.',
+    'room.closed': 'La sala fue cerrada.',
+    'room.fail': 'No se pudo contactar con el servidor. Inténtalo de nuevo.',
     'duo.label': 'Abrir dos respawns',
     'duo.hint': 'Haz clic en dos respawns de la lista. Haz clic de nuevo en uno de ellos para cerrarlo.',
     'duo.second': 'Segundo respawn: {x}',
@@ -1380,6 +1535,37 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'raffle.mode.names': 'Po imionach',
+    'raffle.mode.room': 'Pokój z kością k100',
+    'room.intro': 'Utwórz pokój i podaj jego numer drużynie. Każdy wchodzi z numerem i rzuca kością k100; wszyscy widzą rzuty na żywo.',
+    'room.name': 'Twoje imię',
+    'room.create': 'Utwórz pokój',
+    'room.code': 'Numer pokoju',
+    'room.join': 'Wejdź',
+    'room.title': 'Pokój',
+    'room.copy': 'kopiuj numer',
+    'room.copied': 'Numer pokoju skopiowany.',
+    'room.share': 'Podaj ten numer drużynie.',
+    'room.item': 'Przedmiot do wylosowania',
+    'room.next': 'Nowa runda',
+    'room.round': 'Runda {n}: {x}',
+    'room.roundNoItem': 'Runda {n}',
+    'room.roll': 'Rzuć k100',
+    'room.rolled': 'Twój rzut: {v}.',
+    'room.already': 'W tej rundzie już był twój rzut.',
+    'room.changed': 'Runda się zmieniła. Rzuć ponownie.',
+    'room.waiting': 'Nikt jeszcze nie rzucał.',
+    'room.history': 'Poprzednie rundy',
+    'room.fair': 'Liczba wynika z dokładnej chwili, w której serwer odbiera rzut: nikt nie wybiera wyniku.',
+    'room.leave': 'Wyjdź z pokoju',
+    'room.refresh': 'Odśwież',
+    'room.end': 'Zamknij pokój',
+    'room.endSure': 'Na pewno zamknąć?',
+    'room.needName': 'Podaj swoje imię.',
+    'room.needCode': 'Podaj 6-cyfrowy numer pokoju.',
+    'room.notFound': 'Nie znaleziono pokoju. Sprawdź numer.',
+    'room.closed': 'Pokój został zamknięty.',
+    'room.fail': 'Nie udało się połączyć z serwerem. Spróbuj ponownie.',
     'duo.label': 'Otwórz dwa respawny',
     'duo.hint': 'Kliknij dwa respawny na liście. Kliknij jeden z nich ponownie, aby go zamknąć.',
     'duo.second': 'Drugi respawn: {x}',
@@ -2035,7 +2221,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '' }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PCTS.includes(ui.pct2)) ui.pct2 = ui.pct;
 ui.duo = ui.duo === true;
@@ -2050,6 +2236,9 @@ if (!ui.disc || typeof ui.disc !== 'object' || Array.isArray(ui.disc)) ui.disc =
 for (const k of Object.keys(ui.disc)) if (!(ui.disc[k] && ui.disc[k].gold > 0)) delete ui.disc[k];
 ui.recent = (Array.isArray(ui.recent) ? ui.recent : []).filter(x => typeof x === 'string').slice(0, 12);   // respawns abertos, do mais recente para o mais antigo
 if (typeof ui.raffleNames !== 'string') ui.raffleNames = '';
+if (ui.raffleMode !== 'room') ui.raffleMode = 'names';
+if (!/^\d{6}$/.test(ui.room || '')) ui.room = null;
+if (typeof ui.rollName !== 'string') ui.rollName = '';
 ui.pause = int(ui.pause, 0, 600) || 0;   // segundos de espera entre uma volta e outra, com "Repetir ao zerar"
 // Sem escolha salva, o site abre em inglês.
 if (!LANGS.includes(ui.lang)) ui.lang = 'en';
@@ -2192,6 +2381,7 @@ function setLang(lang) {
   }
   renderAll();
   renderHunt();
+  renderRoom();
 }
 
 // Voltas: cada vez que o cronômetro de um grupo é iniciado conta uma volta, ou seja, uma limpa do respawn.
@@ -3364,6 +3554,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 10:46',
+    pt: ['Sorteio de itens em sala: crie uma sala, passe o número para o grupo e cada pessoa rola um dado D100; todos veem as jogadas na hora. O sorteio por nomes continua disponível.'],
+    en: ['Item raffle in a room: create a room, give its number to your party and everyone rolls a D100; all of you see the rolls live. The raffle by names is still there.'],
+    es: ['Sorteo de objetos en sala: crea una sala, pasa el número al grupo y cada persona tira un dado D100; todos ven las tiradas al momento. El sorteo por nombres sigue disponible.'],
+    pl: ['Losowanie przedmiotów w pokoju: utwórz pokój, podaj numer drużynie, a każdy rzuca kością k100; wszyscy widzą rzuty na żywo. Losowanie po imionach nadal jest dostępne.'],
+  },
   { at: '2026-10-09 10:40',
     pt: ['Site também em polonês: agora são os quatro idiomas do jogo.', 'Seletor de idioma com as bandeiras.', 'O site abre em inglês para quem ainda não escolheu um idioma.'],
     en: ['Site also in Polish: it now covers the four languages of the game.', 'Language picker with flags.', 'The site opens in English for anyone who has not picked a language yet.'],
@@ -3505,8 +3701,10 @@ function openRaffle() {
   if (!names.value.trim()) names.value = huntNames().length ? huntNames().join('\n') : ui.raffleNames;
   $('#raffle-from-hunt').hidden = !huntNames().length;
   setText($('#raffle-msg'), '');
+  roomMsg('');
   const dlg = $('#raffle');
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  setRaffleMode(ui.raffleMode);
   dlg.scrollTop = 0;
 }
 function drawRaffle() {
@@ -3531,6 +3729,267 @@ function drawRaffle() {
   $('#raffle-copy').hidden = false;
   setText($('#raffle-msg'), '');
 }
+/* ---------- Sala de sorteio com dado D100 ----------
+   Quem cria a sala recebe um número de 6 dígitos e passa para o grupo. Cada pessoa entra com o número e rola um D100
+   por rodada; todos veem as jogadas. A sala é um documento no mesmo banco dos respawns (coleção rooms):
+     owner, round, items { rodada: nome do item }, rolls { "rodada_pessoa": { name, at } }
+   O valor do dado não é gravado: sai de "at", a hora em que o servidor recebeu a jogada (com microssegundos),
+   misturada com a sala, a rodada e a pessoa. Ninguém escolhe essa hora e todos os navegadores fazem a mesma conta,
+   então todos veem o mesmo número. As regras do banco (firestore.rules) garantem uma jogada por pessoa por rodada. */
+const room = { code: null, doc: null, sig: '', seen: null, rolling: new Map(), spin: 0, timer: 0, loading: false, busy: false, changedAt: 0, paused: false };
+const fmtCode = c => c.slice(0, 3) + ' ' + c.slice(3);
+const roomPath = code => cloud.root + '/rooms/' + code;
+const roomMsg = text => setText($('#room-msg'), text || '');
+// A hora do servidor sempre com seis casas, para a conta dar igual venha de onde vier.
+function stampKey(at) {
+  const m = /^(.*?)(?:\.(\d+))?Z$/.exec(String(at));
+  return m ? m[1] + '.' + ((m[2] || '') + '000000').slice(0, 6) : String(at);
+}
+function rollValue(code, key, at) {
+  const text = code + '|' + key + '|' + stampKey(at);
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16;
+  return (h >>> 0) % 100 + 1;
+}
+// Jogadas de uma rodada, da maior para a menor.
+function roundRolls(doc, n) {
+  const out = [];
+  for (const [key, r] of Object.entries(doc.rolls || {})) {
+    const i = key.indexOf('_');
+    if (i < 1 || Number(key.slice(0, i)) !== n || !r || !r.at) continue;
+    out.push({ key, name: String(r.name || '?'), value: rollValue(room.code, key, r.at) });
+  }
+  return out.sort((a, b) => b.value - a.value || (a.key < b.key ? -1 : 1));
+}
+function renderRoom() {
+  const inside = !!(room.code && room.doc);
+  $('#room-lobby').hidden = inside;
+  $('#room-in').hidden = !inside;
+  for (const b of [$('#room-create'), $('#room-join')]) b.disabled = room.busy;
+  if (!inside) return;
+  const d = room.doc, n = d.round || 1, mine = !!cloud.uid && d.owner === cloud.uid;
+  setText($('#room-number'), fmtCode(room.code));
+  $('#room-owner').hidden = !mine;
+  $('#room-end').hidden = !mine;
+  $('#room-refresh').hidden = !room.paused;
+  const item = (d.items || {})[n];
+  setText($('#room-round'), item ? tr('room.round', { n, x: item }) : tr('room.roundNoItem', { n }));
+  // Jogada recém-chegada: o dado "gira" um instante antes de mostrar o valor, e só então entra na ordem.
+  const now = Date.now();
+  for (const [k, until] of room.rolling) if (until <= now) room.rolling.delete(k);
+  const rolls = roundRolls(d, n);
+  const shown = rolls.filter(r => !room.rolling.has(r.key));
+  const top = shown.length ? shown[0].value : null;
+  $('#room-rolls').replaceChildren(
+    ...shown.map(r => el('li', { class: r.value === top ? 'top' : null }, el('span', { text: r.name }), el('b', { text: r.value }))),
+    ...rolls.filter(r => room.rolling.has(r.key)).map(r => el('li', { class: 'rolling' }, el('span', { text: r.name }), el('b', { text: randInt(100) + 1 }))),
+    ...(rolls.length ? [] : [el('li', { class: 'room-empty', text: tr('room.waiting') })]));
+  $('#room-roll').disabled = room.busy || !!(cloud.uid && (d.rolls || {})[n + '_' + cloud.uid]);
+  $('#room-next').disabled = room.busy;
+  // Rodadas anteriores: quem tirou o maior número em cada uma.
+  const past = [];
+  for (let k = n - 1; k >= 1; k--) {
+    const rs = roundRolls(d, k);
+    if (!rs.length) continue;
+    past.push(el('li', null, el('span', { text: (d.items || {})[k] || tr('room.roundNoItem', { n: k }) }),
+      el('b', { text: rs.filter(r => r.value === rs[0].value).map(r => r.name).join(' / ') + ' (' + rs[0].value + ')' })));
+  }
+  $('#room-history-wrap').hidden = !past.length;
+  $('#room-history').replaceChildren(...past);
+}
+function setRoomDoc(doc) {
+  const keys = Object.keys(doc.rolls || {});
+  if (room.seen) for (const k of keys) if (!room.seen.has(k)) room.rolling.set(k, Date.now() + 1400);
+  room.seen = new Set(keys);
+  const sig = JSON.stringify([doc.round, doc.items, keys.length]);
+  if (sig !== room.sig) { room.sig = sig; room.changedAt = Date.now(); }
+  room.doc = doc;
+  if (room.rolling.size && !room.spin) {
+    room.spin = setInterval(() => {
+      for (const b of document.querySelectorAll('#room-rolls .rolling b')) b.textContent = randInt(100) + 1;
+      if (![...room.rolling.values()].some(until => until > Date.now())) { clearInterval(room.spin); room.spin = 0; renderRoom(); }
+    }, 70);
+  }
+  renderRoom();
+}
+async function roomPoll() {
+  if (!room.code || room.loading) return;
+  room.loading = true;
+  try {
+    const code = room.code;
+    const got = await cloudFetch('/rooms/' + code);
+    if (room.code !== code) return;
+    if (got.status === 404) roomLeave(tr('room.closed'));
+    else if (got.ok) setRoomDoc(docRaw(got.json));
+  } catch { /* sem rede: tenta de novo na próxima volta */ } finally { room.loading = false; }
+}
+// Acompanha a sala enquanto a janela do sorteio está aberta. Para gastar poucas leituras do banco, anda mais
+// devagar com a aba escondida e para depois de 20 minutos sem novidade (o botão Atualizar retoma).
+function roomWatch(on) {
+  clearInterval(room.timer);
+  room.timer = 0;
+  if (!on || !room.code) return;
+  room.paused = false;
+  room.changedAt = Date.now();
+  let n = 0;
+  room.timer = setInterval(() => {
+    if (Date.now() - room.changedAt > 20 * 60000) { clearInterval(room.timer); room.timer = 0; room.paused = true; renderRoom(); return; }
+    n++;
+    if (document.visibilityState === 'visible' || n % 3 === 0) roomPoll();
+  }, 3000);
+  roomPoll();
+}
+function enterRoom(code, doc) {
+  room.code = code;
+  room.seen = null;
+  room.sig = '';
+  room.rolling.clear();
+  ui.room = code;
+  saveUi();
+  if (doc) setRoomDoc(doc);
+  roomWatch(true);
+}
+function roomLeave(msg) {
+  roomWatch(false);
+  room.code = null;
+  room.doc = null;
+  ui.room = null;
+  saveUi();
+  renderRoom();
+  roomMsg(msg);
+}
+function roomName() {
+  const name = $('#room-name').value.trim().slice(0, 24);
+  if (!name) { roomMsg(tr('room.needName')); $('#room-name').focus(); return ''; }
+  ui.rollName = name;
+  saveUi();
+  return name;
+}
+async function roomCreate() {
+  if (room.busy || !roomName()) return;
+  room.busy = true;
+  roomMsg('');
+  renderRoom();
+  try {
+    const uid = await cloudAuth();
+    let made = false;
+    for (let i = 0; i < 5 && !made; i++) {
+      const code = String(100000 + randInt(900000));
+      const res = await cloudCommit({
+        update: { name: roomPath(code), fields: toFs({ owner: uid, round: 1, items: {}, rolls: {} }).mapValue.fields },
+        updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
+        currentDocument: { exists: false },
+      });
+      if (res.ok) { made = true; enterRoom(code, { owner: uid, round: 1, items: {}, rolls: {} }); }
+      else if (res.status !== 409) break;   // 409: o número já existe, sorteia outro
+    }
+    if (!made) roomMsg(tr('room.fail'));
+  } catch { roomMsg(tr('room.fail')); } finally { room.busy = false; renderRoom(); }
+}
+async function roomJoin() {
+  if (room.busy) return;
+  const code = $('#room-code').value.replace(/\D/g, '');
+  if (code.length !== 6) { roomMsg(tr('room.needCode')); $('#room-code').focus(); return; }
+  if (!roomName()) return;
+  room.busy = true;
+  roomMsg('');
+  renderRoom();
+  try {
+    const got = await cloudFetch('/rooms/' + code);
+    if (got.ok) enterRoom(code, docRaw(got.json));
+    else roomMsg(tr(got.status === 404 ? 'room.notFound' : 'room.fail'));
+  } catch { roomMsg(tr('room.fail')); } finally { room.busy = false; renderRoom(); }
+}
+async function roomRoll() {
+  if (!room.code || !room.doc || room.busy) return;
+  const name = ui.rollName.trim().slice(0, 24);
+  if (!name) { roomLeave(tr('room.needName')); return; }
+  room.busy = true;
+  roomMsg('');
+  renderRoom();
+  try {
+    const uid = await cloudAuth();
+    const code = room.code, n = room.doc.round || 1, key = n + '_' + uid, path = 'rolls.`' + key + '`';
+    const res = await cloudCommit({
+      update: { name: roomPath(code), fields: { rolls: { mapValue: { fields: { [key]: toFs({ name }) } } } } },
+      updateMask: { fieldPaths: [path + '.name'] },
+      updateTransforms: [{ fieldPath: path + '.at', setToServerValue: 'REQUEST_TIME' }],
+      currentDocument: { exists: true },
+    });
+    await roomPoll();
+    if (room.code !== code || !room.doc) return;
+    const mine = roundRolls(room.doc, n).find(r => r.key === key);
+    if (res.ok && mine) setTimeout(() => { if (room.code === code) roomMsg(tr('room.rolled', { v: mine.value })); }, 1400);
+    else if (mine) roomMsg(tr('room.already'));
+    else roomMsg(tr((room.doc.round || 1) !== n ? 'room.changed' : 'room.fail'));
+  } catch { roomMsg(tr('room.fail')); } finally { room.busy = false; renderRoom(); }
+}
+// Dono da sala: abre a rodada do próximo item. Se a rodada atual ainda não tem jogadas, só troca o nome do item.
+async function roomNext() {
+  const d = room.doc;
+  if (!room.code || !d || room.busy) return;
+  const n = d.round || 1, next = roundRolls(d, n).length ? n + 1 : n;
+  const items = { ...(d.items || {}) };
+  const item = $('#room-item').value.trim().slice(0, 60);
+  if (item) items[next] = item; else delete items[next];
+  room.busy = true;
+  roomMsg('');
+  renderRoom();
+  try {
+    const res = await cloudCommit({
+      update: { name: roomPath(room.code), fields: toFs({ round: next, items }).mapValue.fields },
+      updateMask: { fieldPaths: ['round', 'items'] },
+      currentDocument: { exists: true },
+    });
+    if (res.ok) $('#room-item').value = ''; else roomMsg(tr('room.fail'));
+    await roomPoll();
+  } catch { roomMsg(tr('room.fail')); } finally { room.busy = false; renderRoom(); }
+}
+async function roomEnd() {
+  const b = $('#room-end');
+  if (!b.classList.contains('sure')) {   // pede um segundo clique antes de apagar a sala
+    b.classList.add('sure');
+    b.textContent = tr('room.endSure');
+    setTimeout(() => { b.classList.remove('sure'); b.textContent = tr('room.end'); }, 4000);
+    return;
+  }
+  b.classList.remove('sure');
+  b.textContent = tr('room.end');
+  try {
+    const res = await cloudCommit({ delete: roomPath(room.code) });
+    if (res.ok) roomLeave(tr('room.closed')); else roomMsg(tr('room.fail'));
+  } catch { roomMsg(tr('room.fail')); }
+}
+function setRaffleMode(mode) {
+  ui.raffleMode = mode === 'room' ? 'room' : 'names';
+  saveUi();
+  const inRoom = ui.raffleMode === 'room';
+  $('#raffle-mode-names').setAttribute('aria-pressed', String(!inRoom));
+  $('#raffle-mode-room').setAttribute('aria-pressed', String(inRoom));
+  $('#names-pane').hidden = inRoom;
+  $('#room-pane').hidden = !inRoom;
+  if (!inRoom) { roomWatch(false); return; }
+  if (!$('#room-name').value) $('#room-name').value = ui.rollName;
+  // Sala em que a pessoa já estava: volta para ela.
+  if (!room.code && ui.room) { room.code = ui.room; room.seen = null; room.sig = ''; }
+  renderRoom();
+  roomWatch($('#raffle').open);
+}
+$('#raffle-mode-names').addEventListener('click', () => setRaffleMode('names'));
+$('#raffle-mode-room').addEventListener('click', () => setRaffleMode('room'));
+$('#room-create').addEventListener('click', roomCreate);
+$('#room-join').addEventListener('click', roomJoin);
+$('#room-code').addEventListener('keydown', e => { if (e.key === 'Enter') roomJoin(); });
+$('#room-roll').addEventListener('click', roomRoll);
+$('#room-next').addEventListener('click', roomNext);
+$('#room-item').addEventListener('keydown', e => { if (e.key === 'Enter') roomNext(); });
+$('#room-leave').addEventListener('click', () => roomLeave(''));
+$('#room-refresh').addEventListener('click', () => roomWatch(true));
+$('#room-end').addEventListener('click', roomEnd);
+$('#room-copy').addEventListener('click', async () => { roomMsg(tr((await copyText(room.code)) ? 'room.copied' : 'hunt.copyFail')); });
+$('#raffle').addEventListener('close', () => roomWatch(false));   // janela fechada: para de consultar a sala
+
 $('#raffle-btn').addEventListener('click', openRaffle);
 $('#raffle-go').addEventListener('click', drawRaffle);
 $('#raffle-from-hunt').addEventListener('click', () => { $('#raffle-names').value = huntNames().join('\n'); });
@@ -3538,7 +3997,7 @@ $('#raffle-copy').addEventListener('click', async () => {
   const ok = await copyText(raffleText);
   setText($('#raffle-msg'), tr(ok ? 'raffle.copied' : 'hunt.copyFail'));
 });
-$('#raffle-close').addEventListener('click', () => { const dlg = $('#raffle'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+$('#raffle-close').addEventListener('click', () => { const dlg = $('#raffle'); if (dlg.close) dlg.close(); else { dlg.removeAttribute('open'); roomWatch(false); } });
 $('#raffle').addEventListener('click', e => { if (e.target === e.currentTarget && e.currentTarget.close) e.currentTarget.close(); });
 
 /* ---------- Rodapé da janela: opções e botões ---------- */
