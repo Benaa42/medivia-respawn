@@ -229,11 +229,14 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .clock-note { min-height: 1.45em; font-weight: 500; }
 .clock-who { font-weight: 600; color: var(--amber); overflow-wrap: anywhere; }
 .clock-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: auto; padding-top: 10px; }
+.clock-float { margin-top: 8px; font-size: 13px; color: var(--label); }
+.clock-float input:disabled { opacity: 0.5; }
 /* Cronômetros lado a lado ficam alinhados linha a linha (anel, nota, nomes, respawn, botões, voltas), mesmo quando
    os nomes de um deles ocupam mais linhas. Sem subgrid no navegador, os botões ao menos descem para o pé do bloco. */
 @supports (grid-template-rows: subgrid) {
   .clock { display: grid; grid-template-rows: subgrid; grid-row: span 5; justify-items: center; align-items: start; row-gap: 4px; }
-  .clocks.two .clock { grid-row: span 6; }
+  .clocks.two .clock, .clocks.pick .clock { grid-row: span 6; }
+  .clocks.two.pick .clock { grid-row: span 7; }
   .clock-actions { margin-top: 10px; padding-top: 0; }
 }
 .stage-all {
@@ -846,6 +849,8 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'float.show': 'Na janela flutuante',
+    'float.showTip': 'Desmarque para este cronômetro não aparecer na janela flutuante',
     'err.mapperRows': 'Reconheci o print do mapper, mas não consegui ler a tabela de criaturas: o texto do painel está pequeno demais. Aumente o zoom do navegador na página do mapper (Ctrl e +) e tire outro print.',
     'read.mapperTwin': '{y} no mapper é o {x} do jogo: mesmo preço de boost e mesmas criaturas. Abri o {x}, que ficou como estava.',
     'read.mapperLocal': 'Leituras do mapper ficam só neste navegador: lá os nomes e os números nem sempre são os do jogo.',
@@ -1131,6 +1136,8 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'float.show': 'In the floating window',
+    'float.showTip': 'Untick to keep this timer out of the floating window',
     'err.mapperRows': 'This is a mapper screenshot, but the creature table could not be read: the panel text is too small. Zoom in on the mapper page in your browser (Ctrl and +) and take another screenshot.',
     'read.mapperTwin': '{y} on the mapper is {x} in the game: same boost price and same creatures. {x} was opened and left as it was.',
     'read.mapperLocal': 'Mapper reads stay in this browser only: its names and numbers are not always the ones in the game.',
@@ -1416,6 +1423,8 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'float.show': 'En la ventana flotante',
+    'float.showTip': 'Desmarca para que este cronómetro no aparezca en la ventana flotante',
     'err.mapperRows': 'Reconocí la captura del mapper, pero no pude leer la tabla de criaturas: el texto del panel es demasiado pequeño. Aumenta el zoom del navegador en la página del mapper (Ctrl y +) y haz otra captura.',
     'read.mapperTwin': '{y} en el mapper es {x} en el juego: mismo precio de bonus y mismas criaturas. Abrí {x}, que quedó como estaba.',
     'read.mapperLocal': 'Las lecturas del mapper quedan solo en este navegador: sus nombres y números no siempre son los del juego.',
@@ -1701,6 +1710,8 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'float.show': 'W pływającym oknie',
+    'float.showTip': 'Odznacz, aby ten licznik nie pojawiał się w pływającym oknie',
     'err.mapperRows': 'To zrzut z mappera, ale nie udało się odczytać tabeli stworzeń: tekst w panelu jest za mały. Powiększ stronę mappera w przeglądarce (Ctrl i +) i zrób kolejny zrzut.',
     'read.mapperTwin': '{y} w mapperze to {x} w grze: ta sama cena bonusu i te same stworzenia. Otwarto {x} bez zmian.',
     'read.mapperLocal': 'Odczyty z mappera zostają tylko w tej przeglądarce: jego nazwy i liczby nie zawsze zgadzają się z grą.',
@@ -2622,7 +2633,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {} }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {} }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PCTS.includes(ui.pct2)) ui.pct2 = ui.pct;
 ui.duo = ui.duo === true;
@@ -2640,6 +2651,7 @@ if (typeof ui.raffleNames !== 'string') ui.raffleNames = '';
 if (ui.raffleMode !== 'room') ui.raffleMode = 'names';
 if (!/^\d{4,6}$/.test(ui.room || '')) ui.room = null;
 if (typeof ui.rollName !== 'string') ui.rollName = '';
+if (!ui.floatHide || typeof ui.floatHide !== 'object' || Array.isArray(ui.floatHide)) ui.floatHide = {};
 if (!ui.huntExtra || typeof ui.huntExtra !== 'object' || Array.isArray(ui.huntExtra)) ui.huntExtra = {};
 ui.pause = int(ui.pause, 0, 600) || 0;   // segundos de espera entre uma volta e outra, com "Repetir ao zerar"
 // Sem escolha salva, o site abre em inglês.
@@ -2798,6 +2810,17 @@ function lapsSet(id, base, n) {
   if (!Object.keys(mine).length) delete ui.laps[id];
   saveUi();
   paintLaps();
+}
+// Cronômetros que a pessoa tirou da janela flutuante. Como as voltas, ficam guardados por respawn e por grupo de
+// criaturas (o tempo base), então a escolha continua valendo quando o bônus ou o grupo de caça muda.
+const floatOff = (id, base) => Array.isArray(ui.floatHide[id]) && ui.floatHide[id].includes(base);
+function setFloatOn(id, base, on) {
+  const list = (Array.isArray(ui.floatHide[id]) ? ui.floatHide[id] : []).filter(b => b !== base);
+  if (!on) list.push(base);
+  if (list.length) ui.floatHide[id] = list; else delete ui.floatHide[id];
+  saveUi();
+  renderSheet();
+  tick();
 }
 function lapsAdd(t, n) {
   if (t.id && t.base != null && n > 0) lapsSet(t.id, t.base, lapsGet(t.id, t.base) + n);
@@ -2990,9 +3013,12 @@ setInterval(tick, 250);
 /* Janela flutuante: fica por cima do jogo (em janela ou sem bordas). */
 const float = { win: null, list: null, all: null, none: null, rowEls: new Map(), sig: '', canvas: null, video: null };
 // Na mesma ordem da página: primeiro o respawn principal, e em cada um do tempo maior para o menor.
+// Só os cronômetros que a pessoa deixou na janela flutuante; se tirou todos, aparecem todos (ela nunca fica vazia).
 function groupsNow() {
-  return [...timers].map(([key, t]) => ({ key, sec: t.sec, t, who: t.label || '' }))
+  const all = [...timers].map(([key, t]) => ({ key, sec: t.sec, t, who: t.label || '' }))
     .sort((a, b) => (a.t.slot - b.t.slot) || (b.sec - a.sec));
+  const shown = all.filter(g => !floatOff(g.t.id, g.t.base));
+  return shown.length ? shown : all;
 }
 function paintFloat(now) {
   if (float.win && float.list) {
@@ -3048,7 +3074,7 @@ async function toggleFloat() {
   armAudio();   // o clique aqui libera o som mesmo que os cronômetros sejam iniciados pela janela flutuante
   try {
     if ('documentPictureInPicture' in window) {
-      const w = await window.documentPictureInPicture.requestWindow({ width: 320, height: 112 + Math.max(1, timers.size) * 96 });
+      const w = await window.documentPictureInPicture.requestWindow({ width: 320, height: 112 + Math.max(1, groupsNow().length) * 96 });
       const cs = getComputedStyle(document.documentElement);
       const vars = ['--ground', '--title', '--label', '--amber', '--value', '--teal', '--btn', '--btn-edge', '--edge']
         .map(n => n + ':' + cs.getPropertyValue(n)).join(';');
@@ -3067,8 +3093,8 @@ async function toggleFloat() {
           'button.zero{border-color:var(--edge);color:var(--label)}' +
           'button.all{margin-top:10px;width:100%}button.all+button.all{margin-top:6px}' }));
       float.list = el('div');
-      float.all = el('button', { class: 'all', type: 'button', text: tr('startAll'), onclick: startAll });
-      float.none = el('button', { class: 'all zero', type: 'button', text: tr('resetAll'), onclick: resetAll });
+      float.all = el('button', { class: 'all', type: 'button', text: tr('startAll'), onclick: () => { for (const g of groupsNow()) startTimer(g.key); } });
+      float.none = el('button', { class: 'all zero', type: 'button', text: tr('resetAll'), onclick: () => { for (const g of groupsNow()) resetTimer(g.key); } });
       float.sig = null;
       w.document.body.append(float.list, float.all, float.none);
       w.document.addEventListener('pointerdown', armAudio);
@@ -3386,7 +3412,7 @@ function renderSheet() {
   const loading = pending.seed || pending.db || !!pending.cloud;
   const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id) && !owns(ui.id);
   const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r, ui.disc[ui.id] || null,
-    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null]]);
+    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null], ui.floatHide[ui.id] || null, id2 && ui.floatHide[id2] || null]);
   if (sig === sheetSig) return;
   sheetSig = sig;
   timerEls = new Map();
@@ -3405,8 +3431,12 @@ function renderSheet() {
 
   // Cronômetros: um anel por respawn aberto e por tempo de respawn diferente; o anel vai se fechando até a criatura nascer
   const open = r2 ? [{ id, r }, { id: id2, r: r2 }] : [{ id, r }];
-  const clocks = clockGroups(open).map(({ key, sec, who, base, id: rid, slot, area }) => {
+  // Com mais de um cronômetro, cada um tem a caixa "Na janela flutuante"; o último que resta nela não pode sair.
+  const groups = clockGroups(open), many = groups.length > 1;
+  const inFloat = groups.filter(g => !floatOff(g.id, g.base)).length;
+  const clocks = groups.map(({ key, sec, who, base, id: rid, slot, area }) => {
     const tag = (slot ? 'b' : '') + sec;   // ids dos botões; os do segundo respawn levam um "b"
+    const off = floatOff(rid, base);
     const digits = el('b', { class: 'clock-digits', text: fmtTime(sec) });
     const note = el('p', { class: 'clock-note' });
     const ring = el('div', { class: 'ring' });
@@ -3429,11 +3459,15 @@ function renderSheet() {
       el('p', { class: 'clock-who', text: who.join(', ') }),
       r2 ? el('p', { class: 'clock-area', text: area }) : null,   // com dois respawns, de qual deles é o cronômetro
       el('div', { class: 'clock-actions' }, start, el('button', { class: 'dlg stop', type: 'button', text: tr('reset'), onclick: () => resetTimer(key) })),
-      laps);
+      laps,
+      many ? el('label', { class: 'toggle clock-float', title: tr('float.showTip') },
+        el('input', { type: 'checkbox', id: 'float-show-' + tag, checked: !off, disabled: !off && inFloat === 1, onchange: e => setFloatOn(rid, base, e.target.checked) }),
+        el('span', { text: tr('float.show') })) : null);
     timerEls.set(key, { root, digits, note, start, setFrac: f => { arc.style.strokeDashoffset = (RING * (1 - f)).toFixed(2); } });
     return root;
   });
-  parts.stage.replaceChildren(el('div', { class: r2 ? 'clocks two' : 'clocks' }, clocks), stageAll(clocks.length > 1));   // com dois respawns cada cronômetro tem uma linha a mais
+  // Cada cronômetro tem uma linha a mais com dois respawns ("two") e outra com a caixa da janela flutuante ("pick").
+  parts.stage.replaceChildren(el('div', { class: 'clocks' + (r2 ? ' two' : '') + (many ? ' pick' : '') }, clocks), stageAll(clocks.length > 1));
 
   // Controles: atualizados no lugar
   parts.party.set(PARTIES.findIndex(p => p.mult === ui.party));
@@ -4036,6 +4070,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 16:20',
+    pt: ['Janela flutuante: quando o respawn tem mais de um cronômetro, cada um tem a caixa "Na janela flutuante" para escolher quais aparecem nela.'],
+    en: ['Floating window: when a respawn has more than one timer, each has an "In the floating window" box to choose which ones show there.'],
+    es: ['Ventana flotante: cuando el respawn tiene más de un cronómetro, cada uno tiene la casilla "En la ventana flotante" para elegir cuáles aparecen en ella.'],
+    pl: ['Pływające okno: gdy respawn ma więcej niż jeden licznik, każdy ma pole „W pływającym oknie”, aby wybrać, które się w nim pokazują.'],
+  },
   { at: '2026-10-09 15:51',
     pt: ['Print do mapper: a leitura fica só neste navegador e não altera respawns lidos do jogo, porque o mapper usa outros nomes e alguns números diferentes. Se o lugar já está no banco, o site abre o respawn do jogo.'],
     en: ['Mapper screenshot: the read stays in this browser only and does not change respawns read from the game, because the mapper uses other names and some different numbers. If the place is already in the bank, the site opens the respawn from the game.'],
