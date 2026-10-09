@@ -77,6 +77,35 @@ kbd {
 /* Apoiar o projeto: um link discreto no rodapé que abre uma caixa com Pix e Ko-fi */
 .support-btn { padding: 0; border: 0; background: none; color: var(--faint); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .support-btn:hover { color: var(--title); }
+.colophon-links { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+/* Sorteio de itens */
+.raffle-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--label); }
+.raffle-field textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--edge); border-radius: 8px; background: var(--ground); color: var(--title); font: 500 14px/1.4 var(--font-ui); resize: vertical; }
+.raffle-link { align-self: flex-start; font-size: 13px; }
+.dlg.raffle-go { border-color: var(--value); background: var(--value); color: var(--ink); }
+.raffle-result { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.raffle-result:empty { display: none; }
+.raffle-result li { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 8px 12px; border-radius: var(--r-sm); background: var(--card); }
+.raffle-result span { color: var(--label); overflow-wrap: anywhere; }
+.raffle-result b { font-weight: 700; color: var(--amber); overflow-wrap: anywhere; text-align: right; }
+#raffle-copy { align-self: flex-start; }
+dialog#changes { width: min(560px, calc(100vw - 32px)); }
+.changes-list { display: flex; flex-direction: column; gap: 16px; }
+.changes-list h3 { margin-bottom: 5px; font: 600 13px/1.3 var(--font-ui); color: var(--amber); font-variant-numeric: lining-nums tabular-nums; }
+.changes-list ul { display: flex; flex-direction: column; gap: 4px; margin: 0; padding-left: 1.2em; font-size: 14px; color: var(--label); }
+.dlg.support-top { padding: 6px 14px; border-color: var(--amber); background: none; color: var(--amber); font-size: 13px; }
+.dlg.support-top:hover { border-color: var(--amber); background: var(--amber); color: var(--ground); }
+.support-top::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 13px;
+  margin-right: 7px;
+  vertical-align: -2px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 15'%3E%3Cpath d='M8 14.5 1.7 8.3a4.2 4.2 0 0 1 0-6 4.2 4.2 0 0 1 5.9 0l.4.4.4-.4a4.2 4.2 0 0 1 5.9 0 4.2 4.2 0 0 1 0 6z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 15'%3E%3Cpath d='M8 14.5 1.7 8.3a4.2 4.2 0 0 1 0-6 4.2 4.2 0 0 1 5.9 0l.4.4.4-.4a4.2 4.2 0 0 1 5.9 0 4.2 4.2 0 0 1 0 6z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
 dialog.support { width: min(420px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 22px; border: 1px solid var(--edge); border-radius: var(--r-lg); background: var(--box); color: var(--label); overflow-y: auto; }
 dialog.support::backdrop { background: rgba(6, 9, 10, 0.74); }
 dialog.support[open] { display: flex; flex-direction: column; gap: 14px; }
@@ -280,6 +309,9 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .toggle { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; cursor: pointer; }
 .toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--value); }
 .volume { width: 110px; accent-color: var(--value); cursor: pointer; }
+.toggle.pause { cursor: default; }
+.pause input { width: 62px; padding: 4px 8px; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); color: var(--title); font: 600 13px/1.2 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; }
+.clock[data-state="pause"] .ring-arc { stroke: var(--faint); }
 .dlgs { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
 .status { min-height: 1.45em; font-size: 13px; color: var(--faint); }
 .status[data-kind="busy"] { color: var(--amber); }
@@ -394,6 +426,7 @@ details.backup textarea {
           <button type="button" data-lang="en" lang="en" title="English">EN</button>
           <button type="button" data-lang="es" lang="es" title="Español">ES</button>
         </span>
+        <button class="dlg support-top" type="button" id="support-top" data-i18n="support.open" hidden>Apoiar o projeto</button>
       </nav>
     </div>
     <a class="maker" href="https://github.com/Benaa42" target="_blank" rel="noopener"><img src="vibeforge.svg" width="252" height="72" alt="Vibeforge, produzido por Bena" data-i18n-attr="alt:maker.alt"></a>
@@ -424,6 +457,7 @@ details.backup textarea {
     <aside class="win hunt" id="hunt" aria-labelledby="hunt-title">
       <h2 class="win-name" id="hunt-title" data-i18n="hunt.title">Última hunt</h2>
       <div id="hunt-body"></div>
+      <div class="hunt-foot"><button class="dlg" type="button" id="raffle-btn" data-i18n="raffle.open">Sortear itens</button></div>
       <input class="sr" type="file" id="hunt-file" accept=".txt,text/plain" tabindex="-1" aria-hidden="true">
     </aside>
     </div>
@@ -433,6 +467,7 @@ details.backup textarea {
       <footer class="win-foot" id="win-opts">
         <div class="opts">
           <label class="toggle"><input type="checkbox" id="opt-loop"> <span data-i18n="loop">Repetir ao zerar</span></label>
+          <label class="toggle pause" id="opt-pause-wrap" title="Segundos de espera depois de zerar, antes de a próxima volta começar sozinha" data-i18n-attr="title:pause.tip" hidden><span data-i18n="pause.label">Pausa entre voltas</span> <input type="number" id="opt-pause" min="0" max="600" step="5" inputmode="numeric"> <span data-i18n="pause.unit">s</span></label>
           <label class="toggle"><input type="checkbox" id="opt-sound"> <span data-i18n="sound">Som</span></label>
           <input type="range" class="volume" id="opt-volume" min="0" max="100" step="5" aria-label="Volume do som" title="Volume do som" data-i18n-attr="aria-label:volume;title:volume">
           <select class="tone" id="opt-tone" aria-label="Tipo de alerta" title="Tipo de alerta" data-i18n-attr="aria-label:tone.label;title:tone.label">
@@ -453,9 +488,39 @@ details.backup textarea {
 
   <footer class="colophon">
     <p data-i18n="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</p>
-    <button class="support-btn" type="button" id="support-btn" data-i18n="support.open" hidden>Apoiar o projeto</button>
+    <div class="colophon-links">
+      <button class="support-btn" type="button" id="changes-btn" data-i18n="changes.open">Novidades</button>
+      <button class="support-btn" type="button" id="support-btn" data-i18n="support.open" hidden>Apoiar o projeto</button>
+    </div>
   </footer>
 </div>
+
+<dialog class="support" id="raffle" aria-labelledby="raffle-title">
+  <div class="support-end">
+    <h2 id="raffle-title" data-i18n="raffle.title">Sorteio de itens</h2>
+    <button class="dlg stop" type="button" id="raffle-close" data-i18n="support.close" autofocus>Fechar</button>
+  </div>
+  <label class="raffle-field"><span data-i18n="raffle.names">Participantes, um por linha</span>
+    <textarea id="raffle-names" rows="5" spellcheck="false"></textarea></label>
+  <button class="hunt-link raffle-link" type="button" id="raffle-from-hunt" data-i18n="raffle.fromHunt">Usar os nomes da última hunt</button>
+  <label class="raffle-field"><span data-i18n="raffle.items">Itens, um por linha (opcional)</span>
+    <textarea id="raffle-items" rows="3" spellcheck="false"></textarea></label>
+  <label class="toggle"><input type="checkbox" id="raffle-unique"> <span data-i18n="raffle.unique">Não repetir ganhador enquanto houver participante sem item</span></label>
+  <div class="support-end">
+    <p class="support-note" id="raffle-msg" role="status"></p>
+    <button class="dlg raffle-go" type="button" id="raffle-go" data-i18n="raffle.go">Sortear</button>
+  </div>
+  <ol class="raffle-result" id="raffle-result"></ol>
+  <button class="dlg" type="button" id="raffle-copy" data-i18n="raffle.copy" hidden>Copiar resultado</button>
+</dialog>
+
+<dialog class="support" id="changes" aria-labelledby="changes-title">
+  <div class="support-end">
+    <h2 id="changes-title" data-i18n="changes.title">Novidades do site</h2>
+    <button class="dlg stop" type="button" id="changes-close" data-i18n="support.close" autofocus>Fechar</button>
+  </div>
+  <div class="changes-list" id="changes-list"></div>
+</dialog>
 
 <dialog class="support" id="support" aria-labelledby="support-title">
   <h2 id="support-title" data-i18n="support.open">Apoiar o projeto</h2>
@@ -619,6 +684,25 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'bank.more': 'Mostrando {n} de {t} respawns. Busque para ver os outros.',
+    'raffle.open': 'Sortear itens',
+    'raffle.title': 'Sorteio de itens',
+    'raffle.names': 'Participantes, um por linha',
+    'raffle.fromHunt': 'Usar os nomes da última hunt',
+    'raffle.items': 'Itens, um por linha (opcional)',
+    'raffle.unique': 'Não repetir ganhador enquanto houver participante sem item',
+    'raffle.go': 'Sortear',
+    'raffle.need': 'Informe pelo menos dois participantes.',
+    'raffle.winner': 'Ganhador',
+    'raffle.copy': 'Copiar resultado',
+    'raffle.copied': 'Resultado do sorteio copiado.',
+    'changes.open': 'Novidades',
+    'changes.title': 'Novidades do site',
+    'pause.label': 'Pausa entre voltas',
+    'pause.unit': 's',
+    'pause.tip': 'Segundos de espera depois de zerar, antes de a próxima volta começar sozinha',
+    'note.pause': 'pausa antes da próxima volta',
+    'note.pauseShort': 'pausa',
     'hunt.whoTip': 'Copiar o nome de {x}, com Home na linha de baixo',
     'hunt.whoCopied': 'Nome de {x} copiado, com Home na linha de baixo.',
     'hunt.payTip': 'Copiar o valor de {x}',
@@ -797,6 +881,25 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'bank.more': 'Showing {n} of {t} respawns. Search to see the others.',
+    'raffle.open': 'Raffle items',
+    'raffle.title': 'Item raffle',
+    'raffle.names': 'Participants, one per line',
+    'raffle.fromHunt': 'Use the names from the last hunt',
+    'raffle.items': 'Items, one per line (optional)',
+    'raffle.unique': 'Do not repeat a winner while someone still has no item',
+    'raffle.go': 'Draw',
+    'raffle.need': 'Enter at least two participants.',
+    'raffle.winner': 'Winner',
+    'raffle.copy': 'Copy result',
+    'raffle.copied': 'Raffle result copied.',
+    'changes.open': 'What is new',
+    'changes.title': 'What is new on the site',
+    'pause.label': 'Pause between laps',
+    'pause.unit': 's',
+    'pause.tip': 'Seconds to wait after reaching zero, before the next lap starts on its own',
+    'note.pause': 'pause before the next lap',
+    'note.pauseShort': 'pause',
     'hunt.whoTip': 'Copy the name {x}, with Home on the next line',
     'hunt.whoCopied': 'Name {x} copied, with Home on the next line.',
     'hunt.payTip': 'Copy the amount for {x}',
@@ -975,6 +1078,25 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'bank.more': 'Mostrando {n} de {t} respawns. Busca para ver los demás.',
+    'raffle.open': 'Sortear objetos',
+    'raffle.title': 'Sorteo de objetos',
+    'raffle.names': 'Participantes, uno por línea',
+    'raffle.fromHunt': 'Usar los nombres de la última cacería',
+    'raffle.items': 'Objetos, uno por línea (opcional)',
+    'raffle.unique': 'No repetir ganador mientras alguien siga sin objeto',
+    'raffle.go': 'Sortear',
+    'raffle.need': 'Indica al menos dos participantes.',
+    'raffle.winner': 'Ganador',
+    'raffle.copy': 'Copiar resultado',
+    'raffle.copied': 'Resultado del sorteo copiado.',
+    'changes.open': 'Novedades',
+    'changes.title': 'Novedades del sitio',
+    'pause.label': 'Pausa entre vueltas',
+    'pause.unit': 's',
+    'pause.tip': 'Segundos de espera al llegar a cero, antes de que la siguiente vuelta empiece sola',
+    'note.pause': 'pausa antes de la siguiente vuelta',
+    'note.pauseShort': 'pausa',
     'hunt.whoTip': 'Copiar el nombre de {x}, con Home en la línea de abajo',
     'hunt.whoCopied': 'Nombre de {x} copiado, con Home en la línea de abajo.',
     'hunt.payTip': 'Copiar el valor de {x}',
@@ -1559,7 +1681,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {} }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '' }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PARTIES.some(p => p.mult === ui.party)) ui.party = 100;
 if (!DURS.includes(ui.dur)) ui.dur = 60;
@@ -1567,6 +1689,9 @@ if (ui.unit !== 'm') ui.unit = 's';
 if (!TONES[ui.tone]) ui.tone = 'sino';
 if (!ui.tasks || typeof ui.tasks !== 'object' || Array.isArray(ui.tasks)) ui.tasks = {};
 if (!ui.laps || typeof ui.laps !== 'object' || Array.isArray(ui.laps)) ui.laps = {};
+ui.recent = (Array.isArray(ui.recent) ? ui.recent : []).filter(x => typeof x === 'string').slice(0, 12);   // respawns abertos, do mais recente para o mais antigo
+if (typeof ui.raffleNames !== 'string') ui.raffleNames = '';
+ui.pause = int(ui.pause, 0, 600) || 0;   // segundos de espera entre uma volta e outra, com "Repetir ao zerar"
 // Sem escolha salva, o site abre no idioma do navegador; fora dos três, em inglês.
 if (!LANGS.includes(ui.lang)) {
   const nav = String(navigator.language || 'pt').slice(0, 2).toLowerCase();
@@ -1587,10 +1712,26 @@ function renderSync() {
       : store.canWrite === false ? 'sync.ro' : 'sync.rw');
 }
 
+// Sem busca, a lista mostra só três respawns: os últimos abertos, completados por sorteio quando faltam.
+// Os sorteados ficam os mesmos enquanto a página está aberta, para a lista não mudar a cada clique.
+let bankFill = [];
+function bankShort(all) {
+  const byId = new Map(all.map(r => [r.id, r]));
+  const ids = ui.recent.filter(id => byId.has(id)).slice(0, 3);
+  if (ui.id && byId.has(ui.id) && !ids.includes(ui.id)) { ids.unshift(ui.id); ids.length = Math.min(ids.length, 3); }
+  bankFill = bankFill.filter(id => byId.has(id));
+  const pool = all.map(r => r.id).filter(id => !bankFill.includes(id));
+  while (bankFill.length < 3 && pool.length) bankFill.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  for (const id of bankFill) if (ids.length < 3 && !ids.includes(id)) ids.push(id);
+  return ids.map(id => byId.get(id)).sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+}
+
 function renderBank() {
   const q = $('#search').value.trim().toLowerCase();
   const all = allRespawns();
-  const hits = all.filter(r => !q || r.name.toLowerCase().includes(q) || r.monsters.some(m => m.name.toLowerCase().includes(q)));
+  const hits = q
+    ? all.filter(r => r.name.toLowerCase().includes(q) || r.monsters.some(m => m.name.toLowerCase().includes(q)))
+    : bankShort(all);
   const list = $('#bank-list');
   list.replaceChildren(...hits.map(r => el('li', null,
     el('button', {
@@ -1599,12 +1740,15 @@ function renderBank() {
     }, el('b', { text: r.name }), el('small', { text: r.monsters.map(m => m.name).join(', ') || tr('bank.nomobs') })))));
   if (!hits.length) {
     list.append(el('li', { class: 'bank-empty', text: tr(all.length ? 'bank.nohit' : 'bank.empty') }));
+  } else if (!q && all.length > hits.length) {
+    list.append(el('li', { class: 'bank-empty', text: tr('bank.more', { n: hits.length, t: all.length }) }));
   }
 }
 
 function select(id, pct) {
   if (id !== ui.id || (pct != null && pct !== ui.pct)) clearTimers();
   ui.id = id;
+  ui.recent = [id, ...ui.recent.filter(x => x !== id)].slice(0, 12);
   if (pct != null) ui.pct = pct;
   saveUi();
   renderAll();
@@ -1743,13 +1887,14 @@ function startTimer(sec) {
   keepAwake();
   t.endAt = Date.now() + t.dur * 1000;
   t.doneAt = null;
+  t.pauseUntil = null;
   scheduleSounds(t);
   lapsAdd(t, 1);
   tick();
 }
 function resetTimer(sec) {
   const t = timers.get(sec);
-  if (t) { t.endAt = null; t.doneAt = null; cancelSounds(t); }
+  if (t) { t.endAt = null; t.doneAt = null; t.pauseUntil = null; cancelSounds(t); }
   tick();
 }
 function clearTimers() {
@@ -1761,6 +1906,10 @@ const resetAll = () => { for (const sec of timers.keys()) resetTimer(sec); };
 const setText = (node, s) => { s = String(s); if (node.textContent !== s) node.textContent = s; };
 
 function timerView(t, now) {
+  // Pausa entre voltas: o cronômetro zerou e espera um pouco antes de recomeçar sozinho.
+  if (t.pauseUntil != null) {
+    return { state: 'pause', left: Math.max(0, Math.ceil((t.pauseUntil - now) / 1000)), note: tr('note.pause'), frac: 1 };
+  }
   if (t.endAt != null) {
     const left = Math.max(0, Math.ceil((t.endAt - now) / 1000));
     return { state: left <= 10 ? 'warn' : 'run', left, note: tr('note.left', { t: ui.unit === 'm' ? left + ' s' : fmtClock(left) }), frac: 1 - (t.endAt - now) / (t.dur * 1000) };
@@ -1775,14 +1924,23 @@ function tick() {
   const now = Date.now();
   let soonest = null;
   for (const [sec, t] of timers) {
-    if (t.endAt != null && t.endAt <= now) {
-      if (ui.loop) {
-        let turns = 0;
-        while (t.endAt <= now) { t.endAt += t.dur * 1000; turns++; }
-        scheduleSounds(t);
-        lapsAdd(t, turns);   // repetindo sozinho, cada recomeço é uma volta
-      }
-      else { t.doneAt = t.endAt; t.endAt = null; }
+    // Zerou. Sem repetir, fica parado. Repetindo, recomeça sozinho, depois da pausa entre voltas se houver.
+    // O laço cobre o caso de a aba ter ficado parada por mais de uma volta.
+    let turns = 0;
+    while (t.dur > 0) {
+      if (t.endAt != null && t.endAt <= now) {
+        if (!ui.loop) { t.doneAt = t.endAt; t.endAt = null; break; }
+        if (ui.pause > 0) { t.pauseUntil = t.endAt + ui.pause * 1000; t.endAt = null; }
+        else { t.endAt += t.dur * 1000; turns++; }
+      } else if (t.pauseUntil != null && t.pauseUntil <= now) {
+        if (ui.loop) { t.endAt = t.pauseUntil + t.dur * 1000; turns++; }
+        else t.doneAt = t.pauseUntil;
+        t.pauseUntil = null;
+      } else break;
+    }
+    if (turns) {
+      scheduleSounds(t);
+      lapsAdd(t, turns);   // cada recomeço automático é uma volta
     }
     const v = timerView(t, now);
     if (t.endAt != null && (soonest == null || v.left < soonest)) soonest = v.left;
@@ -1839,7 +1997,7 @@ function paintFloat(now) {
       setText(e.b, fmtTime(v.left) + (ui.unit === 'm' ? '' : ' s'));
       setText(e.btn, tr(v.state === 'idle' || v.state === 'done' ? 'start' : 'restart'));
       const laps = ui.id && g.t.base != null ? lapsGet(ui.id, g.t.base) : 0;
-      setText(e.who, g.who + (laps ? ' · ' + tr('lap.short', { n: laps }) : ''));
+      setText(e.who, g.who + (laps ? ' · ' + tr('lap.short', { n: laps }) : '') + (v.state === 'pause' ? ' · ' + tr('note.pauseShort') : ''));
     }
   }
   if (float.canvas && document.pictureInPictureElement === float.video) {
@@ -1851,7 +2009,7 @@ function paintFloat(now) {
     g.fillStyle = col('--ground'); g.fillRect(0, 0, c.width, c.height);
     gs.forEach((gr, i) => {
       const v = timerView(gr.t, now);
-      g.fillStyle = col(v.state === 'warn' ? '--amber' : v.state === 'done' ? '--title' : v.state === 'idle' ? '--label' : '--value');
+      g.fillStyle = col(v.state === 'warn' ? '--amber' : v.state === 'done' || v.state === 'pause' ? '--title' : v.state === 'idle' ? '--label' : '--value');
       g.font = '800 58px "Bricolage Grotesque", "Segoe UI", sans-serif';
       g.fillText(fmtTime(v.left) + (ui.unit === 'm' ? '' : ' s'), 14, i * 96 + 58);
       g.fillStyle = col('--amber');
@@ -1877,7 +2035,7 @@ async function toggleFloat() {
           '.f-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0 8px;border-bottom:1px solid var(--edge)}' +
           '.f-main{display:flex;flex-direction:column;min-width:0}' +
           '.f-main b{font:800 40px/1 "Bricolage Grotesque",Onest,"Segoe UI",sans-serif;color:var(--value)}' +
-          '.f-row[data-state=idle] b{color:var(--label)}.f-row[data-state=warn] b{color:var(--amber)}.f-row[data-state=done] b{color:var(--title)}' +
+          '.f-row[data-state=idle] b{color:var(--label)}.f-row[data-state=warn] b{color:var(--amber)}.f-row[data-state=done] b,.f-row[data-state=pause] b{color:var(--title)}' +
           '.f-main span{color:var(--amber);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
           'button{flex:none;padding:5px 12px 4px;border:1px solid var(--btn-edge);background:var(--btn);color:var(--teal);border-radius:999px;font:600 13px Onest,"Segoe UI",sans-serif;cursor:pointer}' +
           'button:hover{border-color:var(--teal)}' +
@@ -2214,7 +2372,7 @@ async function rename(id, input) {
 function renderAll() {
   // A seleção só muda depois que o banco terminou de carregar: antes disso o respawn salvo pode não ter chegado.
   if (!pending.seed && !pending.db && !pending.cloud && !getRespawn(ui.id)) {
-    const first = allRespawns()[0];
+    const first = bankShort(allRespawns())[0];
     ui.id = first ? first.id : null;
   }
   renderSync();
@@ -2663,8 +2821,11 @@ function openSupport() {
 }
 if (support.pix || support.kofi) {
   const dlg = $('#support');
-  $('#support-btn').hidden = false;
-  $('#support-btn').addEventListener('click', openSupport);
+  // Dois caminhos para a mesma caixa: o botão no topo e o link no rodapé.
+  for (const b of [$('#support-top'), $('#support-btn')]) {
+    b.hidden = false;
+    b.addEventListener('click', openSupport);
+  }
   $('#support-close').addEventListener('click', () => { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
   dlg.addEventListener('click', e => { if (e.target === dlg && dlg.close) dlg.close(); });   // clique fora da caixa fecha
   $('#support-pix-copy').addEventListener('click', async () => {
@@ -2676,6 +2837,128 @@ if (support.pix || support.kofi) {
   });
 }
 
+/* ---------- Novidades ----------
+   O que mudou no site, da publicação mais recente para a mais antiga.
+   A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
+const CHANGES = [
+  { at: '2026-10-08 23:30',
+    pt: ['Pausa entre voltas: com "Repetir ao zerar" ligado, o cronômetro espera os segundos que você definir antes de recomeçar.', 'Botão "Apoiar o projeto" no topo da página.', 'Esta lista de novidades.', 'A lista de respawns mostra só os três últimos abertos; os demais aparecem ao buscar.', 'Sorteio de itens entre os jogadores da última hunt ou entre nomes digitados.'],
+    en: ['Pause between laps: with "Repeat at zero" on, the timer waits the seconds you set before starting again.', '"Support the project" button at the top of the page.', 'This list of changes.', 'The respawn list shows only the last three you opened; the others show up when you search.', 'Item raffle among the players of the last hunt or among names you type.'],
+    es: ['Pausa entre vueltas: con "Repetir al llegar a cero" activado, el cronómetro espera los segundos que definas antes de volver a empezar.', 'Botón "Apoyar el proyecto" en la parte superior de la página.', 'Esta lista de novedades.', 'La lista de respawns muestra solo los tres últimos abiertos; los demás aparecen al buscar.', 'Sorteo de objetos entre los jugadores de la última cacería o entre nombres escritos.'],
+  },
+  { at: '2026-10-08 22:26',
+    pt: ['As opções de som, repetição, janela flutuante e leitura do print subiram para logo abaixo dos cronômetros.', 'Última hunt: clicar no valor a receber copia o número.', 'Última hunt: clicar no nome do jogador copia o nome e, na linha de baixo, "Home".'],
+    en: ['Sound, repeat, floating window and screenshot options moved to right below the timers.', 'Last hunt: clicking the amount a player gets copies the number.', 'Last hunt: clicking a player name copies the name and, on the next line, "Home".'],
+    es: ['Las opciones de sonido, repetición, ventana flotante y lectura de la captura subieron justo debajo de los cronómetros.', 'Última cacería: al hacer clic en el valor a recibir se copia el número.', 'Última cacería: al hacer clic en el nombre del jugador se copia el nombre y, en la línea de abajo, "Home".'],
+  },
+  { at: '2026-10-08 22:14',
+    pt: ['Contador de voltas em cada cronômetro, com botões para corrigir e zerar.', 'Task: o card mostra quantas voltas no respawn são precisas para terminar.', 'Última hunt: números sem espaços, para copiar e colar direto no jogo.'],
+    en: ['Lap counter on each timer, with buttons to correct and reset it.', 'Task: the card shows how many laps of the respawn it takes to finish.', 'Last hunt: numbers without spaces, ready to copy and paste into the game.'],
+    es: ['Contador de vueltas en cada cronómetro, con botones para corregir y reiniciar.', 'Tarea: la tarjeta muestra cuántas vueltas al respawn hacen falta para terminar.', 'Última cacería: números sin espacios, para copiar y pegar directamente en el juego.'],
+  },
+  { at: '2026-10-08 20:30',
+    pt: ['Banco de todos: o respawn lido por qualquer pessoa passa a aparecer para todo mundo.'],
+    en: ['Shared bank: a respawn read by anyone now shows up for everyone.'],
+    es: ['Banco de todos: el respawn leído por cualquiera ahora aparece para todos.'],
+  },
+  { at: '2026-10-08 19:13',
+    pt: ['Task: informe quantos abates faltam e veja o tempo para terminar em cada percentual de bônus.'],
+    en: ['Task: enter how many kills are left and see the time to finish at each bonus percentage.'],
+    es: ['Tarea: indica cuántas muertes faltan y mira el tiempo para terminar en cada porcentaje de bonus.'],
+  },
+  { at: '2026-10-08 17:59',
+    pt: ['Última hunt: o site lê o hunts.txt do jogo e mostra quanto cada jogador gastou e quanto recebe.', 'Apoiar o projeto: doação opcional por Pix ou Ko-fi.'],
+    en: ['Last hunt: the site reads the hunts.txt file from the game and shows how much each player spent and gets.', 'Support the project: optional donation through Pix or Ko-fi.'],
+    es: ['Última cacería: el sitio lee el hunts.txt del juego y muestra cuánto gastó y cuánto recibe cada jugador.', 'Apoyar el proyecto: donación opcional por Pix o Ko-fi.'],
+  },
+  { at: '2026-10-08 16:48',
+    pt: ['Site em português, inglês e espanhol.', 'Três tipos de alerta sonoro: Sino, Bipe e Trompa.', 'Tempos em segundos ou em minutos.', 'Percentual de bônus em barra deslizante.', 'Janela flutuante com botão Zerar em cada cronômetro.'],
+    en: ['Site in Portuguese, English and Spanish.', 'Three alert sounds: Chime, Beep and Horn.', 'Times in seconds or in minutes.', 'Bonus percentage on a slider.', 'Floating window with a Reset button on each timer.'],
+    es: ['Sitio en portugués, inglés y español.', 'Tres tipos de alerta sonora: Campana, Pitido y Cuerno.', 'Tiempos en segundos o en minutos.', 'Porcentaje de bonus en barra deslizante.', 'Ventana flotante con botón Restablecer en cada cronómetro.'],
+  },
+  { at: '2026-10-08 16:20',
+    pt: ['Visual novo, com os cronômetros em anéis que se fecham até o monstro nascer.'],
+    en: ['New look, with timers as rings that close until the monster spawns.'],
+    es: ['Nuevo aspecto, con los cronómetros en anillos que se cierran hasta que nace el monstruo.'],
+  },
+  { at: '2026-10-08 16:01',
+    pt: ['Duração do bônus de 30 a 180 minutos, com o custo calculado.', 'Faixa no topo explicando que basta um Ctrl + V com o print.', 'Assinatura Vibeforge no cabeçalho.'],
+    en: ['Bonus duration from 30 to 180 minutes, with the cost worked out.', 'Band at the top explaining that pressing Ctrl + V with the screenshot is all it takes.', 'Vibeforge signature in the header.'],
+    es: ['Duración del bonus de 30 a 180 minutos, con el coste calculado.', 'Franja superior que explica que basta con Ctrl + V con la captura.', 'Firma Vibeforge en el encabezado.'],
+  },
+  { at: '2026-10-08 14:14',
+    pt: ['Lançamento: leitura do print da janela de bônus, tempo de respawn de 10% a 50%, grupo de caça, cronômetro com alerta sonoro e janela flutuante.'],
+    en: ['Launch: reading the bonus window screenshot, respawn time from 10% to 50%, hunting party, timer with sound alert and floating window.'],
+    es: ['Lanzamiento: lectura de la captura de la ventana de bonus, tiempo de respawn del 10% al 50%, grupo de caza, cronómetro con alerta sonora y ventana flotante.'],
+  },
+];
+function openChanges() {
+  const tag = tr('html.lang');
+  $('#changes-list').replaceChildren(...CHANGES.map(c => {
+    const [day, time] = c.at.split(' ');
+    const [y, mo, d] = day.split('-').map(Number);
+    const when = new Date(y, mo - 1, d).toLocaleDateString(tag, { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + time;
+    return el('section', null, el('h3', { text: when }), el('ul', null, (c[ui.lang] || c.pt).map(x => el('li', { text: x }))));
+  }));
+  const dlg = $('#changes');
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  dlg.scrollTop = 0;   // abre sempre na novidade mais recente
+}
+$('#changes-btn').addEventListener('click', openChanges);
+$('#changes-close').addEventListener('click', () => { const dlg = $('#changes'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+$('#changes').addEventListener('click', e => { if (e.target === e.currentTarget && e.currentTarget.close) e.currentTarget.close(); });
+
+/* ---------- Sorteio de itens ----------
+   Sorteia cada item entre os participantes. Os nomes vêm da hunt mostrada no painel ou são digitados.
+   Usa o gerador aleatório seguro do navegador, sem favorecer nenhum nome. */
+function randInt(n) {
+  const a = new Uint32Array(1), limit = Math.floor(0x100000000 / n) * n;
+  do { crypto.getRandomValues(a); } while (a[0] >= limit);
+  return a[0] % n;
+}
+const huntNames = () => { const h = hunt.sessions[hunt.index]; return h ? h.players.map(p => p.name) : []; };
+let raffleText = '';
+function openRaffle() {
+  const names = $('#raffle-names');
+  if (!names.value.trim()) names.value = huntNames().length ? huntNames().join('\n') : ui.raffleNames;
+  $('#raffle-from-hunt').hidden = !huntNames().length;
+  setText($('#raffle-msg'), '');
+  const dlg = $('#raffle');
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  dlg.scrollTop = 0;
+}
+function drawRaffle() {
+  const clean = text => String(text).split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+  const names = [...new Set(clean($('#raffle-names').value))];
+  if (names.length < 2) { setText($('#raffle-msg'), tr('raffle.need')); return; }
+  ui.raffleNames = names.join('\n');
+  saveUi();
+  let items = clean($('#raffle-items').value);   // itens repetidos valem: dois do mesmo item são dois sorteios
+  const single = !items.length;
+  if (single) items = [tr('raffle.winner')];
+  const unique = $('#raffle-unique').checked;
+  let pool = [];
+  const rows = items.map(item => {
+    // Sem repetir: cada nome sai da urna ao ganhar; quando ela esvazia, todos voltam.
+    if (unique && !pool.length) pool = names.slice();
+    const name = unique ? pool.splice(randInt(pool.length), 1)[0] : names[randInt(names.length)];
+    return { item, name };
+  });
+  $('#raffle-result').replaceChildren(...rows.map(r => el('li', null, el('span', { text: r.item }), el('b', { text: r.name }))));
+  raffleText = rows.map(r => r.item + ': ' + r.name).join('\n');
+  $('#raffle-copy').hidden = false;
+  setText($('#raffle-msg'), '');
+}
+$('#raffle-btn').addEventListener('click', openRaffle);
+$('#raffle-go').addEventListener('click', drawRaffle);
+$('#raffle-from-hunt').addEventListener('click', () => { $('#raffle-names').value = huntNames().join('\n'); });
+$('#raffle-copy').addEventListener('click', async () => {
+  const ok = await copyText(raffleText);
+  setText($('#raffle-msg'), tr(ok ? 'raffle.copied' : 'hunt.copyFail'));
+});
+$('#raffle-close').addEventListener('click', () => { const dlg = $('#raffle'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+$('#raffle').addEventListener('click', e => { if (e.target === e.currentTarget && e.currentTarget.close) e.currentTarget.close(); });
+
 /* ---------- Rodapé da janela: opções e botões ---------- */
 const optsBar = $('#win-opts');
 const optVolume = $('#opt-volume');
@@ -2685,7 +2968,12 @@ $('#opt-loop').checked = ui.loop;
 $('#opt-sound').checked = ui.sound;
 optVolume.value = ui.volume;
 optVolume.hidden = optTone.hidden = !ui.sound;
-$('#opt-loop').addEventListener('change', e => { ui.loop = e.target.checked; saveUi(); });
+const optPause = $('#opt-pause');
+optPause.value = ui.pause;
+$('#opt-pause-wrap').hidden = !ui.loop;
+// A pausa só faz sentido com o cronômetro repetindo sozinho, então o campo aparece junto com essa opção.
+$('#opt-loop').addEventListener('change', e => { ui.loop = e.target.checked; saveUi(); $('#opt-pause-wrap').hidden = !ui.loop; });
+optPause.addEventListener('input', () => { ui.pause = int(optPause.value, 0, 600) || 0; saveUi(); });
 $('#opt-sound').addEventListener('change', e => {
   ui.sound = e.target.checked;
   saveUi();
