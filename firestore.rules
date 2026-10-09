@@ -51,7 +51,9 @@ service cloud.firestore {
     // Salas de sorteio com dado D100.
     // - Qualquer pessoa lê (é assim que todos veem as jogadas).
     // - Quem cria a sala é o dono: só ele abre rodadas, dá nome aos itens e encerra a sala.
-    // - Sala criada há mais de um dia pode ser apagada por qualquer pessoa: é assim que o número volta a ficar livre.
+    // - "at" guarda a hora do último uso: toda jogada e toda mudança do dono a renovam com a hora do servidor.
+    // - Sala sem uso há mais de um dia pode ser apagada por qualquer pessoa: o site faz essa limpeza sozinho e é
+    //   assim que o número volta a ficar livre.
     // - Cada pessoa grava só a própria jogada, uma por rodada, com a hora do servidor. O valor do dado é
     //   calculado pelo site a partir dessa hora, então ninguém escolhe o resultado nem altera jogada alheia.
     match /rooms/{code} {
@@ -60,6 +62,10 @@ service cloud.firestore {
       }
       function added() {
         return request.resource.data.rolls.diff(resource.data.rolls);
+      }
+      // A hora do último uso só pode ficar como estava ou virar a hora do servidor.
+      function touched() {
+        return request.resource.data.at == resource.data.at || request.resource.data.at == request.time;
       }
 
       allow read: if true;
@@ -77,13 +83,15 @@ service cloud.firestore {
         && (
           (
             resource.data.owner == request.auth.uid
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['round', 'items'])
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['round', 'items', 'at'])
+            && touched()
             && request.resource.data.round is int
             && (request.resource.data.round == resource.data.round || request.resource.data.round == resource.data.round + 1)
             && request.resource.data.round <= 200
             && request.resource.data.items is map && request.resource.data.items.size() <= 200
           ) || (
-            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rolls'])
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rolls', 'at'])
+            && touched()
             && added().addedKeys().hasOnly([rollKey()])
             && added().addedKeys().size() == 1
             && added().changedKeys().size() == 0
