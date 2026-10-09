@@ -210,6 +210,8 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .ctl-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; }
 .ctl h3 { font: 600 14px/1.3 var(--font-ui); color: var(--title); }
 .ctl-val { font-size: 13px; color: var(--faint); }
+.disc { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 13px; color: var(--label); }
+.disc .ctl-val { font-variant-numeric: lining-nums tabular-nums; }
 .seg { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--card); }
 .seg button {
   flex: 1;
@@ -683,6 +685,11 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'read.unread': 'Não li o tempo de {x}: tire outro print e cole de novo.',
+    'disc.label': 'Desconto das tasks: {d}%',
+    'disc.full': 'Sem desconto: {v}',
+    'disc.tip': 'Desconto das tasks diárias ou semanais, lido no print. Desmarque quando ele acabar.',
+    'read.disc': 'Desconto de {d}% das tasks aplicado ao custo.',
     'bank.more': 'Mostrando {n} de {t} respawns. Busque para ver os outros.',
     'raffle.open': 'Sortear itens',
     'raffle.title': 'Sorteio de itens',
@@ -880,6 +887,11 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'read.unread': 'The respawn time of {x} could not be read: take another screenshot and paste it again.',
+    'disc.label': 'Task discount: {d}%',
+    'disc.full': 'Without discount: {v}',
+    'disc.tip': 'Discount from daily or weekly tasks, read from the screenshot. Untick it when it ends.',
+    'read.disc': 'Task discount of {d}% applied to the cost.',
     'bank.more': 'Showing {n} of {t} respawns. Search to see the others.',
     'raffle.open': 'Raffle items',
     'raffle.title': 'Item raffle',
@@ -1077,6 +1089,11 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'read.unread': 'No leí el tiempo de {x}: haz otra captura y pégala de nuevo.',
+    'disc.label': 'Descuento de tareas: {d}%',
+    'disc.full': 'Sin descuento: {v}',
+    'disc.tip': 'Descuento de las tareas diarias o semanales, leído en la captura. Desmárcalo cuando termine.',
+    'read.disc': 'Descuento de {d}% de las tareas aplicado al coste.',
     'bank.more': 'Mostrando {n} de {t} respawns. Busca para ver los demás.',
     'raffle.open': 'Sortear objetos',
     'raffle.title': 'Sorteo de objetos',
@@ -1246,26 +1263,37 @@ function parsePrint(lines) {
   const below = (list, n) => list
     .filter(r => Math.abs(r.x - n.x) <= n.h * 3 && r.y > n.y && r.y - n.y <= n.h * 4.5)
     .sort((a, b) => a.y - b.y)[0];
-  const monsters = [];
+  const monsters = [], unread = [];
   for (const n of names) {
     const r = below(resp, n);
-    if (!r || !r.v) continue;
+    if (!r || !r.v) { unread.push(n); continue; }
     const k = below(kills, n);
     monsters.push({ name: n.name, count: n.count, sec: r.v, kills: k ? k.v : null });
   }
-  let cost = null, name = null;
+  let cost = null, discount = null, name = null;
   if (pctLine) {
     const firstY = names.length ? Math.min(...names.map(n => n.y)) : Infinity;
+    // Entre os controles e a lista de monstros há até dois valores: o custo, na altura dos controles, e mais abaixo
+    // o desconto das tasks ("Preço reduzido em 244 500 gold"), quando o jogo mostra essa faixa.
+    const nums = [];
     for (const l of other) {
-      const m = l.text.match(/^(\d{1,3}(?:[ .,]\d{3})+|\d{3,})/);
-      if (m && l.y > pctLine.y && l.y < firstY && l.y - pctLine.y < pctLine.h * 5) { cost = +m[1].replace(/\D/g, ''); break; }
+      if (l.y <= pctLine.y || l.y >= firstY || l.y - pctLine.y >= pctLine.h * 12) continue;
+      const m = l.text.match(/(\d{1,3}(?:[ .,]\d{3})+|\d{3,})/);
+      if (m) nums.push({ v: +m[1].replace(/\D/g, ''), y: l.y, lead: m.index === 0 });
+    }
+    nums.sort((a, b) => a.y - b.y);
+    const c = nums.find(n => n.lead && n.y - pctLine.y < pctLine.h * 5);
+    if (c) {
+      cost = c.v;
+      const d = nums.find(n => n.y > c.y + pctLine.h * 2);
+      if (d && d.v > 0 && d.v < cost * 3) discount = d.v;
     }
     const title = other
       .filter(l => l.conf >= 75 && l.y < pctLine.y - pctLine.h && /[A-Za-z]{3,}/.test(l.text) && l.text.length <= 40)
       .sort((a, b) => b.y - a.y)[0];
     if (title) name = title.text.replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ');
   }
-  return { name, pct, dur, cost, monsters };
+  return { name, pct, dur, cost, discount, monsters, unread };
 }
 
 let workerP = null;
@@ -1305,13 +1333,40 @@ async function ocrLines(blob) {
   g.putImageData(d, 0, 0);
   const w = await getWorker();
   const { data } = await w.recognize(c, {}, { blocks: true });
-  c.width = c.height = 0;
   const lines = [];
   for (const b of data.blocks || []) for (const par of b.paragraphs) for (const l of par.lines) {
     const text = l.text.trim();
     if (text) lines.push({ text, conf: l.confidence, x: l.bbox.x0 / scale, y: l.bbox.y0 / scale, h: (l.bbox.y1 - l.bbox.y0) / scale });
   }
-  return lines;
+  // Lê de novo só um retângulo da imagem (medidas do print original).
+  const crop = async (x, y, wd, ht) => {
+    const left = Math.max(0, Math.round(x * scale)), top = Math.max(0, Math.round(y * scale));
+    const rectangle = { left, top, width: Math.min(c.width - left, Math.round(wd * scale)), height: Math.min(c.height - top, Math.round(ht * scale)) };
+    if (rectangle.width < 8 || rectangle.height < 8) return '';
+    return (await w.recognize(c, { rectangle })).data.text || '';
+  };
+  return { lines, crop, close: () => { c.width = c.height = 0; } };
+}
+
+// Lê o print inteiro. Na página toda o leitor às vezes pula o tempo de um monstro e acerta olhando só o card dele,
+// então cada monstro que ficou sem tempo é relido sozinho.
+async function readPrint(blob) {
+  const ocr = await ocrLines(blob);
+  try {
+    const p = parsePrint(ocr.lines);
+    const still = [];
+    for (const n of p.unread) {
+      const text = await ocr.crop(n.x - n.h / 2, n.y - n.h / 2, n.h * 17, n.h * 4.5).catch(() => '');
+      const sec = text.match(/(\d{1,5})\s*(?:seg|sec)/i);
+      if (!sec || !+sec[1]) { still.push(n.name); continue; }
+      const k = text.match(/(?:hora|hour)\D{0,3}(\d{1,6})\s*$/im);
+      p.monsters.push({ name: n.name, count: n.count, sec: +sec[1], kills: k ? +k[1] : null });
+    }
+    p.unread = still;
+    return p;
+  } finally {
+    ocr.close();
+  }
 }
 
 /* ---------- Banco ---------- */
@@ -1680,7 +1735,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '' }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {} }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PARTIES.some(p => p.mult === ui.party)) ui.party = 100;
 if (!DURS.includes(ui.dur)) ui.dur = 60;
@@ -1688,6 +1743,7 @@ if (ui.unit !== 'm') ui.unit = 's';
 if (!TONES[ui.tone]) ui.tone = 'sino';
 if (!ui.tasks || typeof ui.tasks !== 'object' || Array.isArray(ui.tasks)) ui.tasks = {};
 if (!ui.laps || typeof ui.laps !== 'object' || Array.isArray(ui.laps)) ui.laps = {};
+if (!ui.disc || typeof ui.disc !== 'object' || Array.isArray(ui.disc)) ui.disc = {};
 ui.recent = (Array.isArray(ui.recent) ? ui.recent : []).filter(x => typeof x === 'string').slice(0, 12);   // respawns abertos, do mais recente para o mais antigo
 if (typeof ui.raffleNames !== 'string') ui.raffleNames = '';
 ui.pause = int(ui.pause, 0, 600) || 0;   // segundos de espera entre uma volta e outra, com "Repetir ao zerar"
@@ -2227,7 +2283,20 @@ function mobCards(id, r) {
   });
 }
 const sheetHint = r => (r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest') + ' ' + tr('task.tip');
-const bonusCost = r => r.cost10 ? Math.round(r.cost10 * ui.pct / 10 * ui.dur / (r.duration || 60)) : null;
+// Desconto das tasks diárias ou semanais. É de quem joga, não do respawn: fica só neste navegador, por respawn,
+// e o banco guarda sempre o preço cheio.
+const discOf = id => { const d = ui.disc[id]; return d && d.pct > 0 && d.pct < 100 ? d : null; };
+function discSet(id, pct) {
+  pct = Math.round(pct * 100) / 100;
+  if (pct > 0 && pct < 100) ui.disc[id] = { pct, on: true }; else delete ui.disc[id];
+  saveUi();
+}
+const fmtPct = n => String(Math.round(n * 100) / 100).replace('.', tr('html.lang').startsWith('en') ? '.' : ',');
+const fullCost = r => r.cost10 ? Math.round(r.cost10 * ui.pct / 10 * ui.dur / (r.duration || 60)) : null;
+function bonusCost(r, id) {
+  const full = fullCost(r), d = discOf(id);
+  return full && d && d.on ? Math.round(full * (100 - d.pct) / 100) : full;
+}
 
 // Agrupa os monstros pelo tempo de respawn atual: cada grupo ganha um cronômetro.
 function clockGroups(r) {
@@ -2260,6 +2329,9 @@ function buildSheet(id, fixed) {
       DURS.map(d => ({ value: d, text: tr('dur.value', { n: d }), short: d % 30 === 0 ? String(d) : null })), setDur),
     cost: el('p', { class: 'cost' }),
     costNote: el('span', { class: 'ctl-val' }),
+    discBox: el('input', { type: 'checkbox', id: 'ctl-disc', onchange: e => { const d = discOf(id); if (d) { d.on = e.target.checked; saveUi(); renderSheet(); } } }),
+    discText: el('span'),
+    discFull: el('span', { class: 'ctl-val' }),
     mobs: el('div', { class: 'mobs' }),
     hint: el('p', { class: 'hint' }),
   };
@@ -2271,7 +2343,8 @@ function buildSheet(id, fixed) {
       optsBar,
       statusEl,
       el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root,
-        el('div', { class: 'ctl' }, ctlHead(tr('ctl.cost'), p.costNote), p.cost)),
+        el('div', { class: 'ctl' }, ctlHead(tr('ctl.cost'), p.costNote), p.cost,
+          p.disc = el('div', { class: 'disc' }, el('label', { class: 'toggle', title: tr('disc.tip') }, p.discBox, p.discText), p.discFull))),
       el('h3', { class: 'band', text: tr('band') }),
       p.mobs,
       p.hint));
@@ -2285,7 +2358,7 @@ function renderSheet() {
   const r = ui.id && getRespawn(ui.id);
   const loading = pending.seed || pending.db || !!pending.cloud;
   const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id) && !owns(ui.id);
-  const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r]);
+  const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r, ui.disc[ui.id] || null]);
   if (sig === sheetSig) return;
   sheetSig = sig;
   timerEls = new Map();
@@ -2335,9 +2408,17 @@ function renderSheet() {
   parts.party.set(PARTIES.findIndex(p => p.mult === ui.party));
   parts.bonus.set(PCTS.indexOf(ui.pct));
   parts.dur.set(DURS.indexOf(ui.dur));
-  const cost = bonusCost(r);
+  const cost = bonusCost(r, id);
   parts.cost.replaceChildren(cost == null ? tr('cost.unread') : cost === 0 ? '0' : fmtInt(cost), ...(cost ? [coin()] : []));
   setText(parts.costNote, cost ? tr('cost.note', { p: ui.pct, n: ui.dur }) : cost === 0 ? tr('bonus.none') : '');
+  // Desconto das tasks: aparece quando o print trouxe a faixa de desconto; dá para desligar quando ele acabar.
+  const disc = r.cost10 ? discOf(id) : null;
+  parts.disc.hidden = !disc;
+  if (disc) {
+    parts.discBox.checked = disc.on;
+    setText(parts.discText, tr('disc.label', { d: fmtPct(disc.pct) }));
+    setText(parts.discFull, disc.on && cost ? tr('disc.full', { v: fmtInt(fullCost(r)) }) : '');
+  }
 
   parts.mobs.replaceChildren(...mobCards(id, r));
   setText(parts.hint, sheetHint(r));
@@ -2362,6 +2443,7 @@ async function rename(id, input) {
   if (nid !== id) {
     const keep = new Map(timers);
     await removeRespawn(id);
+    if (ui.disc[id]) { ui.disc[nid] = ui.disc[id]; delete ui.disc[id]; }
     ui.id = nid; saveUi();
     for (const [k, v] of keep) { timers.set(k, v); scheduleSounds(v); }
   }
@@ -2388,7 +2470,7 @@ async function readImage(blob) {
   reading = true;
   setStatus('busy', tr(workerP ? 'read.busy' : 'read.first'));
   try {
-    const p = parsePrint(await ocrLines(blob));
+    const p = await readPrint(blob);
     if (!p.monsters.length) throw new UserError(tr('err.nomobs'));
     if (p.pct == null) throw new UserError(tr('err.nopct'));
     const name = p.name || tr('noname');
@@ -2404,7 +2486,9 @@ async function readImage(blob) {
       if (i >= 0) monsters[i] = m; else monsters.push(m);
       if (pm.kills != null && pm.count && killsPerHour(pm.sec, pm.count) !== pm.kills) doubt.push(pm.name);
     }
-    const cost10 = p.cost && p.pct ? Math.round(p.cost * 10 / p.pct) : null;
+    // Com desconto das tasks, o print mostra o preço já reduzido. O banco guarda o preço cheio, que vale para todos.
+    const full = p.cost ? p.cost + (p.discount || 0) : null;
+    const cost10 = full && p.pct ? Math.round(full * 10 / p.pct) : null;
     const where = await saveRespawn(id, {
       name: prev ? prev.name : name,
       monsters,
@@ -2413,13 +2497,16 @@ async function readImage(blob) {
       readAt: p.pct,
     }, !!p.name && !doubt.length);
     if (DURS.includes(p.dur)) ui.dur = p.dur;
+    if (cost10) discSet(id, p.discount ? p.discount * 100 / full : 0);   // print sem a faixa de desconto: o desconto acabou
     select(id, p.pct);
     let msg = tr(p.monsters.length === 1 ? 'read.ok1' : 'read.okN', { x: prev ? prev.name : name, p: p.pct, n: p.monsters.length }) + ' ' +
       tr(where === 'cloud' ? 'read.cloud' : where === 'shared' ? 'read.shared' : 'read.local') + ' ' + tr('read.discarded');
+    if (cost10 && p.discount) msg += ' ' + tr('read.disc', { d: fmtPct(p.discount * 100 / full) });
+    if (p.unread.length) msg += ' ' + tr('read.unread', { x: p.unread.join(', ') });
     if (!p.name) msg += ' ' + tr('read.noname');
     if (doubt.length) msg += ' ' + tr('read.doubt', { x: doubt.join(', ') });
     if (cloud.on && (!p.name || doubt.length)) msg += ' ' + tr('read.notshared');
-    setStatus(doubt.length || !p.name ? 'busy' : 'ok', msg);
+    setStatus(doubt.length || !p.name || p.unread.length ? 'busy' : 'ok', msg);
     if (!p.name) { const n = $('#area-name'); if (n) { n.focus(); n.select(); } }
   } catch (e) {
     setStatus('err', e instanceof UserError ? e.message : tr('err.read'));
@@ -2840,6 +2927,11 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-08 23:45',
+    pt: ['Desconto das tasks: quando o print traz a faixa "Desconto disponível", o site aplica o desconto ao custo do bônus e mostra o preço sem desconto. Dá para desligar quando o desconto acabar.', 'Leitura do print: quando o tempo de um monstro não é lido, o site relê só aquele monstro e avisa se mesmo assim não conseguir.'],
+    en: ['Task discount: when the screenshot has the "Discount available" band, the site applies the discount to the bonus cost and shows the price without it. You can switch it off when the discount ends.', 'Screenshot reading: when a monster time is not read, the site reads that monster again on its own and tells you if it still fails.'],
+    es: ['Descuento de tareas: cuando la captura trae la franja "Descuento disponible", el sitio aplica el descuento al coste del bonus y muestra el precio sin descuento. Puedes desactivarlo cuando el descuento termine.', 'Lectura de la captura: cuando no se lee el tiempo de un monstruo, el sitio vuelve a leer solo ese monstruo y avisa si aun así no lo consigue.'],
+  },
   { at: '2026-10-08 23:30',
     pt: ['Pausa entre voltas: com "Repetir ao zerar" ligado, o cronômetro espera os segundos que você definir antes de recomeçar.', 'Botão "Apoiar o projeto" no topo da página.', 'Esta lista de novidades.', 'A lista de respawns mostra só os três últimos abertos; os demais aparecem ao buscar.', 'Sorteio de itens entre os jogadores da última hunt ou entre nomes digitados.'],
     en: ['Pause between laps: with "Repeat at zero" on, the timer waits the seconds you set before starting again.', '"Support the project" button at the top of the page.', 'This list of changes.', 'The respawn list shows only the last three you opened; the others show up when you search.', 'Item raffle among the players of the last hunt or among names you type.'],
