@@ -103,6 +103,7 @@ kbd {
 .room-or::before, .room-or::after { content: ""; flex: 1; height: 1px; background: var(--edge); }
 .room-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
 .room-label { font-size: 13px; color: var(--faint); }
+.room-copies { display: inline-flex; flex-wrap: wrap; gap: 4px 14px; }
 .room-number { font: 800 30px/1 var(--font-display); letter-spacing: 0.04em; font-variant-numeric: lining-nums tabular-nums; color: var(--title); }
 .room-round { font-weight: 600; color: var(--amber); overflow-wrap: anywhere; }
 .room-rolls b { font: 800 20px/1 var(--font-display); font-variant-numeric: lining-nums tabular-nums; }
@@ -626,9 +627,12 @@ details.backup textarea {
     <div class="room-box" id="room-in" hidden>
       <div class="room-head">
         <p><span class="room-label" data-i18n="room.title">Sala</span> <b class="room-number" id="room-number"></b></p>
-        <button class="hunt-link" type="button" id="room-copy" data-i18n="room.copy">copiar número</button>
+        <span class="room-copies">
+          <button class="hunt-link" type="button" id="room-copy" data-i18n="room.copy">copiar número</button>
+          <button class="hunt-link" type="button" id="room-copy-link" data-i18n="room.copyLink">copiar link</button>
+        </span>
       </div>
-      <p class="support-note" data-i18n="room.share">Passe este número para o grupo.</p>
+      <p class="support-note" data-i18n="room.share">Passe o número ou o link para o grupo.</p>
       <div>
         <h3 class="room-sub" id="room-members-title"></h3>
         <ul class="room-chips" id="room-members"></ul>
@@ -841,6 +845,9 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'room.copyLink': 'copiar link',
+    'room.linkCopied': 'Link da sala copiado.',
+    'room.viaLink': 'Informe o seu nome para entrar na sala {x}.',
     'hunt.extra.open': 'Acrescentar boost pago',
     'hunt.extra.title': 'Boost pago e não contado na hunt',
     'hunt.extra.hint': 'Para quem pagou o boost sem resetar a hunt antes: informe o valor ao lado do nome. Ele entra no gasto dessa pessoa e as contas são refeitas.',
@@ -877,7 +884,7 @@ const I18N = {
     'room.title': 'Sala',
     'room.copy': 'copiar número',
     'room.copied': 'Número da sala copiado.',
-    'room.share': 'Passe este número para o grupo.',
+    'room.share': 'Passe o número ou o link para o grupo.',
     'room.item': 'Item em disputa',
     'room.next': 'Nova rodada',
     'room.round': 'Rodada {n}: {x}',
@@ -1114,6 +1121,9 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'room.copyLink': 'copy link',
+    'room.linkCopied': 'Room link copied.',
+    'room.viaLink': 'Enter your name to join room {x}.',
     'hunt.extra.open': 'Add a boost that was paid',
     'hunt.extra.title': 'Boost paid but not counted in the hunt',
     'hunt.extra.hint': 'For whoever paid the boost without resetting the hunt first: enter the amount beside the name. It is added to what that person spent and the split is redone.',
@@ -1150,7 +1160,7 @@ const I18N = {
     'room.title': 'Room',
     'room.copy': 'copy number',
     'room.copied': 'Room number copied.',
-    'room.share': 'Give this number to your party.',
+    'room.share': 'Give the number or the link to your party.',
     'room.item': 'Item being rolled for',
     'room.next': 'New round',
     'room.round': 'Round {n}: {x}',
@@ -1387,6 +1397,9 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'room.copyLink': 'copiar enlace',
+    'room.linkCopied': 'Enlace de la sala copiado.',
+    'room.viaLink': 'Escribe tu nombre para entrar en la sala {x}.',
     'hunt.extra.open': 'Añadir un bonus pagado',
     'hunt.extra.title': 'Bonus pagado y no contado en la cacería',
     'hunt.extra.hint': 'Para quien pagó el bonus sin reiniciar la cacería antes: indica el valor junto al nombre. Se suma al gasto de esa persona y las cuentas se rehacen.',
@@ -1423,7 +1436,7 @@ const I18N = {
     'room.title': 'Sala',
     'room.copy': 'copiar número',
     'room.copied': 'Número de la sala copiado.',
-    'room.share': 'Pasa este número al grupo.',
+    'room.share': 'Pasa el número o el enlace al grupo.',
     'room.item': 'Objeto en disputa',
     'room.next': 'Nueva ronda',
     'room.round': 'Ronda {n}: {x}',
@@ -1660,6 +1673,9 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'room.copyLink': 'kopiuj link',
+    'room.linkCopied': 'Link do pokoju skopiowany.',
+    'room.viaLink': 'Podaj swoje imię, aby wejść do pokoju {x}.',
     'hunt.extra.open': 'Dodaj opłacony bonus',
     'hunt.extra.title': 'Bonus opłacony, a nieujęty w polowaniu',
     'hunt.extra.hint': 'Dla osoby, która opłaciła bonus bez wcześniejszego zresetowania polowania: wpisz kwotę przy imieniu. Zostanie doliczona do jej wydatków, a rozliczenie przeliczone.',
@@ -1696,7 +1712,7 @@ const I18N = {
     'room.title': 'Pokój',
     'room.copy': 'kopiuj numer',
     'room.copied': 'Numer pokoju skopiowany.',
-    'room.share': 'Podaj ten numer drużynie.',
+    'room.share': 'Podaj drużynie numer albo link.',
     'room.item': 'Przedmiot do wylosowania',
     'room.next': 'Nowa runda',
     'room.round': 'Runda {n}: {x}',
@@ -3838,6 +3854,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 14:43',
+    pt: ['Salas de sorteio: "copiar link" dentro da sala; quem abre o link entra direto, sem digitar o número. Entrar pelo número continua valendo.'],
+    en: ['Raffle rooms: "copy link" inside the room; whoever opens the link goes straight in, without typing the number. Joining by number still works.'],
+    es: ['Salas de sorteo: "copiar enlace" dentro de la sala; quien abre el enlace entra directo, sin escribir el número. Entrar por el número sigue funcionando.'],
+    pl: ['Pokoje losowania: „kopiuj link” w pokoju; kto otworzy link, wchodzi od razu, bez wpisywania numeru. Wejście po numerze nadal działa.'],
+  },
   { at: '2026-10-09 14:35',
     pt: ['Leitura do print: o custo do bônus acima de um milhão era lido errado em alguns prints; agora o custo é relido de perto e conferido com o desconto.', 'Última hunt: saiu a palavra "null" que aparecia no painel.'],
     en: ['Screenshot reading: a bonus cost above one million was misread in some screenshots; the cost is now read again up close and checked against the discount.', 'Last hunt: the stray word "null" in the panel is gone.'],
@@ -4702,6 +4724,28 @@ $('#room-skip').addEventListener('change', async e => {
 $('#room-refresh').addEventListener('click', () => roomWatch(true));
 $('#room-end').addEventListener('click', roomEnd);
 $('#room-copy').addEventListener('click', async () => { roomMsg(tr((await copyText(room.code)) ? 'room.copied' : 'hunt.copyFail')); });
+// Link direto da sala: o endereço do site com ?sala=1234. Quem abre o link cai no sorteio já com a sala escolhida:
+// com o nome guardado neste navegador entra sozinho; sem nome, falta só dizer quem é. Entrar digitando o número
+// continua valendo.
+const roomLink = code => location.origin + location.pathname + '?sala=' + code;
+$('#room-copy-link').addEventListener('click', async () => { roomMsg(tr((await copyText(roomLink(room.code))) ? 'room.linkCopied' : 'hunt.copyFail')); });
+function roomFromLink() {
+  let code = '';
+  try {
+    const params = new URLSearchParams(location.search);
+    code = (params.get('sala') || params.get('room') || '').replace(/\D/g, '');
+  } catch { return; }
+  if (code.length < 4 || code.length > 6) return;
+  try { history.replaceState(null, '', location.pathname + location.hash); } catch { /* o endereço fica como está */ }
+  if (ui.room && ui.room !== code) ui.room = null;   // estava em outra sala: o link manda
+  ui.raffleMode = 'room';
+  openRaffle();
+  if (ui.room === code) return;   // já estava nesta sala: o sorteio abriu nela
+  $('#room-code').value = code;
+  if (ui.rollName.trim()) roomJoin();
+  else { roomMsg(tr('room.viaLink', { x: fmtCode(code) })); $('#room-name').focus(); }
+}
+setTimeout(roomFromLink, 0);   // depois que a página terminou de montar
 $('#raffle').addEventListener('close', () => roomWatch(false));   // janela fechada: para de consultar a sala
 
 $('#raffle-btn').addEventListener('click', openRaffle);
