@@ -111,6 +111,14 @@ kbd {
 .room-rolls li.rolling b { color: var(--faint); }
 .room-rolls li.room-empty { color: var(--faint); }
 .room-sub { margin-bottom: 6px; font: 600 13px/1.3 var(--font-ui); color: var(--label); }
+/* Quem está na sala: já rolou (com ✓), ainda não rolou, ou fora desta rodada (riscado) */
+.room-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.room-chips li { padding: 3px 10px; border: 1px solid var(--edge); border-radius: 999px; font-size: 13px; color: var(--title); overflow-wrap: anywhere; }
+.room-chips li.rolled { border-color: var(--value); color: var(--value); }
+.room-chips li.rolled::before { content: "✓ "; }
+.room-chips li.out { color: var(--faint); text-decoration: line-through; }
+#room-owner { gap: 10px; }
+#room-note:empty { display: none; }
 #room-pane .dlg:disabled { opacity: 0.45; cursor: default; }
 dialog#changes { width: min(560px, calc(100vw - 32px)); }
 .changes-list { display: flex; flex-direction: column; gap: 16px; }
@@ -609,12 +617,20 @@ details.backup textarea {
         <button class="hunt-link" type="button" id="room-copy" data-i18n="room.copy">copiar número</button>
       </div>
       <p class="support-note" data-i18n="room.share">Passe este número para o grupo.</p>
-      <div class="room-row" id="room-owner" hidden>
-        <label class="raffle-field"><span data-i18n="room.item">Item em disputa</span>
-          <input type="text" id="room-item" maxlength="60" autocomplete="off" spellcheck="false"></label>
-        <button class="dlg" type="button" id="room-next" data-i18n="room.next">Nova rodada</button>
+      <div>
+        <h3 class="room-sub" id="room-members-title"></h3>
+        <ul class="room-chips" id="room-members"></ul>
+      </div>
+      <div class="room-box" id="room-owner" hidden>
+        <div class="room-row">
+          <label class="raffle-field"><span data-i18n="room.item">Item em disputa</span>
+            <input type="text" id="room-item" maxlength="60" autocomplete="off" spellcheck="false"></label>
+          <button class="dlg" type="button" id="room-next" data-i18n="room.next">Nova rodada</button>
+        </div>
+        <label class="toggle"><input type="checkbox" id="room-skip"> <span data-i18n="room.skip">Quem já ganhou um item não rola nos próximos</span></label>
       </div>
       <p class="room-round" id="room-round"></p>
+      <p class="support-note" id="room-note"></p>
       <button class="dlg raffle-go" type="button" id="room-roll" data-i18n="room.roll">Rolar</button>
       <ol class="raffle-result room-rolls" id="room-rolls"></ol>
       <div id="room-history-wrap" hidden>
@@ -811,6 +827,20 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'room.members': 'Na sala ({n})',
+    'room.m.rolled': 'já rolou',
+    'room.m.waiting': 'ainda não rolou',
+    'room.m.out': 'fora desta rodada',
+    'room.skip': 'Quem já ganhou um item não rola nos próximos',
+    'room.tieRound': 'Rodada {n}, desempate: {x}',
+    'room.tieRoundNoItem': 'Rodada {n}, desempate',
+    'room.tieOnly': 'Só rolam: {x}.',
+    'room.tie': 'Empate entre {x} ({v}).',
+    'room.tiebreak': 'Desempatar',
+    'room.afterTie': 'após desempate',
+    'room.allRolled': 'Todos já rolaram.',
+    'room.youOut.tie': 'Você não está no desempate.',
+    'room.youOut.won': 'Você já ganhou um item e fica de fora desta rodada.',
     'room.create.title': 'Começar uma sala nova',
     'room.create.hint': 'Você recebe um número para passar ao grupo. Sala sem uso por 24 horas é apagada sozinha.',
     'room.or': 'ou',
@@ -1062,6 +1092,20 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'room.members': 'In the room ({n})',
+    'room.m.rolled': 'has rolled',
+    'room.m.waiting': 'has not rolled yet',
+    'room.m.out': 'out of this round',
+    'room.skip': 'Whoever already won an item does not roll for the next ones',
+    'room.tieRound': 'Round {n}, tie-break: {x}',
+    'room.tieRoundNoItem': 'Round {n}, tie-break',
+    'room.tieOnly': 'Only these roll: {x}.',
+    'room.tie': 'Tie between {x} ({v}).',
+    'room.tiebreak': 'Break the tie',
+    'room.afterTie': 'after tie-break',
+    'room.allRolled': 'Everyone has rolled.',
+    'room.youOut.tie': 'You are not in the tie-break.',
+    'room.youOut.won': 'You already won an item and sit this round out.',
     'room.create.title': 'Start a new room',
     'room.create.hint': 'You get a number to give to your party. A room left unused for 24 hours is deleted on its own.',
     'room.or': 'or',
@@ -1313,6 +1357,20 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'room.members': 'En la sala ({n})',
+    'room.m.rolled': 'ya tiró',
+    'room.m.waiting': 'aún no tiró',
+    'room.m.out': 'fuera de esta ronda',
+    'room.skip': 'Quien ya ganó un objeto no tira en los siguientes',
+    'room.tieRound': 'Ronda {n}, desempate: {x}',
+    'room.tieRoundNoItem': 'Ronda {n}, desempate',
+    'room.tieOnly': 'Solo tiran: {x}.',
+    'room.tie': 'Empate entre {x} ({v}).',
+    'room.tiebreak': 'Desempatar',
+    'room.afterTie': 'tras desempate',
+    'room.allRolled': 'Todos ya tiraron.',
+    'room.youOut.tie': 'No estás en el desempate.',
+    'room.youOut.won': 'Ya ganaste un objeto y quedas fuera de esta ronda.',
     'room.create.title': 'Empezar una sala nueva',
     'room.create.hint': 'Recibes un número para pasar al grupo. Una sala sin uso durante 24 horas se borra sola.',
     'room.or': 'o',
@@ -1564,6 +1622,20 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'room.members': 'W pokoju ({n})',
+    'room.m.rolled': 'po rzucie',
+    'room.m.waiting': 'jeszcze bez rzutu',
+    'room.m.out': 'poza tą rundą',
+    'room.skip': 'Kto już wygrał przedmiot, nie rzuca o kolejne',
+    'room.tieRound': 'Runda {n}, dogrywka: {x}',
+    'room.tieRoundNoItem': 'Runda {n}, dogrywka',
+    'room.tieOnly': 'Rzucają tylko: {x}.',
+    'room.tie': 'Remis: {x} ({v}).',
+    'room.tiebreak': 'Rozstrzygnij remis',
+    'room.afterTie': 'po dogrywce',
+    'room.allRolled': 'Wszyscy już rzucili.',
+    'room.youOut.tie': 'Nie bierzesz udziału w dogrywce.',
+    'room.youOut.won': 'Masz już wygrany przedmiot i nie bierzesz udziału w tej rundzie.',
     'room.create.title': 'Załóż nowy pokój',
     'room.create.hint': 'Dostajesz numer do przekazania drużynie. Pokój nieużywany przez 24 godziny usuwa się sam.',
     'room.or': 'lub',
@@ -3588,6 +3660,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 11:52',
+    pt: ['Salas de sorteio: lista de quem está na sala, mostrando quem já rolou.', 'Opção do dono para quem já ganhou um item não rolar nos próximos.', 'Empate: o dono abre uma rodada de desempate só entre os empatados.'],
+    en: ['Raffle rooms: list of who is in the room, showing who has already rolled.', 'Owner option so that whoever already won an item does not roll for the next ones.', 'Ties: the owner opens a tie-break round among the tied players only.'],
+    es: ['Salas de sorteo: lista de quién está en la sala, con quién ya tiró.', 'Opción del dueño para que quien ya ganó un objeto no tire en los siguientes.', 'Empate: el dueño abre una ronda de desempate solo entre los empatados.'],
+    pl: ['Pokoje losowania: lista osób w pokoju z zaznaczeniem, kto już rzucił.', 'Opcja właściciela: kto już wygrał przedmiot, nie rzuca o kolejne.', 'Remis: właściciel otwiera dogrywkę tylko między remisującymi.'],
+  },
   { at: '2026-10-09 11:32',
     pt: ['Salas de sorteio: sala sem uso por 24 horas é apagada sozinha, e o número volta a ficar livre.'],
     en: ['Raffle rooms: a room left unused for 24 hours is deleted on its own, and its number becomes free again.'],
@@ -3790,11 +3868,12 @@ function drawRaffle() {
 /* ---------- Sala de sorteio com dado D100 ----------
    Quem cria a sala recebe um número de 4 dígitos e passa para o grupo. Cada pessoa entra com o número e rola um D100
    por rodada; todos veem as jogadas. A sala é um documento no mesmo banco dos respawns (coleção rooms):
-     owner, at (hora do último uso), round, items { rodada: nome do item }, rolls { "rodada_pessoa": { name, at } }
+     owner, at (hora do último uso), round, items { rodada: nome do item }, rolls { "rodada_pessoa": { name, at } },
+     members { pessoa: { name, at } } (quem entrou), flags { rodada: regras da rodada }, skip (opção do dono)
    O valor do dado não é gravado: sai de "at", a hora em que o servidor recebeu a jogada (até o milésimo de segundo),
    misturada com a sala, a rodada e a pessoa. Ninguém escolhe essa hora e todos os navegadores fazem a mesma conta,
    então todos veem o mesmo número. As regras do banco (firestore.rules) garantem uma jogada por pessoa por rodada. */
-const room = { code: null, doc: null, sig: '', seen: null, rolling: new Map(), spin: 0, timer: 0, loading: false, busy: false, changedAt: 0, paused: false };
+const room = { code: null, doc: null, sig: '', seen: null, rolling: new Map(), spin: 0, timer: 0, loading: false, busy: false, changedAt: 0, paused: false, hello: false };
 const fmtCode = c => c.length === 6 ? c.slice(0, 3) + ' ' + c.slice(3) : c;   // as primeiras salas tinham 6 dígitos
 const roomPath = code => cloud.root + '/rooms/' + code;
 const roomMsg = text => setText($('#room-msg'), text || '');
@@ -3910,51 +3989,122 @@ function diceSound() {
     }
   }
 }
-// Jogadas de uma rodada, da maior para a menor.
-function roundRolls(doc, n) {
-  const out = [];
+// Rodadas da sala, com as regras de cada uma. Tudo sai do documento, então todo navegador chega ao mesmo resultado:
+//   flags[n] com "t": desempate da rodada anterior, só rolam os que empataram em primeiro, valendo o mesmo item;
+//   flags[n] com "s": quem já ganhou um item fica de fora.
+// A jogada de quem não podia rolar é ignorada. Em cada rodada: all = todas as jogadas, rolls = as que valem
+// (da maior para a menor), top = as que estão em primeiro, final = falso quando ela foi decidida num desempate.
+function roomRounds(doc) {
+  const total = doc.round || 1, flags = doc.flags || {}, items = doc.items || {};
+  const byRound = {};
   for (const [key, r] of Object.entries(doc.rolls || {})) {
-    const i = key.indexOf('_');
-    if (i < 1 || Number(key.slice(0, i)) !== n || !r || !r.at) continue;
-    out.push({ key, name: String(r.name || '?'), value: rollValue(room.code, key, r.at) });
+    const i = key.indexOf('_'), n = Number(key.slice(0, i));
+    if (i < 1 || !(n >= 1) || !r || !r.at) continue;
+    (byRound[n] || (byRound[n] = [])).push({ key, uid: key.slice(i + 1), name: String(r.name || '?'), value: rollValue(room.code, key, r.at) });
   }
-  return out.sort((a, b) => b.value - a.value || (a.key < b.key ? -1 : 1));
+  const out = [], winners = new Set();
+  for (let n = 1; n <= total; n++) {
+    const f = String(flags[n] || ''), prev = out[n - 1];
+    const tie = f.includes('t') && !!prev && prev.top.length > 1;
+    if (prev) { if (tie) prev.final = false; else for (const r of prev.top) winners.add(r.uid); }
+    const only = tie ? new Set(prev.top.map(r => r.uid)) : null;
+    const barred = !tie && f.includes('s') ? new Set(winners) : new Set();
+    const can = uid => only ? only.has(uid) : !barred.has(uid);
+    const all = (byRound[n] || []).sort((a, b) => b.value - a.value || (a.key < b.key ? -1 : 1));
+    const rolls = all.filter(r => can(r.uid));
+    out[n] = { n, item: String(items[n] || ''), tie, only, all, rolls, top: rolls.filter(r => r.value === rolls[0].value), final: true, can,
+      who: tie ? prev.top.map(r => r.name) : [] };
+  }
+  return out;
 }
+const roundLabel = r => tr((r.tie ? 'room.tieRound' : 'room.round') + (r.item ? '' : 'NoItem'), { n: r.n, x: r.item });
 function renderRoom() {
   const inside = !!(room.code && room.doc);
   $('#room-lobby').hidden = inside;
   $('#room-in').hidden = !inside;
   for (const b of [$('#room-create'), $('#room-join')]) b.disabled = room.busy;
   if (!inside) return;
-  const d = room.doc, n = d.round || 1, mine = !!cloud.uid && d.owner === cloud.uid;
+  const d = room.doc, n = d.round || 1, uid = cloud.uid, mine = !!uid && d.owner === uid;
+  const cur = roomRounds(d)[n];
   setText($('#room-number'), fmtCode(room.code));
   $('#room-owner').hidden = !mine;
   $('#room-end').hidden = !mine;
   $('#room-refresh').hidden = !room.paused;
-  const item = (d.items || {})[n];
-  setText($('#room-round'), item ? tr('room.round', { n, x: item }) : tr('room.roundNoItem', { n }));
+  $('#room-skip').checked = !!d.skip;
+  setText($('#room-round'), roundLabel(cur));
+
+  // Quem está na sala, na ordem em que entrou; quem rolou sem estar na lista entra no fim.
+  const people = Object.entries(d.members || {})
+    .map(([id, m]) => ({ uid: id, name: String((m && m.name) || '?'), at: String((m && m.at) || '') }))
+    .sort((a, b) => a.at < b.at ? -1 : a.at > b.at ? 1 : 0);
+  for (const r of cur.all) if (!people.some(p => p.uid === r.uid)) people.push({ uid: r.uid, name: r.name });
+  const rolled = new Set(cur.rolls.map(r => r.uid));
+  setText($('#room-members-title'), tr('room.members', { n: people.length }));
+  $('#room-members').replaceChildren(...people.map(p => {
+    const state = rolled.has(p.uid) ? 'rolled' : cur.can(p.uid) ? 'waiting' : 'out';
+    return el('li', { class: state, title: tr('room.m.' + state), text: p.name });
+  }));
+
   // Jogada recém-chegada: o dado "gira" um instante antes de mostrar o valor, e só então entra na ordem.
   const now = Date.now();
   for (const [k, until] of room.rolling) if (until <= now) room.rolling.delete(k);
-  const rolls = roundRolls(d, n);
-  const shown = rolls.filter(r => !room.rolling.has(r.key));
+  const shown = cur.rolls.filter(r => !room.rolling.has(r.key));
+  const spinning = cur.rolls.filter(r => room.rolling.has(r.key));
   const top = shown.length ? shown[0].value : null;
   $('#room-rolls').replaceChildren(
     ...shown.map(r => el('li', { class: r.value === top ? 'top' : null }, el('span', { text: r.name }), el('b', { text: r.value }))),
-    ...rolls.filter(r => room.rolling.has(r.key)).map(r => el('li', { class: 'rolling' }, el('span', { text: r.name }), el('b', { text: randInt(100) + 1 }))),
-    ...(rolls.length ? [] : [el('li', { class: 'room-empty', text: tr('room.waiting') })]));
-  $('#room-roll').disabled = room.busy || !!(cloud.uid && (d.rolls || {})[n + '_' + cloud.uid]);
+    ...spinning.map(r => el('li', { class: 'rolling' }, el('span', { text: r.name }), el('b', { text: randInt(100) + 1 }))),
+    ...(cur.rolls.length ? [] : [el('li', { class: 'room-empty', text: tr('room.waiting') })]));
+
+  // Avisos da rodada: quem rola no desempate, se a pessoa está de fora, se há empate, se todos já rolaram.
+  const tied = !spinning.length && cur.top.length > 1;
+  const waiting = people.filter(p => cur.can(p.uid) && !rolled.has(p.uid));
+  const notes = [];
+  if (cur.tie) notes.push(tr('room.tieOnly', { x: cur.who.join(', ') }));
+  if (uid && !cur.can(uid)) notes.push(tr(cur.tie ? 'room.youOut.tie' : 'room.youOut.won'));
+  if (tied) notes.push(tr('room.tie', { x: cur.top.map(r => r.name).join(', '), v: cur.top[0].value }));
+  else if (!spinning.length && cur.rolls.length > 1 && !waiting.length) notes.push(tr('room.allRolled'));
+  setText($('#room-note'), notes.join(' '));
+
+  $('#room-roll').disabled = room.busy || !!(uid && ((d.rolls || {})[n + '_' + uid] || !cur.can(uid)));
+  // Dono: com empate em primeiro, o botão abre o desempate (o item continua o mesmo).
   $('#room-next').disabled = room.busy;
-  // Rodadas anteriores: quem tirou o maior número em cada uma.
+  setText($('#room-next'), tr(tied ? 'room.tiebreak' : 'room.next'));
+  $('#room-item').disabled = tied;
+
+  // Rodadas anteriores: quem ficou com cada item. A rodada que foi para o desempate aparece pelo resultado dele.
   const past = [];
-  for (let k = n - 1; k >= 1; k--) {
-    const rs = roundRolls(d, k);
-    if (!rs.length) continue;
-    past.push(el('li', null, el('span', { text: (d.items || {})[k] || tr('room.roundNoItem', { n: k }) }),
-      el('b', { text: rs.filter(r => r.value === rs[0].value).map(r => r.name).join(' / ') + ' (' + rs[0].value + ')' })));
+  for (const r of roomRounds(d).slice(1, n).reverse()) {
+    if (!r.final || !r.rolls.length) continue;
+    past.push(el('li', null, el('span', { text: r.item || tr('room.roundNoItem', { n: r.n }) }),
+      el('b', { text: r.top.map(x => x.name).join(' / ') + ' (' + r.top[0].value + ')' + (r.tie ? ' · ' + tr('room.afterTie') : '') })));
   }
   $('#room-history-wrap').hidden = !past.length;
   $('#room-history').replaceChildren(...past);
+}
+// Entra na lista de quem está na sala (ou corrige o nome que está lá).
+async function roomHello() {
+  const code = room.code, name = ui.rollName.trim().slice(0, 24);
+  if (!code || !name) return;
+  try {
+    const uid = await cloudAuth();
+    const me = ((room.doc || {}).members || {})[uid];
+    if (room.code !== code || (me && me.name === name)) return;
+    const path = 'members.`' + uid + '`';
+    const res = await roomWrite({
+      update: { name: roomPath(code), fields: { members: { mapValue: { fields: { [uid]: toFs({ name }) } } } } },
+      updateMask: { fieldPaths: [path + '.name'] },
+      updateTransforms: [{ fieldPath: path + '.at', setToServerValue: 'REQUEST_TIME' }],
+      currentDocument: { exists: true },
+    });
+    if (res.ok) roomPoll();
+  } catch { /* a sala funciona sem a lista */ }
+}
+// Sai da lista ao clicar em "Sair da sala". Quem só fecha a página continua aparecendo.
+function roomBye() {
+  const code = room.code, uid = cloud.uid;
+  if (!code || !uid || !((room.doc || {}).members || {})[uid]) return;
+  roomWrite({ update: { name: roomPath(code), fields: {} }, updateMask: { fieldPaths: ['members.`' + uid + '`'] }, currentDocument: { exists: true } }).catch(() => {});
 }
 function setRoomDoc(doc) {
   const keys = Object.keys(doc.rolls || {});
@@ -3962,9 +4112,10 @@ function setRoomDoc(doc) {
   if (room.seen) for (const k of keys) if (!room.seen.has(k)) { room.rolling.set(k, Date.now() + spinTime()); fresh = true; }
   if (fresh && $('#raffle').open) diceSound();   // jogada nova, de quem for: todos ouvem os dados
   room.seen = new Set(keys);
-  const sig = JSON.stringify([doc.round, doc.items, keys.length]);
+  const sig = JSON.stringify([doc.round, doc.items, keys.length, Object.keys(doc.members || {}).length, doc.flags, doc.skip]);
   if (sig !== room.sig) { room.sig = sig; room.changedAt = Date.now(); }
   room.doc = doc;
+  if (!room.hello) { room.hello = true; roomHello(); }
   if (room.rolling.size && !room.spin) {
     room.spin = setInterval(() => {
       for (const b of document.querySelectorAll('#room-rolls .rolling b')) b.textContent = randInt(100) + 1;
@@ -4005,12 +4156,14 @@ function enterRoom(code, doc) {
   room.seen = null;
   room.sig = '';
   room.rolling.clear();
+  room.hello = false;
   ui.room = code;
   saveUi();
   if (doc) setRoomDoc(doc);
   roomWatch(true);
 }
-function roomLeave(msg) {
+function roomLeave(msg, bye) {
+  if (bye) roomBye();
   roomWatch(false);
   room.code = null;
   room.doc = null;
@@ -4035,7 +4188,7 @@ async function roomCreate() {
   try {
     const uid = await cloudAuth();
     const create = code => cloudCommit({
-      update: { name: roomPath(code), fields: toFs({ owner: uid, round: 1, items: {}, rolls: {} }).mapValue.fields },
+      update: { name: roomPath(code), fields: toFs({ owner: uid, round: 1, items: {}, rolls: {}, members: {}, flags: {}, skip: 0 }).mapValue.fields },
       updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
       currentDocument: { exists: false },
     });
@@ -4048,7 +4201,7 @@ async function roomCreate() {
         const old = await cloudCommit({ delete: roomPath(code) });
         if (old.ok) res = await create(code);
       }
-      if (res.ok) { made = true; enterRoom(code, { owner: uid, round: 1, items: {}, rolls: {} }); sweepRooms(); }
+      if (res.ok) { made = true; enterRoom(code, { owner: uid, round: 1, items: {}, rolls: {}, members: {}, flags: {}, skip: 0 }); sweepRooms(); }
       else if (res.status === 403 && digits === 4) digits = 6;   // banco ainda com as regras que só aceitam 6 dígitos
       else if (res.status !== 409) break;
     }
@@ -4081,6 +4234,8 @@ async function roomRoll() {
   try {
     const uid = await cloudAuth();
     const code = room.code, n = room.doc.round || 1, key = n + '_' + uid, path = 'rolls.`' + key + '`';
+    const cur = roomRounds(room.doc)[n];
+    if (!cur.can(uid)) { roomMsg(tr(cur.tie ? 'room.youOut.tie' : 'room.youOut.won')); return; }
     const res = await roomWrite({
       update: { name: roomPath(code), fields: { rolls: { mapValue: { fields: { [key]: toFs({ name }) } } } } },
       updateMask: { fieldPaths: [path + '.name'] },
@@ -4089,27 +4244,40 @@ async function roomRoll() {
     });
     await roomPoll();
     if (room.code !== code || !room.doc) return;
-    const mine = roundRolls(room.doc, n).find(r => r.key === key);
+    const mine = ((roomRounds(room.doc)[n] || {}).all || []).find(r => r.key === key);
     if (res.ok && mine) setTimeout(() => { if (room.code === code) roomMsg(tr('room.rolled', { v: mine.value })); }, spinTime());
     else if (mine) roomMsg(tr('room.already'));
     else roomMsg(tr((room.doc.round || 1) !== n ? 'room.changed' : 'room.fail'));
   } catch { roomMsg(tr('room.fail')); } finally { room.busy = false; renderRoom(); }
 }
-// Dono da sala: abre a rodada do próximo item. Se a rodada atual ainda não tem jogadas, só troca o nome do item.
+// Dono da sala: abre a próxima rodada.
+//   Empate em primeiro: rodada de desempate, só entre os empatados, valendo o mesmo item.
+//   Rodada atual ainda sem jogadas: só troca o nome do item (um desempate sem jogadas fica como está).
+//   Caso contrário: rodada do próximo item, com a opção "quem já ganhou não rola" que estiver marcada.
 async function roomNext() {
   const d = room.doc;
   if (!room.code || !d || room.busy) return;
-  const n = d.round || 1, next = roundRolls(d, n).length ? n + 1 : n;
-  const items = { ...(d.items || {}) };
-  const item = $('#room-item').value.trim().slice(0, 60);
-  if (item) items[next] = item; else delete items[next];
+  const n = d.round || 1, cur = roomRounds(d)[n];
+  if (cur.tie && !cur.rolls.length) return;
+  const items = { ...(d.items || {}) }, flags = { ...(d.flags || {}) };
+  let next = n;
+  if (cur.top.length > 1) {
+    next = n + 1;
+    if (cur.item) items[next] = cur.item; else delete items[next];
+    flags[next] = 't';
+  } else {
+    if (cur.rolls.length) next = n + 1;
+    const item = $('#room-item').value.trim().slice(0, 60);
+    if (item) items[next] = item; else delete items[next];
+    if ($('#room-skip').checked) flags[next] = 's'; else delete flags[next];
+  }
   room.busy = true;
   roomMsg('');
   renderRoom();
   try {
     const res = await roomWrite({
-      update: { name: roomPath(room.code), fields: toFs({ round: next, items }).mapValue.fields },
-      updateMask: { fieldPaths: ['round', 'items'] },
+      update: { name: roomPath(room.code), fields: toFs({ round: next, items, flags }).mapValue.fields },
+      updateMask: { fieldPaths: ['round', 'items', 'flags'] },
       currentDocument: { exists: true },
     });
     if (res.ok) $('#room-item').value = ''; else roomMsg(tr('room.fail'));
@@ -4143,7 +4311,7 @@ function setRaffleMode(mode) {
   if (ui.sound) { armAudio(); loadDice(); }
   if (!$('#room-name').value) $('#room-name').value = ui.rollName;
   // Sala em que a pessoa já estava: volta para ela.
-  if (!room.code && ui.room) { room.code = ui.room; room.seen = null; room.sig = ''; }
+  if (!room.code && ui.room) { room.code = ui.room; room.seen = null; room.sig = ''; room.hello = false; }
   renderRoom();
   roomWatch($('#raffle').open);
 }
@@ -4155,7 +4323,25 @@ $('#room-code').addEventListener('keydown', e => { if (e.key === 'Enter') roomJo
 $('#room-roll').addEventListener('click', roomRoll);
 $('#room-next').addEventListener('click', roomNext);
 $('#room-item').addEventListener('keydown', e => { if (e.key === 'Enter') roomNext(); });
-$('#room-leave').addEventListener('click', () => roomLeave(''));
+$('#room-leave').addEventListener('click', () => roomLeave('', true));
+// Opção do dono: quem já ganhou não rola nos próximos itens. Vale para a rodada atual se ninguém rolou ainda.
+$('#room-skip').addEventListener('change', async e => {
+  const d = room.doc;
+  if (!room.code || !d) return;
+  const on = e.target.checked, n = d.round || 1, cur = roomRounds(d)[n];
+  const fields = { skip: on ? 1 : 0 }, mask = ['skip'];
+  if (!cur.rolls.length && !cur.tie) {
+    const flags = { ...(d.flags || {}) };
+    if (on) flags[n] = 's'; else delete flags[n];
+    fields.flags = flags;
+    mask.push('flags');
+  }
+  try {
+    const res = await roomWrite({ update: { name: roomPath(room.code), fields: toFs(fields).mapValue.fields }, updateMask: { fieldPaths: mask }, currentDocument: { exists: true } });
+    if (!res.ok) roomMsg(tr('room.fail'));
+  } catch { roomMsg(tr('room.fail')); }
+  roomPoll();
+});
 $('#room-refresh').addEventListener('click', () => roomWatch(true));
 $('#room-end').addEventListener('click', roomEnd);
 $('#room-copy').addEventListener('click', async () => { roomMsg(tr((await copyText(room.code)) ? 'room.copied' : 'hunt.copyFail')); });

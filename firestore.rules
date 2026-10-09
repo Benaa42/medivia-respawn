@@ -56,6 +56,8 @@ service cloud.firestore {
     //   assim que o número volta a ficar livre.
     // - Cada pessoa grava só a própria jogada, uma por rodada, com a hora do servidor. O valor do dado é
     //   calculado pelo site a partir dessa hora, então ninguém escolhe o resultado nem altera jogada alheia.
+    // - Cada pessoa põe, corrige ou tira só o próprio nome da lista de quem está na sala (members).
+    // - "flags" (regras de cada rodada: desempate, quem já ganhou não rola) e "skip" são do dono.
     match /rooms/{code} {
       function rollKey() {
         return string(resource.data.round) + '_' + request.auth.uid;
@@ -72,7 +74,10 @@ service cloud.firestore {
 
       allow create: if request.auth != null
         && code.matches('^[0-9]{4,6}$')
-        && request.resource.data.keys().hasOnly(['owner', 'at', 'round', 'items', 'rolls'])
+        && request.resource.data.keys().hasOnly(['owner', 'at', 'round', 'items', 'rolls', 'members', 'flags', 'skip'])
+        && (!('members' in request.resource.data) || (request.resource.data.members is map && request.resource.data.members.size() == 0))
+        && (!('flags' in request.resource.data) || (request.resource.data.flags is map && request.resource.data.flags.size() == 0))
+        && (!('skip' in request.resource.data) || request.resource.data.skip == 0)
         && request.resource.data.owner == request.auth.uid
         && request.resource.data.at == request.time
         && request.resource.data.round == 1
@@ -83,8 +88,10 @@ service cloud.firestore {
         && (
           (
             resource.data.owner == request.auth.uid
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['round', 'items', 'at'])
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['round', 'items', 'at', 'flags', 'skip'])
             && touched()
+            && (!('flags' in request.resource.data) || (request.resource.data.flags is map && request.resource.data.flags.size() <= 200))
+            && (!('skip' in request.resource.data) || request.resource.data.skip == 0 || request.resource.data.skip == 1)
             && request.resource.data.round is int
             && (request.resource.data.round == resource.data.round || request.resource.data.round == resource.data.round + 1)
             && request.resource.data.round <= 200
@@ -102,6 +109,22 @@ service cloud.firestore {
             && request.resource.data.rolls[rollKey()].name.size() >= 1
             && request.resource.data.rolls[rollKey()].name.size() <= 24
             && request.resource.data.rolls[rollKey()].at == request.time
+          ) || (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'at'])
+            && touched()
+            && request.resource.data.members is map
+            && request.resource.data.members.size() <= 60
+            && request.resource.data.members.diff(resource.data.get('members', {})).affectedKeys().hasOnly([request.auth.uid])
+            && (
+              !(request.auth.uid in request.resource.data.members)
+              || (
+                request.resource.data.members[request.auth.uid].keys().hasOnly(['name', 'at'])
+                && request.resource.data.members[request.auth.uid].name is string
+                && request.resource.data.members[request.auth.uid].name.size() >= 1
+                && request.resource.data.members[request.auth.uid].name.size() <= 24
+                && request.resource.data.members[request.auth.uid].at == request.time
+              )
+            )
           )
         );
 
