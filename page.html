@@ -3678,11 +3678,11 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
-  { at: '2026-10-09 12:10',
-    pt: ['Salas de sorteio: o dado D100 agora rola na tela e para no número sorteado.'],
-    en: ['Raffle rooms: the D100 now rolls on screen and stops on the number rolled.'],
-    es: ['Salas de sorteo: el dado D100 ahora rueda en pantalla y se detiene en el número obtenido.'],
-    pl: ['Pokoje losowania: kość k100 toczy się teraz po ekranie i zatrzymuje na wylosowanej liczbie.'],
+  { at: '2026-10-09 12:20',
+    pt: ['Salas de sorteio: o dado D100 agora rola na tela e para no número sorteado.', 'Cada pessoa da rodada tem o seu dado na mesa.'],
+    en: ['Raffle rooms: the D100 now rolls on screen and stops on the number rolled.', 'Each person in the round has their own die on the table.'],
+    es: ['Salas de sorteo: el dado D100 ahora rueda en pantalla y se detiene en el número obtenido.', 'Cada persona de la ronda tiene su dado en la mesa.'],
+    pl: ['Pokoje losowania: kość k100 toczy się teraz po ekranie i zatrzymuje na wylosowanej liczbie.', 'Każda osoba w rundzie ma na stole własną kość.'],
   },
   { at: '2026-10-09 12:00',
     pt: ['Novo alerta sonoro: Jogador na tela.', 'Alerta Batimento mais curto.'],
@@ -4020,11 +4020,12 @@ function diceSound() {
   }
 }
 /* ---------- Mesa dos dados ----------
-   O D100 é desenhado em canvas como uma esfera coberta pelos números de 1 a 100. Cada jogada nova entra rolando pela
-   esquerda, quicando e girando cada vez mais devagar, e para com o número sorteado virado para a frente; aí esse
-   número cresce no meio do dado. O giro termina sempre na posição certa porque o movimento é a posição final mais
-   um resto de giro que vai a zero no tempo do som. As jogadas que já estavam na sala aparecem paradas.
-   A mesa mostra as quatro jogadas mais recentes da rodada. As cores do dado são fixas (o site tem um tema só). */
+   O D100 é desenhado em canvas como uma esfera coberta pelos números de 1 a 100. A mesa tem um dado para cada
+   pessoa que participa da rodada, com o nome embaixo: apagado enquanto ela não rola. Na jogada, o dado dela quica
+   e gira cada vez mais devagar e para com o número sorteado virado para a frente; aí esse número cresce no meio
+   do dado. O giro termina sempre na posição certa porque o movimento é a posição final mais um resto de giro que
+   vai a zero no tempo do som. As jogadas que já estavam na sala aparecem paradas.
+   As cores do dado são fixas (o site tem um tema só). */
 const DIE = { pts: [], num: [], at: [] };
 for (let i = 0; i < 100; i++) {   // 100 pontos espalhados por igual na esfera (espiral de Fibonacci)
   const y = 1 - (i + 0.5) / 50, r = Math.sqrt(1 - y * y), a = i * Math.PI * (3 - Math.sqrt(5));
@@ -4077,54 +4078,67 @@ function drawDie(g, cx, cy, r, floor, R, target, pop, alpha) {
   g.restore();
 }
 const tray = { dice: [], raf: 0, ink: '' };
-// Recebe as jogadas que devem estar na mesa. "until" é a hora em que o dado para (0 ou passada: já parado).
+const TRAY = { cell: 88, row: 132 };   // largura mínima de cada dado e altura de cada fileira da mesa
+// Recebe um dado por pessoa que participa da rodada. Sem "value" a pessoa ainda não rolou (dado parado e apagado);
+// "until" é a hora em que o dado para de rolar (0 ou já passada: aparece parado).
 function diceTable(list) {
   const now = Date.now(), calm = !!window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  tray.dice = list.map(x => tray.dice.find(d => d.key === x.key) || {
-    key: x.key, name: x.name, value: x.value, t0: now, T: Math.max(0, x.until - now), calm, x: null,
-    end: mMul(mAxis([0, 0, 1], Math.random() * 6.283), mFront(DIE.pts[DIE.at[x.value]])),
-    axis: unit([0.25 * (Math.random() - 0.5), 1, 0.35 * (Math.random() - 0.5)]),
-    turns: -(3.5 + Math.random() * 1.5) * 6.283,
+  tray.dice = list.map(x => {
+    const old = tray.dice.find(d => d.key === x.key);
+    if (old && (old.value != null || x.value == null)) { old.name = x.name; return old; }
+    return {   // dado novo na mesa, ou o dado apagado de quem acabou de rolar (fica no mesmo lugar)
+      key: x.key, name: x.name, value: x.value, t0: now, T: x.value != null ? Math.max(0, x.until - now) : 0, calm,
+      x: old ? old.x : null, y: old ? old.y : null,
+      end: x.value != null ? mMul(mAxis([0, 0, 1], Math.random() * 6.283), mFront(DIE.pts[DIE.at[x.value]])) : mAxis(unit([1, 0.6, 0.2]), Math.random() * 6.283),
+      axis: unit([0.25 * (Math.random() - 0.5), 1, 0.35 * (Math.random() - 0.5)]),
+      turns: -(3.5 + Math.random() * 1.5) * 6.283,
+    };
   });
   if (!tray.raf) tray.raf = requestAnimationFrame(trayFrame);
 }
 function trayFrame() {
   tray.raf = 0;
-  const c = $('#room-tray');
-  const W = c.offsetWidth, H = c.offsetHeight;
-  if (!W || !H) return;   // janela fechada ou fora da sala
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const c = $('#room-tray'), W = c.offsetWidth;
+  if (!W) return;   // janela fechada ou fora da sala
+  // Os dados ficam em fileiras, quantos couberem na largura; a mesa cresce com o número de pessoas.
+  const n = tray.dice.length, cols = Math.max(1, Math.min(n, Math.floor(W / TRAY.cell))), rows = Math.max(1, Math.ceil(n / cols));
+  const H = rows * TRAY.row + 4, dpr = Math.min(2, window.devicePixelRatio || 1);
+  if (c.style.height !== H + 'px') c.style.height = H + 'px';
   if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
   if (!tray.ink) tray.ink = getComputedStyle(document.documentElement).getPropertyValue('--label').trim() || '#b9c2c0';
   const g = c.getContext('2d');
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, W, H);
-  const now = Date.now(), n = tray.dice.length;
-  const gap = Math.min(108, W / Math.max(1, n)), r = Math.max(22, Math.min(40, gap / 2 - 8)), cy = H * 0.43, floor = cy + r + 5;
+  const now = Date.now(), gap = Math.min(116, W / cols), r = Math.max(22, Math.min(34, gap / 2 - 8));
   let moving = false;
-  if (!n) drawDie(g, W / 2, cy, r, floor, mAxis([1, 0, 0], 0.5), -1, 0, 0.28);   // mesa vazia: um dado parado, apagado
+  if (!n) drawDie(g, W / 2, 62, r, 67 + r, mAxis([1, 0, 0], 0.5), -1, 0, 0.28);   // ninguém na rodada: um dado parado, apagado
   tray.dice.forEach((d, i) => {
-    const slot = W / 2 + (i - (n - 1) / 2) * gap;
-    d.x = d.x == null ? slot : d.x + (slot - d.x) * 0.2;
+    const row = Math.floor(i / cols), inRow = Math.min(cols, n - row * cols);
+    const sx = W / 2 + (i - row * cols - (inRow - 1) / 2) * gap, sy = row * TRAY.row + 62;
+    d.x = d.x == null ? sx : d.x + (sx - d.x) * 0.2;
+    d.y = d.y == null ? sy : d.y + (sy - d.y) * 0.2;
+    const floor = d.y + r + 5;
     const u = d.T ? Math.min(1, (now - d.t0) / d.T) : 1, rest = 1 - u;
-    const pop = u < 1 ? 0 : d.T ? Math.min(1, (now - d.t0 - d.T) / 260) : 1;
-    if (u < 1 || pop < 1 || Math.abs(slot - d.x) > 0.5) moving = true;
-    if (d.calm && u < 1) drawDie(g, d.x, cy, r, floor, d.end, -1, 0, 0.28);   // sem animação: espera parado e só mostra o número
+    const pop = d.value == null || u < 1 ? 0 : d.T ? Math.min(1, (now - d.t0 - d.T) / 260) : 1;
+    if (u < 1 || (d.value != null && pop < 1) || Math.abs(sx - d.x) > 0.5 || Math.abs(sy - d.y) > 0.5) moving = true;
+    if (d.value == null || (d.calm && u < 1)) drawDie(g, d.x, d.y, r, floor, d.end, -1, 0, 0.28);   // ainda não rolou (ou sem animação: espera parado)
     else {
-      const dx = -(d.x + r * 2) * rest * rest;                                              // vem da borda esquerda
+      const dx = -r * 0.6 * rest * rest;                                                    // um passo de lado, sem sair do lugar dele
       const dy = -Math.abs(Math.sin(u * Math.PI * 3.5)) * r * 0.75 * Math.pow(rest, 1.5);   // quiques cada vez menores
-      drawDie(g, d.x + dx, cy + dy, r, floor, mMul(d.end, mAxis(d.axis, d.turns * Math.pow(rest, 2.4))), DIE.at[d.value], pop, 1);
+      drawDie(g, d.x + dx, d.y + dy, r, floor, mMul(d.end, mAxis(d.axis, d.turns * Math.pow(rest, 2.4))), DIE.at[d.value], pop, 1);
     }
     g.font = '600 12px Onest, "Segoe UI", sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'alphabetic';
     g.fillStyle = tray.ink;
+    g.globalAlpha = d.value == null ? 0.6 : 1;
     let label = d.name;
     if (g.measureText(label).width > gap - 8) {
       while (label.length > 1 && g.measureText(label + '…').width > gap - 8) label = label.slice(0, -1);
       label += '…';
     }
-    g.fillText(label, d.x, H - 9);
+    g.fillText(label, d.x, d.y + 60);
+    g.globalAlpha = 1;
   });
   if (moving) tray.raf = requestAnimationFrame(trayFrame);
 }
@@ -4190,9 +4204,11 @@ function renderRoom() {
   for (const [k, until] of room.rolling) if (until <= now) room.rolling.delete(k);
   const shown = cur.rolls.filter(r => !room.rolling.has(r.key));
   const spinning = cur.rolls.filter(r => room.rolling.has(r.key));
-  // Mesa dos dados: as quatro jogadas mais recentes da rodada; as que acabaram de chegar entram rolando.
-  diceTable(cur.rolls.slice().sort((a, b) => a.at < b.at ? -1 : a.at > b.at ? 1 : 0).slice(-4)
-    .map(r => ({ key: r.key, name: r.name, value: r.value, until: room.rolling.get(r.key) || 0 })));
+  // Mesa dos dados: um dado para cada pessoa que participa desta rodada; o de quem acabou de rolar gira.
+  diceTable(people.filter(p => cur.can(p.uid)).map(p => {
+    const roll = cur.rolls.find(r => r.uid === p.uid);
+    return { key: n + '_' + p.uid, name: p.name, value: roll ? roll.value : null, until: roll ? room.rolling.get(roll.key) || 0 : 0 };
+  }));
   const top = shown.length ? shown[0].value : null;
   $('#room-rolls').replaceChildren(
     ...shown.map(r => el('li', { class: r.value === top ? 'top' : null }, el('span', { text: r.name }), el('b', { text: r.value }))),
