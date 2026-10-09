@@ -418,6 +418,12 @@ details.backup textarea {
 .nav-link { padding: 0; border: 0; background: none; color: var(--faint); font: 400 13px/1.4 var(--font-ui); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .nav-link:hover { color: var(--title); }
 .lang { margin-left: 0; }
+/* Idiomas: as bandeiras dos quatro idiomas do jogo, apagadas; só a do idioma em uso fica com a cor cheia */
+.lang button { padding: 4px 7px; line-height: 0; }
+.lang button[aria-pressed="true"] { background: var(--band); }
+.flag { display: block; width: 20px; height: 14px; border-radius: 2px; opacity: 0.4; filter: saturate(0.55); }
+.lang button:hover .flag { opacity: 0.8; }
+.lang button[aria-pressed="true"] .flag { opacity: 1; filter: none; }
 .tone { padding: 6px 10px; border: 1px solid var(--edge); border-radius: 999px; background: var(--card); color: var(--title); font: 500 13px/1.2 var(--font-ui); cursor: pointer; }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -445,9 +451,10 @@ details.backup textarea {
           <button class="nav-link" type="button" id="changes-top" data-i18n="changes.open">Novidades</button>
         </span>
         <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
-          <button type="button" data-lang="pt" lang="pt-BR" title="Português">PT</button>
-          <button type="button" data-lang="en" lang="en" title="English">EN</button>
-          <button type="button" data-lang="es" lang="es" title="Español">ES</button>
+          <button type="button" data-lang="en" lang="en" title="English" aria-label="English"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><path fill="#b22234" d="M0 0h20v2H0zM0 4h20v2H0zM0 8h20v2H0zM0 12h20v2H0z"/><rect width="9" height="8" fill="#3c3b6e"/></svg></button>
+          <button type="button" data-lang="pl" lang="pl" title="Polski" aria-label="Polski"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg></button>
+          <button type="button" data-lang="pt" lang="pt-BR" title="Português" aria-label="Português"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#009b3a"/><path fill="#fedf00" d="M10 1.6 18 7l-8 5.4L2 7z"/><circle cx="10" cy="7" r="3" fill="#002776"/></svg></button>
+          <button type="button" data-lang="es" lang="es" title="Español" aria-label="Español"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg></button>
         </span>
         <button class="dlg support-top" type="button" id="support-top" data-i18n="support.open" hidden>Apoiar o projeto</button>
       </nav>
@@ -610,7 +617,7 @@ function el(tag, props, ...kids) {
 /* ---------- Idiomas ----------
    Todo texto da tela sai daqui. Para corrigir uma tradução, basta mudar a linha do idioma.
    Os nomes de áreas e de monstros não são traduzidos: aparecem como o jogo os escreve. */
-const LANGS = ['pt', 'en', 'es'];
+const LANGS = ['en', 'pl', 'pt', 'es'];   // os quatro idiomas que o jogo oferece, na ordem do jogo
 const I18N = {
   pt: {
     'html.lang': 'pt-BR',
@@ -1257,11 +1264,226 @@ const I18N = {
     'hunt.copy.player': '{x}: gastó {spent}, recibe {payout}',
     'hunt.copy.solo': '{x}: gastó {spent}',
   },
+  pl: {
+    'html.lang': 'pl',
+    'tagline': 'Licznik respawnu na twoje polowania w Medivii, z drużyną i bonusem już wliczonymi.',
+    'mapper': 'Mapper z wiki',
+    'maker.alt': 'Vibeforge, autor: Bena',
+    'lang.label': 'Język',
+    'paste.a': 'Po skopiowaniu zrzutu okna bonusu naciśnij',
+    'paste.b': 'w dowolnym miejscu tej strony. Zrzut jest odczytywany od razu, bez klikania czegokolwiek wcześniej.',
+    'search': 'Szukaj obszaru lub stworzenia',
+    'backup': 'Kopia zapasowa',
+    'backup.aria': 'Baza w formacie JSON',
+    'backup.copy': 'Kopiuj',
+    'backup.import': 'Importuj tekst powyżej',
+    'backup.copied': 'Baza skopiowana. Wklej ją do pliku tekstowego, aby ją zachować.',
+    'backup.selected': 'Tekst zaznaczony: naciśnij Ctrl + C, aby skopiować.',
+    'backup.bad': 'Ten tekst nie jest kopią bazy. Wklej cały tekst skopiowany stąd.',
+    'backup.imported1': 'Zaimportowano 1 respawn.',
+    'backup.importedN': 'Zaimportowane respawny: {n}.',
+    'backup.none': 'W tym tekście nie znaleziono żadnego respawnu.',
+    'loop': 'Powtarzaj po wyzerowaniu',
+    'sound': 'Dźwięk',
+    'volume': 'Głośność dźwięku',
+    'tone.label': 'Dźwięk alarmu',
+    'tone.sino': 'Dzwonek',
+    'tone.bipe': 'Sygnał',
+    'tone.trompa': 'Róg',
+    'tone.drag1': 'Smok 1',
+    'tone.drag2': 'Smok 2',
+    'tone.dreadlord': 'Dread Lord',
+    'tone.hydra': 'Hydra',
+    'tone.whoosh': 'Mroczny świst',
+    'tone.heartbeat': 'Bicie serca',
+    'tone.levelup': 'Level up',
+    'tone.manafull': 'Pełna mana',
+    'tone.message': 'Wiadomość',
+    'float': 'Pływające okno',
+    'read': 'Wczytaj zrzut',
+    'status.default': 'Możesz też przeciągnąć tutaj obraz zrzutu albo wybrać plik przyciskiem Wczytaj zrzut.',
+    'colophon': 'Narzędzie fanowskie, bez oficjalnego związku z Medivią. Czasy pochodzą z okna bonusu w grze. Zrzut jest odczytywany w twojej przeglądarce i zaraz potem usuwany.',
+    'unit.aria': 'Pokazuj czasy w',
+    'unit.s': 'Sekundy',
+    'unit.m': 'Minuty',
+    'seconds': 'sekund',
+    'minutes': 'minut',
+    'party.100': 'Solo',
+    'party.134': 'Duet',
+    'party.160': 'Trio',
+    'party.178': 'Squad 4+',
+    'party.speed': '{n}% szybkości',
+    'sync.site': 'Baza strony oraz to, co odczytasz w tej przeglądarce.',
+    'sync.local': 'Baza zapisana w tej przeglądarce.',
+    'sync.ro': 'Wspólna baza, tylko do odczytu. To, co odczytasz, zapisuje się w tej przeglądarce.',
+    'sync.rw': 'Wspólna baza: to, co zostanie tu odczytane, widzą wszyscy.',
+    'bank.nomobs': 'brak stworzeń',
+    'bank.nohit': 'Brak obszaru lub stworzenia o tej nazwie.',
+    'bank.empty': 'Nie ma jeszcze respawnów. Każdy odczytany zrzut trafia tutaj pod nazwą obszaru.',
+    'err.sharedDelete': 'Nie udało się usunąć ze wspólnej bazy. Mogą to zrobić tylko osoby z prawem edycji bazy.',
+    'err.float': 'Pływające okno nie otwiera się w tym widoku. Użyj Chrome lub Edge ze stroną otwartą bezpośrednio w karcie.',
+    'err.exists': 'Istnieje już respawn o nazwie „{x}”.',
+    'err.nomobs': 'Nie znaleziono stworzeń ani czasów respawnu na tym obrazie. Zrób zrzut tak, aby było widać całe okno bonusu.',
+    'err.nopct': 'Stworzenia odczytane, ale bez procentu bonusu. Zadbaj, aby na zrzucie było widać tytuł z procentem bonusu, np. „(10%)”.',
+    'err.read': 'Nie udało się odczytać tego obrazu. Spróbuj z nowym zrzutem samego okna bonusu.',
+    'err.notimage': 'To nie jest obraz. Przeciągnij plik ze zrzutem.',
+    'note.left': 'zostało {t}',
+    'note.born': 'odrodzenie {t} temu',
+    'note.idle': 'respawn {t}',
+    'start': 'Start',
+    'restart': 'Od nowa',
+    'reset': 'Zeruj',
+    'startAll': 'Start wszystkich',
+    'resetAll': 'Zeruj wszystkie',
+    'shortcut.all': 'Skrót do startu wszystkich: ',
+    'shortcut.one': 'Skrót do startu: ',
+    'key.space': 'Spacja',
+    'empty.loading': 'Otwieranie bazy respawnów',
+    'empty.none': 'Żaden respawn nie jest otwarty',
+    'howto.intro': 'Aby otworzyć respawn, którego nie ma jeszcze na liście:',
+    'howto.1': 'W Medivii otwórz okno bonusu danego respawnu.',
+    'howto.2': 'Zrób zrzut całego okna.',
+    'howto.3': 'Wróć tutaj i naciśnij ',
+    'howto.note': 'Zrzut może być przy dowolnym procencie bonusu. Pozostałe są wyliczane.',
+    'name.aria': 'Nazwa obszaru',
+    'name.title': 'Kliknij, aby zmienić nazwę',
+    'delete': 'Usuń',
+    'delete.sure': 'Na pewno usunąć?',
+    'stage.aria': 'Liczniki respawnu',
+    'ctl.party': 'Drużyna',
+    'ctl.bonus': 'Procent bonusu',
+    'ctl.dur': 'Czas trwania',
+    'ctl.cost': 'Koszt bonusu',
+    'dur.value': '{n} minut',
+    'bonus.faster': 'respawn o {n}% szybszy',
+    'bonus.none': 'bez bonusu',
+    'bonus.noneShort': 'Brak',
+    'cost.unread': 'nie odczytano',
+    'cost.note': '{p}% na {n} minut',
+    'less': 'Zmniejsz: {x}',
+    'more': 'Zwiększ: {x}',
+    'band': 'Wzmocnione stworzenia',
+    'mob.kills': 'Zabić na godzinę: ',
+    'mob.time': 'Czas respawnu: ',
+    'mob.remove': 'Usuń: {x}',
+    'step.title': '{m} z bonusem {p}%: {t}',
+    'hint.read': 'Odczytano ze zrzutu przy {p}%, potraktowano jako polowanie solo. ',
+    'hint.rest': 'Drużyna jest wliczana przed bonusem. Lista w grze się przewija: jeśli brakuje stworzenia, przewiń okno, zrób kolejny zrzut i wklej go. Trafi do tego samego obszaru.',
+    'read.busy': 'Odczytywanie zrzutu…',
+    'read.first': 'Przygotowywanie czytnika obrazów (tylko za pierwszym razem) i odczytywanie zrzutu…',
+    'read.ok1': '{x}: odczytano przy {p}%, 1 stworzenie.',
+    'read.okN': '{x}: odczytano przy {p}%, stworzeń: {n}.',
+    'read.shared': 'Zapisano we wspólnej bazie.',
+    'read.local': 'Zapisano w bazie tej przeglądarki.',
+    'read.discarded': 'Obraz usunięty.',
+    'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
+    'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
+    'noname': 'Respawn bez nazwy',
+    'duo.label': 'Otwórz dwa respawny',
+    'duo.hint': 'Kliknij dwa respawny na liście. Kliknij jeden z nich ponownie, aby go zamknąć.',
+    'duo.second': 'Drugi respawn: {x}',
+    'duo.close': 'Zamknij ten respawn',
+    'read.unread': 'Nie udało się odczytać czasu respawnu: {x}. Zrób kolejny zrzut i wklej go ponownie.',
+    'disc.label': 'Zniżka za taski: {v}',
+    'disc.full': 'Bez zniżki: {v}',
+    'disc.tip': 'Zniżka za dzienne lub tygodniowe taski, odczytana ze zrzutu. Odznacz, gdy się skończy.',
+    'read.disc': 'Zniżka za taski w wysokości {v} uwzględniona w koszcie.',
+    'bank.more': 'Widoczne {n} z {t} respawnów. Wyszukaj, aby zobaczyć pozostałe.',
+    'raffle.open': 'Losuj przedmioty',
+    'raffle.title': 'Losowanie przedmiotów',
+    'raffle.names': 'Uczestnicy, po jednym w wierszu',
+    'raffle.fromHunt': 'Użyj imion z ostatniego polowania',
+    'raffle.items': 'Przedmioty, po jednym w wierszu (opcjonalnie)',
+    'raffle.unique': 'Nie powtarzaj zwycięzcy, dopóki ktoś nie ma przedmiotu',
+    'raffle.go': 'Losuj',
+    'raffle.need': 'Podaj co najmniej dwóch uczestników.',
+    'raffle.winner': 'Zwycięzca',
+    'raffle.copy': 'Kopiuj wynik',
+    'raffle.copied': 'Wynik losowania skopiowany.',
+    'changes.open': 'Nowości',
+    'changes.title': 'Nowości na stronie',
+    'pause.label': 'Przerwa między okrążeniami',
+    'pause.unit': 's',
+    'pause.tip': 'Sekundy oczekiwania po wyzerowaniu, zanim kolejne okrążenie ruszy samo',
+    'note.pause': 'przerwa przed kolejnym okrążeniem',
+    'note.pauseShort': 'przerwa',
+    'hunt.whoTip': 'Kopiuj imię {x}, z Home w następnym wierszu',
+    'hunt.whoCopied': 'Imię {x} skopiowane, z Home w następnym wierszu.',
+    'hunt.payTip': 'Kopiuj kwotę dla {x}',
+    'hunt.payCopied': 'Kwota dla {x} skopiowana: {v}',
+    'lap.count': 'Okrążenia: {n}',
+    'lap.short': 'okrążenie {n}',
+    'lap.less': 'Odejmij okrążenie',
+    'lap.more': 'Dodaj okrążenie',
+    'lap.reset': 'zeruj okrążenia',
+    'lap.tip': 'Każdy start licznika liczy się jako jedno okrążenie respawnu.',
+    'task.lapsN': 'okrążeń respawnu: {n}',
+    'task.laps1': '1 okrążenie respawnu',
+    'task.lapsOf': 'okrążenie {d} z {n}',
+    'sync.cloud': 'Wspólna baza: to, co ktokolwiek odczyta, pojawia się tutaj.',
+    'sync.wait1': '1 twój odczyt nie został jeszcze wysłany.',
+    'sync.waitN': 'Twoje odczyty jeszcze niewysłane: {n}.',
+    'read.cloud': 'Wysłano do wspólnej bazy.',
+    'read.notshared': 'Zostało tylko w tej przeglądarce: popraw powyższe punkty i wczytaj zrzut ponownie, aby udostępnić go wszystkim.',
+    'err.cloudDelete': 'Nie udało się usunąć ze wspólnej bazy. Może to zrobić tylko osoba, która wysłała respawn.',
+    'task.label': 'Task: zostało',
+    'task.kills': 'zabić',
+    'task.aria': 'Ile zabić ({x}) zostało do taska',
+    'task.time': 'zajmie {t}',
+    'task.never': 'brak szacunku',
+    'task.tip': 'Czas taska liczy się z zabić na godzinę, czyli zakłada, że każde stworzenie ginie zaraz po odrodzeniu.',
+    'span.hm': '{h} h {m} min',
+    'span.m': '{m} min',
+    'support.open': 'Wesprzyj projekt',
+    'support.text': 'Medivia Respawn jest darmowy i powstaje w wolnym czasie. Jeśli pomaga ci w polowaniach, możesz wesprzeć autora. Wsparcie jest dobrowolne i nie daje żadnej przewagi w grze.',
+    'support.pix': 'Pix (tylko Brazylia)',
+    'support.qr': 'Kod QR Pix',
+    'support.pix.hint': 'Zeskanuj kod w aplikacji brazylijskiego banku albo skopiuj kod Pix.',
+    'support.pix.to': 'Odbiorca: {x}',
+    'support.pix.copy': 'Kopiuj kod Pix',
+    'support.pix.copied': 'Kod Pix skopiowany.',
+    'support.copyFail': 'Nie udało się skopiować. Zaznacz kod i skopiuj go.',
+    'support.kofi': 'Ko-fi (dowolny kraj)',
+    'support.kofi.hint': 'Karta lub PayPal, w dowolnej walucie.',
+    'support.kofi.go': 'Otwórz Ko-fi',
+    'support.close': 'Zamknij',
+    'support.pix.link': 'Otwórz link do płatności w banku',
+    'hunt.title': 'Ostatnie polowanie',
+    'hunt.intro': 'Zobacz podsumowanie każdego polowania zapisanego w grze: ile wydał każdy gracz i ile każdy dostaje.',
+    'hunt.connect': 'Połącz hunts.txt',
+    'hunt.tip': 'W oknie, które się otworzy, wklej tę ścieżkę w polu nazwy pliku:',
+    'hunt.privacy': 'Plik jest odczytywany tylko w twojej przeglądarce. Nic nie jest nigdzie wysyłane.',
+    'hunt.ask': 'Przy każdej wizycie przeglądarka ponownie prosi o zgodę na odczyt hunts.txt.',
+    'hunt.reconnect': 'Połącz hunts.txt ponownie',
+    'hunt.other': 'Wybierz inny plik',
+    'hunt.empty': 'W tym pliku nie ma jeszcze zapisanych polowań.',
+    'hunt.bad': 'Ten plik nie wygląda jak hunts.txt z gry.',
+    'hunt.loot': 'Loot',
+    'hunt.supply': 'Zapasy',
+    'hunt.balance': 'Bilans',
+    'hunt.exp': 'Exp zdobyty przez: {x}',
+    'hunt.player': 'Gracz',
+    'hunt.spent': 'Wydał',
+    'hunt.gets': 'Dostaje',
+    'hunt.copy': 'Kopiuj podsumowanie',
+    'hunt.copied': 'Podsumowanie polowania skopiowane.',
+    'hunt.copyFail': 'W tej przeglądarce nie udało się skopiować podsumowania.',
+    'hunt.disconnect': 'Rozłącz',
+    'hunt.live': 'Śledzę hunts.txt. Podsumowanie odświeża się, gdy zapiszesz polowanie w grze.',
+    'hunt.once': 'Plik odczytany jeden raz. W Chrome lub Edge, ze stroną otwartą bezpośrednio w karcie, podsumowanie samo śledzi plik.',
+    'hunt.new': 'Zapisano nowe polowanie: podsumowanie odświeżone.',
+    'hunt.prev': 'Poprzednie polowanie',
+    'hunt.next': 'Następne polowanie',
+    'hunt.copy.head': 'Polowanie {when} ({time})',
+    'hunt.copy.totals': 'Loot {loot} | Zapasy {supply} | Bilans {balance}',
+    'hunt.copy.player': '{x}: wydał {spent}, dostaje {payout}',
+    'hunt.copy.solo': '{x}: wydał {spent}',
+  },
 };
 // Texto no idioma escolhido; {chaves} são trocadas pelos valores passados.
 function tr(key, vars) {
-  let s = (I18N[ui.lang] || I18N.pt)[key];
-  if (s == null) s = I18N.pt[key] != null ? I18N.pt[key] : key;
+  let s = (I18N[ui.lang] || I18N.en)[key];
+  if (s == null) s = I18N.en[key] != null ? I18N.en[key] : key;
   return vars ? s.replace(/\{(\w+)\}/g, (_, k) => vars[k] != null ? vars[k] : '') : s;
 }
 
@@ -1331,8 +1553,8 @@ function parsePrint(lines) {
       const name = m[1].replace(/^[^A-Za-z]+/, '').replace(/\s+/g, ' ').trim();
       if (name) names.push({ name, count: +m[2].replace(/ /g, ''), x: l.x, y: l.y, h: l.h });
     }
-    else if ((m = t.match(/(\d{1,5})\s*(?:seg|sec)/i))) resp.push({ v: +m[1], x: l.x, y: l.y });
-    else if ((m = t.match(/(?:hora|hour)\D{0,3}(\d{1,6})\s*$/i))) kills.push({ v: +m[1], x: l.x, y: l.y });
+    else if ((m = t.match(/(\d{1,5})\s*(?:seg|sec|sek)/i))) resp.push({ v: +m[1], x: l.x, y: l.y });
+    else if ((m = t.match(/(?:hora|hour|godzin\S{0,2})\D{0,3}(\d{1,6})\s*$/i))) kills.push({ v: +m[1], x: l.x, y: l.y });
     else other.push(l);
   }
   // Cada card tem o nome em cima e as duas linhas de números logo abaixo, na mesma coluna.
@@ -1434,9 +1656,9 @@ async function readPrint(blob) {
     const still = [];
     for (const n of p.unread) {
       const text = await ocr.crop(n.x - n.h / 2, n.y - n.h / 2, n.h * 17, n.h * 4.5).catch(() => '');
-      const sec = text.match(/(\d{1,5})\s*(?:seg|sec)/i);
+      const sec = text.match(/(\d{1,5})\s*(?:seg|sec|sek)/i);
       if (!sec || !+sec[1]) { still.push(n.name); continue; }
-      const k = text.match(/(?:hora|hour)\D{0,3}(\d{1,6})\s*$/im);
+      const k = text.match(/(?:hora|hour|godzin\S{0,2})\D{0,3}(\d{1,6})\s*$/im);
       p.monsters.push({ name: n.name, count: n.count, sec: +sec[1], kills: k ? +k[1] : null });
     }
     p.unread = still;
@@ -1828,11 +2050,8 @@ for (const k of Object.keys(ui.disc)) if (!(ui.disc[k] && ui.disc[k].gold > 0)) 
 ui.recent = (Array.isArray(ui.recent) ? ui.recent : []).filter(x => typeof x === 'string').slice(0, 12);   // respawns abertos, do mais recente para o mais antigo
 if (typeof ui.raffleNames !== 'string') ui.raffleNames = '';
 ui.pause = int(ui.pause, 0, 600) || 0;   // segundos de espera entre uma volta e outra, com "Repetir ao zerar"
-// Sem escolha salva, o site abre no idioma do navegador; fora dos três, em inglês.
-if (!LANGS.includes(ui.lang)) {
-  const nav = String(navigator.language || 'pt').slice(0, 2).toLowerCase();
-  ui.lang = LANGS.includes(nav) ? nav : 'en';
-}
+// Sem escolha salva, o site abre em inglês.
+if (!LANGS.includes(ui.lang)) ui.lang = 'en';
 if (!(ui.volume >= 0 && ui.volume <= 100)) ui.volume = 60;
 const saveUi = () => lsSet(LS_UI, ui);
 // Respawns abertos: o principal e, com "Abrir dois respawns" ligado, um segundo. Cada um tem o seu percentual
@@ -3144,90 +3363,113 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 10:40',
+    pt: ['Site também em polonês: agora são os quatro idiomas do jogo.', 'Seletor de idioma com as bandeiras.', 'O site abre em inglês para quem ainda não escolheu um idioma.'],
+    en: ['Site also in Polish: it now covers the four languages of the game.', 'Language picker with flags.', 'The site opens in English for anyone who has not picked a language yet.'],
+    es: ['Sitio también en polaco: ahora cubre los cuatro idiomas del juego.', 'Selector de idioma con banderas.', 'El sitio se abre en inglés para quien aún no eligió un idioma.'],
+    pl: ['Strona także po polsku: teraz obejmuje cztery języki gry.', 'Wybór języka z flagami.', 'Strona otwiera się po angielsku u osób, które nie wybrały jeszcze języka.'],
+  },
   { at: '2026-10-09 10:31',
     pt: ['Cronômetros lado a lado sempre alinhados: os botões e as voltas ficam na mesma altura mesmo quando os nomes das criaturas ocupam mais de uma linha.'],
     en: ['Timers side by side always line up: buttons and laps stay at the same height even when creature names take more than one line.'],
     es: ['Cronómetros en paralelo siempre alineados: los botones y las vueltas quedan a la misma altura aunque los nombres de las criaturas ocupen más de una línea.'],
+    pl: ['Liczniki obok siebie zawsze wyrównane: przyciski i okrążenia są na tej samej wysokości, nawet gdy nazwy stworzeń zajmują więcej niż jeden wiersz.'],
   },
   { at: '2026-10-09 10:27',
     pt: ['Nove novos tipos de alerta sonoro, com áudios gravados: Dragão 1, Dragão 2, Dread Lord, Hidra, Sopro sombrio, Batimento, Level up, Mana cheia e Mensagem.'],
     en: ['Nine new alert sounds, from recorded audio: Dragon 1, Dragon 2, Dread Lord, Hydra, Evil whoosh, Heartbeat, Level up, Mana full and Message.'],
     es: ['Nueve nuevos tipos de alerta sonora, con audios grabados: Dragón 1, Dragón 2, Dread Lord, Hidra, Soplo siniestro, Latido, Level up, Maná lleno y Mensaje.'],
+    pl: ['Dziewięć nowych dźwięków alarmu z nagrań: Smok 1, Smok 2, Dread Lord, Hydra, Mroczny świst, Bicie serca, Level up, Pełna mana i Wiadomość.'],
   },
   { at: '2026-10-09 09:30',
     pt: ['Dois respawns ao mesmo tempo: marque "Abrir dois respawns" e escolha dois na lista para ter os cronômetros de todas as criaturas dos dois, cada respawn com o seu percentual de bônus.', 'Os textos do site passam a dizer "criaturas" em vez de "monstros".'],
     en: ['Two respawns at once: tick "Open two respawns" and pick two in the list to get the timers of every creature of both, each respawn with its own bonus percentage.', 'The site now says "creatures" instead of "monsters".'],
     es: ['Dos respawns a la vez: marca "Abrir dos respawns" y elige dos en la lista para tener los cronómetros de todas las criaturas de ambos, cada respawn con su porcentaje de bonus.', 'Los textos del sitio ahora dicen "criaturas" en lugar de "monstruos".'],
+    pl: ['Dwa respawny naraz: zaznacz „Otwórz dwa respawny” i wybierz dwa z listy, aby mieć liczniki wszystkich stworzeń z obu, każdy respawn z własnym procentem bonusu.', 'Strona mówi teraz „stworzenia” zamiast „potwory”.'],
   },
   { at: '2026-10-08 23:37',
     pt: ['Link para as Novidades no topo da página, abaixo do link do mapper.'],
     en: ['Link to What is new at the top of the page, below the mapper link.'],
     es: ['Enlace a Novedades en la parte superior de la página, debajo del enlace del mapper.'],
+    pl: ['Link do Nowości u góry strony, pod linkiem do mappera.'],
   },
   { at: '2026-10-08 23:31',
     pt: ['Símbolo da Vibeforge na aba do navegador.'],
     en: ['Vibeforge symbol on the browser tab.'],
     es: ['Símbolo de Vibeforge en la pestaña del navegador.'],
+    pl: ['Symbol Vibeforge na karcie przeglądarki.'],
   },
   { at: '2026-10-08 23:19',
     pt: ['Desconto das tasks: o valor em gold é fixo, igual ao do jogo, em qualquer percentual e duração.', 'Custo do bônus arredondado para a centena, como o jogo mostra.'],
     en: ['Task discount: the gold amount is fixed, the same as in the game, at any percentage and duration.', 'Bonus cost rounded to the hundred, as the game shows it.'],
     es: ['Descuento de tareas: el valor en oro es fijo, igual que en el juego, en cualquier porcentaje y duración.', 'Coste del bonus redondeado a la centena, como lo muestra el juego.'],
+    pl: ['Zniżka za taski: kwota w gold jest stała, taka sama jak w grze, przy każdym procencie i czasie trwania.', 'Koszt bonusu zaokrąglany do setek, tak jak pokazuje go gra.'],
   },
   { at: '2026-10-08 23:09',
     pt: ['Desconto das tasks: quando o print traz a faixa "Desconto disponível", o site aplica o desconto ao custo do bônus e mostra o preço sem desconto. Dá para desligar quando o desconto acabar.', 'Leitura do print: quando o tempo de uma criatura não é lido, o site relê só aquela criatura e avisa se mesmo assim não conseguir.'],
     en: ['Task discount: when the screenshot has the "Discount available" band, the site applies the discount to the bonus cost and shows the price without it. You can switch it off when the discount ends.', 'Screenshot reading: when a creature time is not read, the site reads that creature again on its own and tells you if it still fails.'],
     es: ['Descuento de tareas: cuando la captura trae la franja "Descuento disponible", el sitio aplica el descuento al coste del bonus y muestra el precio sin descuento. Puedes desactivarlo cuando el descuento termine.', 'Lectura de la captura: cuando no se lee el tiempo de una criatura, el sitio vuelve a leer solo esa criatura y avisa si aun así no lo consigue.'],
+    pl: ['Zniżka za taski: gdy na zrzucie jest pasek „Dostępna zniżka”, strona odlicza zniżkę od kosztu bonusu i pokazuje cenę bez niej. Można ją wyłączyć, gdy zniżka się skończy.', 'Odczyt zrzutu: gdy czas stworzenia nie zostanie odczytany, strona odczytuje to stworzenie ponownie osobno i informuje, jeśli nadal się nie uda.'],
   },
   { at: '2026-10-08 23:00',
     pt: ['Pausa entre voltas: com "Repetir ao zerar" ligado, o cronômetro espera os segundos que você definir antes de recomeçar.', 'Botão "Apoiar o projeto" no topo da página.', 'Esta lista de novidades.', 'A lista de respawns mostra só os três últimos abertos; os demais aparecem ao buscar.', 'Sorteio de itens entre os jogadores da última hunt ou entre nomes digitados.'],
     en: ['Pause between laps: with "Repeat at zero" on, the timer waits the seconds you set before starting again.', '"Support the project" button at the top of the page.', 'This list of changes.', 'The respawn list shows only the last three you opened; the others show up when you search.', 'Item raffle among the players of the last hunt or among names you type.'],
     es: ['Pausa entre vueltas: con "Repetir al llegar a cero" activado, el cronómetro espera los segundos que definas antes de volver a empezar.', 'Botón "Apoyar el proyecto" en la parte superior de la página.', 'Esta lista de novedades.', 'La lista de respawns muestra solo los tres últimos abiertos; los demás aparecen al buscar.', 'Sorteo de objetos entre los jugadores de la última cacería o entre nombres escritos.'],
+    pl: ['Przerwa między okrążeniami: przy włączonym „Powtarzaj po wyzerowaniu” licznik czeka ustawioną liczbę sekund, zanim ruszy ponownie.', 'Przycisk „Wesprzyj projekt” u góry strony.', 'Ta lista nowości.', 'Lista respawnów pokazuje tylko trzy ostatnio otwarte; pozostałe pojawiają się po wyszukaniu.', 'Losowanie przedmiotów wśród graczy z ostatniego polowania albo wśród wpisanych imion.'],
   },
   { at: '2026-10-08 22:26',
     pt: ['As opções de som, repetição, janela flutuante e leitura do print subiram para logo abaixo dos cronômetros.', 'Última hunt: clicar no valor a receber copia o número.', 'Última hunt: clicar no nome do jogador copia o nome e, na linha de baixo, "Home".'],
     en: ['Sound, repeat, floating window and screenshot options moved to right below the timers.', 'Last hunt: clicking the amount a player gets copies the number.', 'Last hunt: clicking a player name copies the name and, on the next line, "Home".'],
     es: ['Las opciones de sonido, repetición, ventana flotante y lectura de la captura subieron justo debajo de los cronómetros.', 'Última cacería: al hacer clic en el valor a recibir se copia el número.', 'Última cacería: al hacer clic en el nombre del jugador se copia el nombre y, en la línea de abajo, "Home".'],
+    pl: ['Opcje dźwięku, powtarzania, pływającego okna i wczytywania zrzutu przeniesione tuż pod liczniki.', 'Ostatnie polowanie: kliknięcie kwoty, którą dostaje gracz, kopiuje liczbę.', 'Ostatnie polowanie: kliknięcie imienia gracza kopiuje imię, a w następnym wierszu „Home”.'],
   },
   { at: '2026-10-08 22:14',
     pt: ['Contador de voltas em cada cronômetro, com botões para corrigir e zerar.', 'Task: o card mostra quantas voltas no respawn são precisas para terminar.', 'Última hunt: números sem espaços, para copiar e colar direto no jogo.'],
     en: ['Lap counter on each timer, with buttons to correct and reset it.', 'Task: the card shows how many laps of the respawn it takes to finish.', 'Last hunt: numbers without spaces, ready to copy and paste into the game.'],
     es: ['Contador de vueltas en cada cronómetro, con botones para corregir y reiniciar.', 'Tarea: la tarjeta muestra cuántas vueltas al respawn hacen falta para terminar.', 'Última cacería: números sin espacios, para copiar y pegar directamente en el juego.'],
+    pl: ['Licznik okrążeń przy każdym liczniku, z przyciskami do poprawiania i zerowania.', 'Task: karta pokazuje, ile okrążeń respawnu potrzeba do ukończenia.', 'Ostatnie polowanie: liczby bez spacji, gotowe do skopiowania i wklejenia w grze.'],
   },
   { at: '2026-10-08 20:30',
     pt: ['Banco de todos: o respawn lido por qualquer pessoa passa a aparecer para todo mundo.'],
     en: ['Shared bank: a respawn read by anyone now shows up for everyone.'],
     es: ['Banco de todos: el respawn leído por cualquiera ahora aparece para todos.'],
+    pl: ['Wspólna baza: respawn odczytany przez kogokolwiek jest teraz widoczny dla wszystkich.'],
   },
   { at: '2026-10-08 19:13',
     pt: ['Task: informe quantos abates faltam e veja o tempo para terminar em cada percentual de bônus.'],
     en: ['Task: enter how many kills are left and see the time to finish at each bonus percentage.'],
     es: ['Tarea: indica cuántas muertes faltan y mira el tiempo para terminar en cada porcentaje de bonus.'],
+    pl: ['Task: wpisz, ile zabić zostało, i zobacz czas do ukończenia przy każdym procencie bonusu.'],
   },
   { at: '2026-10-08 17:59',
     pt: ['Última hunt: o site lê o hunts.txt do jogo e mostra quanto cada jogador gastou e quanto recebe.', 'Apoiar o projeto: doação opcional por Pix ou Ko-fi.'],
     en: ['Last hunt: the site reads the hunts.txt file from the game and shows how much each player spent and gets.', 'Support the project: optional donation through Pix or Ko-fi.'],
     es: ['Última cacería: el sitio lee el hunts.txt del juego y muestra cuánto gastó y cuánto recibe cada jugador.', 'Apoyar el proyecto: donación opcional por Pix o Ko-fi.'],
+    pl: ['Ostatnie polowanie: strona odczytuje plik hunts.txt z gry i pokazuje, ile każdy gracz wydał i ile dostaje.', 'Wesprzyj projekt: dobrowolna darowizna przez Pix lub Ko-fi.'],
   },
   { at: '2026-10-08 16:48',
     pt: ['Site em português, inglês e espanhol.', 'Três tipos de alerta sonoro: Sino, Bipe e Trompa.', 'Tempos em segundos ou em minutos.', 'Percentual de bônus em barra deslizante.', 'Janela flutuante com botão Zerar em cada cronômetro.'],
     en: ['Site in Portuguese, English and Spanish.', 'Three alert sounds: Chime, Beep and Horn.', 'Times in seconds or in minutes.', 'Bonus percentage on a slider.', 'Floating window with a Reset button on each timer.'],
     es: ['Sitio en portugués, inglés y español.', 'Tres tipos de alerta sonora: Campana, Pitido y Cuerno.', 'Tiempos en segundos o en minutos.', 'Porcentaje de bonus en barra deslizante.', 'Ventana flotante con botón Restablecer en cada cronómetro.'],
+    pl: ['Strona po portugalsku, angielsku i hiszpańsku.', 'Trzy dźwięki alarmu: Dzwonek, Sygnał i Róg.', 'Czasy w sekundach lub w minutach.', 'Procent bonusu na suwaku.', 'Pływające okno z przyciskiem Zeruj przy każdym liczniku.'],
   },
   { at: '2026-10-08 16:20',
     pt: ['Visual novo, com os cronômetros em anéis que se fecham até a criatura nascer.'],
     en: ['New look, with timers as rings that close until the creature spawns.'],
     es: ['Nuevo aspecto, con los cronómetros en anillos que se cierran hasta que nace la criatura.'],
+    pl: ['Nowy wygląd, z licznikami w formie pierścieni, które zamykają się do chwili odrodzenia stworzenia.'],
   },
   { at: '2026-10-08 16:01',
     pt: ['Duração do bônus de 30 a 180 minutos, com o custo calculado.', 'Faixa no topo explicando que basta um Ctrl + V com o print.', 'Assinatura Vibeforge no cabeçalho.'],
     en: ['Bonus duration from 30 to 180 minutes, with the cost worked out.', 'Band at the top explaining that pressing Ctrl + V with the screenshot is all it takes.', 'Vibeforge signature in the header.'],
     es: ['Duración del bonus de 30 a 180 minutos, con el coste calculado.', 'Franja superior que explica que basta con Ctrl + V con la captura.', 'Firma Vibeforge en el encabezado.'],
+    pl: ['Czas trwania bonusu od 30 do 180 minut, z wyliczonym kosztem.', 'Pasek u góry wyjaśniający, że wystarczy Ctrl + V ze zrzutem.', 'Podpis Vibeforge w nagłówku.'],
   },
   { at: '2026-10-08 14:14',
     pt: ['Lançamento: leitura do print da janela de bônus, tempo de respawn de 10% a 50%, grupo de caça, cronômetro com alerta sonoro e janela flutuante.'],
     en: ['Launch: reading the bonus window screenshot, respawn time from 10% to 50%, hunting party, timer with sound alert and floating window.'],
     es: ['Lanzamiento: lectura de la captura de la ventana de bonus, tiempo de respawn del 10% al 50%, grupo de caza, cronómetro con alerta sonora y ventana flotante.'],
+    pl: ['Start: odczyt zrzutu okna bonusu, czas respawnu od 10% do 50%, drużyna, licznik z alarmem dźwiękowym i pływające okno.'],
   },
 ];
 function openChanges() {
@@ -3236,7 +3478,7 @@ function openChanges() {
     const [day, time] = c.at.split(' ');
     const [y, mo, d] = day.split('-').map(Number);
     const when = new Date(y, mo - 1, d).toLocaleDateString(tag, { day: 'numeric', month: 'long', year: 'numeric' }) + ', ' + time;
-    return el('section', null, el('h3', { text: when }), el('ul', null, (c[ui.lang] || c.pt).map(x => el('li', { text: x }))));
+    return el('section', null, el('h3', { text: when }), el('ul', null, (c[ui.lang] || c.en).map(x => el('li', { text: x }))));
   }));
   const dlg = $('#changes');
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
