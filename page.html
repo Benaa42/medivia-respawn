@@ -398,6 +398,8 @@ details.backup textarea {
 .clock.mmss .clock-digits { font-size: 50px; }
 
 .masthead nav { align-items: center; }
+.nav-links { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.nav-link { padding: 0; border: 0; background: none; color: var(--value); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .lang { margin-left: 0; }
 .tone { padding: 6px 10px; border: 1px solid var(--edge); border-radius: 999px; background: var(--card); color: var(--title); font: 500 13px/1.2 var(--font-ui); cursor: pointer; }
 
@@ -421,7 +423,10 @@ details.backup textarea {
       <h1>Medivia Respawn</h1>
       <p data-i18n="tagline">Cronômetro de respawn para as suas caçadas no Medivia, com o grupo e o bônus já calculados.</p>
       <nav aria-label="Medivia">
-        <a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a>
+        <span class="nav-links">
+          <a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a>
+          <button class="nav-link" type="button" id="changes-top" data-i18n="changes.open">Novidades</button>
+        </span>
         <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
           <button type="button" data-lang="pt" lang="pt-BR" title="Português">PT</button>
           <button type="button" data-lang="en" lang="en" title="English">EN</button>
@@ -2941,6 +2946,11 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-08 23:37',
+    pt: ['Link para as Novidades no topo da página, abaixo do link do mapper.'],
+    en: ['Link to What is new at the top of the page, below the mapper link.'],
+    es: ['Enlace a Novedades en la parte superior de la página, debajo del enlace del mapper.'],
+  },
   { at: '2026-10-08 23:31',
     pt: ['Símbolo da Vibeforge na aba do navegador.'],
     en: ['Vibeforge symbol on the browser tab.'],
@@ -3019,7 +3029,8 @@ function openChanges() {
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
   dlg.scrollTop = 0;   // abre sempre na novidade mais recente
 }
-$('#changes-btn').addEventListener('click', openChanges);
+// Dois caminhos para a mesma lista: o link no topo, abaixo do mapper, e o do rodapé.
+for (const b of [$('#changes-top'), $('#changes-btn')]) b.addEventListener('click', openChanges);
 $('#changes-close').addEventListener('click', () => { const dlg = $('#changes'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
 $('#changes').addEventListener('click', e => { if (e.target === e.currentTarget && e.currentTarget.close) e.currentTarget.close(); });
 
