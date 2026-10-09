@@ -263,6 +263,12 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .task-out { margin-left: auto; font-weight: 700; color: var(--value); }
 .steps i { font-size: 11px; font-style: normal; font-weight: 600; color: var(--title); }
 .steps i:empty { display: none; }
+/* Voltas no respawn */
+.laps { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; margin-top: 10px; font-size: 13px; }
+.laps > button:not(.hunt-link) { width: 24px; height: 24px; padding: 0 0 2px; border: 0; border-radius: 50%; background: var(--card); color: var(--title); font: 600 15px/1 var(--font-ui); cursor: pointer; }
+.lap-count { min-width: 78px; font-weight: 600; color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
+.task-laps { flex-basis: 100%; font-weight: 600; text-align: right; color: var(--label); }
+.task-laps:empty { display: none; }
 .hint { max-width: 78ch; font-size: 13px; color: var(--faint); }
 .howto { display: flex; flex-direction: column; gap: 10px; max-width: 54ch; padding: 24px; border-radius: var(--r-lg); background: var(--box); }
 .howto ol { display: flex; flex-direction: column; gap: 4px; padding-left: 1.3em; color: var(--title); }
@@ -609,6 +615,15 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'lap.count': 'Voltas: {n}',
+    'lap.short': 'volta {n}',
+    'lap.less': 'Tirar uma volta',
+    'lap.more': 'Somar uma volta',
+    'lap.reset': 'zerar voltas',
+    'lap.tip': 'Cada início do cronômetro conta uma volta no respawn.',
+    'task.lapsN': '{n} voltas no respawn',
+    'task.laps1': '1 volta no respawn',
+    'task.lapsOf': 'volta {d} de {n}',
     'sync.cloud': 'Banco de todos: o que qualquer pessoa ler aparece aqui.',
     'sync.wait1': '1 leitura sua ainda não foi enviada.',
     'sync.waitN': '{n} leituras suas ainda não foram enviadas.',
@@ -774,6 +789,15 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'lap.count': 'Laps: {n}',
+    'lap.short': 'lap {n}',
+    'lap.less': 'Remove a lap',
+    'lap.more': 'Add a lap',
+    'lap.reset': 'reset laps',
+    'lap.tip': 'Each time the timer starts counts as one lap of the respawn.',
+    'task.lapsN': '{n} laps of the respawn',
+    'task.laps1': '1 lap of the respawn',
+    'task.lapsOf': 'lap {d} of {n}',
     'sync.cloud': 'Shared bank: whatever anyone reads shows up here.',
     'sync.wait1': '1 of your reads has not been sent yet.',
     'sync.waitN': '{n} of your reads have not been sent yet.',
@@ -939,6 +963,15 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'lap.count': 'Vueltas: {n}',
+    'lap.short': 'vuelta {n}',
+    'lap.less': 'Quitar una vuelta',
+    'lap.more': 'Sumar una vuelta',
+    'lap.reset': 'reiniciar vueltas',
+    'lap.tip': 'Cada inicio del cronómetro cuenta una vuelta al respawn.',
+    'task.lapsN': '{n} vueltas al respawn',
+    'task.laps1': '1 vuelta al respawn',
+    'task.lapsOf': 'vuelta {d} de {n}',
     'sync.cloud': 'Banco de todos: lo que cualquiera lea aparece aquí.',
     'sync.wait1': '1 lectura tuya aún no se ha enviado.',
     'sync.waitN': '{n} lecturas tuyas aún no se han enviado.',
@@ -1510,13 +1543,14 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {} }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {} }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PARTIES.some(p => p.mult === ui.party)) ui.party = 100;
 if (!DURS.includes(ui.dur)) ui.dur = 60;
 if (ui.unit !== 'm') ui.unit = 's';
 if (!TONES[ui.tone]) ui.tone = 'sino';
 if (!ui.tasks || typeof ui.tasks !== 'object' || Array.isArray(ui.tasks)) ui.tasks = {};
+if (!ui.laps || typeof ui.laps !== 'object' || Array.isArray(ui.laps)) ui.laps = {};
 // Sem escolha salva, o site abre no idioma do navegador; fora dos três, em inglês.
 if (!LANGS.includes(ui.lang)) {
   const nav = String(navigator.language || 'pt').slice(0, 2).toLowerCase();
@@ -1611,6 +1645,23 @@ function setLang(lang) {
   renderHunt();
 }
 
+// Voltas: cada vez que o cronômetro de um grupo é iniciado conta uma volta, ou seja, uma limpa do respawn.
+// A contagem é guardada por respawn e por grupo de monstros (identificado pelo tempo base), então
+// continua valendo se o bônus ou o grupo de caça mudar no meio da hunt.
+let lapPainters = [];   // quem mostra voltas na tela; refeito a cada desenho do respawn
+const paintLaps = () => { for (const f of lapPainters) f(); };
+const lapsGet = (id, base) => ((ui.laps[id] || {})[base]) || 0;
+function lapsSet(id, base, n) {
+  const mine = ui.laps[id] || (ui.laps[id] = {});
+  if (n > 0) mine[base] = n; else delete mine[base];
+  if (!Object.keys(mine).length) delete ui.laps[id];
+  saveUi();
+  paintLaps();
+}
+function lapsAdd(t, n) {
+  if (ui.id && t.base != null && n > 0) lapsSet(ui.id, t.base, lapsGet(ui.id, t.base) + n);
+}
+
 /* ---------- Cronômetros ---------- */
 const timers = new Map();   // segundos do grupo -> { dur, endAt, doneAt, nodes }
 let timerEls = new Map();
@@ -1677,6 +1728,7 @@ function startTimer(sec) {
   t.endAt = Date.now() + t.dur * 1000;
   t.doneAt = null;
   scheduleSounds(t);
+  lapsAdd(t, 1);
   tick();
 }
 function resetTimer(sec) {
@@ -1708,7 +1760,12 @@ function tick() {
   let soonest = null;
   for (const [sec, t] of timers) {
     if (t.endAt != null && t.endAt <= now) {
-      if (ui.loop) { while (t.endAt <= now) t.endAt += t.dur * 1000; scheduleSounds(t); }
+      if (ui.loop) {
+        let turns = 0;
+        while (t.endAt <= now) { t.endAt += t.dur * 1000; turns++; }
+        scheduleSounds(t);
+        lapsAdd(t, turns);   // repetindo sozinho, cada recomeço é uma volta
+      }
       else { t.doneAt = t.endAt; t.endAt = null; }
     }
     const v = timerView(t, now);
@@ -1751,9 +1808,10 @@ function paintFloat(now) {
         const b = el('b');
         const btn = el('button', { type: 'button', onclick: () => startTimer(g.sec) });
         const zero = el('button', { class: 'zero', type: 'button', text: tr('reset'), onclick: () => resetTimer(g.sec) });
-        const root = el('div', { class: 'f-row' }, el('div', { class: 'f-main' }, b, el('span', { text: g.who, title: g.who })),
+        const who = el('span', { title: g.who });
+        const root = el('div', { class: 'f-row' }, el('div', { class: 'f-main' }, b, who),
           el('div', { class: 'f-btns' }, btn, zero));
-        float.rowEls.set(g.sec, { root, b, btn });
+        float.rowEls.set(g.sec, { root, b, btn, zero, who });
         return root;
       }));
       float.all.hidden = float.none.hidden = gs.length < 2;
@@ -1764,6 +1822,8 @@ function paintFloat(now) {
       e.root.dataset.state = v.state;
       setText(e.b, fmtTime(v.left) + (ui.unit === 'm' ? '' : ' s'));
       setText(e.btn, tr(v.state === 'idle' || v.state === 'done' ? 'start' : 'restart'));
+      const laps = ui.id && g.t.base != null ? lapsGet(ui.id, g.t.base) : 0;
+      setText(e.who, g.who + (laps ? ' · ' + tr('lap.short', { n: laps }) : ''));
     }
   }
   if (float.canvas && document.pictureInPictureElement === float.video) {
@@ -1962,9 +2022,15 @@ function mobCards(id, r) {
     const now = respawnAt(m.base, ui.pct, ui.party);
     const cells = PCTS.map(p => ({ p, sec: respawnAt(m.base, p, ui.party), task: el('i') }));
     const out = el('span', { class: 'task-out', role: 'status' });
+    const lapsOut = el('span', { class: 'task-laps' });
+    const group = (timers.get(now) || {}).base;   // grupo de cronômetro deste monstro
     // A conta é refeita no lugar enquanto a pessoa digita, sem redesenhar o card.
     const paint = n => {
       setText(out, n ? tr('task.time', { t: fmtSpan(taskSeconds(n, now, m.count)) }) : '');
+      // Cada volta no respawn mata a quantidade de monstros do card.
+      const need = n && m.count > 0 ? Math.ceil(n / m.count) : 0;
+      const done = group != null ? lapsGet(id, group) : 0;
+      setText(lapsOut, !need ? '' : done ? tr('task.lapsOf', { d: done, n: need }) : tr(need === 1 ? 'task.laps1' : 'task.lapsN', { n: need }));
       for (const c of cells) setText(c.task, n ? fmtSpan(taskSeconds(n, c.sec, m.count), true) : '');
     };
     const input = el('input', {
@@ -1973,13 +2039,14 @@ function mobCards(id, r) {
       oninput: () => { const n = int(input.value, 1, 99999) || 0; taskSet(id, m.name, n); paint(n); },
     });
     paint(taskGet(id, m.name));
+    lapPainters.push(() => paint(taskGet(id, m.name)));
     return el('article', { class: 'mob' },
       el('h4', { text: m.name + ' (' + m.count + 'x)' }),
       el('button', { class: 'mob-x', type: 'button', text: '×', 'aria-label': tr('mob.remove', { x: m.name }), title: tr('mob.remove', { x: m.name }),
         onclick: () => saveRespawn(id, { ...r, monsters: r.monsters.filter(x => x !== m) }, owns(id) || cloud.queue.has(id)) }),
       el('p', null, tr('mob.kills'), el('b', { text: killsPerHour(now, m.count) })),
       el('p', null, tr('mob.time'), el('b', { text: fmtTime(now) }), ' ' + unitName()),
-      el('label', { class: 'task' }, el('span', { text: tr('task.label') }), input, el('span', { text: tr('task.kills') }), out),
+      el('label', { class: 'task' }, el('span', { text: tr('task.label') }), input, el('span', { text: tr('task.kills') }), out, lapsOut),
       el('div', { class: 'steps' }, cells.map(c => el('button', {
         type: 'button', id: 'step-' + mi + '-' + c.p, class: c.p === ui.pct ? 'on' : null,
         title: tr('step.title', { m: m.name, p: c.p, t: fmtTime(c.sec) + ' ' + unitName() }), onclick: () => select(id, c.p),
@@ -1993,13 +2060,18 @@ const bonusCost = r => r.cost10 ? Math.round(r.cost10 * ui.pct / 10 * ui.dur / (
 function clockGroups(r) {
   const groups = new Map();
   for (const m of r.monsters) {
-    const s = respawnAt(m.base, ui.pct, ui.party);
-    if (!groups.has(s)) groups.set(s, []);
-    groups.get(s).push(m.name);
+    const sec = respawnAt(m.base, ui.pct, ui.party);
+    if (!groups.has(sec)) groups.set(sec, { who: [], base: m.base });
+    const g = groups.get(sec);
+    g.who.push(m.name);
+    g.base = Math.min(g.base, m.base);
   }
   for (const k of [...timers.keys()]) if (!groups.has(k)) { cancelSounds(timers.get(k)); timers.delete(k); }
-  for (const sec of groups.keys()) if (!timers.has(sec)) timers.set(sec, { dur: sec, endAt: null, doneAt: null, nodes: [] });
-  return [...groups].sort((a, b) => b[0] - a[0]);
+  for (const [sec, g] of groups) {
+    if (!timers.has(sec)) timers.set(sec, { dur: sec, endAt: null, doneAt: null, nodes: [] });
+    timers.get(sec).base = g.base;   // identifica o grupo na contagem de voltas, qualquer que seja o bônus
+  }
+  return [...groups].sort((a, b) => b[0] - a[0]).map(([sec, g]) => [sec, g.who, g.base]);
 }
 
 function buildSheet(id, fixed) {
@@ -2042,6 +2114,7 @@ function renderSheet() {
   if (sig === sheetSig) return;
   sheetSig = sig;
   timerEls = new Map();
+  lapPainters = [];
   if (!r) {
     clearTimers();
     parts = null;
@@ -2054,7 +2127,7 @@ function renderSheet() {
   if (document.activeElement !== parts.nameInput) parts.nameInput.value = r.name;
 
   // Cronômetros: um anel por tempo de respawn diferente; o anel vai se fechando até o monstro nascer
-  const clocks = clockGroups(r).map(([sec, who]) => {
+  const clocks = clockGroups(r).map(([sec, who, base]) => {
     const digits = el('b', { class: 'clock-digits', text: fmtTime(sec) });
     const note = el('p', { class: 'clock-note' });
     const ring = el('div', { class: 'ring' });
@@ -2062,11 +2135,21 @@ function renderSheet() {
     const arc = ring.querySelector('.ring-arc');
     ring.append(el('div', { class: 'ring-in' }, digits, el('span', { class: 'clock-unit', text: unitName() })));
     const start = el('button', { class: 'dlg go', type: 'button', id: 'clock-' + sec, text: tr('start'), onclick: () => startTimer(sec) });
+    const lapText = el('span', { class: 'lap-count', title: tr('lap.tip') });
+    lapPainters.push(() => setText(lapText, tr('lap.count', { n: lapsGet(id, base) })));
+    const laps = el('div', { class: 'laps' },
+      el('button', { type: 'button', id: 'lap-less-' + sec, text: '−', 'aria-label': tr('lap.less'), title: tr('lap.less'),
+        onclick: () => lapsSet(id, base, Math.max(0, lapsGet(id, base) - 1)) }),
+      lapText,
+      el('button', { type: 'button', id: 'lap-more-' + sec, text: '+', 'aria-label': tr('lap.more'), title: tr('lap.more'),
+        onclick: () => lapsSet(id, base, lapsGet(id, base) + 1) }),
+      el('button', { class: 'hunt-link', type: 'button', id: 'lap-zero-' + sec, text: tr('lap.reset'), onclick: () => lapsSet(id, base, 0) }));
     const root = el('article', { class: ui.unit === 'm' ? 'clock mmss' : 'clock', 'data-state': 'idle' },
       ring,
       note,
       el('p', { class: 'clock-who', text: who.join(', ') }),
-      el('div', { class: 'clock-actions' }, start, el('button', { class: 'dlg stop', type: 'button', text: tr('reset'), onclick: () => resetTimer(sec) })));
+      el('div', { class: 'clock-actions' }, start, el('button', { class: 'dlg stop', type: 'button', text: tr('reset'), onclick: () => resetTimer(sec) })),
+      laps);
     timerEls.set(sec, { root, digits, note, start, setFrac: f => { arc.style.strokeDashoffset = (RING * (1 - f)).toFixed(2); } });
     return root;
   });
@@ -2084,6 +2167,7 @@ function renderSheet() {
   setText(parts.hint, sheetHint(r));
 
   if (focusId && document.activeElement.id !== focusId) { const f = document.getElementById(focusId); if (f) f.focus(); }
+  paintLaps();
   tick();
 }
 
@@ -2417,7 +2501,8 @@ function renderHunt() {
   }
   const many = hunt.sessions.length > 1;
   const go = d => { hunt.index = Math.min(hunt.sessions.length - 1, Math.max(0, hunt.index + d)); renderHunt(); };
-  const money = v => v == null ? '?' : fmtInt(v);
+  // Números sem separador de milhar: dá para copiar e colar direto no jogo.
+  const money = v => v == null ? '?' : String(Math.round(v));
   const group = s.players.length > 1 || s.players.some(p => p.payout != null);
   body.replaceChildren(
     el('div', { class: 'hunt-head' },
