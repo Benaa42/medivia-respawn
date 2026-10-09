@@ -1884,6 +1884,30 @@ const unitName = () => tr(ui.unit === 'm' ? 'minutes' : 'seconds');
 const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
 
 /* ---------- Leitura do print ---------- */
+// Número com grupos de milhar a partir de pedaços de texto: "1", "012", "500", ou "1012", "500" quando o leitor cola
+// o primeiro grupo no segundo. O primeiro pedaço pode ter qualquer tamanho; os seguintes têm de ter três dígitos.
+// Para no primeiro pedaço que não é número (a moeda ao lado do custo vira coisas como "2%;").
+function readNumber(tokens) {
+  let digits = '', count = 0;
+  for (const raw of tokens) {
+    const t = raw.replace(/[.,;:]+$/, '');
+    if (!(count ? /^\d{3}$/ : /^\d{1,7}$/).test(t)) break;
+    digits += t;
+    count++;
+  }
+  return digits.length >= 3 ? { value: Number(digits), count } : null;
+}
+// Escolhe o custo entre a primeira leitura e as releituras do recorte. Com desconto das tasks há uma prova real:
+// no jogo o desconto é 3/4 do preço de 10% por 60 minutos, então a leitura que fecha essa conta é a certa.
+// Sem isso, vale o valor que saiu igual em duas releituras; se nenhuma se repetiu, a que bate com a primeira leitura.
+function pickCost(first, reads, discount, pct, dur) {
+  const all = [...reads, first].filter(v => v > 0);
+  if (discount && pct && dur) {
+    const fit = all.find(v => Math.abs(discount / ((v + discount) * 10 / pct * 60 / dur) - 0.75) < 0.004);
+    if (fit) return fit;
+  }
+  return reads.find((v, i) => reads.indexOf(v) !== i) || (reads.includes(first) ? first : reads[0] || first);
+}
 function parsePrint(lines) {
   const names = [], resp = [], kills = [], other = [];
   let pct = null, pctLine = null, dur = null;
@@ -1911,7 +1935,7 @@ function parsePrint(lines) {
     const k = below(kills, n);
     monsters.push({ name: n.name, count: n.count, sec: r.v, kills: k ? k.v : null });
   }
-  let cost = null, discount = null, name = null;
+  let cost = null, costBox = null, discount = null, name = null;
   if (pctLine) {
     const firstY = names.length ? Math.min(...names.map(n => n.y)) : Infinity;
     // Entre os controles e a lista de monstros há até dois valores: o custo, na altura dos controles, e mais abaixo
@@ -1919,13 +1943,19 @@ function parsePrint(lines) {
     const nums = [];
     for (const l of other) {
       if (l.y <= pctLine.y || l.y >= firstY || l.y - pctLine.y >= pctLine.h * 12) continue;
-      const m = l.text.match(/(\d{1,3}(?:[ .,]\d{3})+|\d{3,})/);
-      if (m) nums.push({ v: +m[1].replace(/\D/g, ''), y: l.y, lead: !/[A-Za-zÀ-ÿ]/.test(l.text.slice(0, m.index)) });
+      // Sinais colados antes do número (a moldura, a moeda) saem; o número começa no primeiro pedaço com dígito na frente.
+      const toks = l.text.split(/\s+/).map(t => t.replace(/^[^\dA-Za-zÀ-ÿ]+/, '')), from = toks.findIndex(t => /^\d/.test(t));
+      const n = from < 0 ? null : readNumber(toks.slice(from));
+      if (n) nums.push({ v: n.value, y: l.y, lead: !toks.slice(0, from).some(t => /[A-Za-zÀ-ÿ]/.test(t)), line: l, from, count: n.count });
     }
     nums.sort((a, b) => a.y - b.y);
     const c = nums.find(n => n.lead && n.y - pctLine.y < pctLine.h * 5);
     if (c) {
       cost = c.v;
+      // Onde o custo está no print, para ser relido de perto: só os pedaços do número, sem a moeda ao lado.
+      const l = c.line, ws = l.words && l.words.length === l.text.split(/\s+/).length ? l.words : null;
+      const x0 = ws ? ws[c.from].x0 : l.x, x1 = ws ? ws[c.from + c.count - 1].x1 : l.x + l.w;
+      costBox = { x: x0 - l.h * 0.6, y: l.y - l.h * 0.5, w: x1 - x0 + l.h * 1.2, h: l.h * 2 };
       const d = nums.find(n => n.y > c.y + pctLine.h * 2);
       if (d && d.v > 0) discount = d.v;   // o preço cheio é sempre o custo do print mais o desconto, por maior que ele seja
     }
@@ -1934,7 +1964,7 @@ function parsePrint(lines) {
       .sort((a, b) => b.y - a.y)[0];
     if (title) name = title.text.replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ');
   }
-  return { name, pct, dur, cost, discount, monsters, unread };
+  return { name, pct, dur, cost, costBox, discount, monsters, unread };
 }
 
 let workerP = null;
@@ -1963,7 +1993,6 @@ async function ocrLines(blob) {
   const g = c.getContext('2d', { willReadFrequently: true });
   g.imageSmoothingQuality = 'high';
   g.drawImage(bmp, 0, 0, c.width, c.height);
-  bmp.close();
   // Texto claro em fundo escuro: vira preto no branco, que o leitor acerta mais.
   const d = g.getImageData(0, 0, c.width, c.height);
   const p = d.data;
@@ -1977,7 +2006,10 @@ async function ocrLines(blob) {
   const lines = [];
   for (const b of data.blocks || []) for (const par of b.paragraphs) for (const l of par.lines) {
     const text = l.text.trim();
-    if (text) lines.push({ text, conf: l.confidence, x: l.bbox.x0 / scale, y: l.bbox.y0 / scale, h: (l.bbox.y1 - l.bbox.y0) / scale });
+    if (text) lines.push({
+      text, conf: l.confidence, x: l.bbox.x0 / scale, y: l.bbox.y0 / scale, w: (l.bbox.x1 - l.bbox.x0) / scale, h: (l.bbox.y1 - l.bbox.y0) / scale,
+      words: (l.words || []).map(wd => ({ x0: wd.bbox.x0 / scale, x1: wd.bbox.x1 / scale })),
+    });
   }
   // Lê de novo só um retângulo da imagem (medidas do print original).
   const crop = async (x, y, wd, ht) => {
@@ -1986,7 +2018,35 @@ async function ocrLines(blob) {
     if (rectangle.width < 8 || rectangle.height < 8) return '';
     return (await w.recognize(c, { rectangle })).data.text || '';
   };
-  return { lines, crop, close: () => { c.width = c.height = 0; } };
+  // Relê um número (o custo do bônus) num recorte ampliado, em preto e branco puro e só com dígitos. Na página inteira
+  // o leitor às vezes troca um dígito desse texto pequeno; assim ele acerta. Devolve duas leituras, ou três quando
+  // as duas primeiras não concordam.
+  const digits = async (x, y, wd, ht) => {
+    const out = [];
+    x = Math.max(0, x); y = Math.max(0, y);
+    try {
+      await w.setParameters({ tessedit_pageseg_mode: '7', tessedit_char_whitelist: '0123456789 ' });
+      for (const [zoom, cut] of [[4, 128], [6, 128], [5, 110]]) {
+        if (out.length === 2 && out[0] === out[1]) break;
+        const k = document.createElement('canvas'), cw = Math.round(wd * zoom), ch = Math.round(ht * zoom);
+        k.width = cw + 40;
+        k.height = ch + 40;
+        const kg = k.getContext('2d', { willReadFrequently: true });
+        kg.fillStyle = '#000';
+        kg.fillRect(0, 0, k.width, k.height);
+        kg.imageSmoothingQuality = 'high';
+        kg.drawImage(bmp, x, y, wd, ht, 20, 20, cw, ch);
+        const kd = kg.getImageData(0, 0, k.width, k.height), kp = kd.data;
+        for (let i = 0; i < kp.length; i += 4) kp[i] = kp[i + 1] = kp[i + 2] = 255 - Math.max(kp[i], kp[i + 1], kp[i + 2]) < cut ? 0 : 255;
+        kg.putImageData(kd, 0, 0);
+        const n = readNumber(((await w.recognize(k)).data.text || '').trim().split(/\s+/));
+        if (n) out.push(n.value);
+      }
+    } catch { /* fica só a primeira leitura */ }
+    try { await w.setParameters({ tessedit_pageseg_mode: '11', tessedit_char_whitelist: '' }); } catch { /* o leitor volta ao normal na próxima página */ }
+    return out;
+  };
+  return { lines, crop, digits, close: () => { c.width = c.height = 0; bmp.close(); } };
 }
 
 // Lê o print inteiro. Na página toda o leitor às vezes pula o tempo de um monstro e acerta olhando só o card dele,
@@ -2004,6 +2064,7 @@ async function readPrint(blob) {
       p.monsters.push({ name: n.name, count: n.count, sec: +sec[1], kills: k ? +k[1] : null });
     }
     p.unread = still;
+    if (p.cost && p.costBox) p.cost = pickCost(p.cost, await ocr.digits(p.costBox.x, p.costBox.y, p.costBox.w, p.costBox.h), p.discount, p.pct, p.dur || 60);
     return p;
   } finally {
     ocr.close();
@@ -3627,7 +3688,7 @@ function renderHunt() {
   const v = huntView(s);   // a hunt com o boost informado à mão já nas contas
   const group = v.players.length > 1 || v.players.some(p => p.payout != null);
   const open = ui.id && getRespawn(ui.id), openCost = open ? bonusCost(open, ui.id) : null;
-  body.replaceChildren(
+  body.replaceChildren(...[
     el('div', { class: 'hunt-head' },
       el('span', { class: 'hunt-when', text: huntWhen(s) + (s.time ? ' (' + s.time + ')' : '') }),
       many ? el('span', { class: 'hunt-nav' },
@@ -3668,7 +3729,8 @@ function renderHunt() {
     el('div', { class: 'hunt-foot' },
       el('button', { class: 'dlg', type: 'button', id: 'hunt-copy', text: tr('hunt.copy'), onclick: () => copyHunt(v) }),
       link('hunt.disconnect', disconnectHunt)),
-    el('p', { class: hunt.state === 'on' ? 'hunt-note hunt-live' : 'hunt-note', text: tr(hunt.state === 'on' ? 'hunt.live' : 'hunt.once') }));
+    el('p', { class: hunt.state === 'on' ? 'hunt-note hunt-live' : 'hunt-note', text: tr(hunt.state === 'on' ? 'hunt.live' : 'hunt.once') }),
+  ].filter(Boolean));   // sem os itens vazios: replaceChildren escreveria "null" no lugar deles
 }
 
 $('#hunt-file').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; openHuntOnce(f); });
@@ -3777,6 +3839,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 14:35',
+    pt: ['Leitura do print: o custo do bônus acima de um milhão era lido errado em alguns prints; agora o custo é relido de perto e conferido com o desconto.', 'Última hunt: saiu a palavra "null" que aparecia no painel.'],
+    en: ['Screenshot reading: a bonus cost above one million was misread in some screenshots; the cost is now read again up close and checked against the discount.', 'Last hunt: the stray word "null" in the panel is gone.'],
+    es: ['Lectura de la captura: el coste del bonus por encima de un millón se leía mal en algunas capturas; ahora el coste se vuelve a leer de cerca y se comprueba con el descuento.', 'Última cacería: desapareció la palabra "null" que salía en el panel.'],
+    pl: ['Odczyt zrzutu: koszt bonusu powyżej miliona był na niektórych zrzutach odczytywany błędnie; teraz koszt jest odczytywany ponownie z bliska i sprawdzany ze zniżką.', 'Ostatnie polowanie: zniknęło słowo „null” widoczne w panelu.'],
+  },
   { at: '2026-10-09 14:15',
     pt: ['Banco de todos: um print mais novo atualiza o custo e os tempos do respawn, mesmo que tenha sido enviado primeiro por outra pessoa.', 'Leitura do print: o custo com desconto das tasks deixou de ser ignorado quando o desconto era grande perto do custo.'],
     en: ['Shared bank: a newer screenshot updates the cost and the times of a respawn, even if someone else sent it first.', 'Screenshot reading: the cost with a task discount is no longer ignored when the discount was large next to the cost.'],
