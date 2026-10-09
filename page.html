@@ -547,6 +547,7 @@ details.backup textarea {
             <option value="levelup" data-i18n="tone.levelup">Level up</option>
             <option value="manafull" data-i18n="tone.manafull">Mana cheia</option>
             <option value="message" data-i18n="tone.message">Mensagem</option>
+            <option value="onscreen" data-i18n="tone.onscreen">Jogador na tela</option>
           </select>
         </div>
         <div class="dlgs">
@@ -747,6 +748,7 @@ const I18N = {
     'tone.levelup': 'Level up',
     'tone.manafull': 'Mana cheia',
     'tone.message': 'Mensagem',
+    'tone.onscreen': 'Jogador na tela',
     'float': 'Janela flutuante',
     'read': 'Ler print',
     'status.default': 'Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print.',
@@ -1012,6 +1014,7 @@ const I18N = {
     'tone.levelup': 'Level up',
     'tone.manafull': 'Mana full',
     'tone.message': 'Message',
+    'tone.onscreen': 'Player on screen',
     'float': 'Floating window',
     'read': 'Read screenshot',
     'status.default': 'You can also drag the screenshot image here or pick the file with Read screenshot.',
@@ -1277,6 +1280,7 @@ const I18N = {
     'tone.levelup': 'Level up',
     'tone.manafull': 'Maná lleno',
     'tone.message': 'Mensaje',
+    'tone.onscreen': 'Jugador en pantalla',
     'float': 'Ventana flotante',
     'read': 'Leer captura',
     'status.default': 'También puedes arrastrar aquí la imagen de la captura o elegir el archivo en Leer captura.',
@@ -1542,6 +1546,7 @@ const I18N = {
     'tone.levelup': 'Level up',
     'tone.manafull': 'Pełna mana',
     'tone.message': 'Wiadomość',
+    'tone.onscreen': 'Gracz na ekranie',
     'float': 'Pływające okno',
     'read': 'Wczytaj zrzut',
     'status.default': 'Możesz też przeciągnąć tutaj obraz zrzutu albo wybrać plik przyciskiem Wczytaj zrzut.',
@@ -1801,6 +1806,10 @@ const TONES = {
 for (const name of ['drag1', 'drag2', 'dreadlord', 'hydra', 'whoosh', 'heartbeat', 'levelup', 'manafull', 'message']) {
   TONES[name] = { warn: TONES.sino.warn, done: TONES.sino.done, file: 'sounds/' + name + '.wav' };
 }
+// Um áudio gravado também pode tocar só um trecho (from e len, em segundos), mais rápido (rate), com outro
+// volume (gain) e repetido (repeat, com gap segundos entre uma vez e outra).
+// "Jogador na tela": o trecho com som, 12% mais rápido, duas vezes seguidas.
+TONES.onscreen = { warn: TONES.sino.warn, done: TONES.sino.done, file: 'sounds/onscreen.mp3', from: 0.06, len: 0.98, rate: 1.12, gain: 1.4, repeat: 2, gap: 0.08 };
 
 /* ---------- Contas do jogo ----------
    Conferidas contra prints de 10% a 50%: respawn = piso(base / (1 + bônus));
@@ -2562,12 +2571,18 @@ function play(kind, at) {
   if (kind === 'done' && def.file) {
     const buf = samples.get(ui.tone);
     if (buf && typeof buf.then !== 'function') {
-      const o = audio.createBufferSource();
-      o.buffer = buf;
-      o.connect(master);
-      const t = audio.currentTime + Math.max(0, at);
-      o.start(t);
-      return [{ o, at: t }];
+      const from = def.from || 0, len = def.len || buf.duration - from, rate = def.rate || 1;
+      const t0 = audio.currentTime + Math.max(0, at), step = len / rate + (def.gap || 0);
+      return Array.from({ length: def.repeat || 1 }, (_, i) => {
+        const o = audio.createBufferSource(), g = audio.createGain();
+        o.buffer = buf;
+        o.playbackRate.value = rate;
+        g.gain.value = def.gain || 1;
+        o.connect(g); g.connect(master);
+        const t = t0 + i * step;
+        o.start(t, from, len);
+        return { o, at: t };
+      });
     }
     // O arquivo ainda não chegou: por ora vale a nota do Sino, e os avisos são reagendados quando ele chegar.
     loadSample(ui.tone).then(ready => { if (ready) for (const t of timers.values()) scheduleSounds(t); });
@@ -3660,6 +3675,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 12:00',
+    pt: ['Novo alerta sonoro: Jogador na tela.', 'Alerta Batimento mais curto.'],
+    en: ['New alert sound: Player on screen.', 'Shorter Heartbeat alert.'],
+    es: ['Nueva alerta sonora: Jugador en pantalla.', 'Alerta Latido más corta.'],
+    pl: ['Nowy dźwięk alarmu: Gracz na ekranie.', 'Krótszy alarm Bicie serca.'],
+  },
   { at: '2026-10-09 11:52',
     pt: ['Salas de sorteio: lista de quem está na sala, mostrando quem já rolou.', 'Opção do dono para quem já ganhou um item não rolar nos próximos.', 'Empate: o dono abre uma rodada de desempate só entre os empatados.'],
     en: ['Raffle rooms: list of who is in the room, showing who has already rolled.', 'Owner option so that whoever already won an item does not roll for the next ones.', 'Ties: the owner opens a tie-break round among the tied players only.'],
