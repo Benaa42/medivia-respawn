@@ -568,7 +568,7 @@ details.backup textarea {
         </div>
         <input class="sr" type="file" id="file" accept="image/*" tabindex="-1" aria-hidden="true">
       </footer>
-      <p class="status" id="status" role="status" data-kind="info" data-i18n="status.default">Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print.</p>
+      <p class="status" id="status" role="status" data-kind="info" data-i18n="status.default">Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print. O print do mapper da wiki, com o painel do respawn aberto, também vale.</p>
     </main>
   </div>
 
@@ -767,7 +767,7 @@ const I18N = {
     'tone.onscreen': 'Jogador na tela',
     'float': 'Janela flutuante',
     'read': 'Ler print',
-    'status.default': 'Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print.',
+    'status.default': 'Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print. O print do mapper da wiki, com o painel do respawn aberto, também vale.',
     'colophon': 'Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.',
     'unit.aria': 'Mostrar os tempos em',
     'unit.s': 'Segundos',
@@ -845,6 +845,9 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'read.mapper1': '{x} lido do mapper, 1 criatura.',
+    'read.mapperN': '{x} lido do mapper, {n} criaturas.',
+    'err.mapperPct': 'O print do mapper está com "Apply zone boost" marcado, mas não li o percentual do boost. Desmarque essa opção e mande o print de novo.',
     'room.copyLink': 'copiar link',
     'room.linkCopied': 'Link da sala copiado.',
     'room.viaLink': 'Informe o seu nome para entrar na sala {x}.',
@@ -1043,7 +1046,7 @@ const I18N = {
     'tone.onscreen': 'Player on screen',
     'float': 'Floating window',
     'read': 'Read screenshot',
-    'status.default': 'You can also drag the screenshot image here or pick the file with Read screenshot.',
+    'status.default': 'You can also drag the screenshot image here or pick the file with Read screenshot. A screenshot of the wiki mapper with the respawn panel open works too.',
     'colophon': 'Fan-made tool, not officially affiliated with Medivia. Times come from the game\'s bonus window. The screenshot is read in your browser and discarded right after.',
     'unit.aria': 'Show times in',
     'unit.s': 'Seconds',
@@ -1121,6 +1124,9 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'read.mapper1': '{x} read from the mapper, 1 creature.',
+    'read.mapperN': '{x} read from the mapper, {n} creatures.',
+    'err.mapperPct': 'The mapper screenshot has "Apply zone boost" ticked, but the boost percentage could not be read. Untick it and send the screenshot again.',
     'room.copyLink': 'copy link',
     'room.linkCopied': 'Room link copied.',
     'room.viaLink': 'Enter your name to join room {x}.',
@@ -1319,7 +1325,7 @@ const I18N = {
     'tone.onscreen': 'Jugador en pantalla',
     'float': 'Ventana flotante',
     'read': 'Leer captura',
-    'status.default': 'También puedes arrastrar aquí la imagen de la captura o elegir el archivo en Leer captura.',
+    'status.default': 'También puedes arrastrar aquí la imagen de la captura o elegir el archivo en Leer captura. La captura del mapper de la wiki, con el panel del respawn abierto, también sirve.',
     'colophon': 'Herramienta hecha por fans, sin vínculo oficial con Medivia. Los tiempos vienen de la ventana de bonus del juego. La captura se lee en tu navegador y se descarta enseguida.',
     'unit.aria': 'Mostrar los tiempos en',
     'unit.s': 'Segundos',
@@ -1397,6 +1403,9 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'read.mapper1': '{x} leído del mapper, 1 criatura.',
+    'read.mapperN': '{x} leído del mapper, {n} criaturas.',
+    'err.mapperPct': 'La captura del mapper tiene "Apply zone boost" marcado, pero no leí el porcentaje del bonus. Desmárcalo y envía la captura de nuevo.',
     'room.copyLink': 'copiar enlace',
     'room.linkCopied': 'Enlace de la sala copiado.',
     'room.viaLink': 'Escribe tu nombre para entrar en la sala {x}.',
@@ -1595,7 +1604,7 @@ const I18N = {
     'tone.onscreen': 'Gracz na ekranie',
     'float': 'Pływające okno',
     'read': 'Wczytaj zrzut',
-    'status.default': 'Możesz też przeciągnąć tutaj obraz zrzutu albo wybrać plik przyciskiem Wczytaj zrzut.',
+    'status.default': 'Możesz też przeciągnąć tutaj obraz zrzutu albo wybrać plik przyciskiem Wczytaj zrzut. Zrzut mappera z wiki, z otwartym panelem respawnu, też działa.',
     'colophon': 'Narzędzie fanowskie, bez oficjalnego związku z Medivią. Czasy pochodzą z okna bonusu w grze. Zrzut jest odczytywany w twojej przeglądarce i zaraz potem usuwany.',
     'unit.aria': 'Pokazuj czasy w',
     'unit.s': 'Sekundy',
@@ -1673,6 +1682,9 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'read.mapper1': '{x}: odczytano z mappera, 1 stworzenie.',
+    'read.mapperN': '{x}: odczytano z mappera, stworzeń: {n}.',
+    'err.mapperPct': 'Na zrzucie z mappera zaznaczono „Apply zone boost”, ale nie udało się odczytać procentu bonusu. Odznacz tę opcję i wyślij zrzut ponownie.',
     'room.copyLink': 'kopiuj link',
     'room.linkCopied': 'Link do pokoju skopiowany.',
     'room.viaLink': 'Podaj swoje imię, aby wejść do pokoju {x}.',
@@ -1877,9 +1889,9 @@ const PARTIES = [
   { mult: 160, label: 'Trio' },
   { mult: 178, label: 'Squad 4+' },
 ];
-function baseRange(sec, pct) {
-  const lo = Math.ceil(sec * (100 + pct) / 100);
-  const hi = Math.ceil((sec + 1) * (100 + pct) / 100) - 1;
+function baseRange(sec, pct, party = 100) {
+  const lo = Math.ceil(sec * (100 + pct) * party / 10000);
+  const hi = Math.ceil((sec + 1) * (100 + pct) * party / 10000) - 1;
   return [lo, Math.max(lo, hi)];
 }
 function pickBase([lo, hi]) {
@@ -2034,15 +2046,16 @@ async function ocrLines(blob) {
     return (await w.recognize(c, { rectangle })).data.text || '';
   };
   // Relê um número (o custo do bônus) num recorte ampliado, em preto e branco puro e só com dígitos. Na página inteira
-  // o leitor às vezes troca um dígito desse texto pequeno; assim ele acerta. Devolve duas leituras, ou três quando
-  // as duas primeiras não concordam.
-  const digits = async (x, y, wd, ht) => {
+  // o leitor às vezes troca um dígito desse texto pequeno; assim ele acerta. Devolve o número de cada releitura.
+  const digits = async (x, y, wd, ht) => (await peek(x, y, wd, ht, '0123456789 ')).map(t => readNumber(t.split(/\s+/))).filter(Boolean).map(n => n.value);
+  // Relê um trecho como uma linha só, aceitando apenas os caracteres dados. Faz três leituras, com ampliações e
+  // cortes de preto e branco diferentes, para quem chama comparar os resultados.
+  const peek = async (x, y, wd, ht, chars) => {
     const out = [];
     x = Math.max(0, x); y = Math.max(0, y);
     try {
-      await w.setParameters({ tessedit_pageseg_mode: '7', tessedit_char_whitelist: '0123456789 ' });
+      await w.setParameters({ tessedit_pageseg_mode: '7', tessedit_char_whitelist: chars });
       for (const [zoom, cut] of [[4, 128], [6, 128], [5, 110]]) {
-        if (out.length === 2 && out[0] === out[1]) break;
         const k = document.createElement('canvas'), cw = Math.round(wd * zoom), ch = Math.round(ht * zoom);
         k.width = cw + 40;
         k.height = ch + 40;
@@ -2054,14 +2067,109 @@ async function ocrLines(blob) {
         const kd = kg.getImageData(0, 0, k.width, k.height), kp = kd.data;
         for (let i = 0; i < kp.length; i += 4) kp[i] = kp[i + 1] = kp[i + 2] = 255 - Math.max(kp[i], kp[i + 1], kp[i + 2]) < cut ? 0 : 255;
         kg.putImageData(kd, 0, 0);
-        const n = readNumber(((await w.recognize(k)).data.text || '').trim().split(/\s+/));
-        if (n) out.push(n.value);
+        out.push(((await w.recognize(k)).data.text || '').trim());
       }
     } catch { /* fica só a primeira leitura */ }
     try { await w.setParameters({ tessedit_pageseg_mode: '11', tessedit_char_whitelist: '' }); } catch { /* o leitor volta ao normal na próxima página */ }
     return out;
   };
-  return { lines, crop, digits, close: () => { c.width = c.height = 0; bmp.close(); } };
+  // Quantos pixels verdes há num trecho do print: a caixa marcada do mapper é verde, a desmarcada é branca.
+  const green = (x, y, wd, ht) => {
+    const k = document.createElement('canvas');
+    k.width = Math.max(1, Math.round(wd));
+    k.height = Math.max(1, Math.round(ht));
+    const kg = k.getContext('2d', { willReadFrequently: true });
+    kg.drawImage(bmp, Math.max(0, x), Math.max(0, y), k.width, k.height, 0, 0, k.width, k.height);
+    const px = kg.getImageData(0, 0, k.width, k.height).data;
+    let n = 0;
+    for (let i = 0; i < px.length; i += 4) if (px[i + 1] > 150 && px[i + 1] > px[i] + 50 && px[i + 1] > px[i + 2] + 40) n++;
+    return n;
+  };
+  return { lines, crop, digits, peek, green, close: () => { c.width = c.height = 0; bmp.close(); } };
+}
+
+// O mais frequente de uma lista de leituras (as vazias não contam).
+function vote(list) {
+  const seen = list.filter(v => v != null);
+  return seen.sort((a, b) => seen.filter(v => v === b).length - seen.filter(v => v === a).length)[0] ?? null;
+}
+// Print do mapper da wiki (wiki.medivia.online/mapper) com o painel de um respawn aberto. O painel tem o nome do
+// respawn, o grupo de caça, a tabela Monster / Count / Spawn / Kills/h e, em "Zone Boost", a duração, o percentual
+// e o preço do boost. Na página inteira o leitor acha os títulos e os nomes, mas pula os números pequenos da tabela
+// e o percentual; eles são relidos de perto, pela posição das colunas, e conferidos com os abates por hora.
+// Com "Apply zone boost" marcado a tabela mostra o tempo já acelerado, e o tempo base é deduzido como no print do jogo.
+// Devolve null quando o print não é do mapper.
+async function readMapper(ocr) {
+  const L = ocr.lines, find = re => L.find(l => re.test(l.text));
+  const hMonster = find(/^Monster$/i), hCount = find(/^Count$/i), hSpawn = find(/^Spawn$/i), hKills = find(/^Kills\s*\/?\s*h$/i);
+  const priceLine = find(/\d\s*gp$/i);
+  if (!hMonster || !hKills || !(hCount || hSpawn) || !priceLine) return null;
+  // Colunas: se o leitor pulou um dos títulos, a posição dele sai dos outros dois.
+  const xKills = hKills.x;
+  const xCount = hCount ? hCount.x : hSpawn.x - (xKills - hSpawn.x) * 0.95;
+  const xSpawn = hSpawn ? hSpawn.x : xCount + (xKills - xCount) * 0.487;
+  const right = xKills + (xKills - xSpawn);
+  // Linhas da tabela: os nomes abaixo do título "Monster", até o título da seção seguinte (que começa mais à esquerda).
+  const below = L.filter(l => l.y > hMonster.y + hMonster.h && l.x < xCount - 6 && /[A-Za-z]{3}/.test(l.text));
+  const end = Math.min(hMonster.y + 600, ...below.filter(l => l.x <= hMonster.x - 4).map(l => l.y));
+  const rows = below.filter(l => l.y < end - 4 && l.x >= hMonster.x - 2 && l.conf >= 50).sort((a, b) => a.y - b.y);
+  const monsters = [], unread = [];
+  for (const r of rows) {
+    const name = r.text.replace(/^[^A-Za-z]+/, '').replace(/\s+/g, ' ').trim();
+    if (!name) continue;
+    const y = r.y - r.h * 0.6, ht = r.h * 2.2;
+    const counts = await ocr.peek(xCount - 6, y, xSpawn - xCount - 2, ht, '0123456789');
+    const spawns = await ocr.peek(xSpawn - 6, y, xKills - xSpawn - 2, ht, '0123456789s');
+    const killsRead = await ocr.peek(xKills - 6, y, right - xKills + 6, ht, '0123456789/h');
+    let count = vote(counts.map(t => +t.replace(/\D/g, '') || null));
+    const kills = vote(killsRead.map(t => { const m = t.match(/\d{1,6}/); return m ? +m[0] : null; }));
+    // O "s" de "260s" às vezes é lido como dígito ("2605"): valem o número inteiro e o número sem o último dígito,
+    // e os abates por hora dizem qual é o certo.
+    const secs = [];
+    for (const t of spawns) {
+      const m = t.match(/^(\d{1,5})\s*s/), all = t.replace(/\D/g, '');
+      if (m) secs.push(+m[1]);
+      else if (all) { secs.push(+all); if (all.length > 2) secs.push(+all.slice(0, -1)); }
+    }
+    const tries = [...new Set(secs)].filter(v => v > 0).sort((a, b) => secs.filter(v => v === b).length - secs.filter(v => v === a).length);
+    let sec = kills != null && count ? tries.find(v => killsPerHour(v, count) === kills) ?? null : null;
+    if (sec == null && kills != null && !count) {   // a quantidade não foi lida: sai dos abates por hora
+      for (const v of tries) { const c = Math.ceil(kills * v / 3600); if (c > 0 && killsPerHour(v, c) === kills) { sec = v; count = c; break; } }
+    }
+    if (sec == null) sec = tries[0] ?? null;
+    if (sec == null) unread.push(name); else monsters.push({ name, count: count || 0, sec, kills });
+  }
+  // Grupo de caça: "Solo (100%)", "… (134%)"; o nome do respawn são as linhas grandes acima dele.
+  const team = L.find(l => l.y < hMonster.y && /\(\s*\d{2,3}\s*%\s*\)/.test(l.text));
+  const party = team ? +team.text.match(/\(\s*(\d{2,3})\s*%/)[1] : 100;
+  const top = team ? team.y : hMonster.y, small = team ? team.h : hMonster.h;
+  const name = L.filter(l => l.y < top && l.x < hMonster.x + 40 && l.h >= small * 1.5 && l.conf >= 60 && /[A-Za-z]{3}/.test(l.text))
+    .sort((a, b) => a.y - b.y).map(l => l.text).join(' ').replace(/\s+/g, ' ').trim() || null;
+  // Boost: duração ("30 min"), percentual (à direita de "Spawn boost") e preço ("320 000 gp").
+  const durLine = find(/^\d{1,3}\s*min$/i), boostLine = find(/^Spawn boost$/i);
+  const dur = durLine ? +durLine.text.match(/\d+/)[0] : null;
+  const asPct = t => { const m = String(t).match(/(\d{1,2})\s*%/); return m && +m[1] && PCTS.includes(+m[1]) ? +m[1] : null; };
+  let costPct = null;
+  if (boostLine) {
+    const near = L.find(l => l !== boostLine && Math.abs(l.y - boostLine.y) < boostLine.h * 1.5 && l.x > boostLine.x + boostLine.w && asPct(l.text));
+    costPct = near ? asPct(near.text) : null;
+    if (costPct == null && durLine) costPct = vote((await ocr.peek(durLine.x - 30, boostLine.y - boostLine.h * 0.6, durLine.w + 45, boostLine.h * 2.2, '0123456789%')).map(asPct));
+  }
+  const toks = priceLine.text.split(/\s+/), price = readNumber(toks);
+  let cost = price ? price.value : null;
+  if (price) {
+    const ws = priceLine.words.length === toks.length ? priceLine.words : null;
+    const x0 = ws ? ws[0].x0 : priceLine.x, x1 = ws ? ws[price.count - 1].x1 : priceLine.x + priceLine.w * 0.8;
+    cost = pickCost(cost, await ocr.digits(x0 - priceLine.h * 0.6, priceLine.y - priceLine.h * 0.5, x1 - x0 + priceLine.h * 1.2, priceLine.h * 2), null);
+  }
+  // "Apply zone boost": a caixa fica à esquerda do texto e é verde quando marcada.
+  const apply = find(/Apply zone boost/i);
+  const word = apply && apply.words.length === apply.text.split(/\s+/).length ? apply.words[apply.text.split(/\s+/).findIndex(t => /Apply/i.test(t))] : null;
+  const applied = !!apply && ocr.green((word ? word.x0 : apply.x + apply.h * 1.8) - 30, apply.y - 4, 40, apply.h + 12) > 30;
+  return {
+    kind: 'mapper', name, party, dur, cost, costPct, discount: null, monsters, unread,
+    pct: applied ? costPct : 0,   // percentual que acelera os tempos da tabela; sem ele não dá para achar o tempo base
+  };
 }
 
 // Lê o print inteiro. Na página toda o leitor às vezes pula o tempo de um monstro e acerta olhando só o card dele,
@@ -2069,6 +2177,8 @@ async function ocrLines(blob) {
 async function readPrint(blob) {
   const ocr = await ocrLines(blob);
   try {
+    const mapper = await readMapper(ocr);
+    if (mapper) return mapper;
     const p = parsePrint(ocr.lines);
     const still = [];
     for (const n of p.unread) {
@@ -3346,14 +3456,15 @@ async function readImage(blob) {
   try {
     const p = await readPrint(blob);
     if (!p.monsters.length) throw new UserError(tr('err.nomobs'));
-    if (p.pct == null) throw new UserError(tr('err.nopct'));
+    const mapper = p.kind === 'mapper';
+    if (p.pct == null) throw new UserError(tr(mapper ? 'err.mapperPct' : 'err.nopct'));
     const name = p.name || tr('noname');
     const id = slug(name) || 'respawn';
     const prev = getRespawn(id);
     const monsters = prev ? prev.monsters.map(m => ({ ...m })) : [];
     const doubt = [];
     for (const pm of p.monsters) {
-      const range = baseRange(pm.sec, p.pct);
+      const range = baseRange(pm.sec, p.pct, p.party || 100);
       const i = monsters.findIndex(m => m.name.toLowerCase() === pm.name.toLowerCase());
       const old = i >= 0 ? monsters[i].base : null;
       const m = { name: pm.name, count: pm.count, base: old != null && old >= range[0] && old <= range[1] ? old : pickBase(range) };
@@ -3361,9 +3472,10 @@ async function readImage(blob) {
       if (pm.kills != null && pm.count && killsPerHour(pm.sec, pm.count) !== pm.kills) doubt.push(pm.name);
     }
     // Com desconto das tasks, o print mostra o preço já reduzido. O banco guarda o preço cheio, que vale para todos.
-    const full = p.cost ? p.cost + (p.discount || 0) : null;
-    const base60 = full && p.pct && p.dur ? baseCost(full, p.pct, p.dur) : null;
-    const cost10 = base60 || (full && p.pct ? Math.round(full * 10 / p.pct) : null);
+    // No mapper o percentual do preço vem separado: o preço vale para ele mesmo com "Apply zone boost" desmarcado.
+    const full = p.cost ? p.cost + (p.discount || 0) : null, costPct = mapper ? p.costPct : p.pct;
+    const base60 = full && costPct && p.dur ? baseCost(full, costPct, p.dur) : null;
+    const cost10 = base60 || (full && costPct && !mapper ? Math.round(full * 10 / costPct) : null);
     const where = await saveRespawn(id, {
       name: prev ? prev.name : name,
       monsters,
@@ -3371,10 +3483,11 @@ async function readImage(blob) {
       duration: base60 ? 60 : cost10 ? p.dur : (prev && prev.duration) || p.dur || null,
       readAt: p.pct,
     }, !!p.name && !doubt.length);
-    if (DURS.includes(p.dur)) ui.dur = p.dur;
-    if (cost10) discSet(id, p.discount || 0);   // print sem a faixa de desconto: o desconto acabou
-    select(id, p.pct);
-    let msg = tr(p.monsters.length === 1 ? 'read.ok1' : 'read.okN', { x: prev ? prev.name : name, p: p.pct, n: p.monsters.length }) + ' ' +
+    // O print do mapper não diz nada sobre o bônus comprado no jogo: duração, desconto e percentual escolhidos ficam.
+    if (!mapper && DURS.includes(p.dur)) ui.dur = p.dur;
+    if (cost10 && !mapper) discSet(id, p.discount || 0);   // print sem a faixa de desconto: o desconto acabou
+    select(id, mapper ? undefined : p.pct);
+    let msg = tr((mapper ? 'read.mapper' : 'read.ok') + (p.monsters.length === 1 ? '1' : 'N'), { x: prev ? prev.name : name, p: p.pct, n: p.monsters.length }) + ' ' +
       tr(where === 'cloud' ? 'read.cloud' : where === 'shared' ? 'read.shared' : 'read.local') + ' ' + tr('read.discarded');
     if (cost10 && p.discount) msg += ' ' + tr('read.disc', { v: fmtInt(p.discount) });
     if (p.unread.length) msg += ' ' + tr('read.unread', { x: p.unread.join(', ') });
@@ -3854,6 +3967,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 15:05',
+    pt: ['O site também lê o print do mapper da wiki, com o painel do respawn aberto: nome, criaturas, tempos e preço do boost.'],
+    en: ['The site also reads a screenshot of the wiki mapper with the respawn panel open: name, creatures, times and boost price.'],
+    es: ['El sitio también lee la captura del mapper de la wiki, con el panel del respawn abierto: nombre, criaturas, tiempos y precio del bonus.'],
+    pl: ['Strona odczytuje też zrzut mappera z wiki z otwartym panelem respawnu: nazwę, stworzenia, czasy i cenę bonusu.'],
+  },
   { at: '2026-10-09 14:43',
     pt: ['Salas de sorteio: "copiar link" dentro da sala; quem abre o link entra direto, sem digitar o número. Entrar pelo número continua valendo.'],
     en: ['Raffle rooms: "copy link" inside the room; whoever opens the link goes straight in, without typing the number. Joining by number still works.'],
