@@ -616,7 +616,7 @@ details.backup textarea {
         <button class="dlg" type="button" id="room-next" data-i18n="room.next">Nova rodada</button>
       </div>
       <p class="room-round" id="room-round"></p>
-      <button class="dlg raffle-go" type="button" id="room-roll" data-i18n="room.roll">Rolar D100</button>
+      <button class="dlg raffle-go" type="button" id="room-roll" data-i18n="room.roll">Rolar</button>
       <ol class="raffle-result room-rolls" id="room-rolls"></ol>
       <div id="room-history-wrap" hidden>
         <h3 class="room-sub" data-i18n="room.history">Rodadas anteriores</h3>
@@ -832,7 +832,7 @@ const I18N = {
     'room.next': 'Nova rodada',
     'room.round': 'Rodada {n}: {x}',
     'room.roundNoItem': 'Rodada {n}',
-    'room.roll': 'Rolar D100',
+    'room.roll': 'Rolar',
     'room.rolled': 'Você tirou {v}.',
     'room.already': 'Você já rolou nesta rodada.',
     'room.changed': 'A rodada mudou. Role de novo.',
@@ -1083,7 +1083,7 @@ const I18N = {
     'room.next': 'New round',
     'room.round': 'Round {n}: {x}',
     'room.roundNoItem': 'Round {n}',
-    'room.roll': 'Roll D100',
+    'room.roll': 'Roll',
     'room.rolled': 'You rolled {v}.',
     'room.already': 'You have already rolled this round.',
     'room.changed': 'The round changed. Roll again.',
@@ -1334,7 +1334,7 @@ const I18N = {
     'room.next': 'Nueva ronda',
     'room.round': 'Ronda {n}: {x}',
     'room.roundNoItem': 'Ronda {n}',
-    'room.roll': 'Tirar D100',
+    'room.roll': 'Tirar',
     'room.rolled': 'Sacaste {v}.',
     'room.already': 'Ya tiraste en esta ronda.',
     'room.changed': 'La ronda cambió. Tira de nuevo.',
@@ -1585,7 +1585,7 @@ const I18N = {
     'room.next': 'Nowa runda',
     'room.round': 'Runda {n}: {x}',
     'room.roundNoItem': 'Runda {n}',
-    'room.roll': 'Rzuć k100',
+    'room.roll': 'Rzuć',
     'room.rolled': 'Twój rzut: {v}.',
     'room.already': 'W tej rundzie już był twój rzut.',
     'room.changed': 'Runda się zmieniła. Rzuć ponownie.',
@@ -3809,7 +3809,7 @@ function rollValue(code, key, at) {
 // esse trecho do arquivo, em segundos). Ela é baixada quando a pessoa entra no modo sala. Enquanto não chega, ou se
 // faltar, sai um som feito na hora: batidas secas que vão espaçando e enfraquecendo, com um toque grave da mesa.
 // Segue o botão Som e o volume da página.
-const DICE = { file: 'sounds/dice.mp3', from: 0.4, len: 2.15, gain: 0.7 };
+const DICE = { file: 'sounds/dice.mp3', from: 0.4, len: 2.15, gain: 0.525 };
 let diceBuf = null;   // a gravação decodificada, ou a promessa dela enquanto baixa
 let diceNoise = null;
 const diceReady = () => !!diceBuf && typeof diceBuf.then !== 'function';
@@ -3867,7 +3867,7 @@ function diceSound() {
     o.start(t); o.stop(t + 0.09);
   };
   for (const start of [0, 0.03 + Math.random() * 0.04]) {   // dois dados, um logo atrás do outro
-    let t = start, gap = 0.05 + Math.random() * 0.02, level = 0.42;
+    let t = start, gap = 0.05 + Math.random() * 0.02, level = 0.315;
     while (t < 1.15) {
       hit(t0 + t, level * (0.75 + Math.random() * 0.5));
       t += gap * (0.85 + Math.random() * 0.3);
