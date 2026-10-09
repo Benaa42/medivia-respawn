@@ -3554,7 +3554,7 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
-  { at: '2026-10-09 10:46',
+  { at: '2026-10-09 10:59',
     pt: ['Sorteio de itens em sala: crie uma sala, passe o número para o grupo e cada pessoa rola um dado D100; todos veem as jogadas na hora. O sorteio por nomes continua disponível.'],
     en: ['Item raffle in a room: create a room, give its number to your party and everyone rolls a D100; all of you see the rolls live. The raffle by names is still there.'],
     es: ['Sorteo de objetos en sala: crea una sala, pasa el número al grupo y cada persona tira un dado D100; todos ven las tiradas al momento. El sorteo por nombres sigue disponible.'],
@@ -3739,7 +3739,7 @@ function drawRaffle() {
    Quem cria a sala recebe um número de 6 dígitos e passa para o grupo. Cada pessoa entra com o número e rola um D100
    por rodada; todos veem as jogadas. A sala é um documento no mesmo banco dos respawns (coleção rooms):
      owner, round, items { rodada: nome do item }, rolls { "rodada_pessoa": { name, at } }
-   O valor do dado não é gravado: sai de "at", a hora em que o servidor recebeu a jogada (com microssegundos),
+   O valor do dado não é gravado: sai de "at", a hora em que o servidor recebeu a jogada (até o milésimo de segundo),
    misturada com a sala, a rodada e a pessoa. Ninguém escolhe essa hora e todos os navegadores fazem a mesma conta,
    então todos veem o mesmo número. As regras do banco (firestore.rules) garantem uma jogada por pessoa por rodada. */
 const room = { code: null, doc: null, sig: '', seen: null, rolling: new Map(), spin: 0, timer: 0, loading: false, busy: false, changedAt: 0, paused: false };
