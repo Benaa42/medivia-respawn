@@ -113,6 +113,8 @@ kbd {
 .room-sub { margin-bottom: 6px; font: 600 13px/1.3 var(--font-ui); color: var(--label); }
 /* Quem está na sala: já rolou (com ✓), ainda não rolou, ou fora desta rodada (riscado) */
 .room-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+/* Mesa onde os dados rolam */
+.room-tray { display: block; width: 100%; height: 136px; border-radius: var(--r-md); background: var(--ground); }
 .room-chips li { padding: 3px 10px; border: 1px solid var(--edge); border-radius: 999px; font-size: 13px; color: var(--title); overflow-wrap: anywhere; }
 .room-chips li.rolled { border-color: var(--value); color: var(--value); }
 .room-chips li.rolled::before { content: "✓ "; }
@@ -632,6 +634,7 @@ details.backup textarea {
       </div>
       <p class="room-round" id="room-round"></p>
       <p class="support-note" id="room-note"></p>
+      <canvas class="room-tray" id="room-tray" aria-hidden="true"></canvas>
       <button class="dlg raffle-go" type="button" id="room-roll" data-i18n="room.roll">Rolar</button>
       <ol class="raffle-result room-rolls" id="room-rolls"></ol>
       <div id="room-history-wrap" hidden>
@@ -3675,6 +3678,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 12:10',
+    pt: ['Salas de sorteio: o dado D100 agora rola na tela e para no número sorteado.'],
+    en: ['Raffle rooms: the D100 now rolls on screen and stops on the number rolled.'],
+    es: ['Salas de sorteo: el dado D100 ahora rueda en pantalla y se detiene en el número obtenido.'],
+    pl: ['Pokoje losowania: kość k100 toczy się teraz po ekranie i zatrzymuje na wylosowanej liczbie.'],
+  },
   { at: '2026-10-09 12:00',
     pt: ['Novo alerta sonoro: Jogador na tela.', 'Alerta Batimento mais curto.'],
     en: ['New alert sound: Player on screen.', 'Shorter Heartbeat alert.'],
@@ -4010,6 +4019,116 @@ function diceSound() {
     }
   }
 }
+/* ---------- Mesa dos dados ----------
+   O D100 é desenhado em canvas como uma esfera coberta pelos números de 1 a 100. Cada jogada nova entra rolando pela
+   esquerda, quicando e girando cada vez mais devagar, e para com o número sorteado virado para a frente; aí esse
+   número cresce no meio do dado. O giro termina sempre na posição certa porque o movimento é a posição final mais
+   um resto de giro que vai a zero no tempo do som. As jogadas que já estavam na sala aparecem paradas.
+   A mesa mostra as quatro jogadas mais recentes da rodada. As cores do dado são fixas (o site tem um tema só). */
+const DIE = { pts: [], num: [], at: [] };
+for (let i = 0; i < 100; i++) {   // 100 pontos espalhados por igual na esfera (espiral de Fibonacci)
+  const y = 1 - (i + 0.5) / 50, r = Math.sqrt(1 - y * y), a = i * Math.PI * (3 - Math.sqrt(5));
+  DIE.pts.push([Math.cos(a) * r, y, Math.sin(a) * r]);
+  DIE.num.push((i * 37) % 100 + 1);   // números embaralhados pela esfera
+  DIE.at[(i * 37) % 100 + 1] = i;     // em que ponto está cada número
+}
+const unit = v => { const n = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / n, v[1] / n, v[2] / n]; };
+const mMul = (a, b) => [0, 1, 2].map(i => [0, 1, 2].map(j => a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j]));
+const mVec = (m, v) => [m[0][0] * v[0] + m[0][1] * v[1] + m[0][2] * v[2], m[1][0] * v[0] + m[1][1] * v[1] + m[1][2] * v[2], m[2][0] * v[0] + m[2][1] * v[1] + m[2][2] * v[2]];
+// Giro de t radianos em torno de um eixo.
+function mAxis([x, y, z], t) {
+  const c = Math.cos(t), n = Math.sin(t), k = 1 - c;
+  return [[c + x * x * k, x * y * k - z * n, x * z * k + y * n], [y * x * k + z * n, c + y * y * k, y * z * k - x * n], [z * x * k - y * n, z * y * k + x * n, c + z * z * k]];
+}
+// Giro que traz o ponto p para a frente do dado, virado para quem olha.
+function mFront(p) {
+  const len = Math.hypot(p[0], p[1]);
+  if (len < 1e-6) return mAxis([1, 0, 0], p[2] > 0 ? 0 : Math.PI);
+  return mAxis([p[1] / len, -p[0] / len, 0], Math.acos(Math.max(-1, Math.min(1, p[2]))));
+}
+// Desenha o dado com o centro em (cx, cy). "target" é o ponto do número sorteado e "pop" (0 a 1) o quanto ele já cresceu.
+function drawDie(g, cx, cy, r, floor, R, target, pop, alpha) {
+  g.save();
+  const lift = Math.max(0, floor - cy - r);   // quanto o dado está acima da mesa: a sombra encolhe
+  g.globalAlpha = alpha * 0.4 / (1 + lift / 30);
+  g.fillStyle = '#000';
+  g.beginPath(); g.ellipse(cx, floor, r * 0.85 / (1 + lift / 60), r * 0.16, 0, 0, 7); g.fill();
+  g.globalAlpha = alpha;
+  const body = g.createRadialGradient(cx - r * 0.35, cy - r * 0.42, r * 0.08, cx, cy, r);
+  body.addColorStop(0, '#ffe2a6'); body.addColorStop(0.55, '#f0ad4d'); body.addColorStop(1, '#8a5611');
+  g.fillStyle = body;
+  g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill();
+  const front = [];
+  for (let i = 0; i < 100; i++) { const v = mVec(R, DIE.pts[i]); if (v[2] > 0.08) front.push([v, i]); }
+  front.sort((a, b) => (a[1] === target) - (b[1] === target) || a[0][2] - b[0][2]);   // o sorteado por cima de todos
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  for (const [v, i] of front) {
+    const z = v[2], k = i === target ? pop : 0;
+    const x = cx + v[0] * r * 0.94 * (1 - k), y = cy - v[1] * r * 0.94 * (1 - k);
+    const face = r * (0.13 + 0.03 * z) * (1 + 2.4 * k);
+    g.globalAlpha = alpha * Math.min(1, z * 1.5) * (i === target ? 1 : 1 - 0.6 * pop);
+    g.fillStyle = k ? 'rgba(255, 249, 235, ' + (0.2 + 0.8 * k) + ')' : 'rgba(255, 255, 255, 0.18)';
+    g.beginPath(); g.ellipse(x, y, face * (z + (1 - z) * k), face, Math.atan2(-v[1], v[0]), 0, 7); g.fill();
+    g.fillStyle = '#2a1a04';
+    g.font = '800 ' + (r * (0.15 + 0.06 * z) * (1 + 2.2 * k)).toFixed(1) + 'px "Bricolage Grotesque", Onest, sans-serif';
+    g.fillText(DIE.num[i], x, y + 0.5);
+  }
+  g.restore();
+}
+const tray = { dice: [], raf: 0, ink: '' };
+// Recebe as jogadas que devem estar na mesa. "until" é a hora em que o dado para (0 ou passada: já parado).
+function diceTable(list) {
+  const now = Date.now(), calm = !!window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  tray.dice = list.map(x => tray.dice.find(d => d.key === x.key) || {
+    key: x.key, name: x.name, value: x.value, t0: now, T: Math.max(0, x.until - now), calm, x: null,
+    end: mMul(mAxis([0, 0, 1], Math.random() * 6.283), mFront(DIE.pts[DIE.at[x.value]])),
+    axis: unit([0.25 * (Math.random() - 0.5), 1, 0.35 * (Math.random() - 0.5)]),
+    turns: -(3.5 + Math.random() * 1.5) * 6.283,
+  });
+  if (!tray.raf) tray.raf = requestAnimationFrame(trayFrame);
+}
+function trayFrame() {
+  tray.raf = 0;
+  const c = $('#room-tray');
+  const W = c.offsetWidth, H = c.offsetHeight;
+  if (!W || !H) return;   // janela fechada ou fora da sala
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  if (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr)) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+  if (!tray.ink) tray.ink = getComputedStyle(document.documentElement).getPropertyValue('--label').trim() || '#b9c2c0';
+  const g = c.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, W, H);
+  const now = Date.now(), n = tray.dice.length;
+  const gap = Math.min(108, W / Math.max(1, n)), r = Math.max(22, Math.min(40, gap / 2 - 8)), cy = H * 0.43, floor = cy + r + 5;
+  let moving = false;
+  if (!n) drawDie(g, W / 2, cy, r, floor, mAxis([1, 0, 0], 0.5), -1, 0, 0.28);   // mesa vazia: um dado parado, apagado
+  tray.dice.forEach((d, i) => {
+    const slot = W / 2 + (i - (n - 1) / 2) * gap;
+    d.x = d.x == null ? slot : d.x + (slot - d.x) * 0.2;
+    const u = d.T ? Math.min(1, (now - d.t0) / d.T) : 1, rest = 1 - u;
+    const pop = u < 1 ? 0 : d.T ? Math.min(1, (now - d.t0 - d.T) / 260) : 1;
+    if (u < 1 || pop < 1 || Math.abs(slot - d.x) > 0.5) moving = true;
+    if (d.calm && u < 1) drawDie(g, d.x, cy, r, floor, d.end, -1, 0, 0.28);   // sem animação: espera parado e só mostra o número
+    else {
+      const dx = -(d.x + r * 2) * rest * rest;                                              // vem da borda esquerda
+      const dy = -Math.abs(Math.sin(u * Math.PI * 3.5)) * r * 0.75 * Math.pow(rest, 1.5);   // quiques cada vez menores
+      drawDie(g, d.x + dx, cy + dy, r, floor, mMul(d.end, mAxis(d.axis, d.turns * Math.pow(rest, 2.4))), DIE.at[d.value], pop, 1);
+    }
+    g.font = '600 12px Onest, "Segoe UI", sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'alphabetic';
+    g.fillStyle = tray.ink;
+    let label = d.name;
+    if (g.measureText(label).width > gap - 8) {
+      while (label.length > 1 && g.measureText(label + '…').width > gap - 8) label = label.slice(0, -1);
+      label += '…';
+    }
+    g.fillText(label, d.x, H - 9);
+  });
+  if (moving) tray.raf = requestAnimationFrame(trayFrame);
+}
+
 // Rodadas da sala, com as regras de cada uma. Tudo sai do documento, então todo navegador chega ao mesmo resultado:
 //   flags[n] com "t": desempate da rodada anterior, só rolam os que empataram em primeiro, valendo o mesmo item;
 //   flags[n] com "s": quem já ganhou um item fica de fora.
@@ -4021,7 +4140,7 @@ function roomRounds(doc) {
   for (const [key, r] of Object.entries(doc.rolls || {})) {
     const i = key.indexOf('_'), n = Number(key.slice(0, i));
     if (i < 1 || !(n >= 1) || !r || !r.at) continue;
-    (byRound[n] || (byRound[n] = [])).push({ key, uid: key.slice(i + 1), name: String(r.name || '?'), value: rollValue(room.code, key, r.at) });
+    (byRound[n] || (byRound[n] = [])).push({ key, uid: key.slice(i + 1), name: String(r.name || '?'), at: String(r.at), value: rollValue(room.code, key, r.at) });
   }
   const out = [], winners = new Set();
   for (let n = 1; n <= total; n++) {
@@ -4044,7 +4163,7 @@ function renderRoom() {
   $('#room-lobby').hidden = inside;
   $('#room-in').hidden = !inside;
   for (const b of [$('#room-create'), $('#room-join')]) b.disabled = room.busy;
-  if (!inside) return;
+  if (!inside) { tray.dice = []; return; }
   const d = room.doc, n = d.round || 1, uid = cloud.uid, mine = !!uid && d.owner === uid;
   const cur = roomRounds(d)[n];
   setText($('#room-number'), fmtCode(room.code));
@@ -4071,10 +4190,13 @@ function renderRoom() {
   for (const [k, until] of room.rolling) if (until <= now) room.rolling.delete(k);
   const shown = cur.rolls.filter(r => !room.rolling.has(r.key));
   const spinning = cur.rolls.filter(r => room.rolling.has(r.key));
+  // Mesa dos dados: as quatro jogadas mais recentes da rodada; as que acabaram de chegar entram rolando.
+  diceTable(cur.rolls.slice().sort((a, b) => a.at < b.at ? -1 : a.at > b.at ? 1 : 0).slice(-4)
+    .map(r => ({ key: r.key, name: r.name, value: r.value, until: room.rolling.get(r.key) || 0 })));
   const top = shown.length ? shown[0].value : null;
   $('#room-rolls').replaceChildren(
     ...shown.map(r => el('li', { class: r.value === top ? 'top' : null }, el('span', { text: r.name }), el('b', { text: r.value }))),
-    ...spinning.map(r => el('li', { class: 'rolling' }, el('span', { text: r.name }), el('b', { text: randInt(100) + 1 }))),
+    ...spinning.map(r => el('li', { class: 'rolling' }, el('span', { text: r.name }), el('b', { text: '…' }))),
     ...(cur.rolls.length ? [] : [el('li', { class: 'room-empty', text: tr('room.waiting') })]));
 
   // Avisos da rodada: quem rola no desempate, se a pessoa está de fora, se há empate, se todos já rolaram.
@@ -4139,7 +4261,6 @@ function setRoomDoc(doc) {
   if (!room.hello) { room.hello = true; roomHello(); }
   if (room.rolling.size && !room.spin) {
     room.spin = setInterval(() => {
-      for (const b of document.querySelectorAll('#room-rolls .rolling b')) b.textContent = randInt(100) + 1;
       if (![...room.rolling.values()].some(until => until > Date.now())) { clearInterval(room.spin); room.spin = 0; renderRoom(); }
     }, 70);
   }
