@@ -228,6 +228,10 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .clock-note { min-height: 1.45em; font-weight: 500; }
 .clock-who { font-weight: 600; color: var(--amber); overflow-wrap: anywhere; }
 .clock-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: auto; padding-top: 10px; }
+/* Acerto de 10 segundos, para quem iniciou o cronômetro atrasado ou adiantado */
+.clock-nudge { display: flex; flex: 1 0 100%; justify-content: center; gap: 8px; }
+.dlg.nudge { padding: 5px 12px; background: none; color: var(--label); font-size: 13px; font-variant-numeric: lining-nums tabular-nums; }
+.dlg.nudge:disabled { opacity: 0.45; pointer-events: none; }
 .clock-float { margin-top: 8px; font-size: 13px; color: var(--label); }
 /* Comando de voz: o ponto verde mostra que o site está ouvindo; o número no canto do anel é o que se fala */
 .toggle.voice.live span::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 7px; border-radius: 50%; background: var(--value); }
@@ -854,6 +858,8 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'nudge.less': 'Tirar 10 segundos do cronômetro',
+    'nudge.more': 'Somar 10 segundos ao cronômetro',
     'voice.nomic': 'Nenhum microfone encontrado. Ligue um microfone e marque o comando de voz de novo.',
     'voice.network': 'Voz: o serviço de reconhecimento do navegador não respondeu. Só funciona no Chrome e no Edge, com internet.',
     'voice.label': 'Comando de voz',
@@ -1154,6 +1160,8 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'nudge.less': 'Take 10 seconds off the timer',
+    'nudge.more': 'Add 10 seconds to the timer',
     'voice.nomic': 'No microphone found. Connect a microphone and turn voice command on again.',
     'voice.network': 'Voice: the browser\'s recognition service did not answer. It only works in Chrome and Edge, with an internet connection.',
     'voice.label': 'Voice command',
@@ -1454,6 +1462,8 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'nudge.less': 'Quitar 10 segundos al cronómetro',
+    'nudge.more': 'Añadir 10 segundos al cronómetro',
     'voice.nomic': 'No se encontró ningún micrófono. Conecta un micrófono y activa de nuevo el comando de voz.',
     'voice.network': 'Voz: el servicio de reconocimiento del navegador no respondió. Solo funciona en Chrome y Edge, con internet.',
     'voice.label': 'Comando de voz',
@@ -1754,6 +1764,8 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'nudge.less': 'Odejmij 10 sekund od licznika',
+    'nudge.more': 'Dodaj 10 sekund do licznika',
     'voice.nomic': 'Nie znaleziono mikrofonu. Podłącz mikrofon i włącz polecenia głosowe ponownie.',
     'voice.network': 'Głos: usługa rozpoznawania mowy przeglądarki nie odpowiedziała. Działa tylko w Chrome i Edge, z internetem.',
     'voice.label': 'Polecenia głosowe',
@@ -3006,6 +3018,20 @@ function resetTimer(key) {
   if (t) { t.endAt = null; t.doneAt = null; t.pauseUntil = null; cancelSounds(t); }
   tick();
 }
+// Acerto: soma ou tira segundos do tempo que falta, para quem iniciou o cronômetro atrasado ou adiantado.
+// Só mexe em cronômetro que está contando (ou na pausa entre voltas).
+function nudgeTimer(key, sec) {
+  const t = timers.get(key);
+  if (!t) return;
+  if (t.pauseUntil != null) t.pauseUntil += sec * 1000;
+  else if (t.endAt != null) {
+    t.endAt += sec * 1000;
+    if (t.endAt <= Date.now() && ui.sound && audio) play('done', 0);   // tirou mais do que faltava: a criatura já nasceu
+    scheduleSounds(t);
+  } else return;
+  tick();
+}
+const nudgeOff = state => state === 'idle' || state === 'done';
 // Tira os cronômetros de um respawn; sem id, todos.
 function clearTimers(id) {
   for (const [key, t] of [...timers]) if (id == null || t.id === id) { cancelSounds(t); timers.delete(key); }
@@ -3060,6 +3086,7 @@ function tick() {
       setText(e.note, v.note);
       e.setFrac(Math.min(1, Math.max(0, v.frac)));
       setText(e.start, tr(v.state === 'idle' || v.state === 'done' ? 'start' : 'restart'));
+      for (const b of e.nudges) b.disabled = nudgeOff(v.state);
     }
   }
   const r = soonId && getRespawn(soonId);
@@ -3094,9 +3121,11 @@ function paintFloat(now) {
         const btn = el('button', { type: 'button', onclick: () => startTimer(g.key) });
         const zero = el('button', { class: 'zero', type: 'button', text: tr('reset'), onclick: () => resetTimer(g.key) });
         const who = el('span', { title: g.who });
+        const nudges = [-10, 10].map(n => el('button', { type: 'button', text: (n < 0 ? '−' : '+') + '10', title: tr(n < 0 ? 'nudge.less' : 'nudge.more'),
+          'aria-label': tr(n < 0 ? 'nudge.less' : 'nudge.more'), onclick: () => nudgeTimer(g.key, n) }));
         const root = el('div', { class: 'f-row' }, el('div', { class: 'f-main' }, b, who),
-          el('div', { class: 'f-btns' }, btn, zero));
-        float.rowEls.set(g.key, { root, b, btn, zero, who });
+          el('div', { class: 'f-btns' }, btn, zero, el('div', { class: 'f-nudge' }, nudges)));
+        float.rowEls.set(g.key, { root, b, btn, zero, who, nudges });
         return root;
       }));
       float.all.hidden = float.none.hidden = gs.length < 2;
@@ -3108,6 +3137,7 @@ function paintFloat(now) {
       e.root.dataset.state = v.state;
       setText(e.b, fmtTime(v.left) + (ui.unit === 'm' ? '' : ' s'));
       setText(e.btn, tr(v.state === 'idle' || v.state === 'done' ? 'start' : 'restart'));
+      for (const n of e.nudges) n.disabled = nudgeOff(v.state);
       const laps = g.t.id && g.t.base != null ? lapsGet(g.t.id, g.t.base) : 0;
       setText(e.who, g.who + (laps ? ' · ' + tr('lap.short', { n: laps }) : '') + (v.state === 'pause' ? ' · ' + tr('note.pauseShort') : ''));
     }
@@ -3136,7 +3166,7 @@ async function toggleFloat() {
   armAudio();   // o clique aqui libera o som mesmo que os cronômetros sejam iniciados pela janela flutuante
   try {
     if ('documentPictureInPicture' in window) {
-      const w = await window.documentPictureInPicture.requestWindow({ width: 320, height: 112 + Math.max(1, groupsNow().length) * 96 });
+      const w = await window.documentPictureInPicture.requestWindow({ width: 320, height: 112 + Math.max(1, groupsNow().length) * 124 });
       const cs = getComputedStyle(document.documentElement);
       const vars = ['--ground', '--title', '--label', '--amber', '--value', '--teal', '--btn', '--btn-edge', '--edge']
         .map(n => n + ':' + cs.getPropertyValue(n)).join(';');
@@ -3153,6 +3183,8 @@ async function toggleFloat() {
           'button:hover{border-color:var(--teal)}' +
           '.f-btns{display:flex;flex:none;flex-direction:column;gap:4px}' +
           'button.zero{border-color:var(--edge);color:var(--label)}' +
+          '.f-nudge{display:flex;gap:4px}.f-nudge button{flex:1;padding:3px 0 2px;border-color:var(--edge);color:var(--label);font-size:12px}' +
+          'button:disabled{opacity:.45;pointer-events:none}' +
           'button.all{margin-top:10px;width:100%}button.all+button.all{margin-top:6px}' +
           'p.voice{margin:8px 0 0;font-size:12px;color:var(--label)}' }));
       float.list = el('div');
@@ -3518,17 +3550,20 @@ function renderSheet() {
       el('button', { type: 'button', id: 'lap-more-' + tag, text: '+', 'aria-label': tr('lap.more'), title: tr('lap.more'),
         onclick: () => lapsSet(rid, base, lapsGet(rid, base) + 1) }),
       el('button', { class: 'hunt-link', type: 'button', id: 'lap-zero-' + tag, text: tr('lap.reset'), onclick: () => lapsSet(rid, base, 0) }));
+    const nudges = [-10, 10].map(n => el('button', { class: 'dlg nudge', type: 'button', id: (n < 0 ? 'nudge-less-' : 'nudge-more-') + tag, disabled: true,
+      text: (n < 0 ? '−' : '+') + '10 s', title: tr(n < 0 ? 'nudge.less' : 'nudge.more'), 'aria-label': tr(n < 0 ? 'nudge.less' : 'nudge.more'), onclick: () => nudgeTimer(key, n) }));
     const root = el('article', { class: ui.unit === 'm' ? 'clock mmss' : 'clock', 'data-state': 'idle' },
       ring,
       note,
       el('p', { class: 'clock-who', text: who.join(', ') }),
       r2 ? el('p', { class: 'clock-area', text: area }) : null,   // com dois respawns, de qual deles é o cronômetro
-      el('div', { class: 'clock-actions' }, start, el('button', { class: 'dlg stop', type: 'button', text: tr('reset'), onclick: () => resetTimer(key) })),
+      el('div', { class: 'clock-actions' }, start, el('button', { class: 'dlg stop', type: 'button', text: tr('reset'), onclick: () => resetTimer(key) }),
+        el('div', { class: 'clock-nudge' }, nudges)),
       laps,
       many ? el('label', { class: 'toggle clock-float', title: tr('float.showTip') },
         el('input', { type: 'checkbox', id: 'float-show-' + tag, checked: !off, disabled: !off && inFloat === 1, onchange: e => setFloatOn(rid, base, e.target.checked) }),
         el('span', { text: tr('float.show') })) : null);
-    timerEls.set(key, { root, digits, note, start, setFrac: f => { arc.style.strokeDashoffset = (RING * (1 - f)).toFixed(2); } });
+    timerEls.set(key, { root, digits, note, start, nudges, setFrac: f => { arc.style.strokeDashoffset = (RING * (1 - f)).toFixed(2); } });
     return root;
   });
   // Cada cronômetro tem uma linha a mais com dois respawns ("two") e outra com a caixa da janela flutuante ("pick").
@@ -4135,6 +4170,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 17:25',
+    pt: ['Acerto do cronômetro: os botões "−10 s" e "+10 s" tiram ou somam 10 segundos por clique, para quem iniciou atrasado. Também na janela flutuante.'],
+    en: ['Timer adjustment: the "−10 s" and "+10 s" buttons take off or add 10 seconds per click, for when you started late. Also in the floating window.'],
+    es: ['Ajuste del cronómetro: los botones "−10 s" y "+10 s" quitan o añaden 10 segundos por clic, para cuando empezaste tarde. También en la ventana flotante.'],
+    pl: ['Korekta licznika: przyciski „−10 s” i „+10 s” odejmują lub dodają 10 sekund za każdym kliknięciem, gdy start był spóźniony. Także w pływającym oknie.'],
+  },
   { at: '2026-10-09 16:55',
     pt: ['Comando de voz (Chrome e Edge): com a opção ligada, diga "iniciar", "iniciar um", "iniciar dois" ou "zerar" para comandar os cronômetros sem sair do jogo.'],
     en: ['Voice command (Chrome and Edge): with the option on, say "start", "start one", "start two" or "reset" to drive the timers without leaving the game.'],
