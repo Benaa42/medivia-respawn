@@ -493,6 +493,15 @@ details.backup textarea {
             <option value="sino" data-i18n="tone.sino">Sino</option>
             <option value="bipe" data-i18n="tone.bipe">Bipe</option>
             <option value="trompa" data-i18n="tone.trompa">Trompa</option>
+            <option value="drag1" data-i18n="tone.drag1">Dragão 1</option>
+            <option value="drag2" data-i18n="tone.drag2">Dragão 2</option>
+            <option value="dreadlord" data-i18n="tone.dreadlord">Dread Lord</option>
+            <option value="hydra" data-i18n="tone.hydra">Hidra</option>
+            <option value="whoosh" data-i18n="tone.whoosh">Sopro sombrio</option>
+            <option value="heartbeat" data-i18n="tone.heartbeat">Batimento</option>
+            <option value="levelup" data-i18n="tone.levelup">Level up</option>
+            <option value="manafull" data-i18n="tone.manafull">Mana cheia</option>
+            <option value="message" data-i18n="tone.message">Mensagem</option>
           </select>
         </div>
         <div class="dlgs">
@@ -623,6 +632,15 @@ const I18N = {
     'tone.sino': 'Sino',
     'tone.bipe': 'Bipe',
     'tone.trompa': 'Trompa',
+    'tone.drag1': 'Dragão 1',
+    'tone.drag2': 'Dragão 2',
+    'tone.dreadlord': 'Dread Lord',
+    'tone.hydra': 'Hidra',
+    'tone.whoosh': 'Sopro sombrio',
+    'tone.heartbeat': 'Batimento',
+    'tone.levelup': 'Level up',
+    'tone.manafull': 'Mana cheia',
+    'tone.message': 'Mensagem',
     'float': 'Janela flutuante',
     'read': 'Ler print',
     'status.default': 'Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print.',
@@ -829,6 +847,15 @@ const I18N = {
     'tone.sino': 'Chime',
     'tone.bipe': 'Beep',
     'tone.trompa': 'Horn',
+    'tone.drag1': 'Dragon 1',
+    'tone.drag2': 'Dragon 2',
+    'tone.dreadlord': 'Dread Lord',
+    'tone.hydra': 'Hydra',
+    'tone.whoosh': 'Evil whoosh',
+    'tone.heartbeat': 'Heartbeat',
+    'tone.levelup': 'Level up',
+    'tone.manafull': 'Mana full',
+    'tone.message': 'Message',
     'float': 'Floating window',
     'read': 'Read screenshot',
     'status.default': 'You can also drag the screenshot image here or pick the file with Read screenshot.',
@@ -1035,6 +1062,15 @@ const I18N = {
     'tone.sino': 'Campana',
     'tone.bipe': 'Pitido',
     'tone.trompa': 'Cuerno',
+    'tone.drag1': 'Dragón 1',
+    'tone.drag2': 'Dragón 2',
+    'tone.dreadlord': 'Dread Lord',
+    'tone.hydra': 'Hidra',
+    'tone.whoosh': 'Soplo siniestro',
+    'tone.heartbeat': 'Latido',
+    'tone.levelup': 'Level up',
+    'tone.manafull': 'Maná lleno',
+    'tone.message': 'Mensaje',
     'float': 'Ventana flotante',
     'read': 'Leer captura',
     'status.default': 'También puedes arrastrar aquí la imagen de la captura o elegir el archivo en Leer captura.',
@@ -1224,8 +1260,9 @@ function tr(key, vars) {
 }
 
 /* ---------- Sons de alerta ----------
-   Três tipos, cada um com o aviso dos 10 segundos e o de zerar.
-   Cada nota: [forma da onda, frequência em Hz, atraso em s, duração em s, volume]. */
+   Cada tipo tem o aviso dos 10 segundos e o de zerar.
+   Os três primeiros são sintetizados. Cada nota: [forma da onda, frequência em Hz, atraso em s, duração em s, volume].
+   Os outros são áudios gravados (pasta sounds/), tocados ao zerar; nos 10 segundos eles usam a nota curta do Sino. */
 const TONES = {
   sino: {
     warn: [['sine', 523, 0, 0.14, 0.05]],
@@ -1240,6 +1277,9 @@ const TONES = {
     done: [['sawtooth', 196, 0, 0.42, 0.04], ['triangle', 196, 0, 0.42, 0.12], ['sawtooth', 294, 0.36, 0.75, 0.04], ['triangle', 294, 0.36, 0.75, 0.12]],
   },
 };
+for (const name of ['drag1', 'drag2', 'dreadlord', 'hydra', 'whoosh', 'heartbeat', 'levelup', 'manafull', 'message']) {
+  TONES[name] = { warn: TONES.sino.warn, done: TONES.sino.done, file: 'sounds/' + name + '.wav' };
+}
 
 /* ---------- Contas do jogo ----------
    Conferidas contra prints de 10% a 50%: respawn = piso(base / (1 + bônus));
@@ -1963,6 +2003,7 @@ function armAudio() {
       master = audio.createGain();
       master.gain.value = volGain();
       master.connect(audio.destination);
+      loadSample(ui.tone);
     }
     if (audio.state === 'suspended') audio.resume().catch(() => {});
   } catch { audio = null; master = null; }
@@ -1979,9 +2020,46 @@ function tone(freq, at, len, vol, wave = 'sine') {
   o.start(t); o.stop(t + len + 0.05);
   return { o, at: t };
 }
+// Áudios gravados: cada arquivo é baixado e decodificado só quando o tipo é escolhido, e fica guardado.
+const samples = new Map();   // tipo -> AudioBuffer, ou a promessa dele enquanto baixa
+function loadSample(name) {
+  const def = TONES[name];
+  if (!def || !def.file || !audio) return Promise.resolve(null);
+  if (!samples.has(name)) {
+    samples.set(name, fetch(new URL(def.file, document.baseURI))
+      .then(r => { if (!r.ok) throw new Error('sem o arquivo'); return r.arrayBuffer(); })
+      .then(b => audio.decodeAudioData(b))
+      .then(buf => { samples.set(name, buf); return buf; })
+      .catch(() => { samples.delete(name); return null; }));
+  }
+  return Promise.resolve(samples.get(name));
+}
 // Toca um dos avisos ('warn' ou 'done') do tipo de alerta escolhido, daqui a "at" segundos.
 function play(kind, at) {
-  return TONES[ui.tone][kind].map(([wave, freq, delay, len, vol]) => tone(freq, at + delay, len, vol, wave));
+  const def = TONES[ui.tone];
+  if (kind === 'done' && def.file) {
+    const buf = samples.get(ui.tone);
+    if (buf && typeof buf.then !== 'function') {
+      const o = audio.createBufferSource();
+      o.buffer = buf;
+      o.connect(master);
+      const t = audio.currentTime + Math.max(0, at);
+      o.start(t);
+      return [{ o, at: t }];
+    }
+    // O arquivo ainda não chegou: por ora vale a nota do Sino, e os avisos são reagendados quando ele chegar.
+    loadSample(ui.tone).then(ready => { if (ready) for (const t of timers.values()) scheduleSounds(t); });
+  }
+  return def[kind].map(([wave, freq, delay, len, vol]) => tone(freq, at + delay, len, vol, wave));
+}
+// Amostra do alerta ao mexer no volume ou trocar o tipo. Uma amostra nova interrompe a anterior.
+let demo = [];
+function preview() {
+  for (const n of demo) { try { n.o.stop(); n.o.disconnect(); } catch { /* já parou */ } }
+  demo = [];
+  if (!audio) return;
+  const name = ui.tone;
+  loadSample(name).then(() => { if (audio && ui.tone === name) demo = play('done', 0); });
 }
 // Cancela só o que ainda não começou a tocar: um aviso em andamento termina sozinho.
 function cancelSounds(t) {
@@ -3060,6 +3138,11 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 10:27',
+    pt: ['Nove novos tipos de alerta sonoro, com áudios gravados: Dragão 1, Dragão 2, Dread Lord, Hidra, Sopro sombrio, Batimento, Level up, Mana cheia e Mensagem.'],
+    en: ['Nine new alert sounds, from recorded audio: Dragon 1, Dragon 2, Dread Lord, Hydra, Evil whoosh, Heartbeat, Level up, Mana full and Message.'],
+    es: ['Nueve nuevos tipos de alerta sonora, con audios grabados: Dragón 1, Dragón 2, Dread Lord, Hidra, Soplo siniestro, Latido, Level up, Maná lleno y Mensaje.'],
+  },
   { at: '2026-10-09 09:30',
     pt: ['Dois respawns ao mesmo tempo: marque "Abrir dois respawns" e escolha dois na lista para ter os cronômetros de todas as criaturas dos dois, cada respawn com o seu percentual de bônus.', 'Os textos do site passam a dizer "criaturas" em vez de "monstros".'],
     en: ['Two respawns at once: tick "Open two respawns" and pick two in the list to get the timers of every creature of both, each respawn with its own bonus percentage.', 'The site now says "creatures" instead of "monsters".'],
@@ -3231,14 +3314,14 @@ optVolume.addEventListener('input', e => { ui.volume = +e.target.value; if (mast
 optVolume.addEventListener('change', () => {
   saveUi();
   armAudio();
-  if (audio) play('done', 0);
+  preview();
 });
 // Trocar o tipo de alerta toca uma amostra e reagenda os avisos dos cronômetros em andamento.
 optTone.addEventListener('change', () => {
   ui.tone = TONES[optTone.value] ? optTone.value : 'sino';
   saveUi();
   armAudio();
-  if (audio) play('done', 0);
+  preview();
   for (const t of timers.values()) scheduleSounds(t);
 });
 for (const b of document.querySelectorAll('.lang button')) b.addEventListener('click', () => setLang(b.dataset.lang));
