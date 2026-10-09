@@ -191,7 +191,14 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .clock-unit { font-size: 13px; font-weight: 500; color: var(--faint); }
 .clock-note { min-height: 1.45em; font-weight: 500; }
 .clock-who { font-weight: 600; color: var(--amber); overflow-wrap: anywhere; }
-.clock-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 10px; }
+.clock-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: auto; padding-top: 10px; }
+/* Cronômetros lado a lado ficam alinhados linha a linha (anel, nota, nomes, respawn, botões, voltas), mesmo quando
+   os nomes de um deles ocupam mais linhas. Sem subgrid no navegador, os botões ao menos descem para o pé do bloco. */
+@supports (grid-template-rows: subgrid) {
+  .clock { display: grid; grid-template-rows: subgrid; grid-row: span 5; justify-items: center; align-items: start; row-gap: 4px; }
+  .clocks.two .clock { grid-row: span 6; }
+  .clock-actions { margin-top: 10px; padding-top: 0; }
+}
 .stage-all {
   display: flex;
   flex-wrap: wrap;
@@ -2608,7 +2615,7 @@ function renderSheet() {
     timerEls.set(key, { root, digits, note, start, setFrac: f => { arc.style.strokeDashoffset = (RING * (1 - f)).toFixed(2); } });
     return root;
   });
-  parts.stage.replaceChildren(el('div', { class: 'clocks' }, clocks), stageAll(clocks.length > 1));
+  parts.stage.replaceChildren(el('div', { class: r2 ? 'clocks two' : 'clocks' }, clocks), stageAll(clocks.length > 1));   // com dois respawns cada cronômetro tem uma linha a mais
 
   // Controles: atualizados no lugar
   parts.party.set(PARTIES.findIndex(p => p.mult === ui.party));
@@ -3137,6 +3144,11 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 10:31',
+    pt: ['Cronômetros lado a lado sempre alinhados: os botões e as voltas ficam na mesma altura mesmo quando os nomes das criaturas ocupam mais de uma linha.'],
+    en: ['Timers side by side always line up: buttons and laps stay at the same height even when creature names take more than one line.'],
+    es: ['Cronómetros en paralelo siempre alineados: los botones y las vueltas quedan a la misma altura aunque los nombres de las criaturas ocupen más de una línea.'],
+  },
   { at: '2026-10-09 10:27',
     pt: ['Nove novos tipos de alerta sonoro, com áudios gravados: Dragão 1, Dragão 2, Dread Lord, Hidra, Sopro sombrio, Batimento, Level up, Mana cheia e Mensagem.'],
     en: ['Nine new alert sounds, from recorded audio: Dragon 1, Dragon 2, Dread Lord, Hydra, Evil whoosh, Heartbeat, Level up, Mana full and Message.'],
