@@ -10,6 +10,8 @@ const NAMES = {
   'heartbeat.wav': 'heartbeat', 'level_up.wav': 'levelup', 'mana_full.wav': 'manafull', 'message.wav': 'message',
 };
 const PEAK = 0.7, RMS = 0.14;   // teto do pico e do volume médio depois do ajuste
+// Áudios longos demais para um alerta: ficam só os primeiros segundos. O batimento são 4 batidas (uma a cada 0,8 s).
+const CUT = { heartbeat: 3.15 };
 
 function readWav(file) {
   const b = fs.readFileSync(file);
@@ -41,7 +43,7 @@ for (const [from, to] of Object.entries(NAMES)) {
   while (a < z && Math.abs(mono[a]) < quiet) a++;
   while (z > a && Math.abs(mono[z]) < quiet) z--;
   a = Math.max(0, a - pad); z = Math.min(mono.length - 1, z + pad);
-  const cut = mono.subarray(a, z + 1);
+  const cut = mono.subarray(a, Math.min(z + 1, CUT[to] ? a + Math.round(rate * CUT[to]) : Infinity));
   let peak = 0, sq = 0;
   for (const v of cut) { peak = Math.max(peak, Math.abs(v)); sq += v * v; }
   const rms = Math.sqrt(sq / cut.length);
