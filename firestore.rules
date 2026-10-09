@@ -51,6 +51,7 @@ service cloud.firestore {
     // Salas de sorteio com dado D100.
     // - Qualquer pessoa lê (é assim que todos veem as jogadas).
     // - Quem cria a sala é o dono: só ele abre rodadas, dá nome aos itens e encerra a sala.
+    // - Sala criada há mais de um dia pode ser apagada por qualquer pessoa: é assim que o número volta a ficar livre.
     // - Cada pessoa grava só a própria jogada, uma por rodada, com a hora do servidor. O valor do dado é
     //   calculado pelo site a partir dessa hora, então ninguém escolhe o resultado nem altera jogada alheia.
     match /rooms/{code} {
@@ -64,7 +65,7 @@ service cloud.firestore {
       allow read: if true;
 
       allow create: if request.auth != null
-        && code.matches('^[0-9]{6}$')
+        && code.matches('^[0-9]{4,6}$')
         && request.resource.data.keys().hasOnly(['owner', 'at', 'round', 'items', 'rolls'])
         && request.resource.data.owner == request.auth.uid
         && request.resource.data.at == request.time
@@ -96,7 +97,8 @@ service cloud.firestore {
           )
         );
 
-      allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
+      allow delete: if request.auth != null
+        && (resource.data.owner == request.auth.uid || resource.data.at < request.time - duration.value(24, 'h'));
     }
   }
 }
