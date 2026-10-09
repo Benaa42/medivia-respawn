@@ -275,7 +275,7 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 
 /* Opções e botões do respawn */
 .win-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; }
-.bonus > .win-foot { padding-top: 16px; border-top: 1px solid var(--edge); }
+.bonus .win-foot, .bonus .status { padding-inline: 4px; }
 .opts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
 .toggle { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; cursor: pointer; }
 .toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--value); }
@@ -342,6 +342,10 @@ details.backup textarea {
 .hunt-table th:first-child, .hunt-table td:first-child { text-align: left; white-space: normal; }
 .hunt-table td:first-child { padding-right: 8px; font-weight: 600; color: var(--amber); overflow-wrap: anywhere; }
 .hunt-table td:last-child { padding-left: 10px; font-weight: 700; color: var(--value); }
+.hunt-pay { margin: -3px -6px -3px 0; padding: 3px 6px; border: 0; border-radius: 6px; background: none; color: inherit; font: inherit; cursor: pointer; }
+.hunt-who { margin: -3px 0 -3px -6px; padding: 3px 6px; border: 0; border-radius: 6px; background: none; color: inherit; font: inherit; text-align: left; overflow-wrap: anywhere; cursor: pointer; }
+.hunt-pay:hover, .hunt-who:hover { background: var(--card); }
+.hunt-pay.copied, .hunt-who.copied { background: var(--band); }
 .hunt-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
 .hunt .dlg { padding: 7px 14px; font-size: 13px; }
 .hunt-link { padding: 0; border: 0; background: none; color: var(--faint); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
@@ -426,7 +430,7 @@ details.backup textarea {
 
     <main class="win bonus" id="drop">
       <div id="sheet"></div>
-      <footer class="win-foot">
+      <footer class="win-foot" id="win-opts">
         <div class="opts">
           <label class="toggle"><input type="checkbox" id="opt-loop"> <span data-i18n="loop">Repetir ao zerar</span></label>
           <label class="toggle"><input type="checkbox" id="opt-sound"> <span data-i18n="sound">Som</span></label>
@@ -615,6 +619,10 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'hunt.whoTip': 'Copiar o nome de {x}, com Home na linha de baixo',
+    'hunt.whoCopied': 'Nome de {x} copiado, com Home na linha de baixo.',
+    'hunt.payTip': 'Copiar o valor de {x}',
+    'hunt.payCopied': 'Valor de {x} copiado: {v}',
     'lap.count': 'Voltas: {n}',
     'lap.short': 'volta {n}',
     'lap.less': 'Tirar uma volta',
@@ -789,6 +797,10 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'hunt.whoTip': 'Copy the name {x}, with Home on the next line',
+    'hunt.whoCopied': 'Name {x} copied, with Home on the next line.',
+    'hunt.payTip': 'Copy the amount for {x}',
+    'hunt.payCopied': 'Amount for {x} copied: {v}',
     'lap.count': 'Laps: {n}',
     'lap.short': 'lap {n}',
     'lap.less': 'Remove a lap',
@@ -963,6 +975,10 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'hunt.whoTip': 'Copiar el nombre de {x}, con Home en la línea de abajo',
+    'hunt.whoCopied': 'Nombre de {x} copiado, con Home en la línea de abajo.',
+    'hunt.payTip': 'Copiar el valor de {x}',
+    'hunt.payCopied': 'Valor de {x} copiado: {v}',
     'lap.count': 'Vueltas: {n}',
     'lap.short': 'vuelta {n}',
     'lap.less': 'Quitar una vuelta',
@@ -2095,6 +2111,8 @@ function buildSheet(id, fixed) {
     head,
     el('div', { class: 'win-body' },
       p.stage,
+      optsBar,
+      statusEl,
       el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root,
         el('div', { class: 'ctl' }, ctlHead(tr('ctl.cost'), p.costNote), p.cost)),
       el('h3', { class: 'band', text: tr('band') }),
@@ -2119,6 +2137,7 @@ function renderSheet() {
     clearTimers();
     parts = null;
     sheet.replaceChildren(...emptySheet(loading));
+    sheet.append(optsBar, statusEl);   // sem respawn aberto, as opções ficam depois das instruções
     return;
   }
   const id = ui.id;
@@ -2464,16 +2483,40 @@ function huntText(s) {
   for (const p of s.players) lines.push(tr(p.payout != null ? 'hunt.copy.player' : 'hunt.copy.solo', { x: p.name, spent: n(p.spent), payout: n(p.payout) }));
   return lines.join('\n');
 }
-async function copyHunt(s) {
-  const text = huntText(s);
-  try { await navigator.clipboard.writeText(text); setStatus('ok', tr('hunt.copied')); return; } catch { /* tenta o modo antigo */ }
+// Copia um texto para a área de transferência; devolve se deu certo.
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch { /* tenta o modo antigo */ }
   const ta = el('textarea', { class: 'sr', value: text });
   document.body.append(ta);
   ta.select();
   let ok = false;
   try { ok = document.execCommand('copy'); } catch { ok = false; }
   ta.remove();
+  return ok;
+}
+async function copyHunt(s) {
+  const ok = await copyText(huntText(s));
   setStatus(ok ? 'ok' : 'err', tr(ok ? 'hunt.copied' : 'hunt.copyFail'));
+}
+// Clique no valor a receber: copia só o número, pronto para colar no jogo.
+async function copyPayout(p, btn) {
+  const value = String(Math.round(p.payout));
+  const ok = await copyText(value);
+  setStatus(ok ? 'ok' : 'err', ok ? tr('hunt.payCopied', { x: p.name, v: value }) : tr('hunt.copyFail'));
+  if (ok) {
+    btn.classList.add('copied');
+    setTimeout(() => btn.classList.remove('copied'), 900);
+  }
+}
+
+// Clique no nome: copia o nome do jogador e, na linha de baixo, "Home" (quebra de linha no padrão do Windows).
+async function copyWho(p, btn) {
+  const ok = await copyText(p.name + '\r\nHome');
+  setStatus(ok ? 'ok' : 'err', ok ? tr('hunt.whoCopied', { x: p.name }) : tr('hunt.copyFail'));
+  if (ok) {
+    btn.classList.add('copied');
+    setTimeout(() => btn.classList.remove('copied'), 900);
+  }
 }
 
 function renderHunt() {
@@ -2520,7 +2563,14 @@ function renderHunt() {
       el('thead', null, el('tr', null,
         el('th', { scope: 'col', text: tr('hunt.player') }), el('th', { scope: 'col', text: tr('hunt.spent') }), el('th', { scope: 'col', text: tr('hunt.gets') }))),
       el('tbody', null, s.players.map(p => el('tr', null,
-        el('td', { text: p.name }), el('td', { text: money(p.spent) }), el('td', { text: money(p.payout) }))))) : null,
+        el('td', null, el('button', {
+          class: 'hunt-who', type: 'button', text: p.name, title: tr('hunt.whoTip', { x: p.name }),
+          onclick: e => copyWho(p, e.currentTarget),
+        })), el('td', { text: money(p.spent) }),
+        el('td', null, p.payout == null ? '?' : el('button', {
+          class: 'hunt-pay', type: 'button', text: money(p.payout), title: tr('hunt.payTip', { x: p.name }),
+          onclick: e => copyPayout(p, e.currentTarget),
+        })))))) : null,
     el('div', { class: 'hunt-foot' },
       el('button', { class: 'dlg', type: 'button', id: 'hunt-copy', text: tr('hunt.copy'), onclick: () => copyHunt(s) }),
       link('hunt.disconnect', disconnectHunt)),
@@ -2627,6 +2677,7 @@ if (support.pix || support.kofi) {
 }
 
 /* ---------- Rodapé da janela: opções e botões ---------- */
+const optsBar = $('#win-opts');
 const optVolume = $('#opt-volume');
 const optTone = $('#opt-tone');
 optTone.value = ui.tone;
