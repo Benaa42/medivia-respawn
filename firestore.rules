@@ -47,5 +47,56 @@ service cloud.firestore {
 
       allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
     }
+
+    // Salas de sorteio com dado D100.
+    // - Qualquer pessoa lê (é assim que todos veem as jogadas).
+    // - Quem cria a sala é o dono: só ele abre rodadas, dá nome aos itens e encerra a sala.
+    // - Cada pessoa grava só a própria jogada, uma por rodada, com a hora do servidor. O valor do dado é
+    //   calculado pelo site a partir dessa hora, então ninguém escolhe o resultado nem altera jogada alheia.
+    match /rooms/{code} {
+      function rollKey() {
+        return string(resource.data.round) + '_' + request.auth.uid;
+      }
+      function added() {
+        return request.resource.data.rolls.diff(resource.data.rolls);
+      }
+
+      allow read: if true;
+
+      allow create: if request.auth != null
+        && code.matches('^[0-9]{6}$')
+        && request.resource.data.keys().hasOnly(['owner', 'at', 'round', 'items', 'rolls'])
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.at == request.time
+        && request.resource.data.round == 1
+        && request.resource.data.items is map && request.resource.data.items.size() == 0
+        && request.resource.data.rolls is map && request.resource.data.rolls.size() == 0;
+
+      allow update: if request.auth != null
+        && (
+          (
+            resource.data.owner == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['round', 'items'])
+            && request.resource.data.round is int
+            && (request.resource.data.round == resource.data.round || request.resource.data.round == resource.data.round + 1)
+            && request.resource.data.round <= 200
+            && request.resource.data.items is map && request.resource.data.items.size() <= 200
+          ) || (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['rolls'])
+            && added().addedKeys().hasOnly([rollKey()])
+            && added().addedKeys().size() == 1
+            && added().changedKeys().size() == 0
+            && added().removedKeys().size() == 0
+            && request.resource.data.rolls.size() <= 400
+            && request.resource.data.rolls[rollKey()].keys().hasOnly(['name', 'at'])
+            && request.resource.data.rolls[rollKey()].name is string
+            && request.resource.data.rolls[rollKey()].name.size() >= 1
+            && request.resource.data.rolls[rollKey()].name.size() <= 24
+            && request.resource.data.rolls[rollKey()].at == request.time
+          )
+        );
+
+      allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
+    }
   }
 }
