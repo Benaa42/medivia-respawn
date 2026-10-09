@@ -590,7 +590,7 @@ details.backup textarea {
         <input type="text" id="room-name" maxlength="24" autocomplete="off" spellcheck="false"></label>
       <section class="room-choice">
         <h3 data-i18n="room.create.title">Começar uma sala nova</h3>
-        <p class="support-note" data-i18n="room.create.hint">Você recebe um número para passar ao grupo.</p>
+        <p class="support-note" data-i18n="room.create.hint">Você recebe um número para passar ao grupo. Sala sem uso por 24 horas é apagada sozinha.</p>
         <button class="dlg raffle-go" type="button" id="room-create" data-i18n="room.create">Criar sala</button>
       </section>
       <p class="room-or" data-i18n="room.or">ou</p>
@@ -812,7 +812,7 @@ const I18N = {
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
     'room.create.title': 'Começar uma sala nova',
-    'room.create.hint': 'Você recebe um número para passar ao grupo.',
+    'room.create.hint': 'Você recebe um número para passar ao grupo. Sala sem uso por 24 horas é apagada sozinha.',
     'room.or': 'ou',
     'room.join.title': 'Entrar em uma sala que já existe',
     'room.join.hint': 'Digite o número que o dono da sala passou.',
@@ -1063,7 +1063,7 @@ const I18N = {
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
     'room.create.title': 'Start a new room',
-    'room.create.hint': 'You get a number to give to your party.',
+    'room.create.hint': 'You get a number to give to your party. A room left unused for 24 hours is deleted on its own.',
     'room.or': 'or',
     'room.join.title': 'Join a room that already exists',
     'room.join.hint': 'Type the number the room owner gave you.',
@@ -1314,7 +1314,7 @@ const I18N = {
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
     'room.create.title': 'Empezar una sala nueva',
-    'room.create.hint': 'Recibes un número para pasar al grupo.',
+    'room.create.hint': 'Recibes un número para pasar al grupo. Una sala sin uso durante 24 horas se borra sola.',
     'room.or': 'o',
     'room.join.title': 'Entrar en una sala que ya existe',
     'room.join.hint': 'Escribe el número que te pasó el dueño de la sala.',
@@ -1565,7 +1565,7 @@ const I18N = {
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
     'room.create.title': 'Załóż nowy pokój',
-    'room.create.hint': 'Dostajesz numer do przekazania drużynie.',
+    'room.create.hint': 'Dostajesz numer do przekazania drużynie. Pokój nieużywany przez 24 godziny usuwa się sam.',
     'room.or': 'lub',
     'room.join.title': 'Wejdź do istniejącego pokoju',
     'room.join.hint': 'Wpisz numer otrzymany od właściciela pokoju.',
@@ -3588,6 +3588,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 11:32',
+    pt: ['Salas de sorteio: sala sem uso por 24 horas é apagada sozinha, e o número volta a ficar livre.'],
+    en: ['Raffle rooms: a room left unused for 24 hours is deleted on its own, and its number becomes free again.'],
+    es: ['Salas de sorteo: una sala sin uso durante 24 horas se borra sola y su número vuelve a quedar libre.'],
+    pl: ['Pokoje losowania: pokój nieużywany przez 24 godziny usuwa się sam, a jego numer znów jest wolny.'],
+  },
   { at: '2026-10-09 11:16',
     pt: ['Salas de sorteio: som de dados gravado no lugar do som gerado; o número aparece quando os dados param.'],
     en: ['Raffle rooms: a recorded dice sound replaces the generated one; the number shows when the dice stop.'],
@@ -3784,7 +3790,7 @@ function drawRaffle() {
 /* ---------- Sala de sorteio com dado D100 ----------
    Quem cria a sala recebe um número de 4 dígitos e passa para o grupo. Cada pessoa entra com o número e rola um D100
    por rodada; todos veem as jogadas. A sala é um documento no mesmo banco dos respawns (coleção rooms):
-     owner, round, items { rodada: nome do item }, rolls { "rodada_pessoa": { name, at } }
+     owner, at (hora do último uso), round, items { rodada: nome do item }, rolls { "rodada_pessoa": { name, at } }
    O valor do dado não é gravado: sai de "at", a hora em que o servidor recebeu a jogada (até o milésimo de segundo),
    misturada com a sala, a rodada e a pessoa. Ninguém escolhe essa hora e todos os navegadores fazem a mesma conta,
    então todos veem o mesmo número. As regras do banco (firestore.rules) garantem uma jogada por pessoa por rodada. */
@@ -3792,6 +3798,35 @@ const room = { code: null, doc: null, sig: '', seen: null, rolling: new Map(), s
 const fmtCode = c => c.length === 6 ? c.slice(0, 3) + ' ' + c.slice(3) : c;   // as primeiras salas tinham 6 dígitos
 const roomPath = code => cloud.root + '/rooms/' + code;
 const roomMsg = text => setText($('#room-msg'), text || '');
+// Grava na sala marcando a hora do último uso ("at"): é ela que conta para a limpeza das salas paradas.
+// Se o banco ainda estiver com regras que não conhecem essa marca, a gravação é refeita sem ela.
+async function roomWrite(write) {
+  const res = await cloudCommit({ ...write, updateTransforms: [...(write.updateTransforms || []), { fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }] });
+  return res.status === 403 ? cloudCommit(write) : res;
+}
+// Limpeza: sala sem uso há mais de 24 horas é apagada (as regras do banco só deixam apagar nessa condição).
+// Não há tarefa no servidor para isso, então quem limpa é o navegador de quem já tem identidade no site,
+// ao abrir a página e ao criar uma sala, no máximo uma vez a cada 6 horas.
+const LS_SWEEP = 'medivia-respawn.limpeza.v1';
+async function sweepRooms() {
+  if (!cloud.on || !(lsGet(LS_AUTH, null) || {}).refresh) return;
+  if (Date.now() - (Number(lsGet(LS_SWEEP, 0)) || 0) < 6 * 3600000) return;
+  lsSet(LS_SWEEP, Date.now());
+  try {
+    const got = await cloudFetch(':runQuery', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ structuredQuery: {
+        from: [{ collectionId: 'rooms' }],
+        where: { fieldFilter: { field: { fieldPath: 'at' }, op: 'LESS_THAN', value: { timestampValue: new Date(Date.now() - 24 * 3600000 - 60000).toISOString() } } },
+        orderBy: [{ field: { fieldPath: 'at' } }],
+        limit: 30,
+      } }),
+    });
+    if (!got.ok || !Array.isArray(got.json)) return;
+    for (const row of got.json) if (row.document && row.document.name) await cloudCommit({ delete: row.document.name });
+  } catch { /* fica para a próxima vez */ }
+}
+setTimeout(sweepRooms, 8000);
 // A hora do servidor sempre com seis casas, para a conta dar igual venha de onde vier.
 function stampKey(at) {
   const m = /^(.*?)(?:\.(\d+))?Z$/.exec(String(at));
@@ -4013,7 +4048,7 @@ async function roomCreate() {
         const old = await cloudCommit({ delete: roomPath(code) });
         if (old.ok) res = await create(code);
       }
-      if (res.ok) { made = true; enterRoom(code, { owner: uid, round: 1, items: {}, rolls: {} }); }
+      if (res.ok) { made = true; enterRoom(code, { owner: uid, round: 1, items: {}, rolls: {} }); sweepRooms(); }
       else if (res.status === 403 && digits === 4) digits = 6;   // banco ainda com as regras que só aceitam 6 dígitos
       else if (res.status !== 409) break;
     }
@@ -4046,7 +4081,7 @@ async function roomRoll() {
   try {
     const uid = await cloudAuth();
     const code = room.code, n = room.doc.round || 1, key = n + '_' + uid, path = 'rolls.`' + key + '`';
-    const res = await cloudCommit({
+    const res = await roomWrite({
       update: { name: roomPath(code), fields: { rolls: { mapValue: { fields: { [key]: toFs({ name }) } } } } },
       updateMask: { fieldPaths: [path + '.name'] },
       updateTransforms: [{ fieldPath: path + '.at', setToServerValue: 'REQUEST_TIME' }],
@@ -4072,7 +4107,7 @@ async function roomNext() {
   roomMsg('');
   renderRoom();
   try {
-    const res = await cloudCommit({
+    const res = await roomWrite({
       update: { name: roomPath(room.code), fields: toFs({ round: next, items }).mapValue.fields },
       updateMask: { fieldPaths: ['round', 'items'] },
       currentDocument: { exists: true },
