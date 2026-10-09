@@ -1920,15 +1920,14 @@ function parsePrint(lines) {
     for (const l of other) {
       if (l.y <= pctLine.y || l.y >= firstY || l.y - pctLine.y >= pctLine.h * 12) continue;
       const m = l.text.match(/(\d{1,3}(?:[ .,]\d{3})+|\d{3,})/);
-      if (m) nums.push({ v: +m[1].replace(/\D/g, ''), y: l.y, lead: m.index === 0 });
+      if (m) nums.push({ v: +m[1].replace(/\D/g, ''), y: l.y, lead: !/[A-Za-zÀ-ÿ]/.test(l.text.slice(0, m.index)) });
     }
     nums.sort((a, b) => a.y - b.y);
     const c = nums.find(n => n.lead && n.y - pctLine.y < pctLine.h * 5);
     if (c) {
       cost = c.v;
       const d = nums.find(n => n.y > c.y + pctLine.h * 2);
-      // Desconto maior que o preço: o custo do print não diz mais qual é o preço cheio, então não é usado.
-      if (d && d.v > 0) { if (d.v < cost * 3) discount = d.v; else cost = null; }
+      if (d && d.v > 0) discount = d.v;   // o preço cheio é sempre o custo do print mais o desconto, por maior que ele seja
     }
     const title = other
       .filter(l => l.conf >= 75 && l.y < pctLine.y - pctLine.h && /[A-Za-z]{3,}/.test(l.text) && l.text.length <= 40)
@@ -2195,18 +2194,23 @@ function rawToRespawn(raw) {
     .sort((a, b) => (a.i || 0) - (b.i || 0));
   return normalize({ name: raw.name, monsters, cost10: raw.cost10, duration: raw.duration, readAt: raw.readAt, updatedAt: raw.at });
 }
-// Respawn da página -> documento do banco. Com "prev", só acrescenta: o que já está lá fica como está.
-function respawnToRaw(r, owner, prev) {
+// Respawn da página -> documento do banco. Com "prev" parte do que já está lá e acrescenta o que falta;
+// com "update", além disso troca os números (custo, duração, quantidade e tempo de cada criatura) pelos da leitura
+// feita aqui. O nome e as criaturas que já estavam no banco nunca saem.
+function respawnToRaw(r, owner, prev, update) {
   const monsters = {};
   let next = 0;
   for (const [k, m] of Object.entries(prev ? prev.monsters || {} : {})) { monsters[k] = m; next = Math.max(next, (m.i || 0) + 1); }
   for (const m of r.monsters) {
     const k = slug(m.name);
-    if (k && !monsters[k]) monsters[k] = { name: m.name, count: m.count, base: m.base, i: next++ };
+    if (!k) continue;
+    if (!monsters[k]) monsters[k] = { name: m.name, count: m.count, base: m.base, i: next++ };
+    else if (update) monsters[k] = { ...monsters[k], count: m.count, base: m.base };
   }
   const raw = { name: prev ? prev.name : r.name, monsters, owner };
+  const newCost = update && r.cost10 != null;   // a leitura trouxe o custo: ele e a duração dele substituem os do banco
   for (const f of ['cost10', 'duration']) {
-    const v = prev && prev[f] != null ? prev[f] : r[f];
+    const v = prev && prev[f] != null && !newCost ? prev[f] : r[f];
     if (v != null) raw[f] = v;
   }
   if (r.readAt != null) raw.readAt = r.readAt;
@@ -2312,19 +2316,27 @@ async function pushCloud(id) {
     const got = await cloudFetch('/respawns/' + id);
     if (!got.ok && got.status !== 404) return 'later';
     const cur = got.ok ? docRaw(got.json) : null;
-    // Quem enviou primeiro pode corrigir à vontade; os demais só acrescentam o que falta.
-    const raw = !cur || cur.owner === uid ? respawnToRaw(mine, uid, null) : respawnToRaw(mine, cur.owner, cur);
-    if (cur && rawKey(cur) === rawKey(raw)) setCloudDoc(id, cur);
-    else {
+    // Quem enviou primeiro pode corrigir à vontade. Os demais atualizam os números com o print mais novo e
+    // acrescentam o que falta; se o banco ainda estiver com regras que só deixam acrescentar, fica só o acréscimo.
+    const forms = !cur || cur.owner === uid
+      ? [respawnToRaw(mine, uid, null)]
+      : [respawnToRaw(mine, cur.owner, cur, true), respawnToRaw(mine, cur.owner, cur)];
+    let done = false;
+    for (const raw of forms) {
+      if (cur && rawKey(cur) === rawKey(raw)) { setCloudDoc(id, cur); done = true; break; }
       const res = await cloudCommit({
         update: { name: docName(id), fields: toFs(raw).mapValue.fields },
         updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
       });
-      if (res.status === 403 || res.status === 409) continue;   // alguém mexeu no meio do caminho, ou as regras recusaram: tenta de novo com a cópia nova
+      if (res.status === 403) continue;   // as regras recusaram esta forma: tenta a seguinte
+      if (res.status === 409) break;      // alguém mexeu no meio do caminho: recomeça com a cópia nova
       if (!res.ok) return 'later';
       raw.at = res.json.commitTime || new Date().toISOString();
       setCloudDoc(id, raw);
+      done = true;
+      break;
     }
+    if (!done) continue;
     // Se o que está aqui ficou igual ao banco de todos, a cópia local deixa de ser necessária.
     if (store.local.get(id) === mine && store.cloud.has(id) && dataKey(mine) === dataKey(store.cloud.get(id))) {
       store.local.delete(id);
@@ -3765,6 +3777,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-09 14:15',
+    pt: ['Banco de todos: um print mais novo atualiza o custo e os tempos do respawn, mesmo que tenha sido enviado primeiro por outra pessoa.', 'Leitura do print: o custo com desconto das tasks deixou de ser ignorado quando o desconto era grande perto do custo.'],
+    en: ['Shared bank: a newer screenshot updates the cost and the times of a respawn, even if someone else sent it first.', 'Screenshot reading: the cost with a task discount is no longer ignored when the discount was large next to the cost.'],
+    es: ['Banco de todos: una captura más nueva actualiza el coste y los tiempos del respawn, aunque otra persona lo haya enviado primero.', 'Lectura de la captura: el coste con descuento de tareas ya no se ignora cuando el descuento era grande frente al coste.'],
+    pl: ['Wspólna baza: nowszy zrzut aktualizuje koszt i czasy respawnu, nawet jeśli jako pierwsza wysłała go inna osoba.', 'Odczyt zrzutu: koszt ze zniżką za taski nie jest już pomijany, gdy zniżka była duża w stosunku do kosztu.'],
+  },
   { at: '2026-10-09 13:38',
     pt: ['Última hunt: se quem pagou o boost esqueceu de resetar a hunt antes, dá para informar o valor à mão; ele entra no gasto dessa pessoa e as contas são refeitas.'],
     en: ['Last hunt: if whoever paid the boost forgot to reset the hunt first, you can enter the amount by hand; it is added to what that person spent and the split is redone.'],

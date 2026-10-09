@@ -4,7 +4,8 @@ rules_version = '2';
 // - Qualquer pessoa lê.
 // - Para gravar é preciso a identidade anônima que o site cria no primeiro envio.
 // - Quem enviou um respawn pode corrigi-lo ou apagá-lo.
-// - Os demais só podem acrescentar monstros: não alteram nem removem o que já existe.
+// - Os demais atualizam os números (custo, duração, quantidade e tempo das criaturas) e acrescentam criaturas,
+//   para que um print mais novo valha para todos. Não mudam o nome, não tiram criaturas e não apagam o respawn.
 // - Ninguém grava nada fora do formato esperado.
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -18,10 +19,6 @@ service cloud.firestore {
           && (!('cost10' in d) || (d.cost10 is int && d.cost10 > 0 && d.cost10 <= 100000000))
           && (!('duration' in d) || (d.duration is int && d.duration >= 10 && d.duration <= 1000))
           && (!('readAt' in d) || (d.readAt is int && d.readAt >= 0 && d.readAt <= 100));
-      }
-      function kept(field) {
-        return !(field in resource.data)
-          || (field in request.resource.data && request.resource.data[field] == resource.data[field]);
       }
 
       allow read: if true;
@@ -39,9 +36,6 @@ service cloud.firestore {
           || (
             request.resource.data.name == resource.data.name
             && request.resource.data.monsters.diff(resource.data.monsters).removedKeys().size() == 0
-            && request.resource.data.monsters.diff(resource.data.monsters).changedKeys().size() == 0
-            && kept('cost10')
-            && kept('duration')
           )
         );
 
