@@ -236,6 +236,8 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 /* Comando de voz: o ponto verde mostra que o site está ouvindo; o número no canto do anel é o que se fala */
 .toggle.voice.live span::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 7px; border-radius: 50%; background: var(--value); }
 .voice-note { flex: 1 0 100%; order: 9; max-width: 78ch; font-size: 13px; color: var(--label); }
+/* A última fala que o navegador entendeu: verde quando era um comando */
+.voice-heard.ok { color: var(--value); }
 /* O "?" ao lado da opção abre a lista dos comandos de voz */
 .voice-help-btn { width: 22px; height: 22px; margin-left: -8px; padding: 0; border: 1px solid var(--edge); border-radius: 50%; background: none; color: var(--label); font: 600 13px/1 var(--font-ui); cursor: pointer; }
 .voice-help-btn:hover, .voice-help-btn[aria-expanded="true"] { border-color: var(--faint); color: var(--title); }
@@ -588,6 +590,7 @@ details.backup textarea {
           <button class="voice-help-btn" type="button" id="voice-help-btn" aria-expanded="false" aria-controls="voice-help" title="Ver os comandos de voz" aria-label="Ver os comandos de voz" data-i18n-attr="title:voice.help;aria-label:voice.help">?</button>
         </div>
         <p class="voice-note" id="voice-note" role="status" hidden></p>
+        <p class="voice-note voice-heard" id="voice-heard" hidden></p>
         <div class="voice-help" id="voice-help" hidden></div>
         <div class="dlgs">
           <button class="dlg go" type="button" id="float-btn" data-i18n="float">Janela flutuante</button>
@@ -872,6 +875,9 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'voice.hearing': 'Ouvindo: "{x}"…',
+    'voice.heard': 'Ouvi: "{x}"',
+    'voice.heardNo': 'Ouvi: "{x}" (não é um comando)',
     'read.grew': 'Criaturas novas neste respawn: {y}. Agora são {n}.',
     'read.more': 'Se a lista do jogo tiver mais criaturas, role a lista e mande outro print: elas são somadas a este respawn.',
     'voice.help': 'Ver os comandos de voz',
@@ -887,7 +893,7 @@ const I18N = {
     'voice.h.moreD': 'Soma 10 segundos nos que estão contando, ou só naquele',
     'voice.h.less': '"menos dez" · "menos dez um"',
     'voice.h.lessD': 'Tira 10 segundos dos que estão contando, ou só daquele',
-    'voice.h.tip': 'Fale só o comando, sem outras palavras. O número é o que aparece no canto de cada cronômetro com a voz ligada. Com a janela flutuante aberta, os comandos sem número valem só para os cronômetros que estão nela.',
+    'voice.h.tip': 'Fale só o comando, sem outras palavras; dá para emendar dois ("iniciar mais dez"). O número é o que aparece no canto de cada cronômetro com a voz ligada. Com a janela flutuante aberta, o comando sem número vale só para os cronômetros que estão nela; com "todos" ("iniciar todos") vale para todos. Deixe a voz ligada em uma aba só.',
     'voice.did.more': 'Voz: 10 segundos somados.',
     'voice.did.moreOne': 'Voz: 10 segundos somados no cronômetro {n}.',
     'voice.did.less': 'Voz: 10 segundos tirados.',
@@ -1195,6 +1201,9 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'voice.hearing': 'Hearing: "{x}"…',
+    'voice.heard': 'Heard: "{x}"',
+    'voice.heardNo': 'Heard: "{x}" (not a command)',
     'read.grew': 'New creatures in this respawn: {y}. It now has {n}.',
     'read.more': 'If the list in the game has more creatures, scroll it and send another screenshot: they are added to this respawn.',
     'voice.help': 'Show the voice commands',
@@ -1210,7 +1219,7 @@ const I18N = {
     'voice.h.moreD': 'Adds 10 seconds to the running timers, or just that one',
     'voice.h.less': '"minus ten" · "minus ten one"',
     'voice.h.lessD': 'Takes 10 seconds off the running timers, or just that one',
-    'voice.h.tip': 'Say only the command, nothing else. The number is the one shown on the corner of each timer while voice is on. With the floating window open, commands without a number apply only to the timers shown in it.',
+    'voice.h.tip': 'Say only the command, nothing else; two can be chained ("start plus ten"). The number is the one shown on the corner of each timer while voice is on. With the floating window open, a command without a number applies only to the timers shown in it; with "all" ("start all") it applies to every timer. Keep voice on in one tab only.',
     'voice.did.more': 'Voice: 10 seconds added.',
     'voice.did.moreOne': 'Voice: 10 seconds added to timer {n}.',
     'voice.did.less': 'Voice: 10 seconds taken off.',
@@ -1518,6 +1527,9 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'voice.hearing': 'Oyendo: "{x}"…',
+    'voice.heard': 'Oí: "{x}"',
+    'voice.heardNo': 'Oí: "{x}" (no es un comando)',
     'read.grew': 'Criaturas nuevas en este respawn: {y}. Ahora son {n}.',
     'read.more': 'Si la lista del juego tiene más criaturas, desplázala y envía otra captura: se suman a este respawn.',
     'voice.help': 'Ver los comandos de voz',
@@ -1533,7 +1545,7 @@ const I18N = {
     'voice.h.moreD': 'Suma 10 segundos a los que están contando, o solo a ese',
     'voice.h.less': '"menos diez" · "menos diez uno"',
     'voice.h.lessD': 'Quita 10 segundos a los que están contando, o solo a ese',
-    'voice.h.tip': 'Di solo el comando, sin otras palabras. El número es el que aparece en la esquina de cada cronómetro con la voz activada. Con la ventana flotante abierta, los comandos sin número valen solo para los cronómetros que están en ella.',
+    'voice.h.tip': 'Di solo el comando, sin otras palabras; se pueden encadenar dos ("iniciar más diez"). El número es el que aparece en la esquina de cada cronómetro con la voz activada. Con la ventana flotante abierta, el comando sin número vale solo para los cronómetros que están en ella; con "todos" ("iniciar todos") vale para todos. Deja la voz activada en una sola pestaña.',
     'voice.did.more': 'Voz: 10 segundos sumados.',
     'voice.did.moreOne': 'Voz: 10 segundos sumados al cronómetro {n}.',
     'voice.did.less': 'Voz: 10 segundos quitados.',
@@ -1841,6 +1853,9 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'voice.hearing': 'Słyszę: „{x}”…',
+    'voice.heard': 'Usłyszano: „{x}”',
+    'voice.heardNo': 'Usłyszano: „{x}” (to nie polecenie)',
     'read.grew': 'Nowe stworzenia w tym respawnie: {y}. Teraz jest ich {n}.',
     'read.more': 'Jeśli lista w grze ma więcej stworzeń, przewiń ją i wyślij kolejny zrzut: zostaną dodane do tego respawnu.',
     'voice.help': 'Pokaż polecenia głosowe',
@@ -1856,7 +1871,7 @@ const I18N = {
     'voice.h.moreD': 'Dodaje 10 sekund do odliczających liczników lub tylko do tego',
     'voice.h.less': '„minus dziesięć” · „minus dziesięć jeden”',
     'voice.h.lessD': 'Odejmuje 10 sekund od odliczających liczników lub tylko od tego',
-    'voice.h.tip': 'Powiedz samo polecenie, bez innych słów. Numer to ten widoczny w rogu każdego licznika, gdy głos jest włączony. Gdy pływające okno jest otwarte, polecenia bez numeru dotyczą tylko liczników, które w nim są.',
+    'voice.h.tip': 'Powiedz samo polecenie, bez innych słów; można połączyć dwa („start plus dziesięć”). Numer to ten widoczny w rogu każdego licznika, gdy głos jest włączony. Gdy pływające okno jest otwarte, polecenie bez numeru dotyczy tylko liczników, które w nim są; z „wszystkie” („start wszystkie”) dotyczy wszystkich. Włącz głos tylko w jednej karcie.',
     'voice.did.more': 'Głos: dodano 10 sekund.',
     'voice.did.moreOne': 'Głos: dodano 10 sekund do licznika {n}.',
     'voice.did.less': 'Głos: odjęto 10 sekund.',
@@ -4273,6 +4288,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 15:30',
+    pt: ['Comando de voz: a tela mostra o que o navegador ouviu ("Ouvi: …"), para ver por que um comando não pegou.', 'Dois comandos ditos em seguida ("iniciar mais dez") valem juntos, e "iniciar todos" vale para todos mesmo com a janela flutuante aberta.'],
+    en: ['Voice command: the page shows what the browser heard ("Heard: …"), so you can see why a command did not work.', 'Two commands said in a row ("start plus ten") both count, and "start all" applies to every timer even with the floating window open.'],
+    es: ['Comando de voz: la pantalla muestra lo que oyó el navegador ("Oí: …"), para ver por qué un comando no funcionó.', 'Dos comandos dichos seguidos ("iniciar más diez") valen juntos, e "iniciar todos" vale para todos incluso con la ventana flotante abierta.'],
+    pl: ['Polecenia głosowe: strona pokazuje, co usłyszała przeglądarka („Usłyszano: …”), aby było widać, dlaczego polecenie nie zadziałało.', 'Dwa polecenia wypowiedziane po kolei („start plus dziesięć”) działają razem, a „start wszystkie” dotyczy wszystkich także przy otwartym pływającym oknie.'],
+  },
   { at: '2026-10-10 15:12',
     pt: ['Respawn com mais criaturas do que cabe na janela do jogo: role a lista e mande outro print. O site soma as criaturas novas ao respawn que já existe e diz quais entraram.'],
     en: ['Respawn with more creatures than fit in the game window: scroll the list and send another screenshot. The site adds the new creatures to the existing respawn and tells you which ones came in.'],
@@ -5288,8 +5309,9 @@ const VOICE = {
 };
 const speechClass = () => window.SpeechRecognition || window.webkitSpeechRecognition;
 const voice = { rec: null, on: false, note: null, heardAt: 0, wait: 0, seen: new Map(), handled: -1 };
-// Entende uma fala. Devolve { cmd: 'start', 'reset', 'more' ou 'less', n: número do cronômetro (0 = todos) }, ou null
-// se não for comando. Reiniciar é o mesmo que iniciar; 'more' e 'less' são o acerto de 10 segundos.
+// Entende uma fala. Devolve a lista dos comandos dela, cada um { cmd: 'start', 'reset', 'more' ou 'less', n: número do
+// cronômetro (0 = sem número), all: disse "todos" }, ou null se não for só comando. Reiniciar é o mesmo que iniciar;
+// 'more' e 'less' são o acerto de 10 segundos. Duas ordens ditas em seguida chegam juntas ("iniciar mais dez").
 function voiceParse(text) {
   const v = VOICE[ui.lang] || VOICE.en;
   // O navegador às vezes escreve "+10" e "-10" em vez das palavras.
@@ -5297,37 +5319,65 @@ function voiceParse(text) {
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
   for (const [from, to] of v.fix || []) said = said.split(from).join(to);
   const toks = said.split(' ').filter(t => t && !v.skip.includes(t));
-  let cmd = v.start.includes(toks[0]) ? 'start' : v.reset.includes(toks[0]) ? 'reset' : null, rest = toks.slice(1);
-  if (!cmd && (v.more.includes(toks[0]) || v.less.includes(toks[0]))) {
-    // "mais dez" e "menos dez". O número do cronômetro pode vir colado: "mais 102" é "mais dez dois".
-    const glued = /^10([1-9])$/.exec(toks[1] || '');
-    if (glued) rest = [glued[1], ...toks.slice(2)];
-    else if (v.ten.includes(toks[1])) rest = toks.slice(2);
-    else return null;
-    cmd = v.more.includes(toks[0]) ? 'more' : 'less';
+  const num = t => { const i = v.nums.findIndex(w => w.includes(t)); return i >= 0 ? i + 1 : /^[1-9]$/.test(t) ? +t : 0; };   // por extenso ou em algarismo
+  const cmds = [];
+  for (let i = 0; i < toks.length;) {
+    const c = { cmd: v.start.includes(toks[i]) ? 'start' : v.reset.includes(toks[i]) ? 'reset' : null, n: 0, all: false };
+    let next = i + 1;
+    if (!c.cmd && (v.more.includes(toks[i]) || v.less.includes(toks[i]))) {
+      // "mais dez" e "menos dez". O número do cronômetro pode vir colado: "mais 102" é "mais dez dois".
+      const glued = /^10([1-9])$/.exec(toks[next] || '');
+      if (glued) c.n = +glued[1];
+      else if (!v.ten.includes(toks[next])) return null;
+      c.cmd = v.more.includes(toks[i]) ? 'more' : 'less';
+      next++;
+    }
+    if (!c.cmd) return null;   // qualquer palavra que não seja de comando: é conversa
+    if (!c.n && next < toks.length) {
+      if (v.all.includes(toks[next])) { c.all = true; next++; }
+      else if (num(toks[next])) { c.n = num(toks[next]); next++; }
+    }
+    cmds.push(c);
+    i = next;
   }
-  if (!cmd || rest.length > 1) return null;   // depois do comando só cabe o número ou "todos"; o resto é conversa
-  if (!rest.length || v.all.includes(rest[0])) return { cmd, n: 0 };
-  const i = v.nums.findIndex(w => w.includes(rest[0]));
-  const n = i >= 0 ? i + 1 : /^[1-9]$/.test(rest[0]) ? +rest[0] : 0;   // o navegador às vezes escreve o número em algarismo
-  return n ? { cmd, n } : null;
+  return cmds.length && cmds.length <= 3 ? cmds : null;
 }
-function voiceRun(c, at) {
-  const keys = groupsAll().map(g => g.key);
-  if (!keys.length) return;
-  if (c.n > keys.length) { setStatus('err', tr('voice.noTimer', { n: c.n })); return; }
-  // Sem número, o comando vale para todos; com a janela flutuante aberta, só para os cronômetros que estão nela.
-  const picked = c.n ? [keys[c.n - 1]] : floatOpen() ? groupsNow().map(g => g.key) : keys;
+// Faz um comando. Devolve o tipo e o texto da mensagem.
+function voiceDo(c, keys, at) {
+  if (c.n > keys.length) return ['err', tr('voice.noTimer', { n: c.n })];
+  // Sem número, o comando vale para todos; com a janela flutuante aberta, só para os cronômetros que estão nela,
+  // a não ser que a pessoa diga "todos".
+  const picked = c.n ? [keys[c.n - 1]] : !c.all && floatOpen() ? groupsNow().map(g => g.key) : keys;
   if (c.cmd === 'more' || c.cmd === 'less') {
     // O acerto só vale para cronômetro que está contando (ou na pausa entre voltas).
     const live = picked.filter(key => { const t = timers.get(key); return t.endAt != null || t.pauseUntil != null; });
-    if (!live.length) { setStatus('err', tr('voice.noRun')); return; }
+    if (!live.length) return ['err', tr('voice.noRun')];
     for (const key of live) nudgeTimer(key, c.cmd === 'more' ? 10 : -10);
   } else {
     for (const key of picked) { if (c.cmd === 'start') startTimer(key, at); else resetTimer(key); }
   }
-  setStatus('ok', tr('voice.did.' + c.cmd + (c.n ? 'One' : ''), { n: c.n }));
-  if (ui.sound && audio) for (const [wave, freq, delay, len, vol] of TONES.sino.warn) tone(freq, delay, len, vol, wave);   // um toque curto confirma que ouviu
+  return ['ok', tr('voice.did.' + c.cmd + (c.n ? 'One' : ''), { n: c.n })];
+}
+function voiceRun(cmds, at) {
+  const keys = groupsAll().map(g => g.key);
+  if (!keys.length) return;
+  const done = cmds.map(c => voiceDo(c, keys, at));
+  setStatus(...done[done.length - 1]);
+  if (done.some(d => d[0] === 'ok') && ui.sound && audio) for (const [wave, freq, delay, len, vol] of TONES.sino.warn) tone(freq, delay, len, vol, wave);   // um toque curto confirma que ouviu
+}
+// Mostra na tela o que o navegador entendeu da fala: é assim que se vê por que um comando não pegou.
+// state: 'live' (ainda falando), 'ok' (era comando) ou 'no' (não era).
+function voiceHeard(text, state) {
+  text = String(text).trim();
+  if (!text) return;
+  voice.heard = { text: text.length > 60 ? text.slice(0, 57) + '…' : text, state };
+  paintHeard();
+}
+function paintHeard() {
+  const n = $('#voice-heard'), h = voice.on ? voice.heard : null;
+  n.hidden = !h;
+  n.classList.toggle('ok', !!h && h.state === 'ok');
+  setText(n, h ? tr(h.state === 'live' ? 'voice.hearing' : h.state === 'ok' ? 'voice.heard' : 'voice.heardNo', { x: h.text }) : '');
 }
 // A lista dos comandos, aberta pelo "?" ao lado da opção. Funciona com a voz ligada ou desligada.
 const VOICE_HELP = ['startAll', 'startOne', 'restart', 'reset', 'more', 'less'];
@@ -5356,10 +5406,12 @@ function voiceListen() {
     for (let i = e.resultIndex; i < e.results.length; i++) {
       if (!voice.seen.has(i)) voice.seen.set(i, now);
       const r = e.results[i];
-      if (!r.isFinal || i <= voice.handled) continue;
+      if (i <= voice.handled) continue;
+      if (!r.isFinal) { voiceHeard(r[0].transcript, 'live'); continue; }
       voice.handled = i;
       let c = null;
       for (let k = 0; k < r.length && !c; k++) c = voiceParse(r[k].transcript);
+      voiceHeard(r[0].transcript, c ? 'ok' : 'no');
       if (!c) continue;
       // De quando contar: o aviso de começo de fala do navegador, se foi desta frase, ou um pouco antes do primeiro texto dela.
       const first = voice.seen.get(i);
@@ -5371,6 +5423,7 @@ function voiceListen() {
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') setVoice(false, 'voice.denied');
     else if (e.error === 'audio-capture') setVoice(false, 'voice.nomic');
     else if (e.error === 'network') { voice.wait = 5000; setStatus('err', tr('voice.network')); }   // sem o serviço: tenta de novo com calma
+    else if (e.error === 'aborted' && voice.rec === rec) voice.wait = 2500;   // outra aba começou a ouvir: só uma por vez consegue
   };
   // O navegador encerra a escuta depois de um tempo em silêncio: ela é religada enquanto a opção estiver marcada.
   rec.onend = () => {
@@ -5393,6 +5446,8 @@ function setVoice(on, note) {
   voice.note = on ? 'voice.info' : note || null;
   $('#voice-note').hidden = !voice.note;
   setText($('#voice-note'), voice.note ? tr(voice.note) : '');
+  if (!on) voice.heard = null;
+  paintHeard();
   renderSheet();   // os números ao lado dos cronômetros aparecem ou somem
   tick();
 }
