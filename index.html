@@ -880,11 +880,12 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'xp.share': 'Em grupo, cada jogador recebe o XP do abate dividido por {f}, como no mapper.',
     'mob.xp': 'XP por abate: ',
     'mob.xpTip': 'Ainda sem o XP desta criatura: cole o print da ficha dela no bestiário do jogo, na aba Normal',
-    'xp.line': 'XP estimada: {h} por hora, {t} em {d} minutos.',
+    'xp.line': 'XP estimada por jogador: {h} por hora, {t} em {d} minutos.',
     'xp.missing': 'Sem contar {x}: falta o print do bestiário.',
-    'xp.note': 'Conta com tudo morto assim que nasce, na raridade Normal e sem bônus de experiência. Em grupo, é o total do respawn.',
+    'xp.note': 'Conta com tudo morto assim que nasce, na raridade Normal e sem bônus de experiência.',
     'xp.none': 'Para estimar o XP deste respawn, cole o print da ficha de cada criatura no bestiário do jogo (aba Normal). O XP fica guardado para todos.',
     'read.best': '{x}: {v} de XP por abate.',
     'read.bestLocal': 'Guardado neste navegador; vai para o banco de todos assim que der.',
@@ -1217,11 +1218,12 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'xp.share': 'In a group, each player gets the kill XP divided by {f}, as on the mapper.',
     'mob.xp': 'XP per kill: ',
     'mob.xpTip': 'No XP for this creature yet: paste a screenshot of its page in the game bestiary, on the Normal tab',
-    'xp.line': 'Estimated XP: {h} per hour, {t} in {d} minutes.',
+    'xp.line': 'Estimated XP per player: {h} per hour, {t} in {d} minutes.',
     'xp.missing': 'Not counting {x}: the bestiary screenshot is missing.',
-    'xp.note': 'It assumes everything is killed as soon as it spawns, Normal rarity and no experience bonus. In a group, it is the total for the respawn.',
+    'xp.note': 'It assumes everything is killed as soon as it spawns, Normal rarity and no experience bonus.',
     'xp.none': 'To estimate the XP of this respawn, paste a screenshot of each creature\'s page in the game bestiary (Normal tab). The XP is saved for everyone.',
     'read.best': '{x}: {v} XP per kill.',
     'read.bestLocal': 'Saved in this browser; it goes to the shared bank as soon as possible.',
@@ -1554,11 +1556,12 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'xp.share': 'En grupo, cada jugador recibe el XP de la muerte dividido por {f}, como en el mapper.',
     'mob.xp': 'XP por muerte: ',
     'mob.xpTip': 'Aún sin el XP de esta criatura: pega la captura de su ficha en el bestiario del juego, en la pestaña Normal',
-    'xp.line': 'XP estimada: {h} por hora, {t} en {d} minutos.',
+    'xp.line': 'XP estimada por jugador: {h} por hora, {t} en {d} minutos.',
     'xp.missing': 'Sin contar {x}: falta la captura del bestiario.',
-    'xp.note': 'Cuenta con todo muerto en cuanto nace, en rareza Normal y sin bonus de experiencia. En grupo, es el total del respawn.',
+    'xp.note': 'Cuenta con todo muerto en cuanto nace, en rareza Normal y sin bonus de experiencia.',
     'xp.none': 'Para estimar el XP de este respawn, pega la captura de la ficha de cada criatura en el bestiario del juego (pestaña Normal). El XP queda guardado para todos.',
     'read.best': '{x}: {v} de XP por muerte.',
     'read.bestLocal': 'Guardado en este navegador; irá al banco de todos en cuanto se pueda.',
@@ -1891,11 +1894,12 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'xp.share': 'W grupie każdy gracz dostaje XP za zabicie podzielone przez {f}, jak w mapperze.',
     'mob.xp': 'XP za zabicie: ',
     'mob.xpTip': 'Brak XP tego stworzenia: wklej zrzut jego karty z bestiariusza gry, na zakładce Normalny',
-    'xp.line': 'Szacowane XP: {h} na godzinę, {t} w {d} minut.',
+    'xp.line': 'Szacowane XP na gracza: {h} na godzinę, {t} w {d} minut.',
     'xp.missing': 'Bez {x}: brakuje zrzutu z bestiariusza.',
-    'xp.note': 'Zakłada zabijanie wszystkiego od razu po odrodzeniu, rzadkość Normalna i brak bonusu doświadczenia. W grupie to suma dla respawnu.',
+    'xp.note': 'Zakłada zabijanie wszystkiego od razu po odrodzeniu, rzadkość Normalna i brak bonusu doświadczenia.',
     'xp.none': 'Aby oszacować XP tego respawnu, wklej zrzut karty każdego stworzenia z bestiariusza gry (zakładka Normalny). XP zostaje zapisane dla wszystkich.',
     'read.best': '{x}: {v} XP za zabicie.',
     'read.bestLocal': 'Zapisano w tej przeglądarce; trafi do wspólnej bazy, gdy tylko będzie to możliwe.',
@@ -3713,8 +3717,10 @@ function mobCards(id, r) {
       }, el('small', { text: c.p + '%' }), el('span', { text: fmtTime(c.sec) }), c.task))));
   });
 }
-// Estimativa de XP do respawn: abates por hora de cada criatura vezes o XP por abate dela. Quem ainda não tem o XP
-// no banco fica de fora da soma e é citada, para a pessoa mandar o print do bestiário.
+// Estimativa de XP por jogador: abates por hora de cada criatura vezes o XP por abate dela. Em grupo o respawn é mais
+// rápido, mas cada jogador recebe o XP do abate dividido pelo mesmo fator do grupo (1,34, 1,6 ou 1,78): é a conta
+// da tabela "Team Size" do mapper da wiki (2 jogadores = solo ÷ 1,34, 3 = ÷ 1,6, 4 = ÷ 1,78).
+// Quem ainda não tem o XP no banco fica de fora da soma e é citada, para a pessoa mandar o print do bestiário.
 function paintXp(node, id, r) {
   const pct = pctOf(id), missing = [];
   let hour = 0;
@@ -3724,9 +3730,11 @@ function paintXp(node, id, r) {
     else hour += killsPerHour(respawnAt(m.base, pct, ui.party), m.count) * exp;
   }
   if (missing.length === r.monsters.length) { node.replaceChildren(tr('xp.none')); return; }
+  const each = hour * 100 / ui.party;
   node.replaceChildren(
-    el('b', { text: tr('xp.line', { h: fmtXp(hour), t: fmtXp(hour * ui.dur / 60), d: ui.dur }) }),
-    ' ' + (missing.length ? tr('xp.missing', { x: missing.join(', ') }) + ' ' : '') + tr('xp.note'));
+    el('b', { text: tr('xp.line', { h: fmtXp(each), t: fmtXp(each * ui.dur / 60), d: ui.dur }) }),
+    ' ' + (missing.length ? tr('xp.missing', { x: missing.join(', ') }) + ' ' : '') + tr('xp.note') +
+    (ui.party > 100 ? ' ' + tr('xp.share', { f: (ui.party / 100).toLocaleString(document.documentElement.lang || 'en') }) : ''));
 }
 const sheetHint = r => (r.src === 'mapper' ? tr('hint.mapper') : r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest') + ' ' + tr('task.tip');
 // Desconto das tasks diárias ou semanais. É de quem joga, não do respawn: fica só neste navegador, por respawn,
@@ -4541,6 +4549,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 20:28',
+    pt: ['XP estimada: agora é por jogador, como no mapper. Em grupo, o XP de cada abate é dividido por 1,34 (dupla), 1,6 (trio) ou 1,78 (squad); antes o site mostrava o total sem dividir.'],
+    en: ['Estimated XP: it is now per player, as on the mapper. In a group, the XP of each kill is divided by 1.34 (duo), 1.6 (trio) or 1.78 (squad); before, the site showed the undivided total.'],
+    es: ['XP estimada: ahora es por jugador, como en el mapper. En grupo, el XP de cada muerte se divide por 1,34 (dúo), 1,6 (trío) o 1,78 (squad); antes el sitio mostraba el total sin dividir.'],
+    pl: ['Szacowane XP: teraz na gracza, jak w mapperze. W grupie XP za każde zabicie dzieli się przez 1,34 (duet), 1,6 (trio) lub 1,78 (squad); wcześniej strona pokazywała sumę bez podziału.'],
+  },
   { at: '2026-10-10 17:59',
     pt: ['XP das criaturas: cole o print da ficha de uma criatura no bestiário do jogo (aba Normal) e o site guarda o XP por abate dela para todos.', 'Cada respawn mostra a estimativa de XP por hora e no tempo do bônus, em k e kk, conforme o grupo, o percentual e a duração.'],
     en: ['Creature XP: paste a screenshot of a creature page from the game bestiary (Normal tab) and the site saves its XP per kill for everyone.', 'Each respawn shows the estimated XP per hour and for the bonus time, in k and kk, according to the group, the percentage and the duration.'],
