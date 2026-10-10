@@ -885,7 +885,7 @@ const I18N = {
     'voice.h.moreD': 'Soma 10 segundos nos que estão contando, ou só naquele',
     'voice.h.less': '"menos dez" · "menos dez um"',
     'voice.h.lessD': 'Tira 10 segundos dos que estão contando, ou só daquele',
-    'voice.h.tip': 'Fale só o comando, sem outras palavras. O número é o que aparece no canto de cada cronômetro com a voz ligada.',
+    'voice.h.tip': 'Fale só o comando, sem outras palavras. O número é o que aparece no canto de cada cronômetro com a voz ligada. Com a janela flutuante aberta, os comandos sem número valem só para os cronômetros que estão nela.',
     'voice.did.more': 'Voz: 10 segundos somados.',
     'voice.did.moreOne': 'Voz: 10 segundos somados no cronômetro {n}.',
     'voice.did.less': 'Voz: 10 segundos tirados.',
@@ -1206,7 +1206,7 @@ const I18N = {
     'voice.h.moreD': 'Adds 10 seconds to the running timers, or just that one',
     'voice.h.less': '"minus ten" · "minus ten one"',
     'voice.h.lessD': 'Takes 10 seconds off the running timers, or just that one',
-    'voice.h.tip': 'Say only the command, nothing else. The number is the one shown on the corner of each timer while voice is on.',
+    'voice.h.tip': 'Say only the command, nothing else. The number is the one shown on the corner of each timer while voice is on. With the floating window open, commands without a number apply only to the timers shown in it.',
     'voice.did.more': 'Voice: 10 seconds added.',
     'voice.did.moreOne': 'Voice: 10 seconds added to timer {n}.',
     'voice.did.less': 'Voice: 10 seconds taken off.',
@@ -1527,7 +1527,7 @@ const I18N = {
     'voice.h.moreD': 'Suma 10 segundos a los que están contando, o solo a ese',
     'voice.h.less': '"menos diez" · "menos diez uno"',
     'voice.h.lessD': 'Quita 10 segundos a los que están contando, o solo a ese',
-    'voice.h.tip': 'Di solo el comando, sin otras palabras. El número es el que aparece en la esquina de cada cronómetro con la voz activada.',
+    'voice.h.tip': 'Di solo el comando, sin otras palabras. El número es el que aparece en la esquina de cada cronómetro con la voz activada. Con la ventana flotante abierta, los comandos sin número valen solo para los cronómetros que están en ella.',
     'voice.did.more': 'Voz: 10 segundos sumados.',
     'voice.did.moreOne': 'Voz: 10 segundos sumados al cronómetro {n}.',
     'voice.did.less': 'Voz: 10 segundos quitados.',
@@ -1848,7 +1848,7 @@ const I18N = {
     'voice.h.moreD': 'Dodaje 10 sekund do odliczających liczników lub tylko do tego',
     'voice.h.less': '„minus dziesięć” · „minus dziesięć jeden”',
     'voice.h.lessD': 'Odejmuje 10 sekund od odliczających liczników lub tylko od tego',
-    'voice.h.tip': 'Powiedz samo polecenie, bez innych słów. Numer to ten widoczny w rogu każdego licznika, gdy głos jest włączony.',
+    'voice.h.tip': 'Powiedz samo polecenie, bez innych słów. Numer to ten widoczny w rogu każdego licznika, gdy głos jest włączony. Gdy pływające okno jest otwarte, polecenia bez numeru dotyczą tylko liczników, które w nim są.',
     'voice.did.more': 'Głos: dodano 10 sekund.',
     'voice.did.moreOne': 'Głos: dodano 10 sekund do licznika {n}.',
     'voice.did.less': 'Głos: odjęto 10 sekund.',
@@ -3193,6 +3193,8 @@ const float = { win: null, list: null, all: null, none: null, rowEls: new Map(),
 // Todos os cronômetros, na ordem em que aparecem na página.
 const groupsAll = () => [...timers].map(([key, t]) => ({ key, sec: t.sec, t, who: t.label || '' }))
   .sort((a, b) => (a.t.slot - b.t.slot) || (b.sec - a.sec));
+// A janela flutuante está aberta? Vale a janela própria e, no navegador sem ela, o vídeo flutuante.
+const floatOpen = () => !!float.win || !!(float.video && document.pictureInPictureElement === float.video);
 function groupsNow() {
   const all = groupsAll();
   const shown = all.filter(g => !floatOff(g.t.id, g.t.base));
@@ -4260,6 +4262,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 13:45',
+    pt: ['Comando de voz: com a janela flutuante aberta, "iniciar", "zerar", "mais dez" e "menos dez" sem número valem só para os cronômetros que estão nela.'],
+    en: ['Voice command: with the floating window open, "start", "reset", "plus ten" and "minus ten" without a number apply only to the timers shown in it.'],
+    es: ['Comando de voz: con la ventana flotante abierta, "iniciar", "restablecer", "más diez" y "menos diez" sin número valen solo para los cronómetros que están en ella.'],
+    pl: ['Polecenia głosowe: gdy pływające okno jest otwarte, „start”, „zeruj”, „plus dziesięć” i „minus dziesięć” bez numeru dotyczą tylko liczników, które w nim są.'],
+  },
   { at: '2026-10-10 13:29',
     pt: ['Comando de voz: novos comandos "reiniciar", "mais dez" e "menos dez".', 'O botão "?" ao lado de Comando de voz mostra todos os comandos.'],
     en: ['Voice command: new commands "restart", "plus ten" and "minus ten".', 'The "?" button next to Voice command lists every command.'],
@@ -5291,7 +5299,8 @@ function voiceRun(c, at) {
   const keys = groupsAll().map(g => g.key);
   if (!keys.length) return;
   if (c.n > keys.length) { setStatus('err', tr('voice.noTimer', { n: c.n })); return; }
-  const picked = c.n ? [keys[c.n - 1]] : keys;
+  // Sem número, o comando vale para todos; com a janela flutuante aberta, só para os cronômetros que estão nela.
+  const picked = c.n ? [keys[c.n - 1]] : floatOpen() ? groupsNow().map(g => g.key) : keys;
   if (c.cmd === 'more' || c.cmd === 'less') {
     // O acerto só vale para cronômetro que está contando (ou na pausa entre voltas).
     const live = picked.filter(key => { const t = timers.get(key); return t.endAt != null || t.pauseUntil != null; });
