@@ -42,6 +42,35 @@ service cloud.firestore {
       allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
     }
 
+    // XP das criaturas, lido do bestiário do jogo: um documento por criatura.
+    // - Qualquer pessoa lê.
+    // - Quem tem a identidade anônima do site cria a criatura (nome e XP por abate).
+    // - Qualquer pessoa com identidade corrige o XP com um print mais novo; o nome e quem enviou primeiro não mudam.
+    // - Só quem enviou primeiro apaga.
+    match /creatures/{id} {
+      function shape(d) {
+        return d.keys().hasOnly(['name', 'exp', 'owner', 'at'])
+          && d.name is string && d.name.size() >= 1 && d.name.size() <= 60
+          && d.exp is int && d.exp >= 0 && d.exp <= 100000000
+          && d.owner is string
+          && d.at == request.time;
+      }
+
+      allow read: if true;
+
+      allow create: if request.auth != null
+        && id.matches('^[a-z0-9-]{1,80}$')
+        && shape(request.resource.data)
+        && request.resource.data.owner == request.auth.uid;
+
+      allow update: if request.auth != null
+        && shape(request.resource.data)
+        && request.resource.data.name == resource.data.name
+        && request.resource.data.owner == resource.data.owner;
+
+      allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
+    }
+
     // Salas de sorteio com dado D100.
     // - Qualquer pessoa lê (é assim que todos veem as jogadas).
     // - Quem cria a sala é o dono: só ele abre rodadas, dá nome aos itens e encerra a sala.

@@ -369,6 +369,10 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .task-laps { flex-basis: 100%; font-weight: 600; text-align: right; color: var(--label); }
 .task-laps:empty { display: none; }
 .hint { max-width: 78ch; font-size: 13px; color: var(--faint); }
+/* Estimativa de XP do respawn, e a criatura que ainda está sem XP no banco */
+.xp-line { max-width: 78ch; font-size: 13px; color: var(--label); }
+.xp-line b { font-size: 15px; font-weight: 700; color: var(--value); }
+.mob p.mob-noxp b { color: var(--faint); }
 .howto { display: flex; flex-direction: column; gap: 10px; max-width: 54ch; padding: 24px; border-radius: var(--r-lg); background: var(--box); }
 .howto ol { display: flex; flex-direction: column; gap: 4px; padding-left: 1.3em; color: var(--title); }
 
@@ -876,6 +880,17 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'mob.xp': 'XP por abate: ',
+    'mob.xpTip': 'Ainda sem o XP desta criatura: cole o print da ficha dela no bestiário do jogo, na aba Normal',
+    'xp.line': 'XP estimada: {h} por hora, {t} em {d} minutos.',
+    'xp.missing': 'Sem contar {x}: falta o print do bestiário.',
+    'xp.note': 'Conta com tudo morto assim que nasce, na raridade Normal e sem bônus de experiência. Em grupo, é o total do respawn.',
+    'xp.none': 'Para estimar o XP deste respawn, cole o print da ficha de cada criatura no bestiário do jogo (aba Normal). O XP fica guardado para todos.',
+    'read.best': '{x}: {v} de XP por abate.',
+    'read.bestLocal': 'Guardado neste navegador; vai para o banco de todos assim que der.',
+    'err.bestName': 'É um print do bestiário, mas não li o nome da criatura. Tire o print com a ficha inteira aparecendo.',
+    'err.bestExp': 'Li {x} no bestiário, mas não o valor de EXP. Tire o print com a ficha inteira aparecendo.',
+    'err.bestTab': 'O print do bestiário está com outra raridade escolhida. Clique em "Normal" na ficha e mande de novo: é esse o XP que entra na conta.',
     'voice.hearing': 'Ouvindo: "{x}"…',
     'voice.heard': 'Ouvi: "{x}"',
     'voice.heardNo': 'Ouvi: "{x}" (não é um comando)',
@@ -1202,6 +1217,17 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'mob.xp': 'XP per kill: ',
+    'mob.xpTip': 'No XP for this creature yet: paste a screenshot of its page in the game bestiary, on the Normal tab',
+    'xp.line': 'Estimated XP: {h} per hour, {t} in {d} minutes.',
+    'xp.missing': 'Not counting {x}: the bestiary screenshot is missing.',
+    'xp.note': 'It assumes everything is killed as soon as it spawns, Normal rarity and no experience bonus. In a group, it is the total for the respawn.',
+    'xp.none': 'To estimate the XP of this respawn, paste a screenshot of each creature\'s page in the game bestiary (Normal tab). The XP is saved for everyone.',
+    'read.best': '{x}: {v} XP per kill.',
+    'read.bestLocal': 'Saved in this browser; it goes to the shared bank as soon as possible.',
+    'err.bestName': 'This is a bestiary screenshot, but the creature name could not be read. Take the screenshot with the whole page showing.',
+    'err.bestExp': '{x} was read from the bestiary, but not its EXP value. Take the screenshot with the whole page showing.',
+    'err.bestTab': 'The bestiary screenshot has another rarity selected. Click "Normal" on the page and send it again: that is the XP used in the estimate.',
     'voice.hearing': 'Hearing: "{x}"…',
     'voice.heard': 'Heard: "{x}"',
     'voice.heardNo': 'Heard: "{x}" (not a command)',
@@ -1528,6 +1554,17 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'mob.xp': 'XP por muerte: ',
+    'mob.xpTip': 'Aún sin el XP de esta criatura: pega la captura de su ficha en el bestiario del juego, en la pestaña Normal',
+    'xp.line': 'XP estimada: {h} por hora, {t} en {d} minutos.',
+    'xp.missing': 'Sin contar {x}: falta la captura del bestiario.',
+    'xp.note': 'Cuenta con todo muerto en cuanto nace, en rareza Normal y sin bonus de experiencia. En grupo, es el total del respawn.',
+    'xp.none': 'Para estimar el XP de este respawn, pega la captura de la ficha de cada criatura en el bestiario del juego (pestaña Normal). El XP queda guardado para todos.',
+    'read.best': '{x}: {v} de XP por muerte.',
+    'read.bestLocal': 'Guardado en este navegador; irá al banco de todos en cuanto se pueda.',
+    'err.bestName': 'Es una captura del bestiario, pero no leí el nombre de la criatura. Haz la captura con la ficha entera a la vista.',
+    'err.bestExp': 'Leí {x} en el bestiario, pero no el valor de EXP. Haz la captura con la ficha entera a la vista.',
+    'err.bestTab': 'La captura del bestiario tiene otra rareza elegida. Haz clic en "Normal" en la ficha y envíala de nuevo: ese es el XP que entra en la cuenta.',
     'voice.hearing': 'Oyendo: "{x}"…',
     'voice.heard': 'Oí: "{x}"',
     'voice.heardNo': 'Oí: "{x}" (no es un comando)',
@@ -1854,6 +1891,17 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'mob.xp': 'XP za zabicie: ',
+    'mob.xpTip': 'Brak XP tego stworzenia: wklej zrzut jego karty z bestiariusza gry, na zakładce Normalny',
+    'xp.line': 'Szacowane XP: {h} na godzinę, {t} w {d} minut.',
+    'xp.missing': 'Bez {x}: brakuje zrzutu z bestiariusza.',
+    'xp.note': 'Zakłada zabijanie wszystkiego od razu po odrodzeniu, rzadkość Normalna i brak bonusu doświadczenia. W grupie to suma dla respawnu.',
+    'xp.none': 'Aby oszacować XP tego respawnu, wklej zrzut karty każdego stworzenia z bestiariusza gry (zakładka Normalny). XP zostaje zapisane dla wszystkich.',
+    'read.best': '{x}: {v} XP za zabicie.',
+    'read.bestLocal': 'Zapisano w tej przeglądarce; trafi do wspólnej bazy, gdy tylko będzie to możliwe.',
+    'err.bestName': 'To zrzut z bestiariusza, ale nie udało się odczytać nazwy stworzenia. Zrób zrzut z całą kartą.',
+    'err.bestExp': 'Odczytano {x} z bestiariusza, ale nie wartość EXP. Zrób zrzut z całą kartą.',
+    'err.bestTab': 'Na zrzucie z bestiariusza wybrana jest inna rzadkość. Kliknij „Normalny” na karcie i wyślij ponownie: to XP wchodzi do obliczeń.',
     'voice.hearing': 'Słyszę: „{x}”…',
     'voice.heard': 'Usłyszano: „{x}”',
     'voice.heardNo': 'Usłyszano: „{x}” (to nie polecenie)',
@@ -2304,7 +2352,20 @@ async function ocrLines(blob) {
     for (let i = 0; i < px.length; i += 4) if (px[i + 1] > 150 && px[i + 1] > px[i] + 50 && px[i + 1] > px[i + 2] + 40) n++;
     return n;
   };
-  return { lines, crop, digits, peek, green, close: () => { c.width = c.height = 0; bmp.close(); } };
+  // Brilho (0 a 255) de cada pixel de uma linha horizontal do print.
+  const row = (x, y, wd) => {
+    x = Math.max(0, Math.round(x)); y = Math.round(y); wd = Math.min(bmp.width - x, Math.round(wd));
+    if (wd < 1 || y < 0 || y >= bmp.height) return [];
+    const k = document.createElement('canvas');
+    k.width = wd;
+    k.height = 1;
+    const kg = k.getContext('2d', { willReadFrequently: true });
+    kg.drawImage(bmp, x, y, wd, 1, 0, 0, wd, 1);
+    const px = kg.getImageData(0, 0, wd, 1).data, out = [];
+    for (let i = 0; i < px.length; i += 4) out.push(Math.max(px[i], px[i + 1], px[i + 2]));
+    return out;
+  };
+  return { lines, crop, digits, peek, green, row, close: () => { c.width = c.height = 0; bmp.close(); } };
 }
 
 // O mais frequente de uma lista de leituras (as vazias não contam).
@@ -2405,11 +2466,54 @@ async function readMapper(ocr) {
   };
 }
 
+// Print do bestiário do jogo, com a ficha de uma criatura. O nome fica à esquerda dos quadros HP e EXP, na altura dos
+// títulos deles, e o valor de cada quadro logo abaixo do título. As abas de raridade (Normal, Comum, Raro, Lendário)
+// mudam os números da ficha; só a primeira, Normal, serve para a conta. Devolve null quando o print não é do bestiário.
+async function readBestiary(ocr) {
+  const L = ocr.lines, find = re => L.find(l => re.test(l.text));
+  const hp = find(/^HP$/), exp = hp && L.find(l => /^EXP$/.test(l.text) && Math.abs(l.y - hp.y) < l.h * 2);
+  if (!exp || !find(/^(ARM|DEF|SPD|MANA)$/)) return null;
+  const out = { kind: 'bestiary', name: null, exp: null, tab: null };
+  const h = exp.h, pitch = Math.abs(exp.x + exp.w / 2 - hp.x - hp.w / 2);   // distância entre os quadros
+  const nameLine = L.filter(l => l.x + l.w < hp.x && Math.abs(l.y - hp.y) < h * 2 && l.conf >= 60 && /[A-Za-z]{2}/.test(l.text)).sort((a, b) => a.x - b.x)[0];
+  if (nameLine) out.name = nameLine.text.replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ').slice(0, 60) || null;
+  // EXP: o número logo abaixo do título, relido de perto três vezes. Vale o que mais se repetir.
+  const num = t => { const m = String(t).replace(/[.,]/g, ' ').trim().match(/^\d{1,3}(?: ?\d{3})*$|^\d{1,9}$/); return m ? +m[0].replace(/ /g, '') : null; };
+  const below = L.filter(l => l.y > exp.y + h * 0.5 && l.y - exp.y < h * 5 && l.x < exp.x + exp.w && l.x + l.w > exp.x).sort((a, b) => a.y - b.y)[0];
+  const box = below ? { x: below.x - h * 0.8, y: below.y - h * 0.5, w: below.w + h * 1.6, h: below.h * 2 }
+    : { x: exp.x + exp.w / 2 - pitch * 0.45, y: exp.y + h * 1.5, w: pitch * 0.9, h: h * 2.8 };
+  const reads = (await ocr.peek(box.x, box.y, box.w, box.h, '0123456789 ')).map(num);
+  out.exp = vote([below ? num(below.text) : null, ...reads]);
+  if (out.exp != null && out.exp > 1e8) out.exp = null;
+  // Abas de raridade: uma fileira de traços acima do nome, um por aba; o da aba escolhida é o mais claro.
+  // Só valem traços lisos (o texto das abas também forma trechos claros, mas com o brilho variando).
+  const x0 = Math.max(0, hp.x - pitch * 2.6), wide = exp.x + exp.w / 2 + pitch * 0.6 - x0;
+  for (let y = Math.round(exp.y - h * 6); y < exp.y - h * 1.5 && out.tab == null; y++) {
+    const px = ocr.row(x0, y, wide);
+    if (!px.length) continue;
+    const ground = [...px].sort((a, b) => a - b)[Math.floor(px.length / 10)], runs = [];   // o fundo é o que há de mais escuro na linha
+    for (let i = 0; i < px.length; i++) {
+      if (px[i] <= ground + 8) continue;
+      let j = i;
+      while (j < px.length && px[j] > ground + 8) j++;
+      const mid = px.slice(i + 2, j - 2);
+      if (j - i >= h * 3 && j - i <= pitch * 1.2 && Math.max(...mid) - Math.min(...mid) <= 12) runs.push(mid.reduce((a, b) => a + b, 0) / mid.length);
+      i = j;
+    }
+    if (runs.length < 3 || runs.length > 6) continue;
+    const top = Math.max(...runs), rest = runs.filter(v => v !== top);
+    if (runs.length - rest.length === 1 && top - Math.max(...rest) >= 10) out.tab = runs.indexOf(top);   // 0 = Normal
+  }
+  return out;
+}
+
 // Lê o print inteiro. Na página toda o leitor às vezes pula o tempo de um monstro e acerta olhando só o card dele,
 // então cada monstro que ficou sem tempo é relido sozinho.
 async function readPrint(blob) {
   const ocr = await ocrLines(blob);
   try {
+    const bestiary = await readBestiary(ocr);
+    if (bestiary) return bestiary;
     const mapper = await readMapper(ocr);
     if (mapper) return mapper;
     const p = parsePrint(ocr.lines);
@@ -2794,6 +2898,121 @@ async function cloudDelete(id) {
   saveCloudCache();
 }
 
+/* ---------- XP das criaturas ----------
+   O XP que cada criatura dá por abate vem do print da ficha dela no bestiário do jogo e fica no banco de todos, na
+   coleção "creatures", um documento por criatura. Qualquer pessoa pode enviar; um print mais novo corrige o valor.
+   Como os respawns, a lista fica copiada no navegador e depois só as novidades são buscadas. */
+const LS_XP = 'medivia-respawn.criaturas.v1';             // cópia local do XP do banco de todos
+const LS_XP_MINE = 'medivia-respawn.criaturas-meu.v1';    // lidos aqui que ainda não subiram
+const xp = { cloud: new Map(), mine: new Map(), fullAt: 0, loading: false, rev: 0, key: '' };
+const xpDoc = raw => raw && typeof raw.name === 'string' && raw.name.trim() && int(raw.exp, 0, 1e8) != null
+  ? { name: raw.name.trim().slice(0, 60), exp: int(raw.exp, 0, 1e8), at: raw.at || null, owner: raw.owner || null } : null;
+{
+  const cache = lsGet(LS_XP, null);
+  for (const [id, raw] of Object.entries(cache && cache.docs && typeof cache.docs === 'object' ? cache.docs : {})) {
+    const d = xpDoc(raw);
+    if (d && slug(id) === id) xp.cloud.set(id, d);
+  }
+  xp.fullAt = Number(cache && cache.fullAt) || 0;
+  for (const [id, raw] of Object.entries(lsGet(LS_XP_MINE, {}) || {})) {
+    const d = xpDoc(raw);
+    if (d && slug(id) === id) xp.mine.set(id, { name: d.name, exp: d.exp });
+  }
+}
+// XP por abate de uma criatura, ou null se ninguém mandou ainda. O que foi lido aqui vale antes do banco.
+const expOf = name => { const id = slug(name), d = xp.mine.get(id) || xp.cloud.get(id); return d ? d.exp : null; };
+// Guarda a cópia local e redesenha; a página só é refeita quando algum valor mudou de fato.
+function xpChanged() {
+  const key = JSON.stringify([[...xp.cloud].map(([id, d]) => [id, d.exp]), [...xp.mine].map(([id, d]) => [id, d.exp])]);
+  lsSet(LS_XP, { fullAt: xp.fullAt, docs: Object.fromEntries(xp.cloud) });
+  lsSet(LS_XP_MINE, Object.fromEntries(xp.mine));
+  if (key === xp.key) return;
+  xp.key = key;
+  xp.rev++;
+  renderAll();
+}
+xp.key = JSON.stringify([[...xp.cloud].map(([id, d]) => [id, d.exp]), [...xp.mine].map(([id, d]) => [id, d.exp])]);
+async function loadXp() {
+  if (!cloud.on || xp.loading) return;
+  xp.loading = true;
+  try {
+    if (!xp.fullAt || Date.now() - xp.fullAt > 24 * 3600e3) {
+      const docs = new Map();
+      let page = '';
+      do {
+        const r = await cloudFetch('/creatures?pageSize=300' + (page ? '&pageToken=' + encodeURIComponent(page) : ''));
+        if (!r.ok) throw new Error('nuvem');
+        for (const d of r.json.documents || []) { const doc = xpDoc(docRaw(d)); if (doc) docs.set(d.name.split('/').pop(), doc); }
+        page = r.json.nextPageToken || '';
+      } while (page);
+      xp.cloud = docs;
+      xp.fullAt = Date.now();
+    } else {
+      let since = 0;
+      for (const d of xp.cloud.values()) since = Math.max(since, Date.parse(d.at) || 0);
+      const r = await cloudFetch(':runQuery', {
+        method: 'POST',
+        body: JSON.stringify({ structuredQuery: {
+          from: [{ collectionId: 'creatures' }],
+          where: { fieldFilter: { field: { fieldPath: 'at' }, op: 'GREATER_THAN', value: { timestampValue: new Date(Math.max(0, since - 1000)).toISOString() } } },
+          orderBy: [{ field: { fieldPath: 'at' } }],
+          limit: 300,
+        } }),
+      });
+      if (!r.ok) throw new Error('nuvem');
+      for (const row of Array.isArray(r.json) ? r.json : []) {
+        const doc = row.document && xpDoc(docRaw(row.document));
+        if (doc) xp.cloud.set(row.document.name.split('/').pop(), doc);
+      }
+    }
+    xpChanged();
+  } catch { /* sem rede, cota esgotada ou banco ainda sem a coleção: segue com a cópia local */ }
+  xp.loading = false;
+}
+// Envia o XP de uma criatura lido aqui. Devolve 'sent' ou 'later' (fica guardado e sobe numa próxima vez).
+async function pushXp(id) {
+  const mine = xp.mine.get(id);
+  if (!mine) return 'sent';
+  const uid = await cloudAuth();
+  const got = await cloudFetch('/creatures/' + id);
+  if (!got.ok && got.status !== 404) return 'later';
+  const cur = got.ok ? xpDoc(docRaw(got.json)) : null;
+  if (cur && cur.exp === mine.exp) xp.cloud.set(id, cur);
+  else {
+    // O nome e quem enviou primeiro ficam; o valor é o do print mais novo.
+    const raw = { name: cur ? cur.name : mine.name, exp: mine.exp, owner: cur && cur.owner ? cur.owner : uid };
+    const res = await cloudCommit({
+      update: { name: cloud.root + '/creatures/' + id, fields: toFs(raw).mapValue.fields },
+      updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
+    });
+    if (!res.ok) return 'later';
+    xp.cloud.set(id, { ...raw, at: res.json.commitTime || new Date().toISOString() });
+  }
+  if (xp.mine.get(id) === mine) xp.mine.delete(id);
+  xpChanged();
+  return 'sent';
+}
+async function flushXp() {
+  for (const id of [...xp.mine.keys()]) { try { await pushXp(id); } catch { /* fica para a próxima */ } }
+}
+// Guarda o XP lido de um print. Devolve 'cloud' (já está no banco de todos) ou 'local'.
+async function saveXp(name, exp) {
+  const id = slug(name);
+  xp.mine.set(id, { name, exp });
+  xpChanged();
+  if (!cloud.on) return 'local';
+  let sent = 'later';
+  try { sent = await pushXp(id); } catch { /* sem rede */ }
+  return sent === 'sent' ? 'cloud' : 'local';
+}
+// Experiência em "kk" (milhões) ou "k" (milhares), como se fala no jogo.
+function fmtXp(v) {
+  const loc = document.documentElement.lang || 'en';
+  if (v >= 1e6) return (v / 1e6).toLocaleString(loc, { maximumFractionDigits: v >= 1e8 ? 0 : v >= 1e7 ? 1 : 2 }) + ' kk';
+  if (v >= 1e3) return (v / 1e3).toLocaleString(loc, { maximumFractionDigits: v >= 1e5 ? 0 : 1 }) + ' k';
+  return fmtInt(v);
+}
+
 function initCloud() {
   if (!cloud.on) return;
   const cache = lsGet(LS_CLOUD, null);
@@ -2809,7 +3028,8 @@ function initCloud() {
     lsSet(LS_MOVED, true);
   }
   loadCloud().then(flushSend);
-  setInterval(() => { if (document.visibilityState === 'visible') loadCloud().then(flushSend); }, 5 * 60000);
+  loadXp().then(flushXp);
+  setInterval(() => { if (document.visibilityState === 'visible') { loadCloud().then(flushSend); loadXp().then(flushXp); } }, 5 * 60000);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible' && Date.now() - (cloud.loadedAt || 0) > 2 * 60000) loadCloud().then(flushSend);
   });
@@ -3458,6 +3678,7 @@ function mobCards(id, r) {
   const tag = id === secondId() ? 'b' : '';   // os campos do segundo respawn têm ids próprios
   return r.monsters.map((m, mi) => {
     const now = respawnAt(m.base, pct, ui.party);
+    const exp = expOf(m.name);
     const cells = PCTS.map(p => ({ p, sec: respawnAt(m.base, p, ui.party), task: el('i') }));
     const out = el('span', { class: 'task-out', role: 'status' });
     const lapsOut = el('span', { class: 'task-laps' });
@@ -3484,12 +3705,28 @@ function mobCards(id, r) {
         onclick: () => saveRespawn(id, { ...r, monsters: r.monsters.filter(x => x !== m) }, owns(id) || cloud.queue.has(id)) }),
       el('p', null, tr('mob.kills'), el('b', { text: killsPerHour(now, m.count) })),
       el('p', null, tr('mob.time'), el('b', { text: fmtTime(now) }), ' ' + unitName()),
+      el('p', { class: exp == null ? 'mob-noxp' : null, title: exp == null ? tr('mob.xpTip') : null }, tr('mob.xp'), el('b', { text: exp == null ? '?' : fmtInt(exp) })),
       el('label', { class: 'task' }, el('span', { text: tr('task.label') }), input, el('span', { text: tr('task.kills') }), out, lapsOut),
       el('div', { class: 'steps' }, cells.map(c => el('button', {
         type: 'button', id: 'step' + tag + '-' + mi + '-' + c.p, class: c.p === pct ? 'on' : null,
         title: tr('step.title', { m: m.name, p: c.p, t: fmtTime(c.sec) + ' ' + unitName() }), onclick: () => select(id, c.p),
       }, el('small', { text: c.p + '%' }), el('span', { text: fmtTime(c.sec) }), c.task))));
   });
+}
+// Estimativa de XP do respawn: abates por hora de cada criatura vezes o XP por abate dela. Quem ainda não tem o XP
+// no banco fica de fora da soma e é citada, para a pessoa mandar o print do bestiário.
+function paintXp(node, id, r) {
+  const pct = pctOf(id), missing = [];
+  let hour = 0;
+  for (const m of r.monsters) {
+    const exp = expOf(m.name);
+    if (exp == null) missing.push(m.name);
+    else hour += killsPerHour(respawnAt(m.base, pct, ui.party), m.count) * exp;
+  }
+  if (missing.length === r.monsters.length) { node.replaceChildren(tr('xp.none')); return; }
+  node.replaceChildren(
+    el('b', { text: tr('xp.line', { h: fmtXp(hour), t: fmtXp(hour * ui.dur / 60), d: ui.dur }) }),
+    ' ' + (missing.length ? tr('xp.missing', { x: missing.join(', ') }) + ' ' : '') + tr('xp.note'));
 }
 const sheetHint = r => (r.src === 'mapper' ? tr('hint.mapper') : r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest') + ' ' + tr('task.tip');
 // Desconto das tasks diárias ou semanais. É de quem joga, não do respawn: fica só neste navegador, por respawn,
@@ -3582,6 +3819,7 @@ function buildSheet(id, fixed, id2) {
     dur: slider('ctl-dur', tr('ctl.dur'),
       DURS.map(d => ({ value: d, text: tr('dur.value', { n: d }), short: d % 30 === 0 ? String(d) : null })), setDur),
     cost: costCard(id, ''),
+    xp: el('p', { class: 'xp-line' }),
     mobs: el('div', { class: 'mobs' }),
     hint: el('p', { class: 'hint' }),
   };
@@ -3591,11 +3829,13 @@ function buildSheet(id, fixed, id2) {
     p.name2 = el('h3', { class: 'second-name' });
     p.bonus2 = slider('ctl-bonus2', tr('ctl.bonus'), bonusStops(), v => select(id2, v));
     p.cost2 = costCard(id2, '2');
+    p.xp2 = el('p', { class: 'xp-line' });
     p.mobs2 = el('div', { class: 'mobs' });
     second = el('section', { class: 'second' },
       el('header', { class: 'second-head' }, p.name2,
         el('button', { class: 'hunt-link', type: 'button', id: 'second-close', text: tr('duo.close'), onclick: () => pick(id2) })),
       el('div', { class: 'controls' }, p.bonus2.root, p.cost2.root),
+      p.xp2,
       el('h3', { class: 'band', text: tr('band') }),
       p.mobs2);
   }
@@ -3607,6 +3847,7 @@ function buildSheet(id, fixed, id2) {
       optsBar,
       statusEl,
       el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root, p.cost.root),
+      p.xp,
       el('h3', { class: 'band', text: tr('band') }),
       p.mobs,
       second,
@@ -3624,7 +3865,7 @@ function renderSheet() {
   const loading = pending.seed || pending.db || !!pending.cloud;
   const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id) && !owns(ui.id);
   const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r, ui.disc[ui.id] || null,
-    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null], ui.floatHide[ui.id] || null, id2 && ui.floatHide[id2] || null, ui.voice]);
+    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null], ui.floatHide[ui.id] || null, id2 && ui.floatHide[id2] || null, ui.voice, xp.rev]);
   if (sig === sheetSig) return;
   sheetSig = sig;
   timerEls = new Map();
@@ -3691,11 +3932,13 @@ function renderSheet() {
   parts.dur.set(DURS.indexOf(ui.dur));
   parts.cost.set(r);
   parts.mobs.replaceChildren(...mobCards(id, r));
+  paintXp(parts.xp, id, r);
   if (r2) {
     setText(parts.name2, tr('duo.second', { x: r2.name }));
     parts.bonus2.set(PCTS.indexOf(ui.pct2));
     parts.cost2.set(r2);
     parts.mobs2.replaceChildren(...mobCards(id2, r2));
+    paintXp(parts.xp2, id2, r2);
   }
   setText(parts.hint, sheetHint(r));
 
@@ -3752,6 +3995,15 @@ async function readImage(blob) {
   setStatus('busy', tr(workerP ? 'read.busy' : 'read.first'));
   try {
     const p = await readPrint(blob);
+    if (p.kind === 'bestiary') {
+      // Ficha de uma criatura: guarda o XP por abate dela. Só a raridade Normal entra na conta do respawn.
+      if (p.tab) throw new UserError(tr('err.bestTab'));
+      if (!p.name || !slug(p.name)) throw new UserError(tr('err.bestName'));
+      if (p.exp == null) throw new UserError(tr('err.bestExp', { x: p.name }));
+      const where = await saveXp(p.name, p.exp);
+      setStatus('ok', tr('read.best', { x: p.name, v: fmtInt(p.exp) }) + ' ' + tr(where === 'cloud' ? 'read.cloud' : 'read.bestLocal') + ' ' + tr('read.discarded'));
+      return;
+    }
     if (p.failed) throw new UserError(tr('err.mapperRows'));
     if (!p.monsters.length) throw new UserError(tr('err.nomobs'));
     const mapper = p.kind === 'mapper';
@@ -4289,6 +4541,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 17:59',
+    pt: ['XP das criaturas: cole o print da ficha de uma criatura no bestiário do jogo (aba Normal) e o site guarda o XP por abate dela para todos.', 'Cada respawn mostra a estimativa de XP por hora e no tempo do bônus, em k e kk, conforme o grupo, o percentual e a duração.'],
+    en: ['Creature XP: paste a screenshot of a creature page from the game bestiary (Normal tab) and the site saves its XP per kill for everyone.', 'Each respawn shows the estimated XP per hour and for the bonus time, in k and kk, according to the group, the percentage and the duration.'],
+    es: ['XP de las criaturas: pega la captura de la ficha de una criatura en el bestiario del juego (pestaña Normal) y el sitio guarda su XP por muerte para todos.', 'Cada respawn muestra la estimación de XP por hora y en el tiempo del bonus, en k y kk, según el grupo, el porcentaje y la duración.'],
+    pl: ['XP stworzeń: wklej zrzut karty stworzenia z bestiariusza gry (zakładka Normalny), a strona zapisze jego XP za zabicie dla wszystkich.', 'Każdy respawn pokazuje szacowane XP na godzinę i w czasie bonusu, w k i kk, zależnie od grupy, procentu i czasu trwania.'],
+  },
   { at: '2026-10-10 15:30',
     pt: ['Comando de voz: a tela mostra o que o navegador ouviu ("Ouvi: …"), para ver por que um comando não pegou.', 'Dois comandos ditos em seguida ("iniciar mais dez") valem juntos, e "iniciar todos" vale para todos mesmo com a janela flutuante aberta.'],
     en: ['Voice command: the page shows what the browser heard ("Heard: …"), so you can see why a command did not work.', 'Two commands said in a row ("start plus ten") both count, and "start all" applies to every timer even with the floating window open.'],
