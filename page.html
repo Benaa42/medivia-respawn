@@ -872,6 +872,8 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'read.grew': 'Criaturas novas neste respawn: {y}. Agora são {n}.',
+    'read.more': 'Se a lista do jogo tiver mais criaturas, role a lista e mande outro print: elas são somadas a este respawn.',
     'voice.help': 'Ver os comandos de voz',
     'voice.h.startAll': '"iniciar" · "iniciar todos"',
     'voice.h.startAllD': 'Inicia todos os cronômetros',
@@ -1193,6 +1195,8 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'read.grew': 'New creatures in this respawn: {y}. It now has {n}.',
+    'read.more': 'If the list in the game has more creatures, scroll it and send another screenshot: they are added to this respawn.',
     'voice.help': 'Show the voice commands',
     'voice.h.startAll': '"start" · "start all"',
     'voice.h.startAllD': 'Starts every timer',
@@ -1514,6 +1518,8 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'read.grew': 'Criaturas nuevas en este respawn: {y}. Ahora son {n}.',
+    'read.more': 'Si la lista del juego tiene más criaturas, desplázala y envía otra captura: se suman a este respawn.',
     'voice.help': 'Ver los comandos de voz',
     'voice.h.startAll': '"iniciar" · "iniciar todos"',
     'voice.h.startAllD': 'Inicia todos los cronómetros',
@@ -1835,6 +1841,8 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'read.grew': 'Nowe stworzenia w tym respawnie: {y}. Teraz jest ich {n}.',
+    'read.more': 'Jeśli lista w grze ma więcej stworzeń, przewiń ją i wyślij kolejny zrzut: zostaną dodane do tego respawnu.',
     'voice.help': 'Pokaż polecenia głosowe',
     'voice.h.startAll': '„start” · „start wszystkie”',
     'voice.h.startAllD': 'Uruchamia wszystkie liczniki',
@@ -3738,12 +3746,13 @@ async function readImage(blob) {
     const prev = !mapper && found && found.src === 'mapper' ? null : found;   // print do jogo não aproveita nada que veio do mapper
     const monsters = prev ? prev.monsters.map(m => ({ ...m })) : [];
     const doubt = [];
+    const added = [];   // criaturas do print que o respawn ainda não tinha: a lista do jogo rola, e o resto vem em outro print
     for (const pm of p.monsters) {
       const range = baseRange(pm.sec, p.pct, p.party || 100);
       const i = monsters.findIndex(m => m.name.toLowerCase() === pm.name.toLowerCase());
       const old = i >= 0 ? monsters[i].base : null;
       const m = { name: pm.name, count: pm.count, base: old != null && old >= range[0] && old <= range[1] ? old : pickBase(range) };
-      if (i >= 0) monsters[i] = m; else monsters.push(m);
+      if (i >= 0) monsters[i] = m; else { monsters.push(m); if (prev) added.push(pm.name); }
       if (pm.kills != null && pm.count && killsPerHour(pm.sec, pm.count) !== pm.kills) doubt.push(pm.name);
     }
     // Com desconto das tasks, o print mostra o preço já reduzido. O banco guarda o preço cheio, que vale para todos.
@@ -3781,6 +3790,7 @@ async function readImage(blob) {
     if (cost10 && !mapper) discSet(id, p.discount || 0);   // print sem a faixa de desconto: o desconto acabou
     select(id, mapper ? undefined : p.pct);
     let msg = tr((mapper ? 'read.mapper' : 'read.ok') + (p.monsters.length === 1 ? '1' : 'N'), { x: prev ? prev.name : name, p: p.pct, n: p.monsters.length }) + ' ' +
+      (added.length ? tr('read.grew', { y: added.join(', '), n: monsters.length }) + ' ' : '') +
       tr(where === 'cloud' ? 'read.cloud' : where === 'shared' ? 'read.shared' : 'read.local') + ' ' + tr('read.discarded');
     if (cost10 && p.discount) msg += ' ' + tr('read.disc', { v: fmtInt(p.discount) });
     if (p.unread.length) msg += ' ' + tr('read.unread', { x: p.unread.join(', ') });
@@ -3789,6 +3799,7 @@ async function readImage(blob) {
     if (mapper) msg += ' ' + tr('read.mapperLocal');
     else if (cloud.on && (!p.name || doubt.length)) msg += ' ' + tr('read.notshared');
     if (gone) msg += ' ' + tr('read.mapperGone', { y: gone });
+    if (!mapper && p.monsters.length >= 4) msg += ' ' + tr('read.more');   // a janela do jogo mostra quatro por vez
     setStatus(doubt.length || !p.name || p.unread.length ? 'busy' : 'ok', msg);
     if (!p.name) { const n = $('#area-name'); if (n) { n.focus(); n.select(); } }
   } catch (e) {
@@ -4262,6 +4273,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 15:12',
+    pt: ['Respawn com mais criaturas do que cabe na janela do jogo: role a lista e mande outro print. O site soma as criaturas novas ao respawn que já existe e diz quais entraram.'],
+    en: ['Respawn with more creatures than fit in the game window: scroll the list and send another screenshot. The site adds the new creatures to the existing respawn and tells you which ones came in.'],
+    es: ['Respawn con más criaturas de las que caben en la ventana del juego: desplaza la lista y envía otra captura. El sitio suma las criaturas nuevas al respawn que ya existe y dice cuáles entraron.'],
+    pl: ['Respawn z większą liczbą stworzeń, niż mieści okno gry: przewiń listę i wyślij kolejny zrzut. Strona dodaje nowe stworzenia do istniejącego respawnu i podaje, które doszły.'],
+  },
   { at: '2026-10-10 13:45',
     pt: ['Comando de voz: com a janela flutuante aberta, "iniciar", "zerar", "mais dez" e "menos dez" sem número valem só para os cronômetros que estão nela.'],
     en: ['Voice command: with the floating window open, "start", "reset", "plus ten" and "minus ten" without a number apply only to the timers shown in it.'],
