@@ -237,6 +237,18 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 /* Comando de voz: o ponto verde mostra que o site está ouvindo; o número no canto do anel é o que se fala */
 .toggle.voice.live span::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 7px; border-radius: 50%; background: var(--value); }
 .voice-note { flex: 1 0 100%; order: 9; max-width: 78ch; font-size: 13px; color: var(--label); }
+/* O "?" ao lado da opção abre a lista dos comandos de voz */
+.voice-help-btn { width: 22px; height: 22px; margin-left: -8px; padding: 0; border: 1px solid var(--edge); border-radius: 50%; background: none; color: var(--label); font: 600 13px/1 var(--font-ui); cursor: pointer; }
+.voice-help-btn:hover, .voice-help-btn[aria-expanded="true"] { border-color: var(--faint); color: var(--title); }
+.voice-help { flex: 1 0 100%; order: 10; max-width: 78ch; font-size: 13px; color: var(--label); }
+.voice-help dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin: 0; }
+.voice-help dt { color: var(--title); font-weight: 600; }
+.voice-help dd { margin: 0; }
+.voice-help p { margin-top: 8px; }
+@media (max-width: 520px) {
+  .voice-help dl { grid-template-columns: 1fr; gap: 0; }
+  .voice-help dd { margin-bottom: 6px; }
+}
 .clock-n { position: absolute; top: 0; left: 0; min-width: 24px; border-radius: 999px; background: var(--card); color: var(--title); font: 700 13px/1.85 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; text-align: center; }
 .clock-float input:disabled { opacity: 0.5; }
 /* Cronômetros lado a lado ficam alinhados linha a linha (anel, nota, nomes, respawn, botões, voltas), mesmo quando
@@ -574,8 +586,10 @@ details.backup textarea {
             <option value="onscreen" data-i18n="tone.onscreen">Jogador na tela</option>
           </select>
           <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <span data-i18n="voice.label">Comando de voz</span></label>
+          <button class="voice-help-btn" type="button" id="voice-help-btn" aria-expanded="false" aria-controls="voice-help" title="Ver os comandos de voz" aria-label="Ver os comandos de voz" data-i18n-attr="title:voice.help;aria-label:voice.help">?</button>
         </div>
         <p class="voice-note" id="voice-note" role="status" hidden></p>
+        <div class="voice-help" id="voice-help" hidden></div>
         <div class="dlgs">
           <button class="dlg go" type="button" id="float-btn" data-i18n="float">Janela flutuante</button>
           <button class="dlg go" type="button" id="read-btn" data-i18n="read">Ler print</button>
@@ -859,12 +873,31 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'voice.help': 'Ver os comandos de voz',
+    'voice.h.startAll': '"iniciar" · "iniciar todos"',
+    'voice.h.startAllD': 'Inicia todos os cronômetros',
+    'voice.h.startOne': '"iniciar um" · "iniciar dois"…',
+    'voice.h.startOneD': 'Inicia só aquele cronômetro',
+    'voice.h.restart': '"reiniciar" · "reiniciar um"',
+    'voice.h.restartD': 'Recomeça a contagem, de todos ou só daquele',
+    'voice.h.reset': '"zerar" · "zerar um"',
+    'voice.h.resetD': 'Zera todos ou só aquele',
+    'voice.h.more': '"mais dez" · "mais dez um"',
+    'voice.h.moreD': 'Soma 10 segundos nos que estão contando, ou só naquele',
+    'voice.h.less': '"menos dez" · "menos dez um"',
+    'voice.h.lessD': 'Tira 10 segundos dos que estão contando, ou só daquele',
+    'voice.h.tip': 'Fale só o comando, sem outras palavras. O número é o que aparece no canto de cada cronômetro com a voz ligada.',
+    'voice.did.more': 'Voz: 10 segundos somados.',
+    'voice.did.moreOne': 'Voz: 10 segundos somados no cronômetro {n}.',
+    'voice.did.less': 'Voz: 10 segundos tirados.',
+    'voice.did.lessOne': 'Voz: 10 segundos tirados do cronômetro {n}.',
+    'voice.noRun': 'Voz: nenhum cronômetro contando para acertar.',
     'nudge.less': 'Tirar 10 segundos do cronômetro',
     'nudge.more': 'Somar 10 segundos ao cronômetro',
     'voice.nomic': 'Nenhum microfone encontrado. Ligue um microfone e marque o comando de voz de novo.',
     'voice.network': 'Voz: o serviço de reconhecimento do navegador não respondeu. Só funciona no Chrome e no Edge, com internet.',
     'voice.label': 'Comando de voz',
-    'voice.info': 'Comando de voz ligado. Só funciona no Chrome e no Edge, e com internet: a fala é reconhecida pelo serviço do navegador. Diga "iniciar" ou "iniciar todos" para todos os cronômetros, "iniciar um" ou "iniciar dois" para um só, e "zerar" ou "zerar um".',
+    'voice.info': 'Comando de voz ligado. Só funciona no Chrome e no Edge, e com internet: a fala é reconhecida pelo serviço do navegador. Toque no "?" para ver os comandos.',
     'voice.unsupported': 'O comando de voz só funciona no Chrome e no Edge. Este navegador não tem reconhecimento de voz.',
     'voice.denied': 'O navegador não liberou o microfone. Libere o microfone para este site e ligue o comando de voz de novo. Ele só funciona no Chrome e no Edge.',
     'voice.did.start': 'Voz: cronômetros iniciados.',
@@ -1161,12 +1194,31 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'voice.help': 'Show the voice commands',
+    'voice.h.startAll': '"start" · "start all"',
+    'voice.h.startAllD': 'Starts every timer',
+    'voice.h.startOne': '"start one" · "start two"…',
+    'voice.h.startOneD': 'Starts just that timer',
+    'voice.h.restart': '"restart" · "restart one"',
+    'voice.h.restartD': 'Starts the count again, for all or just that one',
+    'voice.h.reset': '"reset" · "reset one"',
+    'voice.h.resetD': 'Resets all or just that one',
+    'voice.h.more': '"plus ten" · "plus ten one"',
+    'voice.h.moreD': 'Adds 10 seconds to the running timers, or just that one',
+    'voice.h.less': '"minus ten" · "minus ten one"',
+    'voice.h.lessD': 'Takes 10 seconds off the running timers, or just that one',
+    'voice.h.tip': 'Say only the command, nothing else. The number is the one shown on the corner of each timer while voice is on.',
+    'voice.did.more': 'Voice: 10 seconds added.',
+    'voice.did.moreOne': 'Voice: 10 seconds added to timer {n}.',
+    'voice.did.less': 'Voice: 10 seconds taken off.',
+    'voice.did.lessOne': 'Voice: 10 seconds taken off timer {n}.',
+    'voice.noRun': 'Voice: no timer is running to adjust.',
     'nudge.less': 'Take 10 seconds off the timer',
     'nudge.more': 'Add 10 seconds to the timer',
     'voice.nomic': 'No microphone found. Connect a microphone and turn voice command on again.',
     'voice.network': 'Voice: the browser\'s recognition service did not answer. It only works in Chrome and Edge, with an internet connection.',
     'voice.label': 'Voice command',
-    'voice.info': 'Voice command on. It only works in Chrome and Edge, and with an internet connection: speech is recognised by the browser\'s service. Say "start" or "start all" for every timer, "start one" or "start two" for a single one, and "reset" or "reset one".',
+    'voice.info': 'Voice command on. It only works in Chrome and Edge, and with an internet connection: speech is recognised by the browser\'s service. Press "?" to see the commands.',
     'voice.unsupported': 'Voice command only works in Chrome and Edge. This browser has no speech recognition.',
     'voice.denied': 'The browser did not allow the microphone. Allow the microphone for this site and turn voice command on again. It only works in Chrome and Edge.',
     'voice.did.start': 'Voice: timers started.',
@@ -1463,12 +1515,31 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'voice.help': 'Ver los comandos de voz',
+    'voice.h.startAll': '"iniciar" · "iniciar todos"',
+    'voice.h.startAllD': 'Inicia todos los cronómetros',
+    'voice.h.startOne': '"iniciar uno" · "iniciar dos"…',
+    'voice.h.startOneD': 'Inicia solo ese cronómetro',
+    'voice.h.restart': '"reiniciar" · "reiniciar uno"',
+    'voice.h.restartD': 'Vuelve a empezar la cuenta, de todos o solo de ese',
+    'voice.h.reset': '"restablecer" · "restablecer uno"',
+    'voice.h.resetD': 'Restablece todos o solo ese',
+    'voice.h.more': '"más diez" · "más diez uno"',
+    'voice.h.moreD': 'Suma 10 segundos a los que están contando, o solo a ese',
+    'voice.h.less': '"menos diez" · "menos diez uno"',
+    'voice.h.lessD': 'Quita 10 segundos a los que están contando, o solo a ese',
+    'voice.h.tip': 'Di solo el comando, sin otras palabras. El número es el que aparece en la esquina de cada cronómetro con la voz activada.',
+    'voice.did.more': 'Voz: 10 segundos sumados.',
+    'voice.did.moreOne': 'Voz: 10 segundos sumados al cronómetro {n}.',
+    'voice.did.less': 'Voz: 10 segundos quitados.',
+    'voice.did.lessOne': 'Voz: 10 segundos quitados al cronómetro {n}.',
+    'voice.noRun': 'Voz: ningún cronómetro está contando para ajustar.',
     'nudge.less': 'Quitar 10 segundos al cronómetro',
     'nudge.more': 'Añadir 10 segundos al cronómetro',
     'voice.nomic': 'No se encontró ningún micrófono. Conecta un micrófono y activa de nuevo el comando de voz.',
     'voice.network': 'Voz: el servicio de reconocimiento del navegador no respondió. Solo funciona en Chrome y Edge, con internet.',
     'voice.label': 'Comando de voz',
-    'voice.info': 'Comando de voz activado. Solo funciona en Chrome y Edge, y con internet: el habla la reconoce el servicio del navegador. Di "iniciar" o "iniciar todos" para todos los cronómetros, "iniciar uno" o "iniciar dos" para uno solo, y "restablecer" o "restablecer uno".',
+    'voice.info': 'Comando de voz activado. Solo funciona en Chrome y Edge, y con internet: el habla la reconoce el servicio del navegador. Pulsa "?" para ver los comandos.',
     'voice.unsupported': 'El comando de voz solo funciona en Chrome y Edge. Este navegador no tiene reconocimiento de voz.',
     'voice.denied': 'El navegador no permitió el micrófono. Permite el micrófono para este sitio y activa de nuevo el comando de voz. Solo funciona en Chrome y Edge.',
     'voice.did.start': 'Voz: cronómetros iniciados.',
@@ -1765,12 +1836,31 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'voice.help': 'Pokaż polecenia głosowe',
+    'voice.h.startAll': '„start” · „start wszystkie”',
+    'voice.h.startAllD': 'Uruchamia wszystkie liczniki',
+    'voice.h.startOne': '„start jeden” · „start dwa”…',
+    'voice.h.startOneD': 'Uruchamia tylko ten licznik',
+    'voice.h.restart': '„restart” · „restart jeden”',
+    'voice.h.restartD': 'Zaczyna odliczanie od nowa, dla wszystkich lub tylko tego',
+    'voice.h.reset': '„zeruj” · „zeruj jeden”',
+    'voice.h.resetD': 'Zeruje wszystkie lub tylko ten',
+    'voice.h.more': '„plus dziesięć” · „plus dziesięć jeden”',
+    'voice.h.moreD': 'Dodaje 10 sekund do odliczających liczników lub tylko do tego',
+    'voice.h.less': '„minus dziesięć” · „minus dziesięć jeden”',
+    'voice.h.lessD': 'Odejmuje 10 sekund od odliczających liczników lub tylko od tego',
+    'voice.h.tip': 'Powiedz samo polecenie, bez innych słów. Numer to ten widoczny w rogu każdego licznika, gdy głos jest włączony.',
+    'voice.did.more': 'Głos: dodano 10 sekund.',
+    'voice.did.moreOne': 'Głos: dodano 10 sekund do licznika {n}.',
+    'voice.did.less': 'Głos: odjęto 10 sekund.',
+    'voice.did.lessOne': 'Głos: odjęto 10 sekund od licznika {n}.',
+    'voice.noRun': 'Głos: żaden licznik nie odlicza.',
     'nudge.less': 'Odejmij 10 sekund od licznika',
     'nudge.more': 'Dodaj 10 sekund do licznika',
     'voice.nomic': 'Nie znaleziono mikrofonu. Podłącz mikrofon i włącz polecenia głosowe ponownie.',
     'voice.network': 'Głos: usługa rozpoznawania mowy przeglądarki nie odpowiedziała. Działa tylko w Chrome i Edge, z internetem.',
     'voice.label': 'Polecenia głosowe',
-    'voice.info': 'Polecenia głosowe włączone. Działają tylko w Chrome i Edge, i z internetem: mowę rozpoznaje usługa przeglądarki. Powiedz „start” lub „start wszystkie” dla wszystkich liczników, „start jeden” lub „start dwa” dla jednego, oraz „zeruj” lub „zeruj jeden”.',
+    'voice.info': 'Polecenia głosowe włączone. Działają tylko w Chrome i Edge, i z internetem: mowę rozpoznaje usługa przeglądarki. Naciśnij „?”, aby zobaczyć polecenia.',
     'voice.unsupported': 'Polecenia głosowe działają tylko w Chrome i Edge. Ta przeglądarka nie ma rozpoznawania mowy.',
     'voice.denied': 'Przeglądarka nie zezwoliła na mikrofon. Zezwól tej stronie na mikrofon i włącz polecenia głosowe ponownie. Działają tylko w Chrome i Edge.',
     'voice.did.start': 'Głos: liczniki uruchomione.',
@@ -4171,6 +4261,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 13:29',
+    pt: ['Comando de voz: novos comandos "reiniciar", "mais dez" e "menos dez".', 'O botão "?" ao lado de Comando de voz mostra todos os comandos.'],
+    en: ['Voice command: new commands "restart", "plus ten" and "minus ten".', 'The "?" button next to Voice command lists every command.'],
+    es: ['Comando de voz: nuevos comandos "reiniciar", "más diez" y "menos diez".', 'El botón "?" junto a Comando de voz muestra todos los comandos.'],
+    pl: ['Polecenia głosowe: nowe polecenia „restart”, „plus dziesięć” i „minus dziesięć”.', 'Przycisk „?” obok poleceń głosowych pokazuje wszystkie polecenia.'],
+  },
   { at: '2026-10-09 17:25',
     pt: ['Acerto do cronômetro: os botões "−10 s" e "+10 s" tiram ou somam 10 segundos por clique, para quem iniciou atrasado. Também na janela flutuante.'],
     en: ['Timer adjustment: the "−10 s" and "+10 s" buttons take off or add 10 seconds per click, for when you started late. Also in the floating window.'],
@@ -5149,37 +5245,78 @@ optTone.addEventListener('change', () => {
    Só vale a fala que é o comando e mais nada: numa conversa ("vou iniciar a hunt agora") nada acontece.
    O navegador só entrega a frase pronta perto de um segundo depois; por isso o cronômetro conta de quando a fala começou. */
 const VOICE = {
-  pt: { lang: 'pt-BR', start: ['iniciar', 'inicia', 'inicie'], reset: ['zerar', 'zera', 'zere'], all: ['todos', 'tudo'], skip: ['o', 'os', 'cronometro', 'cronometros', 'timer', 'numero'],
+  pt: { lang: 'pt-BR', start: ['iniciar', 'inicia', 'inicie', 'reiniciar', 'reinicia', 'reinicie'], reset: ['zerar', 'zera', 'zere'],
+    more: ['mais', 'mas'], less: ['menos'], ten: ['dez', '10'], all: ['todos', 'tudo'],
+    skip: ['o', 'os', 'no', 'do', 'ao', 'cronometro', 'cronometros', 'timer', 'numero', 'segundos'],
     nums: [['um', 'uma', 'hum'], ['dois', 'duas'], ['tres'], ['quatro'], ['cinco'], ['seis']] },
-  en: { lang: 'en-US', start: ['start'], reset: ['reset'], all: ['all', 'everything'], skip: ['the', 'timer', 'timers', 'number'],
+  en: { lang: 'en-US', start: ['start', 'restart'], reset: ['reset'],
+    more: ['plus', 'add'], less: ['minus', 'less'], ten: ['ten', '10'], all: ['all', 'everything'],
+    skip: ['the', 'timer', 'timers', 'number', 'seconds', 'on'],
     nums: [['one', 'won'], ['two', 'too', 'to'], ['three'], ['four', 'for'], ['five'], ['six']] },
-  es: { lang: 'es-ES', start: ['iniciar', 'inicia', 'inicie'], reset: ['restablecer', 'restablece'], all: ['todos', 'todo'], skip: ['el', 'los', 'cronometro', 'cronometros', 'numero'],
+  es: { lang: 'es-ES', start: ['iniciar', 'inicia', 'inicie', 'reiniciar', 'reinicia', 'reinicie'], reset: ['restablecer', 'restablece'],
+    more: ['mas'], less: ['menos'], ten: ['diez', '10'], all: ['todos', 'todo'],
+    skip: ['el', 'los', 'al', 'en', 'cronometro', 'cronometros', 'numero', 'segundos'],
     nums: [['uno', 'un', 'una'], ['dos'], ['tres'], ['cuatro'], ['cinco'], ['seis']] },
-  pl: { lang: 'pl-PL', start: ['start', 'startuj'], reset: ['zeruj', 'wyzeruj'], all: ['wszystkie', 'wszystko', 'wszystkich'], skip: ['licznik', 'liczniki', 'numer'],
+  pl: { lang: 'pl-PL', start: ['start', 'startuj', 'restart'], reset: ['zeruj', 'wyzeruj'],
+    more: ['plus', 'dodaj'], less: ['minus', 'odejmij'], ten: ['dziesiec', '10'], all: ['wszystkie', 'wszystko', 'wszystkich'],
+    skip: ['licznik', 'liczniki', 'numer', 'sekund', 'na', 'do'], fix: [['od nowa', 'restart']],
     nums: [['jeden', 'raz'], ['dwa'], ['trzy'], ['cztery'], ['piec'], ['szesc']] },
 };
 const speechClass = () => window.SpeechRecognition || window.webkitSpeechRecognition;
 const voice = { rec: null, on: false, note: null, heardAt: 0, wait: 0, seen: new Map(), handled: -1 };
-// Entende uma fala. Devolve { cmd: 'start' ou 'reset', n: número do cronômetro (0 = todos) }, ou null se não for comando.
+// Entende uma fala. Devolve { cmd: 'start', 'reset', 'more' ou 'less', n: número do cronômetro (0 = todos) }, ou null
+// se não for comando. Reiniciar é o mesmo que iniciar; 'more' e 'less' são o acerto de 10 segundos.
 function voiceParse(text) {
   const v = VOICE[ui.lang] || VOICE.en;
-  const toks = String(text).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').split(' ').filter(t => t && !v.skip.includes(t));
-  if (!toks.length || toks.length > 2) return null;   // comando é uma palavra, ou duas com o número ou "todos"; o resto é conversa
-  const cmd = v.start.includes(toks[0]) ? 'start' : v.reset.includes(toks[0]) ? 'reset' : null;
-  if (!cmd) return null;
-  if (toks.length === 1 || v.all.includes(toks[1])) return { cmd, n: 0 };
-  const i = v.nums.findIndex(w => w.includes(toks[1]));
-  const n = i >= 0 ? i + 1 : /^[1-9]$/.test(toks[1]) ? +toks[1] : 0;   // o navegador às vezes escreve o número em algarismo
+  // O navegador às vezes escreve "+10" e "-10" em vez das palavras.
+  let said = String(text).toLowerCase().replace(/\+/g, ' ' + v.more[0] + ' ').replace(/[-−–](?=\s*\d)/g, ' ' + v.less[0] + ' ')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  for (const [from, to] of v.fix || []) said = said.split(from).join(to);
+  const toks = said.split(' ').filter(t => t && !v.skip.includes(t));
+  let cmd = v.start.includes(toks[0]) ? 'start' : v.reset.includes(toks[0]) ? 'reset' : null, rest = toks.slice(1);
+  if (!cmd && (v.more.includes(toks[0]) || v.less.includes(toks[0]))) {
+    // "mais dez" e "menos dez". O número do cronômetro pode vir colado: "mais 102" é "mais dez dois".
+    const glued = /^10([1-9])$/.exec(toks[1] || '');
+    if (glued) rest = [glued[1], ...toks.slice(2)];
+    else if (v.ten.includes(toks[1])) rest = toks.slice(2);
+    else return null;
+    cmd = v.more.includes(toks[0]) ? 'more' : 'less';
+  }
+  if (!cmd || rest.length > 1) return null;   // depois do comando só cabe o número ou "todos"; o resto é conversa
+  if (!rest.length || v.all.includes(rest[0])) return { cmd, n: 0 };
+  const i = v.nums.findIndex(w => w.includes(rest[0]));
+  const n = i >= 0 ? i + 1 : /^[1-9]$/.test(rest[0]) ? +rest[0] : 0;   // o navegador às vezes escreve o número em algarismo
   return n ? { cmd, n } : null;
 }
 function voiceRun(c, at) {
   const keys = groupsAll().map(g => g.key);
   if (!keys.length) return;
   if (c.n > keys.length) { setStatus('err', tr('voice.noTimer', { n: c.n })); return; }
-  for (const key of c.n ? [keys[c.n - 1]] : keys) { if (c.cmd === 'start') startTimer(key, at); else resetTimer(key); }
+  const picked = c.n ? [keys[c.n - 1]] : keys;
+  if (c.cmd === 'more' || c.cmd === 'less') {
+    // O acerto só vale para cronômetro que está contando (ou na pausa entre voltas).
+    const live = picked.filter(key => { const t = timers.get(key); return t.endAt != null || t.pauseUntil != null; });
+    if (!live.length) { setStatus('err', tr('voice.noRun')); return; }
+    for (const key of live) nudgeTimer(key, c.cmd === 'more' ? 10 : -10);
+  } else {
+    for (const key of picked) { if (c.cmd === 'start') startTimer(key, at); else resetTimer(key); }
+  }
   setStatus('ok', tr('voice.did.' + c.cmd + (c.n ? 'One' : ''), { n: c.n }));
   if (ui.sound && audio) for (const [wave, freq, delay, len, vol] of TONES.sino.warn) tone(freq, delay, len, vol, wave);   // um toque curto confirma que ouviu
 }
+// A lista dos comandos, aberta pelo "?" ao lado da opção. Funciona com a voz ligada ou desligada.
+const VOICE_HELP = ['startAll', 'startOne', 'restart', 'reset', 'more', 'less'];
+function renderVoiceHelp() {
+  $('#voice-help').replaceChildren(
+    el('dl', {}, VOICE_HELP.flatMap(k => [el('dt', { text: tr('voice.h.' + k) }), el('dd', { text: tr('voice.h.' + k + 'D') })])),
+    el('p', { text: tr('voice.h.tip') }));
+}
+$('#voice-help-btn').addEventListener('click', () => {
+  const box = $('#voice-help'), open = box.hidden;
+  if (open) renderVoiceHelp();
+  box.hidden = !open;
+  $('#voice-help-btn').setAttribute('aria-expanded', String(open));
+});
 function voiceListen() {
   const rec = new (speechClass())();
   rec.lang = (VOICE[ui.lang] || VOICE.en).lang;
@@ -5236,6 +5373,7 @@ function setVoice(on, note) {
 }
 // Idioma novo: a escuta recomeça nele e o aviso é reescrito.
 function voiceLang() {
+  if (!$('#voice-help').hidden) renderVoiceHelp();
   if (voice.on) setVoice(true);
   else setText($('#voice-note'), voice.note ? tr(voice.note) : '');
 }
