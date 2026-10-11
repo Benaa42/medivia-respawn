@@ -577,6 +577,51 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .page[hidden] { display: none; }
 /* Ferramenta que era janela e virou página: o mesmo bloco, agora no fluxo da página */
 .tool { display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: var(--r-lg); background: var(--box); color: var(--label); min-width: 0; }
+/* Calculadora: comprar pronto ou montar */
+.calc h2 { font: 800 22px/1.2 var(--font-display); color: var(--title); }
+.calc > .support-note { max-width: 78ch; margin-top: -8px; }
+.calc-top { display: flex; flex-wrap: wrap; gap: 12px 20px; }
+.calc-top .calc-field { flex: 1 1 220px; max-width: 320px; }
+.calc-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; font-size: 13px; color: var(--label); }
+.calc-field small { font-size: 12px; color: var(--faint); }
+.calc input[type="text"] { width: 100%; min-width: 0; padding: 9px 12px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--ground); color: var(--title); font: 600 15px/1.2 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; }
+.calc input[type="text"]::placeholder { color: var(--faint); font-weight: 400; opacity: 0.7; }
+.calc-options { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr); gap: 16px; align-items: start; }
+.calc-opt { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 16px; border-radius: 14px; background: var(--card); }
+.calc-opt h3 { font: 600 16px/1.3 var(--font-ui); color: var(--title); }
+.calc-opt .hunt-link { align-self: flex-start; font-size: 13px; }
+.calc-price { display: flex; align-items: center; gap: 8px; }
+.calc-price input { flex: 1 1 auto; }
+.unit-toggle.calc-cur { flex: none; margin-left: 0; background: var(--ground); }
+#calc-parts { display: flex; flex-direction: column; gap: 12px; }
+.calc-part { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.7fr) minmax(0, 1.5fr) auto; gap: 8px 10px; align-items: end; }
+.calc-del { width: 34px; height: 39px; border: 0; border-radius: var(--r-sm); background: none; color: var(--faint); font-size: 20px; line-height: 1; cursor: pointer; }
+.calc-del:hover { background: var(--ground); color: var(--title); }
+/* Resultado: a frase que responde, as duas contas e os pontos em que a resposta muda */
+.calc-result { display: flex; flex-direction: column; gap: 12px; padding: 18px; border: 1px solid var(--edge); border-radius: 14px; }
+.calc-verdict { font: 700 20px/1.3 var(--font-display); color: var(--title); text-wrap: balance; }
+.calc-verdict b { color: var(--value); font-variant-numeric: lining-nums tabular-nums; }
+.calc-lines { display: grid; grid-template-columns: auto auto auto; justify-content: start; gap: 6px 24px; font-size: 14px; font-variant-numeric: lining-nums tabular-nums; }
+.calc-lines span { color: var(--label); }
+.calc-lines b { color: var(--title); text-align: right; }
+.calc-lines i { color: var(--faint); font-style: normal; text-align: right; }
+.calc-lines .best { color: var(--value); }
+.calc-turn { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 12px 0 0; border-top: 1px solid var(--edge); list-style: none; font-size: 13px; color: var(--label); }
+.calc-turn li:first-child { font-weight: 600; color: var(--title); }
+.calc-turn b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
+@media (max-width: 860px) {
+  .calc-options { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  /* Ingrediente em três linhas: o nome; a quantidade com o botão de tirar; o preço com a moeda */
+  .calc-part { grid-template-columns: minmax(0, 1fr) auto; }
+  .calc-part > :nth-child(1) { grid-column: 1 / -1; }
+  .calc-part > :nth-child(2) { grid-column: 1; grid-row: 2; }
+  .calc-part > :nth-child(3) { grid-column: 1 / -1; grid-row: 3; }
+  .calc-del { grid-column: 2; grid-row: 2; }
+  .calc-lines { grid-template-columns: auto auto; }
+  .calc-lines i { grid-column: 2; }
+}
 /* Analisador de hunt: o resumo de um lado e as criaturas abatidas do outro */
 #page-hunt .hunt { padding: 22px; }
 #page-hunt .hunt .win-name { font: 800 22px/1.2 var(--font-display); }
@@ -626,7 +671,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 /* No celular as abas descem para uma barra fixa embaixo, ao alcance do polegar */
 @media (max-width: 700px) {
   .wrap { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
-  .tabs { position: fixed; inset: auto 0 0 0; z-index: 20; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); border: 0; border-top: 1px solid var(--gold-edge); border-radius: 0; background: var(--box); }
+  .tabs { position: fixed; inset: auto 0 0 0; z-index: 20; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); border: 0; border-top: 1px solid var(--gold-edge); border-radius: 0; background: var(--box); }
   .tabs button { flex-direction: column; gap: 4px; padding: 7px 2px; border-radius: var(--r-sm); color: var(--label); font-size: 11px; }
   .tabs .wide { display: none; }
   .tabs .short { display: inline; }
@@ -663,6 +708,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13c-3-.5-6 0-8 1.5zM12 6v13"/></symbol>
   <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></symbol>
   <symbol id="i-pip" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="11.5" y="11" width="7" height="5.5" rx="1" fill="currentColor"/></symbol>
+  <symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></symbol>
   <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></symbol>
 </svg>
 <div class="wrap">
@@ -680,6 +726,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       <button type="button" data-go="timer"><svg class="ico" aria-hidden="true"><use href="#i-timer"/></svg><span data-i18n="nav.timer">Cronômetro</span></button>
       <button type="button" data-go="hunt"><svg class="ico" aria-hidden="true"><use href="#i-hunt"/></svg><span class="wide" data-i18n="nav.hunt">Analisador de hunt</span><span class="short" data-i18n="nav.huntShort">Hunt</span></button>
       <button type="button" data-go="creatures"><svg class="ico" aria-hidden="true"><use href="#i-book"/></svg><span data-i18n="creatures.open">Criaturas</span></button>
+      <button type="button" data-go="calc"><svg class="ico" aria-hidden="true"><use href="#i-calc"/></svg><span data-i18n="calc.nav">Calculadora</span></button>
       <button type="button" data-go="raffle"><svg class="ico" aria-hidden="true"><use href="#i-dice"/></svg><span data-i18n="nav.raffle">Sorteio</span></button>
     </nav>
     <div class="toolbar-end">
@@ -780,6 +827,32 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       <div class="hunt-foot"><button class="dlg" type="button" id="raffle-btn" data-i18n="raffle.open">Sortear itens</button></div>
       <input class="sr" type="file" id="hunt-file" accept=".txt,text/plain" tabindex="-1" aria-hidden="true">
     </section>
+  </section>
+
+  <section class="page" id="page-calc" hidden>
+    <div class="tool calc" id="calc" aria-labelledby="calc-title">
+      <h2 id="calc-title" data-i18n="calc.title">Comprar pronto ou montar?</h2>
+      <p class="support-note" data-i18n="calc.intro">Compare o preço de um item pronto no mercado com o custo de comprar os ingredientes e montar. Os preços em Medivia Coin viram gold pela cotação que você informar.</p>
+      <div class="calc-top">
+        <label class="calc-field"><span data-i18n="calc.item">Item (opcional)</span><input type="text" id="calc-name" maxlength="60" autocomplete="off" placeholder="Cursed Soulheart"></label>
+        <label class="calc-field"><span data-i18n="calc.rate">Cotação da Medivia Coin</span><input type="text" id="calc-rate" inputmode="numeric" autocomplete="off" placeholder="63 000"><small data-i18n="calc.rateHint">gold por 1 MC: o menor preço de venda no mercado</small></label>
+      </div>
+      <div class="calc-options">
+        <section class="calc-opt" aria-labelledby="calc-buy-title">
+          <h3 id="calc-buy-title" data-i18n="calc.buy">Comprar pronto</h3>
+          <div class="calc-field"><span id="calc-buy-label" data-i18n="calc.buyPrice">Preço do item</span>
+            <div class="calc-price"><input type="text" id="calc-buy" inputmode="numeric" autocomplete="off" placeholder="185" aria-labelledby="calc-buy-label"><span class="unit-toggle calc-cur" id="calc-buy-cur" role="group" aria-labelledby="calc-buy-label"></span></div>
+          </div>
+        </section>
+        <section class="calc-opt" aria-labelledby="calc-make-title">
+          <h3 id="calc-make-title" data-i18n="calc.make">Montar</h3>
+          <div id="calc-parts"></div>
+          <button class="hunt-link" type="button" id="calc-add" data-i18n="calc.addPart">Adicionar ingrediente</button>
+        </section>
+      </div>
+      <div class="calc-result" id="calc-result" role="status"></div>
+      <div class="hunt-foot"><button class="dlg stop" type="button" id="calc-clear" data-i18n="calc.clear">Limpar</button></div>
+    </div>
   </section>
 
   <section class="page" id="page-creatures" hidden>
@@ -1092,6 +1165,37 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'calc.nav': 'Calculadora',
+    'calc.title': 'Comprar pronto ou montar?',
+    'calc.intro': 'Compare o preço de um item pronto no mercado com o custo de comprar os ingredientes e montar. Os preços em Medivia Coin viram gold pela cotação que você informar.',
+    'calc.item': 'Item (opcional)',
+    'calc.rate': 'Cotação da Medivia Coin',
+    'calc.rateHint': 'gold por 1 MC: o menor preço de venda no mercado',
+    'calc.buy': 'Comprar pronto',
+    'calc.buyPrice': 'Preço do item',
+    'calc.make': 'Montar',
+    'calc.part': 'Ingrediente',
+    'calc.qty': 'Quantidade',
+    'calc.unit': 'Preço de cada',
+    'calc.addPart': 'Adicionar ingrediente',
+    'calc.removePart': 'Tirar este ingrediente',
+    'calc.clear': 'Limpar',
+    'calc.cur.gold': 'Preço em gold',
+    'calc.cur.mc': 'Preço em Medivia Coin',
+    'calc.empty': 'Preencha o preço do item pronto e a quantidade e o preço de cada ingrediente para ver a comparação.',
+    'calc.needRate': 'Informe a cotação da Medivia Coin: há preço em MC nesta comparação.',
+    'calc.win.buy': 'Comprar pronto sai',
+    'calc.win.make': 'Montar sai',
+    'calc.cheaper': 'mais barato ({p}%).',
+    'calc.tie': 'As duas opções custam o mesmo.',
+    'calc.turn.title': 'Onde a resposta muda',
+    'calc.turn.rate.a': 'As opções empatam com a Medivia Coin a',
+    'calc.turn.rate.b': ': abaixo disso compensa {x}; acima, {y}.',
+    'calc.opt.buy': 'comprar pronto',
+    'calc.opt.make': 'montar',
+    'calc.turn.buy': 'Comprar pronto compensa se o item custar até',
+    'calc.turn.part': 'Montar compensa se o ingrediente custar até',
+    'calc.each': 'cada',
     'tok.title': 'Elite tokens',
     'tok.note': 'Tokens do loot desta hunt, cada tipo dividido em partes iguais. O que não divide certo vai um para cada jogador, em rodízio.',
     'tok.solo': 'Tokens do loot desta hunt.',
@@ -1516,6 +1620,37 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'calc.nav': 'Calculator',
+    'calc.title': 'Buy it ready or craft it?',
+    'calc.intro': 'Compare the price of a ready item on the market with the cost of buying the ingredients and crafting it. Prices in Medivia Coin are turned into gold at the rate you enter.',
+    'calc.item': 'Item (optional)',
+    'calc.rate': 'Medivia Coin rate',
+    'calc.rateHint': 'gold per 1 MC: the lowest sell price on the market',
+    'calc.buy': 'Buy it ready',
+    'calc.buyPrice': 'Item price',
+    'calc.make': 'Craft it',
+    'calc.part': 'Ingredient',
+    'calc.qty': 'Quantity',
+    'calc.unit': 'Price of each',
+    'calc.addPart': 'Add an ingredient',
+    'calc.removePart': 'Remove this ingredient',
+    'calc.clear': 'Clear',
+    'calc.cur.gold': 'Price in gold',
+    'calc.cur.mc': 'Price in Medivia Coin',
+    'calc.empty': 'Fill in the price of the ready item and the quantity and price of each ingredient to see the comparison.',
+    'calc.needRate': 'Enter the Medivia Coin rate: this comparison has a price in MC.',
+    'calc.win.buy': 'Buying it ready is',
+    'calc.win.make': 'Crafting it is',
+    'calc.cheaper': 'cheaper ({p}%).',
+    'calc.tie': 'Both options cost the same.',
+    'calc.turn.title': 'Where the answer changes',
+    'calc.turn.rate.a': 'The options break even with the Medivia Coin at',
+    'calc.turn.rate.b': ': below that it pays to {x}; above it, to {y}.',
+    'calc.opt.buy': 'buy it ready',
+    'calc.opt.make': 'craft it',
+    'calc.turn.buy': 'Buying it ready pays off if the item costs up to',
+    'calc.turn.part': 'Crafting pays off if the ingredient costs up to',
+    'calc.each': 'each',
     'tok.title': 'Elite tokens',
     'tok.note': 'Tokens in the loot of this hunt, each type split into equal parts. What does not divide evenly goes one to each player, in turns.',
     'tok.solo': 'Tokens in the loot of this hunt.',
@@ -1940,6 +2075,37 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'calc.nav': 'Calculadora',
+    'calc.title': '¿Comprar hecho o montar?',
+    'calc.intro': 'Compara el precio de un item hecho en el mercado con el coste de comprar los ingredientes y montarlo. Los precios en Medivia Coin se pasan a gold con la cotización que indiques.',
+    'calc.item': 'Item (opcional)',
+    'calc.rate': 'Cotización de la Medivia Coin',
+    'calc.rateHint': 'gold por 1 MC: el menor precio de venta en el mercado',
+    'calc.buy': 'Comprar hecho',
+    'calc.buyPrice': 'Precio del item',
+    'calc.make': 'Montar',
+    'calc.part': 'Ingrediente',
+    'calc.qty': 'Cantidad',
+    'calc.unit': 'Precio de cada uno',
+    'calc.addPart': 'Añadir ingrediente',
+    'calc.removePart': 'Quitar este ingrediente',
+    'calc.clear': 'Limpiar',
+    'calc.cur.gold': 'Precio en gold',
+    'calc.cur.mc': 'Precio en Medivia Coin',
+    'calc.empty': 'Rellena el precio del item hecho y la cantidad y el precio de cada ingrediente para ver la comparación.',
+    'calc.needRate': 'Indica la cotización de la Medivia Coin: hay un precio en MC en esta comparación.',
+    'calc.win.buy': 'Comprar hecho sale',
+    'calc.win.make': 'Montar sale',
+    'calc.cheaper': 'más barato ({p}%).',
+    'calc.tie': 'Las dos opciones cuestan lo mismo.',
+    'calc.turn.title': 'Dónde cambia la respuesta',
+    'calc.turn.rate.a': 'Las opciones empatan con la Medivia Coin a',
+    'calc.turn.rate.b': ': por debajo compensa {x}; por encima, {y}.',
+    'calc.opt.buy': 'comprar hecho',
+    'calc.opt.make': 'montar',
+    'calc.turn.buy': 'Comprar hecho compensa si el item cuesta hasta',
+    'calc.turn.part': 'Montar compensa si el ingrediente cuesta hasta',
+    'calc.each': 'cada uno',
     'tok.title': 'Elite tokens',
     'tok.note': 'Tokens del loot de esta hunt, cada tipo repartido en partes iguales. Lo que no se divide exacto va uno para cada jugador, por turnos.',
     'tok.solo': 'Tokens del loot de esta hunt.',
@@ -2364,6 +2530,37 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'calc.nav': 'Kalkulator',
+    'calc.title': 'Kupić gotowe czy złożyć?',
+    'calc.intro': 'Porównaj cenę gotowego przedmiotu na rynku z kosztem kupna składników i złożenia go. Ceny w Medivia Coin są przeliczane na gold po kursie, który podasz.',
+    'calc.item': 'Przedmiot (opcjonalnie)',
+    'calc.rate': 'Kurs Medivia Coin',
+    'calc.rateHint': 'gold za 1 MC: najniższa cena sprzedaży na rynku',
+    'calc.buy': 'Kupić gotowe',
+    'calc.buyPrice': 'Cena przedmiotu',
+    'calc.make': 'Złożyć',
+    'calc.part': 'Składnik',
+    'calc.qty': 'Ilość',
+    'calc.unit': 'Cena za sztukę',
+    'calc.addPart': 'Dodaj składnik',
+    'calc.removePart': 'Usuń ten składnik',
+    'calc.clear': 'Wyczyść',
+    'calc.cur.gold': 'Cena w gold',
+    'calc.cur.mc': 'Cena w Medivia Coin',
+    'calc.empty': 'Podaj cenę gotowego przedmiotu oraz ilość i cenę każdego składnika, aby zobaczyć porównanie.',
+    'calc.needRate': 'Podaj kurs Medivia Coin: w tym porównaniu jest cena w MC.',
+    'calc.win.buy': 'Kupno gotowego jest o',
+    'calc.win.make': 'Złożenie jest o',
+    'calc.cheaper': 'tańsze ({p}%).',
+    'calc.tie': 'Obie opcje kosztują tyle samo.',
+    'calc.turn.title': 'Kiedy odpowiedź się zmienia',
+    'calc.turn.rate.a': 'Opcje wyrównują się przy Medivia Coin po',
+    'calc.turn.rate.b': ': poniżej opłaca się {x}; powyżej {y}.',
+    'calc.opt.buy': 'kupić gotowe',
+    'calc.opt.make': 'złożyć',
+    'calc.turn.buy': 'Kupno gotowego opłaca się, jeśli przedmiot kosztuje do',
+    'calc.turn.part': 'Złożenie opłaca się, jeśli składnik kosztuje do',
+    'calc.each': 'za sztukę',
     'tok.title': 'Elite tokeny',
     'tok.note': 'Tokeny z łupu tego polowania, każdy rodzaj dzielony po równo. To, co się nie dzieli równo, trafia po jednym do kolejnych graczy.',
     'tok.solo': 'Tokeny z łupu tego polowania.',
@@ -3860,6 +4057,7 @@ function setLang(lang) {
   }
   renderAll();
   renderHunt();
+  renderCalc();
   renderRoom();
   voiceLang();
   if (pageNow === 'creatures') renderCreatures();
@@ -5418,6 +5616,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 15:56',
+    pt: ['Nova ferramenta no menu: Calculadora. Ela compara comprar um item pronto com comprar os ingredientes e montar, convertendo os preços em Medivia Coin pela cotação do mercado, e mostra em que preço a resposta se inverte.'],
+    en: ['New tool in the menu: Calculator. It compares buying a ready item with buying the ingredients and crafting it, converting Medivia Coin prices at the market rate, and shows at which price the answer flips.'],
+    es: ['Nueva herramienta en el menú: Calculadora. Compara comprar un item hecho con comprar los ingredientes y montarlo, convirtiendo los precios en Medivia Coin con la cotización del mercado, y muestra en qué precio cambia la respuesta.'],
+    pl: ['Nowe narzędzie w menu: Kalkulator. Porównuje kupno gotowego przedmiotu z kupnem składników i złożeniem go, przeliczając ceny w Medivia Coin po kursie rynkowym, i pokazuje, przy jakiej cenie odpowiedź się odwraca.'],
+  },
   { at: '2026-10-11 05:15',
     pt: ['Print do bestiário: em alguns prints o site não achava o nome da criatura, mesmo visível. Agora o nome é relido de perto quando isso acontece.'],
     en: ['Bestiary screenshot: on some screenshots the site could not find the creature name even though it was visible. The name is now read again up close when that happens.'],
@@ -6836,11 +7040,119 @@ for (const b of document.querySelectorAll('.lang button')) b.addEventListener('c
 $('#float-btn').addEventListener('click', toggleFloat);
 $('#read-btn').addEventListener('click', () => $('#file').click());
 
+/* ---------- Calculadora: comprar pronto ou montar ----------
+   Um item pode ser comprado pronto no mercado ou montado com ingredientes, e cada preço pode estar em gold ou em
+   Medivia Coin (MC), a moeda premium, que tem cotação em gold no próprio mercado. A calculadora converte tudo para
+   gold pela cotação informada, diz qual opção sai mais barata e mostra em que preço a resposta se inverte.
+   O que a pessoa digita fica guardado só no navegador dela. */
+const LS_CALC = 'medivia-respawn.calculadora.v1';
+const calcPart = () => ({ name: '', qty: '', price: '', cur: 'gold' });
+const calc = { name: '', rate: '', buy: '', buyCur: 'mc', parts: [calcPart()] };
+{
+  const saved = lsGet(LS_CALC, null);
+  if (saved && typeof saved === 'object') {
+    for (const k of ['name', 'rate', 'buy']) if (typeof saved[k] === 'string') calc[k] = saved[k].slice(0, 60);
+    if (saved.buyCur === 'gold') calc.buyCur = 'gold';
+    const parts = (Array.isArray(saved.parts) ? saved.parts : []).filter(p => p && typeof p === 'object').slice(0, 12)
+      .map(p => ({ name: String(p.name || '').slice(0, 60), qty: String(p.qty || '').slice(0, 20), price: String(p.price || '').slice(0, 20), cur: p.cur === 'mc' ? 'mc' : 'gold' }));
+    if (parts.length) calc.parts = parts;
+  }
+}
+const saveCalc = () => lsSet(LS_CALC, calc);
+// Valor digitado: "62 996", "62.996", "63k" ou "11,65kk" (k = mil, kk = milhão). Vazio ou fora do formato dá null.
+function parseAmount(text) {
+  const t = String(text == null ? '' : text).trim().toLowerCase().replace(/\s+/g, '');
+  const short = /^(\d+(?:[.,]\d+)?)(kk|k)$/.exec(t);
+  if (short) return Math.round(parseFloat(short[1].replace(',', '.')) * (short[2] === 'kk' ? 1e6 : 1e3));
+  if (!/^\d[\d.,]*$/.test(t)) return null;
+  const v = Number(t.replace(/[.,]/g, ''));
+  return v <= 1e13 ? v : null;
+}
+// Campo de valor ligado a um texto guardado: recalcula a cada tecla e, ao sair do campo, mostra o número por extenso.
+function calcBind(input, obj, key) {
+  input.value = obj[key];
+  input.addEventListener('input', () => { obj[key] = input.value; saveCalc(); renderCalcResult(); });
+  input.addEventListener('blur', () => { const v = parseAmount(input.value); if (v != null) { input.value = obj[key] = fmtInt(v); saveCalc(); } });
+  return input;
+}
+// Botões Gold / MC de um preço
+function calcCurrency(box, obj, key) {
+  box.replaceChildren(...[['gold', 'Gold'], ['mc', 'MC']].map(([id, label]) => el('button', { type: 'button', text: label, 'aria-pressed': String(obj[key] === id),
+    title: tr('calc.cur.' + id), onclick: () => { obj[key] = id; saveCalc(); calcCurrency(box, obj, key); renderCalcResult(); } })));
+  return box;
+}
+function renderCalcParts() {
+  $('#calc-parts').replaceChildren(...calc.parts.map((p, i) => el('div', { class: 'calc-part' },
+    el('label', { class: 'calc-field' }, el('span', { text: tr('calc.part') }),
+      el('input', { type: 'text', value: p.name, maxLength: 60, autocomplete: 'off', placeholder: i ? '' : 'Chaos Soul Fragments', oninput: e => { p.name = e.target.value; saveCalc(); } })),
+    el('label', { class: 'calc-field' }, el('span', { text: tr('calc.qty') }),
+      calcBind(el('input', { type: 'text', inputMode: 'numeric', autocomplete: 'off', placeholder: i ? '' : '1 000' }), p, 'qty')),
+    el('div', { class: 'calc-field' }, el('span', { text: tr('calc.unit') }),
+      el('div', { class: 'calc-price' },
+        calcBind(el('input', { type: 'text', inputMode: 'numeric', autocomplete: 'off', placeholder: i ? '' : '7 797', 'aria-label': tr('calc.unit') }), p, 'price'),
+        calcCurrency(el('span', { class: 'unit-toggle calc-cur', role: 'group', 'aria-label': tr('calc.unit') }), p, 'cur'))),
+    calc.parts.length > 1 ? el('button', { class: 'calc-del', type: 'button', text: '×', title: tr('calc.removePart'), 'aria-label': tr('calc.removePart'),
+      onclick: () => { calc.parts.splice(i, 1); saveCalc(); renderCalcParts(); renderCalcResult(); } }) : null)));
+  $('#calc-add').hidden = calc.parts.length >= 12;
+}
+function renderCalcResult() {
+  const box = $('#calc-result'), rate = parseAmount(calc.rate), buy = parseAmount(calc.buy);
+  const hint = key => box.replaceChildren(el('p', { class: 'hunt-note', text: tr(key) }));
+  // Cada opção tem uma parte em gold e uma parte em MC; a cotação junta as duas.
+  const rows = calc.parts.map(p => ({ qty: parseAmount(p.qty), price: parseAmount(p.price), mc: p.cur === 'mc' })).filter(p => p.qty != null || p.price != null);
+  if (!(buy > 0) || !rows.length || !rows.every(p => p.qty > 0 && p.price != null)) return hint('calc.empty');
+  const a = calc.buyCur === 'mc' ? { gold: 0, mc: buy } : { gold: buy, mc: 0 }, b = { gold: 0, mc: 0 };
+  for (const p of rows) b[p.mc ? 'mc' : 'gold'] += p.qty * p.price;
+  const usesMc = a.mc > 0 || b.mc > 0;
+  if (usesMc && !(rate > 0)) return hint('calc.needRate');
+  const A = a.gold + a.mc * (rate || 0), B = b.gold + b.mc * (rate || 0), diff = Math.abs(A - B);
+  const loc = document.documentElement.lang || 'en';
+  const mcText = gold => rate > 0 ? '≈ ' + (gold / rate).toLocaleString(loc, { maximumFractionDigits: gold / rate >= 100 ? 0 : 1 }) + ' MC' : '';
+  const verdict = diff === 0 ? [tr('calc.tie')]
+    : [tr(A < B ? 'calc.win.buy' : 'calc.win.make') + ' ', el('b', { text: fmtInt(diff) + ' gold' }), ' ' + tr('calc.cheaper', { p: Math.round(diff / Math.max(A, B) * 100) })];
+  const line = (key, total, best) => [el('span', { class: best ? 'best' : null, text: tr(key) }), el('b', { class: best ? 'best' : null, text: fmtInt(total) + ' gold' }), el('i', { text: mcText(total) })];
+  // Onde a resposta se inverte: na cotação da MC, no preço do item pronto e, com um ingrediente só, no preço dele.
+  const turn = [];
+  if (a.mc !== b.mc) {
+    const even = (b.gold - a.gold) / (a.mc - b.mc);
+    if (even > 0 && Number.isFinite(even)) turn.push(el('li', {}, tr('calc.turn.rate.a') + ' ', el('b', { text: fmtInt(even) + ' gold' }),
+      tr('calc.turn.rate.b', { x: tr(a.mc > b.mc ? 'calc.opt.buy' : 'calc.opt.make'), y: tr(a.mc > b.mc ? 'calc.opt.make' : 'calc.opt.buy') })));
+  }
+  const buyMax = Math.floor(calc.buyCur === 'mc' ? B / rate : B);
+  if (buyMax >= 1) turn.push(el('li', {}, tr('calc.turn.buy') + ' ', el('b', { text: fmtInt(buyMax) + (calc.buyCur === 'mc' ? ' MC' : ' gold') }), '.'));
+  if (rows.length === 1) {
+    const partMax = Math.floor((rows[0].mc ? A / rate : A) / rows[0].qty);
+    if (partMax >= 1) turn.push(el('li', {}, tr('calc.turn.part') + ' ', el('b', { text: fmtInt(partMax) + (rows[0].mc ? ' MC' : ' gold') }), ' ' + tr('calc.each') + '.'));
+  }
+  box.replaceChildren(...[
+    el('p', { class: 'calc-verdict' }, calc.name.trim() ? calc.name.trim() + ': ' : null, verdict),
+    el('div', { class: 'calc-lines' }, line('calc.buy', A, A < B), line('calc.make', B, B < A)),
+    turn.length ? el('ul', { class: 'calc-turn' }, el('li', { text: tr('calc.turn.title') }), turn) : null,
+  ].filter(Boolean));
+}
+function renderCalc() {
+  calcCurrency($('#calc-buy-cur'), calc, 'buyCur');
+  renderCalcParts();
+  renderCalcResult();
+}
+calcBind($('#calc-rate'), calc, 'rate');
+calcBind($('#calc-buy'), calc, 'buy');
+$('#calc-name').value = calc.name;
+$('#calc-name').addEventListener('input', e => { calc.name = e.target.value; saveCalc(); renderCalcResult(); });
+$('#calc-add').addEventListener('click', () => { calc.parts.push(calcPart()); saveCalc(); renderCalcParts(); renderCalcResult(); });
+// Limpar zera o item e os preços; a cotação da MC fica, porque vale para a próxima comparação.
+$('#calc-clear').addEventListener('click', () => {
+  Object.assign(calc, { name: '', buy: '', buyCur: 'mc', parts: [calcPart()] });
+  saveCalc();
+  $('#calc-name').value = $('#calc-buy').value = '';
+  renderCalc();
+});
+
 /* ---------- Páginas ----------
-   Cada ferramenta é uma página com endereço próprio (#hunt, #creatures); o cronômetro é a página inicial, sem nada
+   Cada ferramenta é uma página com endereço próprio (#hunt, #creatures, #calc); o cronômetro é a página inicial, sem nada
    depois do endereço. O sorteio está no mesmo menu, mas abre por cima da página em que a pessoa está (#raffle abre
    o site já com ele). Os cronômetros continuam contando em qualquer página. */
-const PAGES = ['timer', 'hunt', 'creatures'];
+const PAGES = ['timer', 'hunt', 'creatures', 'calc'];
 function goTo(route, push = true) {
   const [name, sub] = String(route || '').split('/');
   if (name === 'raffle') { openRaffle(); return; }
@@ -6851,6 +7163,7 @@ function goTo(route, push = true) {
   creatureWanted = to === 'creatures' && sub && slug(sub) === sub ? sub : null;   // #creatures/malformis já abre a ficha
   if (to === 'creatures') renderCreatures();   // se os dados ainda não chegaram, a ficha abre quando chegarem
   if (to === 'hunt') renderHunt();
+  if (to === 'calc') renderCalc();
   const hash = to === 'timer' ? '' : '#' + to;
   if (push && location.hash !== hash) { try { history.pushState(null, '', location.pathname + location.search + hash); } catch { /* o endereço fica como está */ } }
   if (was !== to) window.scrollTo(0, 0);
