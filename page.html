@@ -150,9 +150,9 @@ dialog#changes { width: min(560px, calc(100vw - 32px)); }
 .creature-link { padding: 0; border: 0; background: none; color: var(--amber); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
 .creature-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 /* Ficha da criatura: o nome, os atributos em quadros e a tabela de onde ela aparece */
-.creature-sheet { padding-right: 4px; }
-.creature-back { align-self: flex-start; }
-.creature-name { font: 800 28px/1.15 var(--font-display); color: var(--amber); overflow-wrap: anywhere; }
+dialog#creature-dlg { width: min(880px, calc(100vw - 32px)); scrollbar-width: thin; scrollbar-color: var(--edge) transparent; }
+#creature-title { font-size: 28px; line-height: 1.15; color: var(--amber); overflow-wrap: anywhere; }
+.creature-sheet { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .creature-need { max-width: 70ch; padding: 10px 14px; border-left: 3px solid var(--amber); border-radius: 0 var(--r-sm) var(--r-sm) 0; background: var(--card); font-size: 14px; color: var(--title); }
 /* Em cima o que interessa para a caça (XP, HP e a relação entre os dois); embaixo os atributos de combate */
 .creature-stats { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; }
@@ -434,7 +434,10 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .toggle.pause { cursor: default; }
 .pause input { width: 62px; padding: 4px 8px; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); color: var(--title); font: 600 13px/1.2 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; }
 .clock[data-state="pause"] .ring-arc { stroke: var(--faint); }
-.dlgs { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.dlgs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
+/* A janela flutuante é o que deixa o cronômetro por cima do jogo: é o botão de mais destaque da barra */
+.dlg.float-cta { display: inline-flex; align-items: center; gap: 9px; padding: 11px 20px; border-color: var(--value); background: var(--value); color: var(--ink); font-size: 15px; font-weight: 700; }
+.dlg.float-cta:hover { border-color: var(--value); filter: brightness(1.08); }
 .status { min-height: 1.45em; font-size: 13px; color: var(--faint); }
 .status[data-kind="busy"] { color: var(--amber); }
 .status[data-kind="ok"] { color: var(--value); }
@@ -488,7 +491,7 @@ details.backup textarea {
 .side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .hunt { gap: 12px; padding: 18px 16px 16px; border-radius: var(--r-lg); background: var(--box); }
 .hunt .win-name { font: 600 16px/1.3 var(--font-ui); letter-spacing: 0; }
-#hunt-body { display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
+#hunt-body, #hunt-side-body { display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
 .hunt-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 8px; }
 .hunt-when { color: var(--label); font-variant-numeric: lining-nums tabular-nums; }
 .hunt-nav { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--faint); font-variant-numeric: lining-nums tabular-nums; }
@@ -550,7 +553,6 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .page[hidden] { display: none; }
 /* Ferramenta que era janela e virou página: o mesmo bloco, agora no fluxo da página */
 .tool { display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: var(--r-lg); background: var(--box); color: var(--label); min-width: 0; }
-#raffle.tool { width: min(560px, 100%); }
 /* Analisador de hunt: o resumo de um lado e as criaturas abatidas do outro */
 #page-hunt .hunt { padding: 22px; }
 #page-hunt .hunt .win-name { font: 800 22px/1.2 var(--font-display); }
@@ -601,6 +603,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/></symbol>
   <symbol id="i-hunt" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></symbol>
   <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13c-3-.5-6 0-8 1.5zM12 6v13"/></symbol>
+  <symbol id="i-pip" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="11.5" y="11" width="7" height="5.5" rx="1" fill="currentColor"/></symbol>
   <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></symbol>
 </svg>
 <div class="wrap">
@@ -657,6 +660,14 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
         </details>
       </footer>
     </aside>
+    <aside class="win hunt" id="hunt-side" aria-labelledby="hunt-side-title">
+      <h2 class="win-name" id="hunt-side-title" data-i18n="hunt.title">Última hunt</h2>
+      <div id="hunt-side-body"></div>
+      <div class="hunt-foot">
+        <button class="dlg" type="button" data-go="raffle" data-i18n="raffle.open">Sortear itens</button>
+        <button class="hunt-link" type="button" data-go="hunt" data-i18n="hunt.more">Ver no analisador</button>
+      </div>
+    </aside>
     </div>
 
     <main class="win bonus" id="drop">
@@ -689,7 +700,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
         <p class="voice-note voice-heard" id="voice-heard" hidden></p>
         <div class="voice-help" id="voice-help" hidden></div>
         <div class="dlgs">
-          <button class="dlg go" type="button" id="float-btn" data-i18n="float">Janela flutuante</button>
+          <button class="dlg go float-cta" type="button" id="float-btn" title="Abre os cronômetros numa janelinha que fica por cima do jogo" data-i18n-attr="title:float.tip"><svg class="ico" aria-hidden="true"><use href="#i-pip"/></svg><span data-i18n="float">Janela flutuante</span></button>
           <button class="dlg go" type="button" id="read-btn" data-i18n="read">Ler print</button>
         </div>
         <input class="sr" type="file" id="file" accept="image/*" tabindex="-1" aria-hidden="true">
@@ -730,14 +741,23 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   <p class="support-note" id="creatures-count" role="status"></p>
   <div class="creatures-wrap"><table class="creatures-table" id="creatures-table"></table></div>
   </div>
-  <div class="creatures-pane creature-sheet" id="creature-sheet" hidden></div>
 </div>
   </section>
 
-  <section class="page" id="page-raffle" hidden>
-<div class="support tool" id="raffle" aria-labelledby="raffle-title">
+  <footer class="colophon">
+    <p data-i18n="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</p>
+    <div class="colophon-links">
+      <button class="support-btn" type="button" id="changes-btn" data-i18n="changes.open">Novidades</button>
+      <button class="support-btn" type="button" id="support-btn" data-i18n="support.open" hidden>Apoiar o projeto</button>
+    </div>
+  </footer>
+</div>
+
+
+<dialog class="support" id="raffle" aria-labelledby="raffle-title">
   <div class="support-end">
     <h2 id="raffle-title" data-i18n="raffle.title">Sorteio de itens</h2>
+    <button class="dlg stop" type="button" id="raffle-close" data-i18n="support.close" autofocus>Fechar</button>
   </div>
   <span class="unit-toggle raffle-mode" role="group" aria-label="Sorteio de itens" data-i18n-attr="aria-label:raffle.title">
     <button type="button" id="raffle-mode-names" data-i18n="raffle.mode.names">Por nomes</button>
@@ -816,18 +836,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
     </div>
     <p class="support-note" id="room-msg" role="status"></p>
   </div>
-</div>
-  </section>
-
-  <footer class="colophon">
-    <p data-i18n="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</p>
-    <div class="colophon-links">
-      <button class="support-btn" type="button" id="changes-btn" data-i18n="changes.open">Novidades</button>
-      <button class="support-btn" type="button" id="support-btn" data-i18n="support.open" hidden>Apoiar o projeto</button>
-    </div>
-  </footer>
-</div>
-
+</dialog>
 
 <dialog class="support" id="changes" aria-labelledby="changes-title">
   <div class="support-end">
@@ -837,6 +846,14 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   <div class="changes-list" id="changes-list"></div>
 </dialog>
 
+
+<dialog class="support" id="creature-dlg" aria-labelledby="creature-title">
+  <div class="support-end">
+    <h2 id="creature-title"></h2>
+    <button class="dlg stop" type="button" id="creature-close" data-i18n="support.close" autofocus>Fechar</button>
+  </div>
+  <div class="creature-sheet" id="creature-sheet"></div>
+</dialog>
 
 <dialog class="support" id="support" aria-labelledby="support-title">
   <h2 id="support-title" data-i18n="support.open">Apoiar o projeto</h2>
@@ -1011,6 +1028,8 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'hunt.more': 'Ver no analisador',
+    'float.tip': 'Abre os cronômetros numa janelinha que fica por cima do jogo',
     'nav.label': 'Ferramentas',
     'nav.timer': 'Cronômetro',
     'nav.hunt': 'Analisador de hunt',
@@ -1399,6 +1418,8 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'hunt.more': 'Open in the analyzer',
+    'float.tip': 'Opens the timers in a small window that stays on top of the game',
     'nav.label': 'Tools',
     'nav.timer': 'Timer',
     'nav.hunt': 'Hunt analyzer',
@@ -1787,6 +1808,8 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'hunt.more': 'Ver en el analizador',
+    'float.tip': 'Abre los cronómetros en una ventanita que queda por encima del juego',
     'nav.label': 'Herramientas',
     'nav.timer': 'Cronómetro',
     'nav.hunt': 'Analizador de hunt',
@@ -2175,6 +2198,8 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'hunt.more': 'Zobacz w analizatorze',
+    'float.tip': 'Otwiera liczniki w małym oknie, które pozostaje nad grą',
     'nav.label': 'Narzędzia',
     'nav.timer': 'Licznik',
     'nav.hunt': 'Analizator polowań',
@@ -4747,8 +4772,13 @@ async function copyWho(p, btn) {
   }
 }
 
+// O resumo da hunt aparece em dois lugares: na coluna do cronômetro e, com as criaturas abatidas, no analisador.
+// Os campos do analisador levam "-full" no id para não repetir os da coluna.
 function renderHunt() {
-  const body = $('#hunt-body');
+  huntFill($('#hunt-side-body'), '', false);
+  huntFill($('#hunt-body'), '-full', true);
+}
+function huntFill(body, tag, wide) {
   const s = hunt.sessions[hunt.index];
   const link = (key, fn) => el('button', { class: 'hunt-link', type: 'button', text: tr(key), onclick: fn });
   if (!s) {
@@ -4756,14 +4786,14 @@ function renderHunt() {
       body.replaceChildren(
         el('p', { text: tr('hunt.ask') }),
         el('div', { class: 'hunt-foot' },
-          el('button', { class: 'dlg', type: 'button', id: 'hunt-connect', text: tr('hunt.reconnect'), onclick: () => connectHunt(hunt.handle, true) }),
+          el('button', { class: 'dlg', type: 'button', id: 'hunt-connect' + tag, text: tr('hunt.reconnect'), onclick: () => connectHunt(hunt.handle, true) }),
           link('hunt.other', pickHunt)));
     } else if (hunt.state === 'on' || hunt.state === 'once') {
       body.replaceChildren(el('p', { text: tr('hunt.empty') }), el('div', { class: 'hunt-foot' }, link('hunt.disconnect', disconnectHunt)));
     } else {
       body.replaceChildren(
         el('p', { text: tr('hunt.intro') }),
-        el('div', { class: 'hunt-foot' }, el('button', { class: 'dlg', type: 'button', id: 'hunt-connect', text: tr('hunt.connect'), onclick: pickHunt })),
+        el('div', { class: 'hunt-foot' }, el('button', { class: 'dlg', type: 'button', id: 'hunt-connect' + tag, text: tr('hunt.connect'), onclick: pickHunt })),
         el('p', { class: 'hunt-note', text: tr('hunt.tip') }),
         el('p', { class: 'hunt-path', text: HUNT_PATH }),
         el('p', { class: 'hunt-note', text: tr('hunt.privacy') }));
@@ -4778,20 +4808,20 @@ function renderHunt() {
   const group = v.players.length > 1 || v.players.some(p => p.payout != null);
   const open = ui.id && getRespawn(ui.id), openCost = open ? bonusCost(open, ui.id) : null;
   const hours = (() => { const m = /^(\d+):(\d\d):(\d\d)$/.exec(s.time || ''); return m ? +m[1] + m[2] / 60 + m[3] / 3600 : 0; })();
-  body.replaceChildren(el('div', { class: 'hunt-grid' }, el('div', { class: 'hunt-main' }, [
+  const main = [
     el('div', { class: 'hunt-head' },
       el('span', { class: 'hunt-when', text: huntWhen(s) + (s.time ? ' (' + s.time + ')' : '') }),
       many ? el('span', { class: 'hunt-nav' },
-        el('button', { type: 'button', id: 'hunt-prev', text: '‹', 'aria-label': tr('hunt.prev'), title: tr('hunt.prev'), disabled: hunt.index === 0, onclick: () => go(-1) }),
+        el('button', { type: 'button', id: 'hunt-prev' + tag, text: '‹', 'aria-label': tr('hunt.prev'), title: tr('hunt.prev'), disabled: hunt.index === 0, onclick: () => go(-1) }),
         (hunt.index + 1) + '/' + hunt.sessions.length,
-        el('button', { type: 'button', id: 'hunt-next', text: '›', 'aria-label': tr('hunt.next'), title: tr('hunt.next'), disabled: hunt.index === hunt.sessions.length - 1, onclick: () => go(1) })) : null),
+        el('button', { type: 'button', id: 'hunt-next' + tag, text: '›', 'aria-label': tr('hunt.next'), title: tr('hunt.next'), disabled: hunt.index === hunt.sessions.length - 1, onclick: () => go(1) })) : null),
     el('dl', { class: 'hunt-totals' },
       el('dt', { text: tr('hunt.loot') }), el('dd', { text: money(v.loot) }),
       el('dt', { text: tr('hunt.supply') }), el('dd', { text: money(v.supply) }),
       el('dt', { text: tr('hunt.balance') }), el('dd', { class: v.balance < 0 ? 'loss' : 'gain', text: (v.balance > 0 ? '+' : '') + money(v.balance) }),
       s.exp != null ? [el('dt', { text: tr('hunt.exp', { x: s.me || '?' }) }), el('dd', { text: money(s.exp) })] : null,
       s.exp != null && hours ? [el('dt', { text: tr('hunt.expHour') }), el('dd', { text: fmtXp(s.exp / hours) })] : null),
-    v.extra ? el('p', { class: 'hunt-note', id: 'hunt-extra-note', text: tr('hunt.extra.note', { v: money(v.extra) }) }) : null,
+    v.extra ? el('p', { class: 'hunt-note', id: 'hunt-extra-note' + tag, text: tr('hunt.extra.note', { v: money(v.extra) }) }) : null,
     group ? el('table', { class: 'hunt-table' },
       el('thead', null, el('tr', null,
         el('th', { scope: 'col', text: tr('hunt.player') }), el('th', { scope: 'col', text: tr('hunt.spent') }), el('th', { scope: 'col', text: tr('hunt.gets') }))),
@@ -4810,18 +4840,20 @@ function renderHunt() {
         el('p', { class: 'hunt-extra-title', text: tr('hunt.extra.title') }),
         v.names.map((name, i) => el('label', null, el('span', { text: name }),
           el('input', {
-            type: 'number', id: 'hunt-extra-' + i, min: 0, max: 99999999, step: 1, inputMode: 'numeric', placeholder: '0',
+            type: 'number', id: 'hunt-extra-' + i + tag, min: 0, max: 99999999, step: 1, inputMode: 'numeric', placeholder: '0',
             value: huntExtra(s)[name] || '', 'aria-label': tr('hunt.extra.aria', { x: name }),
             onchange: e => setHuntExtra(s, name, int(e.target.value, 1, 99999999) || 0),
           }))),
         el('p', { class: 'hunt-note', text: tr('hunt.extra.hint') }),
-        openCost ? el('p', { class: 'hunt-note', id: 'hunt-extra-cost', text: tr('hunt.extra.cost', { v: money(openCost) }) }) : null)
-      : el('button', { class: 'hunt-link hunt-extra-open', type: 'button', id: 'hunt-extra-open', text: tr('hunt.extra.open'), onclick: () => { hunt.extraOpen = true; renderHunt(); } }),
+        openCost ? el('p', { class: 'hunt-note', id: 'hunt-extra-cost' + tag, text: tr('hunt.extra.cost', { v: money(openCost) }) }) : null)
+      : el('button', { class: 'hunt-link hunt-extra-open', type: 'button', id: 'hunt-extra-open' + tag, text: tr('hunt.extra.open'), onclick: () => { hunt.extraOpen = true; renderHunt(); } }),
     el('div', { class: 'hunt-foot' },
-      el('button', { class: 'dlg', type: 'button', id: 'hunt-copy', text: tr('hunt.copy'), onclick: () => copyHunt(v) }),
+      el('button', { class: 'dlg', type: 'button', id: 'hunt-copy' + tag, text: tr('hunt.copy'), onclick: () => copyHunt(v) }),
       link('hunt.disconnect', disconnectHunt)),
     el('p', { class: hunt.state === 'on' ? 'hunt-note hunt-live' : 'hunt-note', text: tr(hunt.state === 'on' ? 'hunt.live' : 'hunt.once') }),
-  ].filter(Boolean)), huntKills(s, hours)));   // sem os itens vazios: o vazio viraria o texto "null"
+  ].filter(Boolean);   // sem os itens vazios: o vazio viraria o texto "null"
+  if (wide) body.replaceChildren(el('div', { class: 'hunt-grid' }, el('div', { class: 'hunt-main' }, main), huntKills(s, hours)));
+  else body.replaceChildren(...main);
 }
 // Criaturas abatidas na hunt, com o ritmo por hora e o XP por abate de quem já está no banco de criaturas.
 // Com o XP de todas, dá para dizer quanto do XP de tabela dos abates o jogador recebeu.
@@ -4838,7 +4870,7 @@ function huntKills(s, hours) {
     el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table' },
       el('thead', {}, el('tr', {}, [tr('creatures.col.name'), tr('hunt.kills.n'), tr('hunt.kills.rate'), tr('creature.s.xp')].map(t => el('th', { scope: 'col', text: t })))),
       el('tbody', {}, rows.map(r => el('tr', {},
-        el('td', {}, el('button', { class: 'creature-link', type: 'button', text: r.name, title: tr('creature.open'), onclick: () => goTo('creatures/' + r.id) })),
+        el('td', {}, el('button', { class: 'creature-link', type: 'button', text: r.name, title: tr('creature.open'), onclick: () => showCreature(r.id) })),
         el('td', { text: fmtInt(r.n) }),
         el('td', { class: hours ? null : 'none', text: hours ? fmtInt(Math.round(r.n / hours)) : '–' }),
         el('td', { class: r.exp == null ? 'none' : null, text: r.exp == null ? '?' : fmtInt(r.exp) })))))),
@@ -4954,6 +4986,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 22:33',
+    pt: ['O resumo da última hunt voltou para a página do Cronômetro; o Analisador de hunt continua com a versão completa.', 'O botão Janela flutuante ganhou destaque.', 'Criaturas e Sorteio: a ficha da criatura e o sorteio abrem por cima da página, como janela.'],
+    en: ['The last hunt summary is back on the Timer page; the Hunt analyzer keeps the full version.', 'The Floating window button now stands out.', 'Creatures and Raffle: the creature sheet and the raffle open on top of the page, as a window.'],
+    es: ['El resumen de la última hunt volvió a la página del Cronómetro; el Analizador de hunt mantiene la versión completa.', 'El botón Ventana flotante ahora destaca más.', 'Criaturas y Sorteo: la ficha de la criatura y el sorteo se abren encima de la página, como ventana.'],
+    pl: ['Podsumowanie ostatniego polowania wróciło na stronę Licznika; Analizator polowań zachowuje pełną wersję.', 'Przycisk Pływające okno jest teraz bardziej widoczny.', 'Stworzenia i Losowanie: karta stworzenia i losowanie otwierają się nad stroną, jako okno.'],
+  },
   { at: '2026-10-10 22:25',
     pt: ['Menu de ferramentas no topo: Cronômetro, Analisador de hunt, Criaturas e Sorteio agora são páginas, cada uma com endereço próprio.', 'Analisador de hunt: mostra o XP por hora e as criaturas abatidas, com o ritmo por hora e o XP por abate.'],
     en: ['Tool menu at the top: Timer, Hunt analyzer, Creatures and Raffle are now pages, each with its own address.', 'Hunt analyzer: it shows XP per hour and the creatures killed, with the hourly pace and the XP per kill.'],
@@ -5255,7 +5293,7 @@ function renderCreatures() {
   const num = v => v == null ? null : fmtInt(v);
   const range = (lo, hi) => lo == null ? null : lo === hi ? fmtInt(lo) : fmtInt(lo) + ' – ' + fmtInt(hi);
   const cell = v => el('td', { class: v == null ? 'none' : null, text: v == null ? '–' : v });
-  const open = id => { select(id); goTo('timer'); };
+  const open = id => { showCreature(null); select(id); goTo('timer'); };
   $('#creatures-table').replaceChildren(
     el('thead', {}, el('tr', {}, [tr('creatures.col.name'), 'XP', 'HP', 'ARM', 'DEF', 'SPD', 'Mana', tr('creatures.col.where')].map(t => el('th', { scope: 'col', text: t })))),
     el('tbody', {}, list.length ? list.map(c => el('tr', {},
@@ -5271,19 +5309,17 @@ function renderCreatures() {
 // Ficha de uma criatura. Os atributos vêm do print do bestiário; "Onde aparece" vem dos respawns do banco, com o
 // tempo, os abates e o XP por jogador calculados para o grupo e o bônus escolhidos nos controles da página.
 let creatureId = null;
-function showCreature(id, push = true) {
+// A ficha abre por cima da página, como janela: a lista continua onde estava. Sem id, fecha.
+function showCreature(id) {
+  const dlg = $('#creature-dlg');
   creatureId = id;
-  $('#creatures-list').hidden = !!id;
-  $('#creature-sheet').hidden = !id;
-  if (id) renderCreature();
-  // A ficha tem endereço próprio: dá para mandar o link de uma criatura.
-  const hash = '#creatures' + (creatureId ? '/' + creatureId : '');
-  if (push && pageNow === 'creatures' && location.hash !== hash) { try { history.pushState(null, '', location.pathname + location.search + hash); } catch { /* o endereço fica como está */ } }
-  window.scrollTo(0, 0);
+  if (id) renderCreature();   // se a criatura não existe, a própria ficha desiste e zera o id
+  if (!creatureId) { if (dlg.open) { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); } return; }
+  if (!dlg.open) { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); dlg.scrollTop = 0; }
 }
 function renderCreature() {
   const c = creatureRows().find(x => x.id === creatureId);
-  if (!c) { showCreature(null); return; }
+  if (!c) { creatureId = null; return; }
   const loc = document.documentElement.lang || 'en';
   const num = v => v == null ? null : fmtInt(v);
   const range = (lo, hi) => lo == null ? null : lo === hi ? fmtInt(lo) : fmtInt(lo) + ' – ' + fmtInt(hi);
@@ -5295,11 +5331,10 @@ function renderCreature() {
     const sec = respawnAt(m.base, ui.pct, ui.party), kills = killsPerHour(sec, m.count);
     return { ...w, sec, kills, xp: c.exp == null ? null : kills * c.exp * 100 / ui.party };
   }).filter(Boolean);
-  const open = id => { select(id); goTo('timer'); };
+  const open = id => { showCreature(null); select(id); goTo('timer'); };
   const need = c.exp == null ? 'creature.needXp' : c.hp == null ? 'creature.needStats' : null;
+  setText($('#creature-title'), c.name);
   $('#creature-sheet').replaceChildren(...[   // o aviso só existe quando falta dado: sem o filtro, o vazio viraria texto
-    el('button', { class: 'hunt-link creature-back', type: 'button', id: 'creature-back', text: tr('creature.back'), onclick: () => showCreature(null) }),
-    el('h3', { class: 'creature-name', text: c.name }),
     need ? el('p', { class: 'creature-need', text: tr(need) }) : null,
     el('div', { class: 'creature-stats' },
       stat('xp', num(c.exp), 'main xp'), stat('hp', num(c.hp), 'main'),
@@ -5319,6 +5354,9 @@ function renderCreature() {
             el('td', { class: w.xp == null ? 'none' : null, text: w.xp == null ? '?' : fmtXp(w.xp) })))))),
       ] : el('p', { class: 'support-note', text: tr('creature.whereNone') }))].filter(Boolean));
 }
+$('#creature-close').addEventListener('click', () => showCreature(null));
+$('#creature-dlg').addEventListener('close', () => { creatureId = null; });
+$('#creature-dlg').addEventListener('click', e => { if (e.target === e.currentTarget) showCreature(null); });
 $('#creatures-search').addEventListener('input', renderCreatures);
 $('#creatures-sort').addEventListener('change', renderCreatures);
 $('#creatures-missing').addEventListener('change', renderCreatures);
@@ -5339,7 +5377,10 @@ function openRaffle() {
   $('#raffle-from-hunt').hidden = !huntNames().length;
   setText($('#raffle-msg'), '');
   roomMsg('');
+  const dlg = $('#raffle');
+  if (!dlg.open) { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); }
   setRaffleMode(ui.raffleMode);
+  dlg.scrollTop = 0;
 }
 function drawRaffle() {
   const clean = text => String(text).split(/\r?\n/).map(x => x.trim()).filter(Boolean);
@@ -5758,7 +5799,7 @@ function setRoomDoc(doc) {
   const keys = Object.keys(doc.rolls || {});
   let fresh = false;
   if (room.seen) for (const k of keys) if (!room.seen.has(k)) { room.rolling.set(k, Date.now() + spinTime()); fresh = true; }
-  if (fresh && pageNow === 'raffle') diceSound();   // jogada nova, de quem for: todos ouvem os dados
+  if (fresh && $('#raffle').open) diceSound();   // jogada nova, de quem for: todos ouvem os dados
   room.seen = new Set(keys);
   const sig = JSON.stringify([doc.round, doc.items, keys.length, Object.keys(doc.members || {}).length, doc.flags, doc.skip]);
   if (sig !== room.sig) { room.sig = sig; room.changedAt = Date.now(); }
@@ -5960,7 +6001,7 @@ function setRaffleMode(mode) {
   // Sala em que a pessoa já estava: volta para ela.
   if (!room.code && ui.room) { room.code = ui.room; room.seen = null; room.sig = ''; room.hello = false; }
   renderRoom();
-  roomWatch(pageNow === 'raffle');
+  roomWatch($('#raffle').open);
 }
 $('#raffle-mode-names').addEventListener('click', () => setRaffleMode('names'));
 $('#raffle-mode-room').addEventListener('click', () => setRaffleMode('room'));
@@ -6016,6 +6057,9 @@ function roomFromLink() {
 setTimeout(roomFromLink, 0);   // depois que a página terminou de montar
 
 $('#raffle-btn').addEventListener('click', () => goTo('raffle'));
+$('#raffle').addEventListener('close', () => roomWatch(false));   // janela fechada: para de consultar a sala
+$('#raffle-close').addEventListener('click', () => { const dlg = $('#raffle'); if (dlg.close) dlg.close(); else { dlg.removeAttribute('open'); roomWatch(false); } });
+$('#raffle').addEventListener('click', e => { if (e.target === e.currentTarget && e.currentTarget.close) e.currentTarget.close(); });
 $('#raffle-go').addEventListener('click', drawRaffle);
 $('#raffle-from-hunt').addEventListener('click', () => { $('#raffle-names').value = huntNames().join('\n'); });
 $('#raffle-copy').addEventListener('click', async () => {
@@ -6242,20 +6286,20 @@ $('#float-btn').addEventListener('click', toggleFloat);
 $('#read-btn').addEventListener('click', () => $('#file').click());
 
 /* ---------- Páginas ----------
-   Cada ferramenta é uma página com endereço próprio (#hunt, #creatures, #creatures/malformis, #raffle); o cronômetro
-   é a página inicial, sem nada depois do endereço. Os cronômetros continuam contando em qualquer página. */
-const PAGES = ['timer', 'hunt', 'creatures', 'raffle'];
+   Cada ferramenta é uma página com endereço próprio (#hunt, #creatures); o cronômetro é a página inicial, sem nada
+   depois do endereço. O sorteio está no mesmo menu, mas abre por cima da página em que a pessoa está (#raffle abre
+   o site já com ele). Os cronômetros continuam contando em qualquer página. */
+const PAGES = ['timer', 'hunt', 'creatures'];
 function goTo(route, push = true) {
   const [name, sub] = String(route || '').split('/');
+  if (name === 'raffle') { openRaffle(); return; }
   const to = PAGES.includes(name) ? name : 'timer', was = pageNow;
   pageNow = to;
   for (const p of PAGES) $('#page-' + p).hidden = p !== to;
   for (const b of document.querySelectorAll('[data-go]')) { if (b.dataset.go === to) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
-  if (was === 'raffle' && to !== 'raffle') roomWatch(false);   // fora do sorteio a sala para de ser consultada
-  if (to === 'creatures') { renderCreatures(); showCreature(sub && slug(sub) === sub ? sub : null, false); }
-  if (to === 'raffle' && was !== 'raffle') openRaffle();
+  if (to === 'creatures') { renderCreatures(); if (sub && slug(sub) === sub) showCreature(sub); }   // #creatures/malformis já abre a ficha
   if (to === 'hunt') renderHunt();
-  const hash = to === 'timer' ? '' : '#' + to + (to === 'creatures' && creatureId ? '/' + creatureId : '');
+  const hash = to === 'timer' ? '' : '#' + to;
   if (push && location.hash !== hash) { try { history.pushState(null, '', location.pathname + location.search + hash); } catch { /* o endereço fica como está */ } }
   if (was !== to) window.scrollTo(0, 0);
 }
@@ -6264,7 +6308,8 @@ window.addEventListener('popstate', () => goTo(location.hash.slice(1), false));
 
 applyStatic();
 renderAll();
-goTo(location.hash.slice(1), false);
+goTo(location.hash === '#raffle' ? '' : location.hash.slice(1), false);
+if (location.hash === '#raffle') openRaffle();
 loadSeed();
 initShared();
 initCloud();
