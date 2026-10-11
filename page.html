@@ -5119,7 +5119,7 @@ function huntFill(body, tag, wide) {
       link('hunt.disconnect', disconnectHunt)),
     el('p', { class: hunt.state === 'on' ? 'hunt-note hunt-live' : 'hunt-note', text: tr(hunt.state === 'on' ? 'hunt.live' : 'hunt.once') }),
   ].filter(Boolean);   // sem os itens vazios: o vazio viraria o texto "null"
-  if (wide) body.replaceChildren(...[el('div', { class: 'hunt-grid' }, el('div', { class: 'hunt-main' }, main), huntKills(s, hours)), huntSkins(s), huntTokens(s)].filter(Boolean));
+  if (wide) body.replaceChildren(...[el('div', { class: 'hunt-grid' }, el('div', { class: 'hunt-main' }, main), huntKills(s, hours)), huntTokens(s), huntSkins(s)].filter(Boolean));   // os tokens, que são curtos, vêm antes das skins
   else body.replaceChildren(...main);
 }
 /* ---------- Skins que viram goblets ----------
@@ -5373,6 +5373,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 01:50',
+    pt: ['Analisador de hunt: os elite tokens aparecem antes das skins para goblets.'],
+    en: ['Hunt analyzer: the elite tokens now come before the skins for goblets.'],
+    es: ['Analizador de hunt: los elite tokens aparecen antes de las skins para goblets.'],
+    pl: ['Analizator polowań: elite tokeny są teraz przed skinami na goblety.'],
+  },
   { at: '2026-10-11 01:44',
     pt: ['Analisador de hunt: a divisão dos elite tokens ficou compacta, com uma linha por tipo de token.'],
     en: ['Hunt analyzer: the elite token split is now compact, one line per token type.'],
