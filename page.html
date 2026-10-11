@@ -68,7 +68,7 @@ kbd {
 .masthead > div { flex: 1 1 320px; min-width: 0; }
 .masthead h1 { font: 800 32px/1.05 var(--font-display); letter-spacing: -0.01em; color: var(--title); }
 .masthead p { max-width: 60ch; margin-top: 6px; }
-.masthead nav { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; font-weight: 600; }
+
 .maker { display: block; flex: none; }
 .maker img { display: block; width: auto; height: 46px; }
 .colophon { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; font-size: 13px; color: var(--faint); }
@@ -126,8 +126,7 @@ kbd {
 #room-pane .dlg:disabled { opacity: 0.45; cursor: default; }
 dialog#changes { width: min(560px, calc(100vw - 32px)); }
 /* Tela de criaturas: uma tabela; em tela estreita ela rola de lado dentro da própria moldura */
-/* A moldura não rola: o título e o Fechar ficam parados, e só a lista ou a ficha rola, com uma barra fina */
-dialog#creatures { width: min(940px, calc(100vw - 32px)); overflow: hidden; }
+#creatures-status:empty { display: none; }
 .creatures-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
 #creatures-search { flex: 1 1 220px; min-width: 0; padding: 9px 12px; border: 1px solid transparent; border-radius: var(--r-sm); background: var(--card); color: var(--title); }
 #creatures-search::placeholder { color: var(--faint); }
@@ -536,8 +535,43 @@ details.backup textarea {
 .unit-toggle button[aria-pressed="true"] { background: var(--title); color: var(--ground); }
 .clock.mmss .clock-digits { font-size: 50px; }
 
-.masthead nav { align-items: center; }
-.nav-links { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.nav-links { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 8px; font-weight: 600; }
+/* Barra de ferramentas: as abas à esquerda; novidades, idioma e apoio à direita */
+svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; }
+.tabs { display: inline-flex; gap: 2px; max-width: 100%; padding: 4px; border-radius: 999px; background: var(--box); }
+.tabs button { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: 0; border-radius: 999px; background: none; color: var(--label); font: 600 14px/1.2 var(--font-ui); white-space: nowrap; cursor: pointer; }
+.tabs button:hover { color: var(--title); }
+.tabs button[aria-current="page"] { background: var(--title); color: var(--ground); }
+.tabs .short { display: none; }
+.toolbar-end { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-left: auto; }
+.toolbar-end .unit-toggle { margin-left: 0; }
+.page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.page[hidden] { display: none; }
+/* Ferramenta que era janela e virou página: o mesmo bloco, agora no fluxo da página */
+.tool { display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: var(--r-lg); background: var(--box); color: var(--label); min-width: 0; }
+#raffle.tool { width: min(560px, 100%); }
+/* Analisador de hunt: o resumo de um lado e as criaturas abatidas do outro */
+#page-hunt .hunt { padding: 22px; }
+#page-hunt .hunt .win-name { font: 800 22px/1.2 var(--font-display); }
+.hunt-grid { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 18px 32px; align-items: start; }
+.hunt-main, .hunt-kills { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.hunt-kills h3 { font: 600 16px/1.3 var(--font-ui); color: var(--title); }
+.hunt-kills .creatures-table { min-width: 420px; }
+.hunt-kills .creatures-table td:last-child, .hunt-kills .creatures-table th:last-child { min-width: 0; text-align: right; white-space: nowrap; }
+.hunt-kills .creatures-table td:last-child { color: var(--title); }
+.hunt-kills .creatures-table td.none:last-child { color: var(--faint); }
+@media (max-width: 860px) { .hunt-grid { grid-template-columns: minmax(0, 1fr); } }
+/* No celular as abas descem para uma barra fixa embaixo, ao alcance do polegar */
+@media (max-width: 700px) {
+  .wrap { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .tabs { position: fixed; inset: auto 0 0 0; z-index: 20; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--edge); border-radius: 0; }
+  .tabs button { flex-direction: column; gap: 4px; padding: 7px 2px; border-radius: var(--r-sm); color: var(--faint); font-size: 11px; }
+  .tabs button[aria-current="page"] { background: var(--band); color: var(--amber); }
+  .tabs .wide { display: none; }
+  .tabs .short { display: inline; }
+  .toolbar-end { margin-left: 0; }
+}
 .nav-link { padding: 0; border: 0; background: none; color: var(--faint); font: 400 13px/1.4 var(--font-ui); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .nav-link:hover { color: var(--title); }
 .lang { margin-left: 0; }
@@ -563,29 +597,42 @@ details.backup textarea {
 }
 </style>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/></symbol>
+  <symbol id="i-hunt" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13c-3-.5-6 0-8 1.5zM12 6v13"/></symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></symbol>
+</svg>
 <div class="wrap">
   <header class="masthead">
     <div>
       <h1>Medivia Respawn</h1>
       <p data-i18n="tagline">Cronômetro de respawn para as suas caçadas no Medivia, com o grupo e o bônus já calculados.</p>
-      <nav aria-label="Medivia">
-        <span class="nav-links">
-          <a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a>
-          <button class="nav-link" type="button" id="creatures-top" data-i18n="creatures.open">Criaturas</button>
-          <button class="nav-link" type="button" id="changes-top" data-i18n="changes.open">Novidades</button>
-        </span>
-        <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
-          <button type="button" data-lang="en" lang="en" title="English" aria-label="English"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><path fill="#b22234" d="M0 0h20v2H0zM0 4h20v2H0zM0 8h20v2H0zM0 12h20v2H0z"/><rect width="9" height="8" fill="#3c3b6e"/></svg></button>
-          <button type="button" data-lang="pl" lang="pl" title="Polski" aria-label="Polski"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg></button>
-          <button type="button" data-lang="pt" lang="pt-BR" title="Português" aria-label="Português"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#009b3a"/><path fill="#fedf00" d="M10 1.6 18 7l-8 5.4L2 7z"/><circle cx="10" cy="7" r="3" fill="#002776"/></svg></button>
-          <button type="button" data-lang="es" lang="es" title="Español" aria-label="Español"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg></button>
-        </span>
-        <button class="dlg support-top" type="button" id="support-top" data-i18n="support.open" hidden>Apoiar o projeto</button>
-      </nav>
+      <p class="nav-links"><a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a></p>
     </div>
     <a class="maker" href="https://github.com/Benaa42" target="_blank" rel="noopener"><img src="vibeforge.svg" width="252" height="72" alt="Vibeforge, produzido por Bena" data-i18n-attr="alt:maker.alt"></a>
   </header>
 
+  <div class="toolbar">
+    <nav class="tabs" aria-label="Ferramentas" data-i18n-attr="aria-label:nav.label">
+      <button type="button" data-go="timer"><svg class="ico" aria-hidden="true"><use href="#i-timer"/></svg><span data-i18n="nav.timer">Cronômetro</span></button>
+      <button type="button" data-go="hunt"><svg class="ico" aria-hidden="true"><use href="#i-hunt"/></svg><span class="wide" data-i18n="nav.hunt">Analisador de hunt</span><span class="short" data-i18n="nav.huntShort">Hunt</span></button>
+      <button type="button" data-go="creatures"><svg class="ico" aria-hidden="true"><use href="#i-book"/></svg><span data-i18n="creatures.open">Criaturas</span></button>
+      <button type="button" data-go="raffle"><svg class="ico" aria-hidden="true"><use href="#i-dice"/></svg><span data-i18n="nav.raffle">Sorteio</span></button>
+    </nav>
+    <div class="toolbar-end">
+      <button class="nav-link" type="button" id="changes-top" data-i18n="changes.open">Novidades</button>
+      <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
+        <button type="button" data-lang="en" lang="en" title="English" aria-label="English"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><path fill="#b22234" d="M0 0h20v2H0zM0 4h20v2H0zM0 8h20v2H0zM0 12h20v2H0z"/><rect width="9" height="8" fill="#3c3b6e"/></svg></button>
+        <button type="button" data-lang="pl" lang="pl" title="Polski" aria-label="Polski"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg></button>
+        <button type="button" data-lang="pt" lang="pt-BR" title="Português" aria-label="Português"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#009b3a"/><path fill="#fedf00" d="M10 1.6 18 7l-8 5.4L2 7z"/><circle cx="10" cy="7" r="3" fill="#002776"/></svg></button>
+        <button type="button" data-lang="es" lang="es" title="Español" aria-label="Español"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg></button>
+      </span>
+      <button class="dlg support-top" type="button" id="support-top" data-i18n="support.open" hidden>Apoiar o projeto</button>
+    </div>
+  </div>
+
+  <section class="page" id="page-timer">
   <p class="paste"><span data-i18n="paste.a">Com o print da janela de bônus copiado, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="paste.b">em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</span></p>
 
   <div class="desk">
@@ -609,12 +656,6 @@ details.backup textarea {
           </div>
         </details>
       </footer>
-    </aside>
-    <aside class="win hunt" id="hunt" aria-labelledby="hunt-title">
-      <h2 class="win-name" id="hunt-title" data-i18n="hunt.title">Última hunt</h2>
-      <div id="hunt-body"></div>
-      <div class="hunt-foot"><button class="dlg" type="button" id="raffle-btn" data-i18n="raffle.open">Sortear itens</button></div>
-      <input class="sr" type="file" id="hunt-file" accept=".txt,text/plain" tabindex="-1" aria-hidden="true">
     </aside>
     </div>
 
@@ -656,20 +697,47 @@ details.backup textarea {
       <p class="status" id="status" role="status" data-kind="info" data-i18n="status.default">Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print. O print do mapper da wiki, com o painel do respawn aberto, também vale.</p>
     </main>
   </div>
+  </section>
 
-  <footer class="colophon">
-    <p data-i18n="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</p>
-    <div class="colophon-links">
-      <button class="support-btn" type="button" id="changes-btn" data-i18n="changes.open">Novidades</button>
-      <button class="support-btn" type="button" id="support-btn" data-i18n="support.open" hidden>Apoiar o projeto</button>
-    </div>
-  </footer>
+  <section class="page" id="page-hunt" hidden>
+    <section class="win hunt" id="hunt" aria-labelledby="hunt-title">
+      <h2 class="win-name" id="hunt-title" data-i18n="hunt.title">Última hunt</h2>
+      <div id="hunt-body"></div>
+      <div class="hunt-foot"><button class="dlg" type="button" id="raffle-btn" data-i18n="raffle.open">Sortear itens</button></div>
+      <input class="sr" type="file" id="hunt-file" accept=".txt,text/plain" tabindex="-1" aria-hidden="true">
+    </section>
+  </section>
+
+  <section class="page" id="page-creatures" hidden>
+<div class="support tool" id="creatures" aria-labelledby="creatures-title">
+  <div class="support-end">
+    <h2 id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
+  </div>
+  <p class="status" id="creatures-status" role="status" hidden></p>
+  <div class="creatures-pane" id="creatures-list">
+  <p class="support-note" data-i18n="creatures.intro">XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus.</p>
+  <div class="creatures-bar">
+    <input type="search" id="creatures-search" placeholder="Buscar criatura ou respawn" aria-label="Buscar criatura ou respawn" autocomplete="off" data-i18n-attr="placeholder:creatures.search;aria-label:creatures.search">
+    <label class="creatures-sort"><span data-i18n="creatures.sort">Ordenar por</span>
+      <select class="tone" id="creatures-sort">
+        <option value="name" data-i18n="creatures.by.name">Nome</option>
+        <option value="exp">XP</option>
+        <option value="hp">HP</option>
+      </select>
+    </label>
+    <label class="toggle"><input type="checkbox" id="creatures-missing"> <span data-i18n="creatures.missing">Só as sem XP</span></label>
+  </div>
+  <p class="support-note" id="creatures-count" role="status"></p>
+  <div class="creatures-wrap"><table class="creatures-table" id="creatures-table"></table></div>
+  </div>
+  <div class="creatures-pane creature-sheet" id="creature-sheet" hidden></div>
 </div>
+  </section>
 
-<dialog class="support" id="raffle" aria-labelledby="raffle-title">
+  <section class="page" id="page-raffle" hidden>
+<div class="support tool" id="raffle" aria-labelledby="raffle-title">
   <div class="support-end">
     <h2 id="raffle-title" data-i18n="raffle.title">Sorteio de itens</h2>
-    <button class="dlg stop" type="button" id="raffle-close" data-i18n="support.close" autofocus>Fechar</button>
   </div>
   <span class="unit-toggle raffle-mode" role="group" aria-label="Sorteio de itens" data-i18n-attr="aria-label:raffle.title">
     <button type="button" id="raffle-mode-names" data-i18n="raffle.mode.names">Por nomes</button>
@@ -748,7 +816,18 @@ details.backup textarea {
     </div>
     <p class="support-note" id="room-msg" role="status"></p>
   </div>
-</dialog>
+</div>
+  </section>
+
+  <footer class="colophon">
+    <p data-i18n="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</p>
+    <div class="colophon-links">
+      <button class="support-btn" type="button" id="changes-btn" data-i18n="changes.open">Novidades</button>
+      <button class="support-btn" type="button" id="support-btn" data-i18n="support.open" hidden>Apoiar o projeto</button>
+    </div>
+  </footer>
+</div>
+
 
 <dialog class="support" id="changes" aria-labelledby="changes-title">
   <div class="support-end">
@@ -758,29 +837,6 @@ details.backup textarea {
   <div class="changes-list" id="changes-list"></div>
 </dialog>
 
-<dialog class="support" id="creatures" aria-labelledby="creatures-title">
-  <div class="support-end">
-    <h2 id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
-    <button class="dlg stop" type="button" id="creatures-close" data-i18n="support.close" autofocus>Fechar</button>
-  </div>
-  <div class="creatures-pane" id="creatures-list">
-  <p class="support-note" data-i18n="creatures.intro">XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus.</p>
-  <div class="creatures-bar">
-    <input type="search" id="creatures-search" placeholder="Buscar criatura ou respawn" aria-label="Buscar criatura ou respawn" autocomplete="off" data-i18n-attr="placeholder:creatures.search;aria-label:creatures.search">
-    <label class="creatures-sort"><span data-i18n="creatures.sort">Ordenar por</span>
-      <select class="tone" id="creatures-sort">
-        <option value="name" data-i18n="creatures.by.name">Nome</option>
-        <option value="exp">XP</option>
-        <option value="hp">HP</option>
-      </select>
-    </label>
-    <label class="toggle"><input type="checkbox" id="creatures-missing"> <span data-i18n="creatures.missing">Só as sem XP</span></label>
-  </div>
-  <p class="support-note" id="creatures-count" role="status"></p>
-  <div class="creatures-wrap"><table class="creatures-table" id="creatures-table"></table></div>
-  </div>
-  <div class="creatures-pane creature-sheet" id="creature-sheet" hidden></div>
-</dialog>
 
 <dialog class="support" id="support" aria-labelledby="support-title">
   <h2 id="support-title" data-i18n="support.open">Apoiar o projeto</h2>
@@ -815,6 +871,7 @@ details.backup textarea {
 const PCTS = [0, 10, 20, 30, 40, 50];
 const DURS = Array.from({ length: 16 }, (_, i) => 30 + i * 10);
 const $ = (s, r = document) => r.querySelector(s);
+let pageNow = 'timer';   // ferramenta aberta: timer, hunt, creatures ou raffle
 
 function el(tag, props, ...kids) {
   const n = document.createElement(tag);
@@ -954,6 +1011,19 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'nav.label': 'Ferramentas',
+    'nav.timer': 'Cronômetro',
+    'nav.hunt': 'Analisador de hunt',
+    'nav.huntShort': 'Hunt',
+    'nav.raffle': 'Sorteio',
+    'hunt.expHour': 'XP por hora',
+    'hunt.kills.title': 'Criaturas abatidas',
+    'hunt.kills.n': 'Abates',
+    'hunt.kills.rate': 'Por hora',
+    'hunt.kills.missing1': 'Falta o XP de 1 criatura no banco. Com o XP de todas, esta página mostra quanto do XP de tabela dos abates você recebeu.',
+    'hunt.kills.missingN': 'Falta o XP de {n} criaturas no banco. Com o XP de todas, esta página mostra quanto do XP de tabela dos abates você recebeu.',
+    'hunt.kills.share': 'XP de tabela desses abates: {t}. {x} recebeu {p}% disso.',
+    'hunt.kills.book': 'XP de tabela desses abates: {t}.',
     'creature.open': 'Abrir a ficha desta criatura',
     'creature.back': 'Voltar à lista',
     'creature.needXp': 'Falta o XP desta criatura. Cole o print da ficha dela no bestiário do jogo, na aba Normal, e os dados aparecem aqui.',
@@ -1329,6 +1399,19 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'nav.label': 'Tools',
+    'nav.timer': 'Timer',
+    'nav.hunt': 'Hunt analyzer',
+    'nav.huntShort': 'Hunt',
+    'nav.raffle': 'Raffle',
+    'hunt.expHour': 'XP per hour',
+    'hunt.kills.title': 'Creatures killed',
+    'hunt.kills.n': 'Kills',
+    'hunt.kills.rate': 'Per hour',
+    'hunt.kills.missing1': 'The XP of 1 creature is missing from the bank. With the XP of all of them, this page shows how much of the table XP of the kills you received.',
+    'hunt.kills.missingN': 'The XP of {n} creatures is missing from the bank. With the XP of all of them, this page shows how much of the table XP of the kills you received.',
+    'hunt.kills.share': 'Table XP of these kills: {t}. {x} received {p}% of it.',
+    'hunt.kills.book': 'Table XP of these kills: {t}.',
     'creature.open': 'Open the sheet of this creature',
     'creature.back': 'Back to the list',
     'creature.needXp': 'This creature has no XP yet. Paste a screenshot of its page in the game bestiary, on the Normal tab, and the data shows up here.',
@@ -1704,6 +1787,19 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'nav.label': 'Herramientas',
+    'nav.timer': 'Cronómetro',
+    'nav.hunt': 'Analizador de hunt',
+    'nav.huntShort': 'Hunt',
+    'nav.raffle': 'Sorteo',
+    'hunt.expHour': 'XP por hora',
+    'hunt.kills.title': 'Criaturas abatidas',
+    'hunt.kills.n': 'Muertes',
+    'hunt.kills.rate': 'Por hora',
+    'hunt.kills.missing1': 'Falta el XP de 1 criatura en el banco. Con el XP de todas, esta página muestra cuánto del XP de tabla de las muertes recibiste.',
+    'hunt.kills.missingN': 'Falta el XP de {n} criaturas en el banco. Con el XP de todas, esta página muestra cuánto del XP de tabla de las muertes recibiste.',
+    'hunt.kills.share': 'XP de tabla de estas muertes: {t}. {x} recibió el {p}% de eso.',
+    'hunt.kills.book': 'XP de tabla de estas muertes: {t}.',
     'creature.open': 'Abrir la ficha de esta criatura',
     'creature.back': 'Volver a la lista',
     'creature.needXp': 'Falta el XP de esta criatura. Pega la captura de su ficha en el bestiario del juego, en la pestaña Normal, y los datos aparecen aquí.',
@@ -2079,6 +2175,19 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'nav.label': 'Narzędzia',
+    'nav.timer': 'Licznik',
+    'nav.hunt': 'Analizator polowań',
+    'nav.huntShort': 'Polowanie',
+    'nav.raffle': 'Losowanie',
+    'hunt.expHour': 'XP na godzinę',
+    'hunt.kills.title': 'Zabite stworzenia',
+    'hunt.kills.n': 'Zabicia',
+    'hunt.kills.rate': 'Na godzinę',
+    'hunt.kills.missing1': 'W bazie brakuje XP 1 stworzenia. Mając XP wszystkich, ta strona pokaże, jaką część tabelarycznego XP za zabicia otrzymano.',
+    'hunt.kills.missingN': 'W bazie brakuje XP {n} stworzeń. Mając XP wszystkich, ta strona pokaże, jaką część tabelarycznego XP za zabicia otrzymano.',
+    'hunt.kills.share': 'Tabelaryczne XP tych zabić: {t}. {x} otrzymał(a) {p}% z tego.',
+    'hunt.kills.book': 'Tabelaryczne XP tych zabić: {t}.',
     'creature.open': 'Otwórz kartę tego stworzenia',
     'creature.back': 'Wróć do listy',
     'creature.needXp': 'Brak XP tego stworzenia. Wklej zrzut jego karty z bestiariusza gry, na zakładce Normalny, a dane pojawią się tutaj.',
@@ -3186,7 +3295,6 @@ function xpChanged() {
   xp.key = key;
   xp.rev++;
   renderAll();
-  if ($('#creatures').open) renderCreatures();
 }
 xp.key = xpKey();
 async function loadXp() {
@@ -3328,7 +3436,14 @@ const secondId = () => ui.duo && ui.id2 && ui.id2 !== ui.id && getRespawn(ui.id)
 const pctOf = id => id === secondId() ? ui.pct2 : ui.pct;
 
 const statusEl = $('#status');
-function setStatus(kind, text) { statusEl.dataset.kind = kind; statusEl.textContent = text; }
+function setStatus(kind, text) {
+  statusEl.dataset.kind = kind;
+  statusEl.textContent = text;
+  const mirror = $('#creatures-status');   // o mesmo recado na página de criaturas, onde se cola o print do bestiário
+  mirror.dataset.kind = kind;
+  mirror.textContent = text;
+  mirror.hidden = false;
+}
 
 function renderSync() {
   const waiting = cloud.queue.size;
@@ -3461,7 +3576,8 @@ function setLang(lang) {
   renderHunt();
   renderRoom();
   voiceLang();
-  if ($('#creatures').open) renderCreatures();
+  if (pageNow === 'creatures') renderCreatures();
+  if (pageNow === 'hunt') renderHunt();
 }
 
 // Voltas: cada vez que o cronômetro de um grupo é iniciado conta uma volta, ou seja, uma limpa do respawn.
@@ -4249,6 +4365,7 @@ function renderAll() {
   renderBank();
   renderSheet();
   if ($('#backup').open && document.activeElement !== $('#backup-text')) fillBackup();
+  if (pageNow === 'creatures') renderCreatures();   // respawns ou XP mudaram: a lista de criaturas acompanha
 }
 
 /* ---------- Entrada do print ---------- */
@@ -4266,6 +4383,7 @@ async function readImage(blob) {
       if (!p.name || !slug(p.name)) throw new UserError(tr('err.bestName'));
       if (p.exp == null) throw new UserError(tr('err.bestExp', { x: p.name }));
       const where = await saveXp(p.name, p.exp, p.stats || {});
+      if (pageNow === 'creatures') showCreature(slug(p.name));   // quem está nas criaturas já vê a ficha preenchida
       setStatus('ok', tr('read.best', { x: p.name, v: fmtInt(p.exp) }) + ' ' + tr(where === 'cloud' ? 'read.cloud' : 'read.bestLocal') + ' ' + tr('read.discarded'));
       return;
     }
@@ -4302,6 +4420,7 @@ async function readImage(blob) {
       if (known) {
         if (prev && prev.src === 'mapper' && store.local.has(id)) { store.local.delete(id); persistLocal(); }   // sobra de uma leitura antiga do mapper
         select(known.id);
+        goTo('timer');
         setStatus('ok', tr('read.mapperTwin', { y: name, x: known.name }) + ' ' + tr('read.discarded'));
         return;
       }
@@ -4322,6 +4441,7 @@ async function readImage(blob) {
     if (!mapper && DURS.includes(p.dur)) ui.dur = p.dur;
     if (cost10 && !mapper) discSet(id, p.discount || 0);   // print sem a faixa de desconto: o desconto acabou
     select(id, mapper ? undefined : p.pct);
+    goTo('timer');   // print de respawn lido em outra página: abre o cronômetro dele
     let msg = tr((mapper ? 'read.mapper' : 'read.ok') + (p.monsters.length === 1 ? '1' : 'N'), { x: prev ? prev.name : name, p: p.pct, n: p.monsters.length }) + ' ' +
       (added.length ? tr('read.grew', { y: added.join(', '), n: monsters.length }) + ' ' : '') +
       tr(where === 'cloud' ? 'read.cloud' : where === 'shared' ? 'read.shared' : 'read.local') + ' ' + tr('read.discarded');
@@ -4363,7 +4483,7 @@ $('#file').addEventListener('change', e => { const f = e.target.files[0]; e.targ
 $('#read-btn').addEventListener('pointerenter', () => { getWorker().catch(() => {}); }, { once: true });
 
 document.addEventListener('keydown', e => {
-  if (e.code !== 'Space' || e.repeat || !timers.size) return;
+  if (e.code !== 'Space' || e.repeat || !timers.size || pageNow !== 'timer') return;
   if (e.target.closest && e.target.closest('input, textarea, button, select, summary, [contenteditable]')) return;
   e.preventDefault();
   startAll();
@@ -4416,8 +4536,10 @@ function parseHunts(text) {
       saved: one(/^Hunt saved at (.+)$/m), start: one(/^Start time: (.+)$/m), end: one(/^End time: (.+)$/m), time: one(/^Session time: (.+)$/m),
       me: exp ? exp[1] : null, exp: exp ? Number(exp[2]) : null,
       supply: num(/^Supply value: (-?\d+)/m), loot: num(/^Loot value: (-?\d+)/m), balance: num(/^Balance: (-?\d+)/m),
-      players: [],
+      players: [], kills: [],
     };
+    const dead = block.split(/^Monsters killed:\n/m)[1];
+    if (dead) for (const m of dead.matchAll(/^- (.+) \(killed: (\d+)\)\s*$/gm)) s.kills.push({ name: m[1], n: Number(m[2]) });
     for (const m of block.matchAll(/^Supplies used \((.+)\): (-?\d+)/gm)) s.players.push({ name: m[1], spent: Number(m[2]), payout: null });
     const pay = block.match(/^Suggested payout:\n((?:- .*\n?)*)/m);
     if (pay) for (const m of pay[1].matchAll(/^- (.+): (-?\d+)\s*$/gm)) {
@@ -4655,7 +4777,8 @@ function renderHunt() {
   const v = huntView(s);   // a hunt com o boost informado à mão já nas contas
   const group = v.players.length > 1 || v.players.some(p => p.payout != null);
   const open = ui.id && getRespawn(ui.id), openCost = open ? bonusCost(open, ui.id) : null;
-  body.replaceChildren(...[
+  const hours = (() => { const m = /^(\d+):(\d\d):(\d\d)$/.exec(s.time || ''); return m ? +m[1] + m[2] / 60 + m[3] / 3600 : 0; })();
+  body.replaceChildren(el('div', { class: 'hunt-grid' }, el('div', { class: 'hunt-main' }, [
     el('div', { class: 'hunt-head' },
       el('span', { class: 'hunt-when', text: huntWhen(s) + (s.time ? ' (' + s.time + ')' : '') }),
       many ? el('span', { class: 'hunt-nav' },
@@ -4666,7 +4789,8 @@ function renderHunt() {
       el('dt', { text: tr('hunt.loot') }), el('dd', { text: money(v.loot) }),
       el('dt', { text: tr('hunt.supply') }), el('dd', { text: money(v.supply) }),
       el('dt', { text: tr('hunt.balance') }), el('dd', { class: v.balance < 0 ? 'loss' : 'gain', text: (v.balance > 0 ? '+' : '') + money(v.balance) }),
-      s.exp != null ? [el('dt', { text: tr('hunt.exp', { x: s.me || '?' }) }), el('dd', { text: money(s.exp) })] : null),
+      s.exp != null ? [el('dt', { text: tr('hunt.exp', { x: s.me || '?' }) }), el('dd', { text: money(s.exp) })] : null,
+      s.exp != null && hours ? [el('dt', { text: tr('hunt.expHour') }), el('dd', { text: fmtXp(s.exp / hours) })] : null),
     v.extra ? el('p', { class: 'hunt-note', id: 'hunt-extra-note', text: tr('hunt.extra.note', { v: money(v.extra) }) }) : null,
     group ? el('table', { class: 'hunt-table' },
       el('thead', null, el('tr', null,
@@ -4697,7 +4821,31 @@ function renderHunt() {
       el('button', { class: 'dlg', type: 'button', id: 'hunt-copy', text: tr('hunt.copy'), onclick: () => copyHunt(v) }),
       link('hunt.disconnect', disconnectHunt)),
     el('p', { class: hunt.state === 'on' ? 'hunt-note hunt-live' : 'hunt-note', text: tr(hunt.state === 'on' ? 'hunt.live' : 'hunt.once') }),
-  ].filter(Boolean));   // sem os itens vazios: replaceChildren escreveria "null" no lugar deles
+  ].filter(Boolean)), huntKills(s, hours)));   // sem os itens vazios: o vazio viraria o texto "null"
+}
+// Criaturas abatidas na hunt, com o ritmo por hora e o XP por abate de quem já está no banco de criaturas.
+// Com o XP de todas, dá para dizer quanto do XP de tabela dos abates o jogador recebeu.
+function huntKills(s, hours) {
+  if (!s.kills.length) return null;
+  const title = t => t.replace(/(^|[\s-])([a-z])/g, (m, a, b) => a + b.toUpperCase());   // o jogo grava os nomes em minúsculas
+  const rows = s.kills.map(k => {
+    const id = slug(k.name), d = xp.mine.get(id) || xp.cloud.get(id);
+    return { id, name: d ? d.name : title(k.name), n: k.n, exp: d ? d.exp : null };
+  }).sort((a, b) => b.n - a.n);
+  const missing = rows.filter(r => r.exp == null).length, book = rows.reduce((t, r) => t + (r.exp || 0) * r.n, 0);
+  return el('div', { class: 'hunt-kills' }, [
+    el('h3', { text: tr('hunt.kills.title') }),
+    el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table' },
+      el('thead', {}, el('tr', {}, [tr('creatures.col.name'), tr('hunt.kills.n'), tr('hunt.kills.rate'), tr('creature.s.xp')].map(t => el('th', { scope: 'col', text: t })))),
+      el('tbody', {}, rows.map(r => el('tr', {},
+        el('td', {}, el('button', { class: 'creature-link', type: 'button', text: r.name, title: tr('creature.open'), onclick: () => goTo('creatures/' + r.id) })),
+        el('td', { text: fmtInt(r.n) }),
+        el('td', { class: hours ? null : 'none', text: hours ? fmtInt(Math.round(r.n / hours)) : '–' }),
+        el('td', { class: r.exp == null ? 'none' : null, text: r.exp == null ? '?' : fmtInt(r.exp) })))))),
+    el('p', { class: 'hunt-note', text: missing
+      ? tr(missing === 1 ? 'hunt.kills.missing1' : 'hunt.kills.missingN', { n: missing })
+      : s.exp != null && book ? tr('hunt.kills.share', { t: fmtXp(book), x: s.me || '?', p: Math.round(s.exp * 100 / book) }) : tr('hunt.kills.book', { t: fmtXp(book) }) }),
+  ]);
 }
 
 $('#hunt-file').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; openHuntOnce(f); });
@@ -4806,6 +4954,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 22:21',
+    pt: ['Menu de ferramentas no topo: Cronômetro, Analisador de hunt, Criaturas e Sorteio agora são páginas, cada uma com endereço próprio.', 'Analisador de hunt: mostra o XP por hora e as criaturas abatidas, com o ritmo por hora e o XP por abate.'],
+    en: ['Tool menu at the top: Timer, Hunt analyzer, Creatures and Raffle are now pages, each with its own address.', 'Hunt analyzer: it shows XP per hour and the creatures killed, with the hourly pace and the XP per kill.'],
+    es: ['Menú de herramientas arriba: Cronómetro, Analizador de hunt, Criaturas y Sorteo ahora son páginas, cada una con su propia dirección.', 'Analizador de hunt: muestra el XP por hora y las criaturas abatidas, con el ritmo por hora y el XP por muerte.'],
+    pl: ['Menu narzędzi u góry: Licznik, Analizator polowań, Stworzenia i Losowanie są teraz stronami, każda z własnym adresem.', 'Analizator polowań: pokazuje XP na godzinę i zabite stworzenia, z tempem na godzinę i XP za zabicie.'],
+  },
   { at: '2026-10-10 21:08',
     pt: ['Tela nova "Criaturas", no topo da página: lista todas as criaturas que os prints já trouxeram, com XP, HP, ARM, DEF, SPD, Mana e os respawns onde aparecem.', 'Clicar numa criatura abre a ficha dela: atributos, XP por HP e os respawns onde aparece, com abates e XP por hora.', 'O print do bestiário agora guarda também HP, ARM, DEF, SPD e Mana.'],
     en: ['New "Creatures" screen, at the top of the page: it lists every creature the screenshots have brought in, with XP, HP, ARM, DEF, SPD, Mana and the respawns where they appear.', 'Clicking a creature opens its sheet: stats, XP per HP and the respawns where it appears, with kills and XP per hour.', 'The bestiary screenshot now also saves HP, ARM, DEF, SPD and Mana.'],
@@ -5101,7 +5255,7 @@ function renderCreatures() {
   const num = v => v == null ? null : fmtInt(v);
   const range = (lo, hi) => lo == null ? null : lo === hi ? fmtInt(lo) : fmtInt(lo) + ' – ' + fmtInt(hi);
   const cell = v => el('td', { class: v == null ? 'none' : null, text: v == null ? '–' : v });
-  const open = id => { const dlg = $('#creatures'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); select(id); };
+  const open = id => { select(id); goTo('timer'); };
   $('#creatures-table').replaceChildren(
     el('thead', {}, el('tr', {}, [tr('creatures.col.name'), 'XP', 'HP', 'ARM', 'DEF', 'SPD', 'Mana', tr('creatures.col.where')].map(t => el('th', { scope: 'col', text: t })))),
     el('tbody', {}, list.length ? list.map(c => el('tr', {},
@@ -5117,12 +5271,15 @@ function renderCreatures() {
 // Ficha de uma criatura. Os atributos vêm do print do bestiário; "Onde aparece" vem dos respawns do banco, com o
 // tempo, os abates e o XP por jogador calculados para o grupo e o bônus escolhidos nos controles da página.
 let creatureId = null;
-function showCreature(id) {
+function showCreature(id, push = true) {
   creatureId = id;
   $('#creatures-list').hidden = !!id;
   $('#creature-sheet').hidden = !id;
   if (id) renderCreature();
-  $('#creatures').scrollTop = 0;
+  // A ficha tem endereço próprio: dá para mandar o link de uma criatura.
+  const hash = '#creatures' + (creatureId ? '/' + creatureId : '');
+  if (push && pageNow === 'creatures' && location.hash !== hash) { try { history.pushState(null, '', location.pathname + location.search + hash); } catch { /* o endereço fica como está */ } }
+  window.scrollTo(0, 0);
 }
 function renderCreature() {
   const c = creatureRows().find(x => x.id === creatureId);
@@ -5138,7 +5295,7 @@ function renderCreature() {
     const sec = respawnAt(m.base, ui.pct, ui.party), kills = killsPerHour(sec, m.count);
     return { ...w, sec, kills, xp: c.exp == null ? null : kills * c.exp * 100 / ui.party };
   }).filter(Boolean);
-  const open = id => { const dlg = $('#creatures'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); select(id); };
+  const open = id => { select(id); goTo('timer'); };
   const need = c.exp == null ? 'creature.needXp' : c.hp == null ? 'creature.needStats' : null;
   $('#creature-sheet').replaceChildren(...[   // o aviso só existe quando falta dado: sem o filtro, o vazio viraria texto
     el('button', { class: 'hunt-link creature-back', type: 'button', id: 'creature-back', text: tr('creature.back'), onclick: () => showCreature(null) }),
@@ -5162,15 +5319,6 @@ function renderCreature() {
             el('td', { class: w.xp == null ? 'none' : null, text: w.xp == null ? '?' : fmtXp(w.xp) })))))),
       ] : el('p', { class: 'support-note', text: tr('creature.whereNone') }))].filter(Boolean));
 }
-$('#creatures-top').addEventListener('click', () => {
-  showCreature(null);
-  renderCreatures();
-  const dlg = $('#creatures');
-  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
-  dlg.scrollTop = 0;
-});
-$('#creatures-close').addEventListener('click', () => { const dlg = $('#creatures'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
-$('#creatures').addEventListener('click', e => { if (e.target === e.currentTarget && e.currentTarget.close) e.currentTarget.close(); });
 $('#creatures-search').addEventListener('input', renderCreatures);
 $('#creatures-sort').addEventListener('change', renderCreatures);
 $('#creatures-missing').addEventListener('change', renderCreatures);
@@ -5191,10 +5339,7 @@ function openRaffle() {
   $('#raffle-from-hunt').hidden = !huntNames().length;
   setText($('#raffle-msg'), '');
   roomMsg('');
-  const dlg = $('#raffle');
-  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
   setRaffleMode(ui.raffleMode);
-  dlg.scrollTop = 0;
 }
 function drawRaffle() {
   const clean = text => String(text).split(/\r?\n/).map(x => x.trim()).filter(Boolean);
@@ -5613,7 +5758,7 @@ function setRoomDoc(doc) {
   const keys = Object.keys(doc.rolls || {});
   let fresh = false;
   if (room.seen) for (const k of keys) if (!room.seen.has(k)) { room.rolling.set(k, Date.now() + spinTime()); fresh = true; }
-  if (fresh && $('#raffle').open) diceSound();   // jogada nova, de quem for: todos ouvem os dados
+  if (fresh && pageNow === 'raffle') diceSound();   // jogada nova, de quem for: todos ouvem os dados
   room.seen = new Set(keys);
   const sig = JSON.stringify([doc.round, doc.items, keys.length, Object.keys(doc.members || {}).length, doc.flags, doc.skip]);
   if (sig !== room.sig) { room.sig = sig; room.changedAt = Date.now(); }
@@ -5815,7 +5960,7 @@ function setRaffleMode(mode) {
   // Sala em que a pessoa já estava: volta para ela.
   if (!room.code && ui.room) { room.code = ui.room; room.seen = null; room.sig = ''; room.hello = false; }
   renderRoom();
-  roomWatch($('#raffle').open);
+  roomWatch(pageNow === 'raffle');
 }
 $('#raffle-mode-names').addEventListener('click', () => setRaffleMode('names'));
 $('#raffle-mode-room').addEventListener('click', () => setRaffleMode('room'));
@@ -5862,24 +6007,21 @@ function roomFromLink() {
   try { history.replaceState(null, '', location.pathname + location.hash); } catch { /* o endereço fica como está */ }
   if (ui.room && ui.room !== code) ui.room = null;   // estava em outra sala: o link manda
   ui.raffleMode = 'room';
-  openRaffle();
+  goTo('raffle');
   if (ui.room === code) return;   // já estava nesta sala: o sorteio abriu nela
   $('#room-code').value = code;
   if (ui.rollName.trim()) roomJoin();
   else { roomMsg(tr('room.viaLink', { x: fmtCode(code) })); $('#room-name').focus(); }
 }
 setTimeout(roomFromLink, 0);   // depois que a página terminou de montar
-$('#raffle').addEventListener('close', () => roomWatch(false));   // janela fechada: para de consultar a sala
 
-$('#raffle-btn').addEventListener('click', openRaffle);
+$('#raffle-btn').addEventListener('click', () => goTo('raffle'));
 $('#raffle-go').addEventListener('click', drawRaffle);
 $('#raffle-from-hunt').addEventListener('click', () => { $('#raffle-names').value = huntNames().join('\n'); });
 $('#raffle-copy').addEventListener('click', async () => {
   const ok = await copyText(raffleText);
   setText($('#raffle-msg'), tr(ok ? 'raffle.copied' : 'hunt.copyFail'));
 });
-$('#raffle-close').addEventListener('click', () => { const dlg = $('#raffle'); if (dlg.close) dlg.close(); else { dlg.removeAttribute('open'); roomWatch(false); } });
-$('#raffle').addEventListener('click', e => { if (e.target === e.currentTarget && e.currentTarget.close) e.currentTarget.close(); });
 
 /* ---------- Rodapé da janela: opções e botões ---------- */
 const optsBar = $('#win-opts');
@@ -6099,8 +6241,30 @@ for (const b of document.querySelectorAll('.lang button')) b.addEventListener('c
 $('#float-btn').addEventListener('click', toggleFloat);
 $('#read-btn').addEventListener('click', () => $('#file').click());
 
+/* ---------- Páginas ----------
+   Cada ferramenta é uma página com endereço próprio (#hunt, #creatures, #creatures/malformis, #raffle); o cronômetro
+   é a página inicial, sem nada depois do endereço. Os cronômetros continuam contando em qualquer página. */
+const PAGES = ['timer', 'hunt', 'creatures', 'raffle'];
+function goTo(route, push = true) {
+  const [name, sub] = String(route || '').split('/');
+  const to = PAGES.includes(name) ? name : 'timer', was = pageNow;
+  pageNow = to;
+  for (const p of PAGES) $('#page-' + p).hidden = p !== to;
+  for (const b of document.querySelectorAll('[data-go]')) { if (b.dataset.go === to) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
+  if (was === 'raffle' && to !== 'raffle') roomWatch(false);   // fora do sorteio a sala para de ser consultada
+  if (to === 'creatures') { renderCreatures(); showCreature(sub && slug(sub) === sub ? sub : null, false); }
+  if (to === 'raffle' && was !== 'raffle') openRaffle();
+  if (to === 'hunt') renderHunt();
+  const hash = to === 'timer' ? '' : '#' + to + (to === 'creatures' && creatureId ? '/' + creatureId : '');
+  if (push && location.hash !== hash) { try { history.pushState(null, '', location.pathname + location.search + hash); } catch { /* o endereço fica como está */ } }
+  if (was !== to) window.scrollTo(0, 0);
+}
+document.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) goTo(b.dataset.go); });
+window.addEventListener('popstate', () => goTo(location.hash.slice(1), false));
+
 applyStatic();
 renderAll();
+goTo(location.hash.slice(1), false);
 loadSeed();
 initShared();
 initCloud();
