@@ -753,6 +753,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
             <option value="onscreen" data-i18n="tone.onscreen">Jogador na tela</option>
             <option value="azrak" data-i18n="tone.azrak">Voz do Azrak</option>
             <option value="vivien" data-i18n="tone.vivien">Voz da Vivien</option>
+            <option value="aghata" data-i18n="tone.aghata">Voz da Aghata</option>
           </select>
           <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <svg class="ico mic" aria-hidden="true"><use href="#i-mic"/></svg><span data-i18n="voice.label">Ativar comando de voz</span></label>
           <button class="voice-help-btn" type="button" id="voice-help-btn" aria-expanded="false" aria-controls="voice-help" title="Ver os comandos de voz" aria-label="Ver os comandos de voz" data-i18n-attr="title:voice.help;aria-label:voice.help">?</button>
@@ -1123,6 +1124,7 @@ const I18N = {
     'creature.update': 'Os números mudaram no jogo? Cole um print novo da ficha desta criatura no bestiário, na aba da raridade que mudou, e eles são atualizados.',
     'tone.azrak': 'Voz do Azrak',
     'tone.vivien': 'Voz da Vivien',
+    'tone.aghata': 'Voz da Aghata',
     'hunt.more': 'Ver no analisador',
     'float.tip': 'Abre os cronômetros numa janelinha que fica por cima do jogo',
     'nav.label': 'Ferramentas',
@@ -1546,6 +1548,7 @@ const I18N = {
     'creature.update': 'Did the numbers change in the game? Paste a new screenshot of the bestiary page of this creature, on the tab of the rarity that changed, and they are updated.',
     'tone.azrak': 'Azrak voice',
     'tone.vivien': 'Vivien voice',
+    'tone.aghata': 'Aghata voice',
     'hunt.more': 'Open in the analyzer',
     'float.tip': 'Opens the timers in a small window that stays on top of the game',
     'nav.label': 'Tools',
@@ -1969,6 +1972,7 @@ const I18N = {
     'creature.update': '¿Cambiaron los números en el juego? Pega una captura nueva de la ficha de esta criatura en el bestiario, en la pestaña de la rareza que cambió, y se actualizan.',
     'tone.azrak': 'Voz de Azrak',
     'tone.vivien': 'Voz de Vivien',
+    'tone.aghata': 'Voz de Aghata',
     'hunt.more': 'Ver en el analizador',
     'float.tip': 'Abre los cronómetros en una ventanita que queda por encima del juego',
     'nav.label': 'Herramientas',
@@ -2392,6 +2396,7 @@ const I18N = {
     'creature.update': 'Liczby zmieniły się w grze? Wklej nowy zrzut karty tego stworzenia z bestiariusza, z zakładki rzadkości, która się zmieniła, a zostaną zaktualizowane.',
     'tone.azrak': 'Głos Azraka',
     'tone.vivien': 'Głos Vivien',
+    'tone.aghata': 'Głos Aghaty',
     'hunt.more': 'Zobacz w analizatorze',
     'float.tip': 'Otwiera liczniki w małym oknie, które pozostaje nad grą',
     'nav.label': 'Narzędzia',
@@ -2705,6 +2710,7 @@ TONES.onscreen = { warn: TONES.sino.warn, done: TONES.sino.done, file: 'sounds/o
 const VOICES = {
   azrak: [[0.05, 3.31, 1.77], [0.05, 3.42, 1.81], [0.04, 3.15, 2.12], [0.03, 3.32, 2.12], [0, 3.45, 2.43], [0.06, 4.34, 1.98]],
   vivien: [[0.04, 3.01, 1.6], [0.06, 3.38, 1.81], [0.04, 4.35, 1.63]],
+  aghata: [[0.05, 3.81, 2.3], [0.04, 4.03, 2], [0.11, 4.02, 2.1], [0.04, 3.83, 2.3]],
 };
 for (const [name, takes] of Object.entries(VOICES)) {
   TONES[name] = { warn: TONES.sino.warn, done: TONES.sino.done,
@@ -5401,6 +5407,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 04:24',
+    pt: ['Novo alerta com voz: "Voz da Aghata", com quatro gravações de "Monsters respawned" que se alternam a cada aviso.'],
+    en: ['New spoken alert: "Aghata voice", with four recordings of "Monsters respawned" that alternate on every alert.'],
+    es: ['Nueva alerta con voz: "Voz de Aghata", con cuatro grabaciones de "Monsters respawned" que se alternan en cada aviso.'],
+    pl: ['Nowy alarm głosowy: „Głos Aghaty”, z czterema nagraniami „Monsters respawned”, które zmieniają się przy każdym alarmie.'],
+  },
   { at: '2026-10-11 03:55',
     pt: ['Analisador de hunt: as skins, os goblets e os elite tokens aparecem com a figura do jogo.'],
     en: ['Hunt analyzer: skins, goblets and elite tokens are shown with their in-game picture.'],
