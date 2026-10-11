@@ -126,6 +126,25 @@ kbd {
 #room-note:empty { display: none; }
 #room-pane .dlg:disabled { opacity: 0.45; cursor: default; }
 dialog#changes { width: min(560px, calc(100vw - 32px)); }
+/* Tela de criaturas: uma tabela; em tela estreita ela rola de lado dentro da própria moldura */
+dialog#creatures { width: min(940px, calc(100vw - 32px)); }
+.creatures-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+#creatures-search { flex: 1 1 220px; min-width: 0; padding: 9px 12px; border: 1px solid transparent; border-radius: var(--r-sm); background: var(--card); color: var(--title); }
+#creatures-search::placeholder { color: var(--faint); }
+#creatures-search:focus { border-color: var(--edge); }
+.creatures-sort { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
+/* A lista rola dentro da moldura (para os lados e para baixo); a busca e o cabeçalho ficam à vista */
+.creatures-wrap { flex: 1 1 auto; min-height: 160px; overflow: auto; }
+.creatures-table { width: 100%; min-width: 660px; border-collapse: collapse; font-size: 14px; font-variant-numeric: lining-nums tabular-nums; }
+.creatures-table th { position: sticky; top: 0; padding: 6px 10px; background: var(--box); box-shadow: inset 0 -1px 0 var(--edge); font: 500 12px/1.3 var(--font-ui); color: var(--faint); text-align: right; white-space: nowrap; }
+.creatures-table td { padding: 8px 10px; border-bottom: 1px solid var(--edge); color: var(--title); text-align: right; vertical-align: top; white-space: nowrap; }
+.creatures-table th:first-child, .creatures-table td:first-child, .creatures-table th:last-child, .creatures-table td:last-child { text-align: left; }
+.creatures-table td:first-child { font-weight: 600; color: var(--amber); white-space: normal; }
+.creatures-table td:last-child { color: var(--label); white-space: normal; }
+.creatures-table td.xp { font-weight: 700; color: var(--value); }
+.creatures-table td.none { font-weight: 400; color: var(--faint); }
+.creatures-table .hunt-link { color: var(--label); text-align: left; }
+.creatures-table .hunt-link:hover { color: var(--title); }
 .changes-list { display: flex; flex-direction: column; gap: 16px; }
 .changes-list h3 { margin-bottom: 5px; font: 600 13px/1.3 var(--font-ui); color: var(--amber); font-variant-numeric: lining-nums tabular-nums; }
 .changes-list ul { display: flex; flex-direction: column; gap: 4px; margin: 0; padding-left: 1.2em; font-size: 14px; color: var(--label); }
@@ -522,6 +541,7 @@ details.backup textarea {
       <nav aria-label="Medivia">
         <span class="nav-links">
           <a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a>
+          <button class="nav-link" type="button" id="creatures-top" data-i18n="creatures.open">Criaturas</button>
           <button class="nav-link" type="button" id="changes-top" data-i18n="changes.open">Novidades</button>
         </span>
         <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
@@ -708,6 +728,27 @@ details.backup textarea {
   <div class="changes-list" id="changes-list"></div>
 </dialog>
 
+<dialog class="support" id="creatures" aria-labelledby="creatures-title">
+  <div class="support-end">
+    <h2 id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
+    <button class="dlg stop" type="button" id="creatures-close" data-i18n="support.close" autofocus>Fechar</button>
+  </div>
+  <p class="support-note" data-i18n="creatures.intro">XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus.</p>
+  <div class="creatures-bar">
+    <input type="search" id="creatures-search" placeholder="Buscar criatura ou respawn" aria-label="Buscar criatura ou respawn" autocomplete="off" data-i18n-attr="placeholder:creatures.search;aria-label:creatures.search">
+    <label class="creatures-sort"><span data-i18n="creatures.sort">Ordenar por</span>
+      <select class="tone" id="creatures-sort">
+        <option value="name" data-i18n="creatures.by.name">Nome</option>
+        <option value="exp">XP</option>
+        <option value="hp">HP</option>
+      </select>
+    </label>
+    <label class="toggle"><input type="checkbox" id="creatures-missing"> <span data-i18n="creatures.missing">Só as sem XP</span></label>
+  </div>
+  <p class="support-note" id="creatures-count" role="status"></p>
+  <div class="creatures-wrap"><table class="creatures-table" id="creatures-table"></table></div>
+</dialog>
+
 <dialog class="support" id="support" aria-labelledby="support-title">
   <h2 id="support-title" data-i18n="support.open">Apoiar o projeto</h2>
   <p data-i18n="support.text">O Medivia Respawn é gratuito e feito nas horas vagas. Se ele ajuda nas suas caçadas, você pode apoiar quem desenvolve. A doação é opcional e não dá nenhuma vantagem no jogo.</p>
@@ -880,6 +921,17 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'creatures.open': 'Criaturas',
+    'creatures.title': 'Criaturas',
+    'creatures.intro': 'XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus. Para completar uma criatura, cole o print da ficha dela no bestiário do jogo, na aba Normal.',
+    'creatures.search': 'Buscar criatura ou respawn',
+    'creatures.sort': 'Ordenar por',
+    'creatures.by.name': 'Nome',
+    'creatures.missing': 'Só as sem XP',
+    'creatures.count': '{n} criaturas, {k} com XP.',
+    'creatures.none': 'Nenhuma criatura encontrada.',
+    'creatures.col.name': 'Criatura',
+    'creatures.col.where': 'Respawns',
     'xp.share': 'Em grupo, cada jogador recebe o XP do abate dividido por {f}, como no mapper.',
     'mob.xp': 'XP por abate: ',
     'mob.xpTip': 'Ainda sem o XP desta criatura: cole o print da ficha dela no bestiário do jogo, na aba Normal',
@@ -1218,6 +1270,17 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'creatures.open': 'Creatures',
+    'creatures.title': 'Creatures',
+    'creatures.intro': 'XP and stats come from bestiary screenshots; the respawns, from screenshots of the bonus window. To complete a creature, paste a screenshot of its page in the game bestiary, on the Normal tab.',
+    'creatures.search': 'Search creature or respawn',
+    'creatures.sort': 'Sort by',
+    'creatures.by.name': 'Name',
+    'creatures.missing': 'Only those without XP',
+    'creatures.count': '{n} creatures, {k} with XP.',
+    'creatures.none': 'No creature found.',
+    'creatures.col.name': 'Creature',
+    'creatures.col.where': 'Respawns',
     'xp.share': 'In a group, each player gets the kill XP divided by {f}, as on the mapper.',
     'mob.xp': 'XP per kill: ',
     'mob.xpTip': 'No XP for this creature yet: paste a screenshot of its page in the game bestiary, on the Normal tab',
@@ -1556,6 +1619,17 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'creatures.open': 'Criaturas',
+    'creatures.title': 'Criaturas',
+    'creatures.intro': 'El XP y los atributos vienen de las capturas del bestiario; los respawns, de las capturas de la ventana de bonus. Para completar una criatura, pega la captura de su ficha en el bestiario del juego, en la pestaña Normal.',
+    'creatures.search': 'Buscar criatura o respawn',
+    'creatures.sort': 'Ordenar por',
+    'creatures.by.name': 'Nombre',
+    'creatures.missing': 'Solo las que no tienen XP',
+    'creatures.count': '{n} criaturas, {k} con XP.',
+    'creatures.none': 'No se encontró ninguna criatura.',
+    'creatures.col.name': 'Criatura',
+    'creatures.col.where': 'Respawns',
     'xp.share': 'En grupo, cada jugador recibe el XP de la muerte dividido por {f}, como en el mapper.',
     'mob.xp': 'XP por muerte: ',
     'mob.xpTip': 'Aún sin el XP de esta criatura: pega la captura de su ficha en el bestiario del juego, en la pestaña Normal',
@@ -1894,6 +1968,17 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'creatures.open': 'Stworzenia',
+    'creatures.title': 'Stworzenia',
+    'creatures.intro': 'XP i statystyki pochodzą ze zrzutów bestiariusza, a respawny ze zrzutów okna bonusu. Aby uzupełnić stworzenie, wklej zrzut jego karty z bestiariusza gry, na zakładce Normalny.',
+    'creatures.search': 'Szukaj stworzenia lub respawnu',
+    'creatures.sort': 'Sortuj według',
+    'creatures.by.name': 'Nazwa',
+    'creatures.missing': 'Tylko bez XP',
+    'creatures.count': 'Stworzeń: {n}, z XP: {k}.',
+    'creatures.none': 'Nie znaleziono żadnego stworzenia.',
+    'creatures.col.name': 'Stworzenie',
+    'creatures.col.where': 'Respawny',
     'xp.share': 'W grupie każdy gracz dostaje XP za zabicie podzielone przez {f}, jak w mapperze.',
     'mob.xp': 'XP za zabicie: ',
     'mob.xpTip': 'Brak XP tego stworzenia: wklej zrzut jego karty z bestiariusza gry, na zakładce Normalny',
@@ -2477,7 +2562,7 @@ async function readBestiary(ocr) {
   const L = ocr.lines, find = re => L.find(l => re.test(l.text));
   const hp = find(/^HP$/), exp = hp && L.find(l => /^EXP$/.test(l.text) && Math.abs(l.y - hp.y) < l.h * 2);
   if (!exp || !find(/^(ARM|DEF|SPD|MANA)$/)) return null;
-  const out = { kind: 'bestiary', name: null, exp: null, tab: null };
+  const out = { kind: 'bestiary', name: null, exp: null, tab: null, stats: {} };
   const h = exp.h, pitch = Math.abs(exp.x + exp.w / 2 - hp.x - hp.w / 2);   // distância entre os quadros
   const nameLine = L.filter(l => l.x + l.w < hp.x && Math.abs(l.y - hp.y) < h * 2 && l.conf >= 60 && /[A-Za-z]{2}/.test(l.text)).sort((a, b) => a.x - b.x)[0];
   if (nameLine) out.name = nameLine.text.replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ').slice(0, 60) || null;
@@ -2489,6 +2574,26 @@ async function readBestiary(ocr) {
   const reads = (await ocr.peek(box.x, box.y, box.w, box.h, '0123456789 ')).map(num);
   out.exp = vote([below ? num(below.text) : null, ...reads]);
   if (out.exp != null && out.exp > 1e8) out.exp = null;
+  // Os outros quadros (HP, ARM, DEF, SPD, MANA): o valor fica logo abaixo do título e é relido de perto, como o EXP.
+  // ARM e DEF são faixas ("38 - 113"); sem o traço lido, só vale um número sozinho.
+  const spanOf = t => {
+    const m = String(t).trim().match(/^(\d{1,7})\s*-\s*(\d{1,7})$/), one = String(t).trim().match(/^\d{1,7}$/);
+    return m ? +m[1] + '-' + +m[2] : one ? +one[0] + '-' + +one[0] : null;
+  };
+  for (const [key, re, isSpan] of [['hp', /^HP$/], ['arm', /^ARM$/, true], ['def', /^DEF$/, true], ['spd', /^SPD$/], ['mana', /^MANA$/]]) {
+    const t = find(re);
+    if (!t) continue;
+    const under = L.filter(l => l.y > t.y + h * 0.5 && l.y - t.y < h * 5 && l.x < t.x + t.w && l.x + l.w > t.x).sort((a, b) => a.y - b.y)[0];
+    const reads = await ocr.peek(t.x + t.w / 2 - pitch * 0.45, t.y + h * 1.5, pitch * 0.9, h * 2.8, isSpan ? '0123456789 -' : '0123456789 ');
+    if (isSpan) {
+      const v = vote([under ? spanOf(under.text) : null, ...reads.map(spanOf)]);
+      const [lo, hi] = v ? v.split('-').map(Number) : [];
+      if (v && lo <= hi && hi <= 1e6) { out.stats[key + 'Lo'] = lo; out.stats[key + 'Hi'] = hi; }
+    } else {
+      const v = vote([under ? num(under.text) : null, ...reads.map(num)]);
+      if (v != null && v <= (key === 'spd' ? 1e6 : 1e8)) out.stats[key] = v;
+    }
+  }
   // Abas de raridade: uma fileira de traços acima do nome, um por aba; o da aba escolhida é o mais claro.
   // Só valem traços lisos (o texto das abas também forma trechos claros, mas com o brilho variando).
   const x0 = Math.max(0, hp.x - pitch * 2.6), wide = exp.x + exp.w / 2 + pitch * 0.6 - x0;
@@ -2909,8 +3014,14 @@ async function cloudDelete(id) {
 const LS_XP = 'medivia-respawn.criaturas.v1';             // cópia local do XP do banco de todos
 const LS_XP_MINE = 'medivia-respawn.criaturas-meu.v1';    // lidos aqui que ainda não subiram
 const xp = { cloud: new Map(), mine: new Map(), fullAt: 0, loading: false, rev: 0, key: '' };
-const xpDoc = raw => raw && typeof raw.name === 'string' && raw.name.trim() && int(raw.exp, 0, 1e8) != null
-  ? { name: raw.name.trim().slice(0, 60), exp: int(raw.exp, 0, 1e8), at: raw.at || null, owner: raw.owner || null } : null;
+// Atributos da ficha que vão junto com o XP, e o maior valor aceito de cada um.
+const XP_STATS = { hp: 1e8, armLo: 1e6, armHi: 1e6, defLo: 1e6, defHi: 1e6, spd: 1e6, mana: 1e8 };
+function xpDoc(raw) {
+  if (!raw || typeof raw.name !== 'string' || !raw.name.trim() || int(raw.exp, 0, 1e8) == null) return null;
+  const d = { name: raw.name.trim().slice(0, 60), exp: int(raw.exp, 0, 1e8), at: raw.at || null, owner: raw.owner || null };
+  for (const [k, max] of Object.entries(XP_STATS)) { const v = int(raw[k], 0, max); if (v != null) d[k] = v; }
+  return d;
+}
 {
   const cache = lsGet(LS_XP, null);
   for (const [id, raw] of Object.entries(cache && cache.docs && typeof cache.docs === 'object' ? cache.docs : {})) {
@@ -2920,22 +3031,27 @@ const xpDoc = raw => raw && typeof raw.name === 'string' && raw.name.trim() && i
   xp.fullAt = Number(cache && cache.fullAt) || 0;
   for (const [id, raw] of Object.entries(lsGet(LS_XP_MINE, {}) || {})) {
     const d = xpDoc(raw);
-    if (d && slug(id) === id) xp.mine.set(id, { name: d.name, exp: d.exp });
+    if (!d || slug(id) !== id) continue;
+    delete d.at;
+    delete d.owner;
+    xp.mine.set(id, d);
   }
 }
+const xpKey = () => JSON.stringify([xp.cloud, xp.mine].map(m => [...m].map(([id, d]) => [id, d.exp, ...Object.keys(XP_STATS).map(k => d[k] ?? null)])));
 // XP por abate de uma criatura, ou null se ninguém mandou ainda. O que foi lido aqui vale antes do banco.
 const expOf = name => { const id = slug(name), d = xp.mine.get(id) || xp.cloud.get(id); return d ? d.exp : null; };
 // Guarda a cópia local e redesenha; a página só é refeita quando algum valor mudou de fato.
 function xpChanged() {
-  const key = JSON.stringify([[...xp.cloud].map(([id, d]) => [id, d.exp]), [...xp.mine].map(([id, d]) => [id, d.exp])]);
+  const key = xpKey();
   lsSet(LS_XP, { fullAt: xp.fullAt, docs: Object.fromEntries(xp.cloud) });
   lsSet(LS_XP_MINE, Object.fromEntries(xp.mine));
   if (key === xp.key) return;
   xp.key = key;
   xp.rev++;
   renderAll();
+  if ($('#creatures').open) renderCreatures();
 }
-xp.key = JSON.stringify([[...xp.cloud].map(([id, d]) => [id, d.exp]), [...xp.mine].map(([id, d]) => [id, d.exp])]);
+xp.key = xpKey();
 async function loadXp() {
   if (!cloud.on || xp.loading) return;
   xp.loading = true;
@@ -2981,10 +3097,13 @@ async function pushXp(id) {
   const got = await cloudFetch('/creatures/' + id);
   if (!got.ok && got.status !== 404) return 'later';
   const cur = got.ok ? xpDoc(docRaw(got.json)) : null;
-  if (cur && cur.exp === mine.exp) xp.cloud.set(id, cur);
+  // O print mais novo corrige o que leu; o que ele não leu fica como estava no banco.
+  const stats = {};
+  for (const k of Object.keys(XP_STATS)) { const v = mine[k] ?? (cur ? cur[k] : null); if (v != null) stats[k] = v; }
+  if (cur && cur.exp === mine.exp && Object.keys(XP_STATS).every(k => (cur[k] ?? null) === (stats[k] ?? null))) xp.cloud.set(id, cur);
   else {
-    // O nome e quem enviou primeiro ficam; o valor é o do print mais novo.
-    const raw = { name: cur ? cur.name : mine.name, exp: mine.exp, owner: cur && cur.owner ? cur.owner : uid };
+    // O nome e quem enviou primeiro ficam; os valores são os do print mais novo.
+    const raw = { name: cur ? cur.name : mine.name, exp: mine.exp, ...stats, owner: cur && cur.owner ? cur.owner : uid };
     const res = await cloudCommit({
       update: { name: cloud.root + '/creatures/' + id, fields: toFs(raw).mapValue.fields },
       updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
@@ -3000,9 +3119,9 @@ async function flushXp() {
   for (const id of [...xp.mine.keys()]) { try { await pushXp(id); } catch { /* fica para a próxima */ } }
 }
 // Guarda o XP lido de um print. Devolve 'cloud' (já está no banco de todos) ou 'local'.
-async function saveXp(name, exp) {
+async function saveXp(name, exp, stats) {
   const id = slug(name);
-  xp.mine.set(id, { name, exp });
+  xp.mine.set(id, { ...(xp.mine.get(id) || {}), name, exp, ...stats });
   xpChanged();
   if (!cloud.on) return 'local';
   let sent = 'later';
@@ -3205,6 +3324,7 @@ function setLang(lang) {
   renderHunt();
   renderRoom();
   voiceLang();
+  if ($('#creatures').open) renderCreatures();
 }
 
 // Voltas: cada vez que o cronômetro de um grupo é iniciado conta uma volta, ou seja, uma limpa do respawn.
@@ -4008,7 +4128,7 @@ async function readImage(blob) {
       if (p.tab) throw new UserError(tr('err.bestTab'));
       if (!p.name || !slug(p.name)) throw new UserError(tr('err.bestName'));
       if (p.exp == null) throw new UserError(tr('err.bestExp', { x: p.name }));
-      const where = await saveXp(p.name, p.exp);
+      const where = await saveXp(p.name, p.exp, p.stats || {});
       setStatus('ok', tr('read.best', { x: p.name, v: fmtInt(p.exp) }) + ' ' + tr(where === 'cloud' ? 'read.cloud' : 'read.bestLocal') + ' ' + tr('read.discarded'));
       return;
     }
@@ -4549,6 +4669,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 21:08',
+    pt: ['Tela nova "Criaturas", no topo da página: lista todas as criaturas que os prints já trouxeram, com XP, HP, ARM, DEF, SPD, Mana e os respawns onde aparecem.', 'O print do bestiário agora guarda também HP, ARM, DEF, SPD e Mana.'],
+    en: ['New "Creatures" screen, at the top of the page: it lists every creature the screenshots have brought in, with XP, HP, ARM, DEF, SPD, Mana and the respawns where they appear.', 'The bestiary screenshot now also saves HP, ARM, DEF, SPD and Mana.'],
+    es: ['Nueva pantalla "Criaturas", en la parte superior de la página: lista todas las criaturas que ya trajeron las capturas, con XP, HP, ARM, DEF, SPD, Mana y los respawns donde aparecen.', 'La captura del bestiario ahora guarda también HP, ARM, DEF, SPD y Mana.'],
+    pl: ['Nowy ekran „Stworzenia” u góry strony: lista wszystkich stworzeń ze zrzutów, z XP, HP, ARM, DEF, SPD, Maną i respawnami, w których występują.', 'Zrzut z bestiariusza zapisuje teraz także HP, ARM, DEF, SPD i Manę.'],
+  },
   { at: '2026-10-10 20:28',
     pt: ['XP estimada: agora é por jogador, como no mapper. Em grupo, o XP de cada abate é dividido por 1,34 (dupla), 1,6 (trio) ou 1,78 (squad); antes o site mostrava o total sem dividir.'],
     en: ['Estimated XP: it is now per player, as on the mapper. In a group, the XP of each kill is divided by 1.34 (duo), 1.6 (trio) or 1.78 (squad); before, the site showed the undivided total.'],
@@ -4812,6 +4938,55 @@ function openChanges() {
 for (const b of [$('#changes-top'), $('#changes-btn')]) b.addEventListener('click', openChanges);
 $('#changes-close').addEventListener('click', () => { const dlg = $('#changes'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
 $('#changes').addEventListener('click', e => { if (e.target === e.currentTarget && e.currentTarget.close) e.currentTarget.close(); });
+
+/* ---------- Tela de criaturas ----------
+   Uma linha por criatura conhecida. Do print do bestiário vêm o XP e os atributos; dos prints de respawn, em quais
+   respawns ela aparece. Criatura que só veio de respawn aparece sem XP: é a lista do que falta mandar. */
+function creatureRows() {
+  const rows = new Map();
+  const row = (id, name) => { if (!rows.has(id)) rows.set(id, { id, name, where: [] }); return rows.get(id); };
+  for (const r of allRespawns()) {
+    for (const m of r.monsters) { const id = slug(m.name); if (id) row(id, m.name).where.push({ id: r.id, name: r.name, count: m.count }); }
+  }
+  for (const id of new Set([...xp.cloud.keys(), ...xp.mine.keys()])) {
+    const d = { ...(xp.cloud.get(id) || {}), ...(xp.mine.get(id) || {}) };   // o que foi lido aqui vale antes do banco
+    Object.assign(row(id, d.name), d);
+  }
+  return [...rows.values()];
+}
+function renderCreatures() {
+  const text = slug($('#creatures-search').value), by = $('#creatures-sort').value, only = $('#creatures-missing').checked;
+  const all = creatureRows();
+  const list = all
+    .filter(c => (!only || c.exp == null) && (!text || slug(c.name).includes(text) || c.where.some(w => slug(w.name).includes(text))))
+    .sort((a, b) => (by === 'name' ? 0 : (b[by] ?? -1) - (a[by] ?? -1)) || a.name.localeCompare(b.name, 'pt'));   // sem valor vai para o fim
+  setText($('#creatures-count'), tr('creatures.count', { n: all.length, k: all.filter(c => c.exp != null).length }));
+  const num = v => v == null ? null : fmtInt(v);
+  const range = (lo, hi) => lo == null ? null : lo === hi ? fmtInt(lo) : fmtInt(lo) + ' – ' + fmtInt(hi);
+  const cell = v => el('td', { class: v == null ? 'none' : null, text: v == null ? '–' : v });
+  const open = id => { const dlg = $('#creatures'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); select(id); };
+  $('#creatures-table').replaceChildren(
+    el('thead', {}, el('tr', {}, [tr('creatures.col.name'), 'XP', 'HP', 'ARM', 'DEF', 'SPD', 'Mana', tr('creatures.col.where')].map(t => el('th', { scope: 'col', text: t })))),
+    el('tbody', {}, list.length ? list.map(c => el('tr', {},
+      el('td', { text: c.name }),
+      el('td', { class: c.exp == null ? 'none' : 'xp', title: c.exp == null ? tr('mob.xpTip') : null, text: c.exp == null ? '?' : fmtInt(c.exp) }),
+      cell(num(c.hp)), cell(range(c.armLo, c.armHi)), cell(range(c.defLo, c.defHi)), cell(num(c.spd)), cell(num(c.mana)),
+      c.where.length
+        ? el('td', {}, c.where.flatMap((w, i) => [i ? ', ' : null, el('button', { class: 'hunt-link', type: 'button', text: w.name + ' (' + w.count + 'x)', onclick: () => open(w.id) })]))
+        : cell(null)))
+      : el('tr', {}, el('td', { class: 'none', colSpan: 8, text: tr('creatures.none') }))));
+}
+$('#creatures-top').addEventListener('click', () => {
+  renderCreatures();
+  const dlg = $('#creatures');
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  dlg.scrollTop = 0;
+});
+$('#creatures-close').addEventListener('click', () => { const dlg = $('#creatures'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+$('#creatures').addEventListener('click', e => { if (e.target === e.currentTarget && e.currentTarget.close) e.currentTarget.close(); });
+$('#creatures-search').addEventListener('input', renderCreatures);
+$('#creatures-sort').addEventListener('change', renderCreatures);
+$('#creatures-missing').addEventListener('change', renderCreatures);
 
 /* ---------- Sorteio de itens ----------
    Sorteia cada item entre os participantes. Os nomes vêm da hunt mostrada no painel ou são digitados.
