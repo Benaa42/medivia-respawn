@@ -3047,7 +3047,17 @@ async function readBestiary(ocr) {
   const out = { kind: 'bestiary', name: null, exp: null, tab: null, stats: {} };
   const h = exp.h, pitch = Math.abs(exp.x + exp.w / 2 - hp.x - hp.w / 2);   // distância entre os quadros
   const nameLine = L.filter(l => l.x + l.w < hp.x && Math.abs(l.y - hp.y) < h * 2 && l.conf >= 60 && /[A-Za-z]{2}/.test(l.text)).sort((a, b) => a.x - b.x)[0];
-  if (nameLine) out.name = nameLine.text.replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ').slice(0, 60) || null;
+  const tidy = t => String(t).replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ').slice(0, 60);
+  if (nameLine) out.name = tidy(nameLine.text) || null;
+  // Na página inteira o leitor às vezes pula o nome (um texto laranja sozinho no painel escuro). Aí o nome é relido
+  // de perto, no espaço à esquerda do quadro HP e na altura do título dele. Só vale quando duas das três releituras
+  // dão o mesmo nome: um nome errado criaria outra criatura no banco.
+  if (!out.name) {
+    const mid = hp.x + hp.w / 2;
+    const reads = (await ocr.peek(mid - pitch * 2.45, hp.y - h * 0.7, pitch * 1.85, h * 2.4, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz '-")).map(tidy).filter(t => /[A-Za-z]{2}/.test(t));
+    const best = vote(reads);
+    if (best && reads.filter(t => t === best).length >= 2) out.name = best;
+  }
   // EXP: o número logo abaixo do título, relido de perto três vezes. Vale o que mais se repetir.
   const num = t => { const m = String(t).replace(/[.,]/g, ' ').trim().match(/^\d{1,3}(?: ?\d{3})*$|^\d{1,9}$/); return m ? +m[0].replace(/ /g, '') : null; };
   const below = L.filter(l => l.y > exp.y + h * 0.5 && l.y - exp.y < h * 5 && l.x < exp.x + exp.w && l.x + l.w > exp.x).sort((a, b) => a.y - b.y)[0];
@@ -5407,6 +5417,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 05:15',
+    pt: ['Print do bestiário: em alguns prints o site não achava o nome da criatura, mesmo visível. Agora o nome é relido de perto quando isso acontece.'],
+    en: ['Bestiary screenshot: on some screenshots the site could not find the creature name even though it was visible. The name is now read again up close when that happens.'],
+    es: ['Captura del bestiario: en algunas capturas el sitio no encontraba el nombre de la criatura, aunque estuviera visible. Ahora el nombre se vuelve a leer de cerca cuando eso ocurre.'],
+    pl: ['Zrzut bestiariusza: na niektórych zrzutach strona nie znajdowała nazwy stworzenia, choć była widoczna. Teraz nazwa jest w takim przypadku odczytywana ponownie z bliska.'],
+  },
   { at: '2026-10-11 04:24',
     pt: ['Novo alerta com voz: "Voz da Aghata", com quatro gravações de "Monsters respawned" que se alternam a cada aviso.'],
     en: ['New spoken alert: "Aghata voice", with four recordings of "Monsters respawned" that alternate on every alert.'],
