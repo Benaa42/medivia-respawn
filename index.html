@@ -2995,20 +2995,33 @@ function parsePrint(lines) {
       const name = m[1].replace(/^[^A-Za-z]+/, '').replace(/\s+/g, ' ').trim();
       if (name) names.push({ name, count: +m[2].replace(/ /g, ''), x: l.x, y: l.y, h: l.h });
     }
-    else if ((m = t.match(/(\d{1,5})\s*(?:seg|sec|sek)/i))) resp.push({ v: +m[1], x: l.x, y: l.y });
-    else if ((m = t.match(/(?:hora|hour|godzin\S{0,2})\D{0,3}(\d{1,6})\s*$/i))) kills.push({ v: +m[1], x: l.x, y: l.y });
+    else if ((m = t.match(/(\d{1,5})\s*(?:seg|sec|sek)/i))) resp.push({ v: +m[1], x: l.x, y: l.y, h: l.h });
+    else if ((m = t.match(/(?:hora|hour|godzin\S{0,2})\D{0,3}(\d{1,6})\s*$/i))) kills.push({ v: +m[1], x: l.x, y: l.y, h: l.h });
     else other.push(l);
   }
   // Cada card tem o nome em cima e as duas linhas de números logo abaixo, na mesma coluna.
   const below = (list, n) => list
     .filter(r => Math.abs(r.x - n.x) <= n.h * 3 && r.y > n.y && r.y - n.y <= n.h * 4.5)
     .sort((a, b) => a.y - b.y)[0];
-  const monsters = [], unread = [];
+  const monsters = [], unread = [], taken = new Set();
   for (const n of names) {
     const r = below(resp, n);
     if (!r || !r.v) { unread.push(n); continue; }
+    taken.add(r);
     const k = below(kills, n);
     monsters.push({ name: n.name, count: n.count, sec: r.v, kills: k ? k.v : null });
+  }
+  // Tempo de respawn que ficou sem nome: o leitor às vezes pula o nome do monstro (texto laranja) e lê só as linhas
+  // de baixo. Cada um vira um pedido de releitura do nome, no espaço logo acima dos números do card (os abates por
+  // hora ficam entre o nome e o tempo). A largura para antes do card vizinho, quando há um na mesma altura.
+  const orphans = [];
+  for (const r of resp) {
+    if (taken.has(r) || !r.v) continue;
+    const k = kills.filter(q => Math.abs(q.x - r.x) <= r.h * 3 && q.y < r.y && r.y - q.y <= r.h * 2.5).sort((a, b) => b.y - a.y)[0];
+    const top = k || r, step = k ? r.y - k.y : r.h * 1.2;
+    const next = [...resp, ...kills].filter(q => q.x > top.x + top.h * 6 && Math.abs(q.y - top.y) < top.h).map(q => q.x);
+    orphans.push({ sec: r.v, kills: k ? k.v : null,
+      box: { x: top.x - top.h, y: top.y - step * 1.25, w: Math.min(top.h * 26, next.length ? Math.min(...next) - top.x - top.h * 3 : Infinity), h: step * 1.2 } });
   }
   let cost = null, costBox = null, discount = null, name = null;
   if (pctLine) {
@@ -3039,7 +3052,7 @@ function parsePrint(lines) {
       .sort((a, b) => b.y - a.y)[0];
     if (title) name = title.text.replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ');
   }
-  return { name, pct, dur, cost, costBox, discount, monsters, unread };
+  return { name, pct, dur, cost, costBox, discount, monsters, unread, orphans };
 }
 
 let workerP = null;
@@ -3337,6 +3350,20 @@ async function readPrint(blob) {
       p.monsters.push({ name: n.name, count: n.count, sec: +sec[1], kills: k ? +k[1] : null });
     }
     p.unread = still;
+    // Nome que a leitura da página pulou: relido de perto, acima dos números. Só vale quando duas das três releituras
+    // dão o mesmo nome e a mesma quantidade, e o nome não tem dígito (um nome errado criaria outra criatura).
+    for (const o of p.orphans) {
+      if (!(o.box.w > 0)) continue;
+      const reads = (await ocr.peek(o.box.x, o.box.y, o.box.w, o.box.h, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ()'-")).map(t => {
+        const m = String(t).trim().match(/^(.*[A-Za-z].*?)\s*\(\s*(\d[\d ]{0,3})\s*[xX]\s*\)\s*$/);
+        const name = m ? m[1].replace(/^[^A-Za-z]+/, '').replace(/\s+/g, ' ').trim() : '';
+        return name && !/\d/.test(name) ? name + '|' + +m[2].replace(/ /g, '') : null;
+      });
+      const best = vote(reads);
+      if (!best || reads.filter(t => t === best).length < 2) continue;
+      const [name, count] = best.split('|');
+      if (!p.monsters.some(m => m.name === name)) p.monsters.push({ name, count: +count, sec: o.sec, kills: o.kills });
+    }
     if (p.cost && p.costBox) p.cost = pickCost(p.cost, await ocr.digits(p.costBox.x, p.costBox.y, p.costBox.w, p.costBox.h), p.discount, p.pct, p.dur || 60);
     return p;
   } finally {
@@ -5700,6 +5727,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 20:01',
+    pt: ['Print da janela de bônus: em alguns prints o site dizia que não havia criatura, porque não achava o nome dela. Agora o nome é relido de perto, acima do tempo de respawn.'],
+    en: ['Bonus window screenshot: on some screenshots the site said there was no creature, because it could not find its name. The name is now read again up close, above the spawn time.'],
+    es: ['Captura de la ventana de bonus: en algunas capturas el sitio decía que no había criatura, porque no encontraba su nombre. Ahora el nombre se vuelve a leer de cerca, encima del tiempo de respawn.'],
+    pl: ['Zrzut okna bonusu: na niektórych zrzutach strona twierdziła, że nie ma stworzenia, bo nie znajdowała jego nazwy. Teraz nazwa jest odczytywana ponownie z bliska, nad czasem respawnu.'],
+  },
   { at: '2026-10-11 19:34',
     pt: ['Bipes do cronômetro mais altos e com um padrão para cada momento: um bipe ao iniciar, um faltando 30 segundos e três faltando 10 segundos.', 'Comando de voz: dois bipes confirmam os acertos (+10, −10, +5…) e o zerar; o "iniciar" dá o bipe de início.'],
     en: ['Louder timer beeps with a pattern for each moment: one beep on start, one with 30 seconds left and three with 10 seconds left.', 'Voice command: two beeps confirm adjustments (+10, −10, +5…) and reset; "start" gives the start beep.'],
