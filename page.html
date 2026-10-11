@@ -22,6 +22,9 @@
   --teal: #3ae374;      /* ação, na janela flutuante */
   --red: #ff7468;
   --mic: #ff8f3a;       /* laranja do microfone do comando de voz */
+  --gold-edge: rgba(240, 173, 77, 0.55);   /* contorno da barra de ferramentas */
+  --gold-wash: rgba(240, 173, 77, 0.06);   /* fundo da barra de ferramentas */
+  --gold-ink: #241703;                     /* texto sobre o dourado */
   --btn: #1e2627;
   --btn-edge: #2c3637;
   --ink: #06170d;       /* texto sobre o verde */
@@ -553,13 +556,15 @@ details.backup textarea {
 .clock.mmss .clock-digits { font-size: 50px; }
 
 .nav-links { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 8px; font-weight: 600; }
-/* Barra de ferramentas: as abas à esquerda; novidades, idioma e apoio à direita */
+/* Barra de ferramentas: as abas à esquerda; novidades, idioma e apoio à direita.
+   É o menu do site, então não usa a pílula branca dos outros seletores: a barra tem contorno e fundo dourados e a
+   aba aberta é dourada cheia. */
 svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; }
-.tabs { display: inline-flex; gap: 2px; max-width: 100%; padding: 4px; border-radius: 999px; background: var(--box); }
-.tabs button { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: 0; border-radius: 999px; background: none; color: var(--label); font: 600 14px/1.2 var(--font-ui); white-space: nowrap; cursor: pointer; }
-.tabs button:hover { color: var(--title); }
-.tabs button[aria-current="page"] { background: var(--title); color: var(--ground); }
+.tabs { display: inline-flex; gap: 2px; max-width: 100%; padding: 4px; border: 1px solid var(--gold-edge); border-radius: 999px; background: var(--gold-wash); }
+.tabs button { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: 0; border-radius: 999px; background: none; color: var(--title); font: 600 14px/1.2 var(--font-ui); white-space: nowrap; cursor: pointer; }
+.tabs button:hover { color: var(--amber); }
+.tabs button[aria-current="page"], .tabs button[aria-current="page"]:hover { background: var(--amber); color: var(--gold-ink); }
 .tabs .short { display: none; }
 .toolbar-end { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-left: auto; }
 .toolbar-end .unit-toggle { margin-left: 0; }
@@ -581,9 +586,8 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 /* No celular as abas descem para uma barra fixa embaixo, ao alcance do polegar */
 @media (max-width: 700px) {
   .wrap { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
-  .tabs { position: fixed; inset: auto 0 0 0; z-index: 20; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--edge); border-radius: 0; }
-  .tabs button { flex-direction: column; gap: 4px; padding: 7px 2px; border-radius: var(--r-sm); color: var(--faint); font-size: 11px; }
-  .tabs button[aria-current="page"] { background: var(--band); color: var(--amber); }
+  .tabs { position: fixed; inset: auto 0 0 0; z-index: 20; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); border: 0; border-top: 1px solid var(--gold-edge); border-radius: 0; background: var(--box); }
+  .tabs button { flex-direction: column; gap: 4px; padding: 7px 2px; border-radius: var(--r-sm); color: var(--label); font-size: 11px; }
   .tabs .wide { display: none; }
   .tabs .short { display: inline; }
   .toolbar-end { margin-left: 0; }
@@ -5150,6 +5154,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 00:31',
+    pt: ['Barra de ferramentas em dourado: contorno dourado e a aba aberta em dourado cheio, para o menu se destacar do resto da página.'],
+    en: ['Tool bar in gold: a gold outline and the open tab in solid gold, so the menu stands out from the rest of the page.'],
+    es: ['Barra de herramientas en dorado: contorno dorado y la pestaña abierta en dorado sólido, para que el menú destaque del resto de la página.'],
+    pl: ['Pasek narzędzi w złocie: złoty kontur i otwarta zakładka w pełnym złocie, aby menu wyróżniało się na stronie.'],
+  },
   { at: '2026-10-11 00:26',
     pt: ['Criaturas: na aba Lendário, o nome que a criatura tem no jogo aparece entre parênteses ao lado do nome dela.'],
     en: ['Creatures: on the Legendary tab, the name the creature has in the game is shown in brackets next to its name.'],
