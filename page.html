@@ -594,9 +594,12 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .gob-dot.tok-silver { background: #c9d1d6; }
 .gob-dot.tok-golden { background: var(--amber); }
 .gob-dot.tok-crystal { background: #7fd8ff; }
-.creatures-table.tok-table { min-width: 320px; }
-.creatures-table.gob-table.tok-table td:first-child { color: var(--amber); }
-.creatures-table.tok-table td { font-weight: 700; }
+/* Elite tokens: bloco curto, uma linha por tipo, com o total e a parte de cada jogador */
+.hunt-tokens { gap: 6px; }
+.tok-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.tok-line { display: flex; flex-wrap: wrap; gap: 2px 18px; font-size: 14px; color: var(--label); }
+.tok-line b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
+.tok-line .tok-name { color: var(--title); font-weight: 600; }
 .gob-totals { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 14px; color: var(--label); }
 .gob-totals b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
 .creatures-table.gob-table { min-width: 460px; }
@@ -5228,17 +5231,15 @@ function huntTokens(s) {
     }
     text = [tr('tok.title') + ' · ' + huntWhen(s), ...share.map(p => p.name + ': ' + types.map(([id, name]) => p.n[id] + '× ' + name).join(', '))].join('\n');
   }
-  return el('div', { class: 'hunt-skins' }, [
-    el('h3', { text: tr('tok.title') }),
-    el('p', { class: 'hunt-note', text: tr(share ? 'tok.note' : 'tok.solo') }),
-    el('p', { class: 'gob-totals' }, types.map(([id, name]) => el('span', {}, dot(id), name + ': ', el('b', { text: fmtInt(count[id]) })))),
-    ...(share ? [   // espalhado: uma lista dentro da lista viraria texto
-      el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table gob-table tok-table' },
-        el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: tr('hunt.player') }), types.map(([id, name]) => el('th', { scope: 'col' }, dot(id), name.split(' ')[0])))),
-        el('tbody', {}, share.map(p => el('tr', {}, el('td', { text: p.name }), types.map(([id]) => el('td', { class: p.n[id] ? null : 'none', text: fmtInt(p.n[id]) }))))))),
-      el('div', { class: 'hunt-foot' }, el('button', { class: 'dlg', type: 'button', id: 'tok-copy', text: tr('gob.copy'),
-        onclick: async e => { const b = e.currentTarget, ok = await copyText(text); setText(b, tr(ok ? 'gob.copied' : 'hunt.copyFail')); setTimeout(() => setText(b, tr('gob.copy')), 1600); } })),
-    ] : []),
+  // Bloco curto: o título com o botão de copiar ao lado e uma linha por tipo de token (total e quanto cada um leva).
+  return el('div', { class: 'hunt-skins hunt-tokens', title: tr(share ? 'tok.note' : 'tok.solo') }, [
+    el('div', { class: 'tok-head' },
+      el('h3', { text: tr('tok.title') }),
+      share ? el('button', { class: 'hunt-link', type: 'button', id: 'tok-copy', text: tr('gob.copy'),
+        onclick: async e => { const b = e.currentTarget, ok = await copyText(text); setText(b, tr(ok ? 'gob.copied' : 'hunt.copyFail')); setTimeout(() => setText(b, tr('gob.copy')), 1600); } }) : null),
+    ...types.map(([id, name]) => el('p', { class: 'tok-line' },   // espalhado: uma lista dentro da lista viraria texto
+      el('span', { class: 'tok-name' }, dot(id), name + ': ', el('b', { text: fmtInt(count[id]) })),
+      share ? share.map(p => el('span', {}, p.name + ' ', el('b', { text: fmtInt(p.n[id]) }))) : null)),
   ]);
 }
 // Criaturas abatidas na hunt, com o ritmo por hora e o XP por abate de quem já está no banco de criaturas.
@@ -5372,6 +5373,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 01:44',
+    pt: ['Analisador de hunt: a divisão dos elite tokens ficou compacta, com uma linha por tipo de token.'],
+    en: ['Hunt analyzer: the elite token split is now compact, one line per token type.'],
+    es: ['Analizador de hunt: el reparto de los elite tokens ahora es compacto, una línea por tipo de token.'],
+    pl: ['Analizator polowań: podział elite tokenów jest teraz zwięzły, jedna linia na rodzaj tokenu.'],
+  },
   { at: '2026-10-11 01:37',
     pt: ['Analisador de hunt: os elite tokens do loot (silver, golden e crystal) aparecem com o total e a divisão em partes iguais entre os jogadores.'],
     en: ['Hunt analyzer: the elite tokens in the loot (silver, golden and crystal) are shown with the total and an equal split between the players.'],
