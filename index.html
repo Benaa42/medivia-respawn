@@ -22,6 +22,7 @@
   --value: #3ae374;     /* números e ação */
   --teal: #3ae374;      /* ação, na janela flutuante */
   --red: #ff7468;
+  --mic: #ff8f3a;       /* laranja do microfone do comando de voz */
   --btn: #1e2627;
   --btn-edge: #2c3637;
   --ink: #06170d;       /* texto sobre o verde */
@@ -284,6 +285,8 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .dlg.nudge:disabled { opacity: 0.45; pointer-events: none; }
 .clock-float { margin-top: 8px; font-size: 13px; color: var(--label); }
 /* Comando de voz: o ponto verde mostra que o site está ouvindo; o número no canto do anel é o que se fala */
+/* O microfone laranja marca a opção de voz na barra; a legenda continua ao lado */
+.toggle.voice .mic { color: var(--mic); }
 .toggle.voice.live span::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 7px; border-radius: 50%; background: var(--value); }
 .voice-note { flex: 1 0 100%; order: 9; max-width: 78ch; font-size: 13px; color: var(--label); }
 /* A última fala que o navegador entendeu: verde quando era um comando */
@@ -604,6 +607,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/></symbol>
   <symbol id="i-hunt" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></symbol>
   <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6c-2-1.5-5-2-8-1.5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-13c-3-.5-6 0-8 1.5zM12 6v13"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></symbol>
   <symbol id="i-pip" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><rect x="11.5" y="11" width="7" height="5.5" rx="1" fill="currentColor"/></symbol>
   <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></symbol>
 </svg>
@@ -694,7 +698,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
             <option value="message" data-i18n="tone.message">Mensagem</option>
             <option value="onscreen" data-i18n="tone.onscreen">Jogador na tela</option>
           </select>
-          <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <span data-i18n="voice.label">Comando de voz</span></label>
+          <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <svg class="ico mic" aria-hidden="true"><use href="#i-mic"/></svg><span data-i18n="voice.label">Ativar comando de voz</span></label>
           <button class="voice-help-btn" type="button" id="voice-help-btn" aria-expanded="false" aria-controls="voice-help" title="Ver os comandos de voz" aria-label="Ver os comandos de voz" data-i18n-attr="title:voice.help;aria-label:voice.help">?</button>
         </div>
         <p class="voice-note" id="voice-note" role="status" hidden></p>
@@ -1121,7 +1125,7 @@ const I18N = {
     'nudge.more': 'Somar 10 segundos ao cronômetro',
     'voice.nomic': 'Nenhum microfone encontrado. Ligue um microfone e marque o comando de voz de novo.',
     'voice.network': 'Voz: o serviço de reconhecimento do navegador não respondeu. Só funciona no Chrome e no Edge, com internet.',
-    'voice.label': 'Comando de voz',
+    'voice.label': 'Ativar comando de voz',
     'voice.info': 'Comando de voz ligado. Só funciona no Chrome e no Edge, e com internet: a fala é reconhecida pelo serviço do navegador. Toque no "?" para ver os comandos.',
     'voice.unsupported': 'O comando de voz só funciona no Chrome e no Edge. Este navegador não tem reconhecimento de voz.',
     'voice.denied': 'O navegador não liberou o microfone. Libere o microfone para este site e ligue o comando de voz de novo. Ele só funciona no Chrome e no Edge.',
@@ -1511,7 +1515,7 @@ const I18N = {
     'nudge.more': 'Add 10 seconds to the timer',
     'voice.nomic': 'No microphone found. Connect a microphone and turn voice command on again.',
     'voice.network': 'Voice: the browser\'s recognition service did not answer. It only works in Chrome and Edge, with an internet connection.',
-    'voice.label': 'Voice command',
+    'voice.label': 'Turn on voice command',
     'voice.info': 'Voice command on. It only works in Chrome and Edge, and with an internet connection: speech is recognised by the browser\'s service. Press "?" to see the commands.',
     'voice.unsupported': 'Voice command only works in Chrome and Edge. This browser has no speech recognition.',
     'voice.denied': 'The browser did not allow the microphone. Allow the microphone for this site and turn voice command on again. It only works in Chrome and Edge.',
@@ -1901,7 +1905,7 @@ const I18N = {
     'nudge.more': 'Añadir 10 segundos al cronómetro',
     'voice.nomic': 'No se encontró ningún micrófono. Conecta un micrófono y activa de nuevo el comando de voz.',
     'voice.network': 'Voz: el servicio de reconocimiento del navegador no respondió. Solo funciona en Chrome y Edge, con internet.',
-    'voice.label': 'Comando de voz',
+    'voice.label': 'Activar comando de voz',
     'voice.info': 'Comando de voz activado. Solo funciona en Chrome y Edge, y con internet: el habla la reconoce el servicio del navegador. Pulsa "?" para ver los comandos.',
     'voice.unsupported': 'El comando de voz solo funciona en Chrome y Edge. Este navegador no tiene reconocimiento de voz.',
     'voice.denied': 'El navegador no permitió el micrófono. Permite el micrófono para este sitio y activa de nuevo el comando de voz. Solo funciona en Chrome y Edge.',
@@ -2291,7 +2295,7 @@ const I18N = {
     'nudge.more': 'Dodaj 10 sekund do licznika',
     'voice.nomic': 'Nie znaleziono mikrofonu. Podłącz mikrofon i włącz polecenia głosowe ponownie.',
     'voice.network': 'Głos: usługa rozpoznawania mowy przeglądarki nie odpowiedziała. Działa tylko w Chrome i Edge, z internetem.',
-    'voice.label': 'Polecenia głosowe',
+    'voice.label': 'Włącz polecenia głosowe',
     'voice.info': 'Polecenia głosowe włączone. Działają tylko w Chrome i Edge, i z internetem: mowę rozpoznaje usługa przeglądarki. Naciśnij „?”, aby zobaczyć polecenia.',
     'voice.unsupported': 'Polecenia głosowe działają tylko w Chrome i Edge. Ta przeglądarka nie ma rozpoznawania mowy.',
     'voice.denied': 'Przeglądarka nie zezwoliła na mikrofon. Zezwól tej stronie na mikrofon i włącz polecenia głosowe ponownie. Działają tylko w Chrome i Edge.',
@@ -4987,6 +4991,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 22:46',
+    pt: ['Comando de voz: a opção ganhou um ícone de microfone e passou a se chamar "Ativar comando de voz".'],
+    en: ['Voice command: the option now has a microphone icon and reads "Turn on voice command".'],
+    es: ['Comando de voz: la opción ahora tiene un icono de micrófono y se llama "Activar comando de voz".'],
+    pl: ['Polecenia głosowe: opcja ma teraz ikonę mikrofonu i nazywa się „Włącz polecenia głosowe”.'],
+  },
   { at: '2026-10-10 22:39',
     pt: ['Assinatura Vibeforge só com o nome, e o emblema da bigorna centrado no anel; o ícone da aba acompanha.'],
     en: ['Vibeforge signature with the name only, and the anvil emblem centred in the ring; the tab icon follows.'],
