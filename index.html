@@ -582,7 +582,26 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 #page-hunt .hunt .win-name { font: 800 22px/1.2 var(--font-display); }
 .hunt-grid { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 18px 32px; align-items: start; }
 .hunt-main, .hunt-kills { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.hunt-kills h3 { font: 600 16px/1.3 var(--font-ui); color: var(--title); }
+.hunt-kills h3, .hunt-skins h3 { font: 600 16px/1.3 var(--font-ui); color: var(--title); }
+/* Skins que viram goblets: um ponto com a cor de cada tipo de goblet */
+.hunt-skins { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; padding-top: 18px; border-top: 1px solid var(--edge); min-width: 0; }
+.hunt-skins h3 + .hunt-note { margin-top: -6px; max-width: 78ch; }
+.hunt-skins .creatures-wrap { flex: none; min-height: 0; }
+.hunt-skins h3:not(:first-child) { margin-top: 8px; }
+.gob-dot { display: inline-block; width: 9px; height: 9px; margin-right: 7px; border-radius: 50%; background: var(--faint); }
+.gob-dot.gob-cursed { background: #b48cff; }
+.gob-dot.gob-malevolent { background: #5aa9ff; }
+.gob-dot.gob-vile { background: var(--value); }
+.gob-totals { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 14px; color: var(--label); }
+.gob-totals b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
+.creatures-table.gob-table { min-width: 460px; }
+.creatures-table.gob-table td:first-child { color: var(--title); font-weight: 600; }
+.creatures-table.gob-table td:last-child, .creatures-table.gob-table th:last-child { min-width: 0; text-align: right; white-space: nowrap; }
+.creatures-table.gob-table td:last-child { color: var(--title); font-weight: 700; }
+.creatures-table.gob-table td.none { color: var(--faint); font-weight: 400; }
+.creatures-table.gob-share td:first-child { color: var(--amber); }
+.creatures-table.gob-share td:last-child, .creatures-table.gob-share th:last-child { min-width: 220px; text-align: left; white-space: normal; }
+.creatures-table.gob-share td:last-child { color: var(--label); font-weight: 400; }
 .hunt-kills .creatures-table { min-width: 420px; }
 .hunt-kills .creatures-table td:last-child, .hunt-kills .creatures-table th:last-child { min-width: 0; text-align: right; white-space: nowrap; }
 .hunt-kills .creatures-table td:last-child { color: var(--title); }
@@ -1056,6 +1075,19 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'gob.title': 'Skins para goblets',
+    'gob.note': 'Skins do loot desta hunt que podem ser trocadas por goblets, pelos valores da wiki. Skin que precisa de várias para uma troca só conta quando fecha o conjunto.',
+    'gob.col.skin': 'Skin',
+    'gob.col.qty': 'Quantidade',
+    'gob.col.rate': 'Troca',
+    'gob.col.pts': 'Goblets',
+    'gob.left': 'sobram {n}',
+    'gob.split': 'Divisão entre os jogadores',
+    'gob.splitNote': 'Cada tipo de goblet é dividido para os pontos ficarem o mais iguais possível, sem repartir um conjunto. As sobras, que não fecham uma troca, vão para quem ficou com menos.',
+    'gob.col.gets': 'Fica com',
+    'gob.partial': 'não fecha troca',
+    'gob.copy': 'Copiar divisão',
+    'gob.copied': 'Divisão copiada.',
     'tier.label': 'Raridade',
     'tier.normal': 'Normal',
     'tier.common': 'Comum',
@@ -1463,6 +1495,19 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'gob.title': 'Skins for goblets',
+    'gob.note': 'Skins in the loot of this hunt that can be exchanged for goblets, at the wiki rates. A skin that needs several for one exchange only counts when the set is complete.',
+    'gob.col.skin': 'Skin',
+    'gob.col.qty': 'Count',
+    'gob.col.rate': 'Exchange',
+    'gob.col.pts': 'Goblets',
+    'gob.left': '{n} left over',
+    'gob.split': 'Split between the players',
+    'gob.splitNote': 'Each goblet type is split so the points come out as even as possible, without breaking up a set. Leftovers, which do not complete an exchange, go to whoever got less.',
+    'gob.col.gets': 'Gets',
+    'gob.partial': 'no full exchange',
+    'gob.copy': 'Copy the split',
+    'gob.copied': 'Split copied.',
     'tier.label': 'Rarity',
     'tier.normal': 'Normal',
     'tier.common': 'Common',
@@ -1870,6 +1915,19 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'gob.title': 'Skins para goblets',
+    'gob.note': 'Skins del loot de esta hunt que se pueden cambiar por goblets, con los valores de la wiki. La skin que necesita varias para un cambio solo cuenta cuando completa el conjunto.',
+    'gob.col.skin': 'Skin',
+    'gob.col.qty': 'Cantidad',
+    'gob.col.rate': 'Cambio',
+    'gob.col.pts': 'Goblets',
+    'gob.left': 'sobran {n}',
+    'gob.split': 'Reparto entre los jugadores',
+    'gob.splitNote': 'Cada tipo de goblet se reparte para que los puntos queden lo más iguales posible, sin dividir un conjunto. Las sobras, que no completan un cambio, van a quien recibió menos.',
+    'gob.col.gets': 'Se queda con',
+    'gob.partial': 'no completa cambio',
+    'gob.copy': 'Copiar reparto',
+    'gob.copied': 'Reparto copiado.',
     'tier.label': 'Rareza',
     'tier.normal': 'Normal',
     'tier.common': 'Común',
@@ -2277,6 +2335,19 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'gob.title': 'Skiny na goblety',
+    'gob.note': 'Skiny z łupu tego polowania, które można wymienić na goblety, według stawek z wiki. Skin wymagający kilku sztuk na wymianę liczy się dopiero po skompletowaniu zestawu.',
+    'gob.col.skin': 'Skin',
+    'gob.col.qty': 'Liczba',
+    'gob.col.rate': 'Wymiana',
+    'gob.col.pts': 'Goblety',
+    'gob.left': 'zostaje {n}',
+    'gob.split': 'Podział między graczy',
+    'gob.splitNote': 'Każdy rodzaj gobletu jest dzielony tak, aby punkty wyszły jak najbardziej równo, bez rozbijania zestawu. Resztki, które nie dają wymiany, trafiają do tego, kto dostał mniej.',
+    'gob.col.gets': 'Dostaje',
+    'gob.partial': 'bez pełnej wymiany',
+    'gob.copy': 'Kopiuj podział',
+    'gob.copied': 'Podział skopiowany.',
     'tier.label': 'Rzadkość',
     'tier.normal': 'Normalny',
     'tier.common': 'Pospolity',
@@ -4736,8 +4807,9 @@ function parseHunts(text) {
       saved: one(/^Hunt saved at (.+)$/m), start: one(/^Start time: (.+)$/m), end: one(/^End time: (.+)$/m), time: one(/^Session time: (.+)$/m),
       me: exp ? exp[1] : null, exp: exp ? Number(exp[2]) : null,
       supply: num(/^Supply value: (-?\d+)/m), loot: num(/^Loot value: (-?\d+)/m), balance: num(/^Balance: (-?\d+)/m),
-      players: [], kills: [],
+      players: [], kills: [], items: [],
     };
+    for (const m of block.matchAll(/^- (.+) \(looted: (\d+), value: -?\d+\)\s*$/gm)) s.items.push({ name: m[1], n: Number(m[2]) });
     const dead = block.split(/^Monsters killed:\n/m)[1];
     if (dead) for (const m of dead.matchAll(/^- (.+) \(killed: (\d+)\)\s*$/gm)) s.kills.push({ name: m[1], n: Number(m[2]) });
     for (const m of block.matchAll(/^Supplies used \((.+)\): (-?\d+)/gm)) s.players.push({ name: m[1], spent: Number(m[2]), payout: null });
@@ -5027,8 +5099,93 @@ function huntFill(body, tag, wide) {
       link('hunt.disconnect', disconnectHunt)),
     el('p', { class: hunt.state === 'on' ? 'hunt-note hunt-live' : 'hunt-note', text: tr(hunt.state === 'on' ? 'hunt.live' : 'hunt.once') }),
   ].filter(Boolean);   // sem os itens vazios: o vazio viraria o texto "null"
-  if (wide) body.replaceChildren(el('div', { class: 'hunt-grid' }, el('div', { class: 'hunt-main' }, main), huntKills(s, hours)));
+  if (wide) body.replaceChildren(...[el('div', { class: 'hunt-grid' }, el('div', { class: 'hunt-main' }, main), huntKills(s, hours)), huntSkins(s)].filter(Boolean));
   else body.replaceChildren(...main);
+}
+/* ---------- Skins que viram goblets ----------
+   Algumas skins do loot são trocadas no jogo por goblets de três tipos. A tabela abaixo é a da wiki, no formato
+   "quantas skins / nome / quantos goblets": 3 Rotten Boggle Ear valem 1 goblet; 1 Broken Fluxweave Mask vale 4.
+   Skin que precisa de várias para uma troca só vale quando fecha o conjunto; o que sobra não conta ponto. */
+const GOBLET_TYPES = { cursed: 'Cursed Soul Goblets', malevolent: 'Malevolent Soul Goblets', vile: 'Vile Soul Goblets' };
+const GOBLET_RATES = {
+  cursed: '3 Rotten Boggle Ear 1|1 Fairy Wing 2|2 Dark Centaur Leather 3|1 Light Centaur Leather 1|1 Centaur Leather 1|1 Broken Hydroweave Mask 2|1 Broken Pyroweave Mask 2|1 Broken Fluxweave Mask 4|1 Blazemane 2|1 Frostmane 2|1 Magma Dragon Horn 3|1 Ancient Dragon Horn 7|1 Obsidian Dragon Horn 5|1 Weak Blizzard Core 2|1 Storm Bangle 3|1 Pegasus Feather 7',
+  malevolent: '1 Ent Twig 1|2 Black Feather 1|2 Gryphon Claw 1|3 Hand of Wraith 2|2 Ancient Bone 3|6 Giant Insect Wing 1|1 Dwarven Shoulderpad 5|1 Red Wyvern Horn 4|1 Blue Wyvern Horn 3|1 Red Wyvern Wing 4|1 Blue Wyvern Wing 3|1 Ancient Watcher\'s Tentacle 3|1 Eye of Oculus 1|1 Ancient Watcher\'s Eyesocket 8|1 Tangled Bowel 6|1 Fine Leather 4|1 Spiked Backflap 9|1 Reaper Horn 7|1 Frost Dragon Tail 2|1 Mangled Piece of Blue Cloth 5|1 Frozen Bracer 10|1 Frozen Lung 4|3 Frost Dragon Claw 1|1 Frost Dragon Wing 3|1 Frost Drake Tail 1|1 Drake Eye 1|1 Hot Horn 8|1 Anubis Ear 5|2 Giant Cobra Fang 1|1 Giant Cobra Tongue 2|1 Giant Cobra Scale 5|1 Void Bone 9|1 Void Essence 3|1 Permafrost Shard 3|1 Fiery Carapace 3|1 Golden Beetle Ornament 5|3 Hydra Tongue 2|2 Albino Dragon Skin 3|1 Albino Dragon Tail 8|2 Hydra Claw 3|2 Wight Brain 1|5 Abominated Skin Piece 1|1 Abominated Arm 1|1 Chimera Foot 1|1 Chimera Mane 5|1 Titan Horn 1|1 Hydra Head 1|2 Corrupted Skin Piece 1|3 Corrupted Fang 2|3 Torn Piece of Cloth 1|1 Ancient Runeplate 2|3 Poisonous Tail 1|2 Giant Ruby 1|3 Red Dragon Scale 2|1 Pile of Bones 1|3 Nether Spider Head 2|3 Demonic Claw 1|1 Frost Dragon Heart 1|1 Nether Fangs 1',
+  vile: '5 Flamingo Leg 1|2 Boar Fang 1|2 Boar Skin 1|1 Stone Skin 1|3 Insect Wing 1|2 Gargoyle Wing 1|3 Tortoise Shell 1|1 Scorpion Shell 1|1 Shoulder Armorstrap 6|1 Plaguespreader Bone 2|4 Green Hair 1|1 Restless Skull 1|1 Snow Ravager Fur 1|1 Crystalbeast Fur 1|1 Wendigo Claw 3|1 Wendigo Antlers 6|2 Alpha Wolf Fang 1|1 Harpy Spellweaver Claw 2|2 Harpy Claw 3|1 Tentacle 1|1 Corrupted Watcher Eye 3|4 Golden Feather 2|1 Blue Feather 2|1 Glob of Tar 2|1 Green Dragon Scale 2|4 Sandbeast Bone 1|2 Devil Tail 5|3 Leather Beater 2|2 Dog Head 3|2 Snake Tongue 1|2 Rotworm Mouth 1|2 Elf Ear 1|5 Larva Eggs 2|3 Patch of Armor Steel 1|4 Lion Mane 2|2 Orc Head 1|4 Giant Spider Head 2|4 Minotaur Head 1|3 Brown Leather 1|1 Minotaur Hoof 3|3 Spiderling Remains 1|2 White Wool 1|2 Black Wool 1|1 Antlers 1|2 Pig Tail 1|2 Green Leather 1|2 Orc Teeth 1|2 Lich Skull 3|1 Diabolic Claw 2|3 Brown Hair 1|2 Blue Hair 1|2 Hyaena Fang 1|4 Wolf Paw 3|4 Winter Wolf Paw 3|1 Polar Bear Claw 1|1 War Wolf Paw 1|2 Rabbit Ear 1|3 Patch of Orc Skin 1|1 Bear Claw 1|1 Red Leather 1|2 Giant Eye 3|2 Shattered Skull 1|3 Beater 1|3 Iron Headpiece 1|2 Tear of Nature 3|2 Scorpion Tail 1|3 Dwarf Beard 1|3 Minotaur Horn 1',
+};
+// O jogo grava alguns nomes no plural ("tears of nature", "hyaena fangs"): a comparação ignora o "s" do fim das palavras.
+const skinKey = name => name.toLowerCase().replace(/['’]/g, '').split(/[^a-z0-9]+/).filter(Boolean).map(w => w.length > 3 ? w.replace(/s$/, '') : w).join(' ');
+const GOBLETS = new Map();
+for (const [type, list] of Object.entries(GOBLET_RATES)) {
+  for (const row of list.split('|')) { const m = /^(\d+) (.+) (\d+)$/.exec(row); GOBLETS.set(skinKey(m[2]), { type, name: m[2], need: +m[1], gives: +m[3] }); }
+}
+// As skins trocáveis do loot de uma hunt: quantos conjuntos completos cada uma fecha e quantas sobram.
+function huntSkinList(s) {
+  const found = [];
+  for (const it of s.items || []) {
+    const g = GOBLETS.get(skinKey(it.name));
+    if (g) found.push({ ...g, count: it.n, sets: Math.floor(it.n / g.need), left: it.n % g.need });
+  }
+  const order = Object.keys(GOBLET_TYPES);
+  return found.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type) || b.sets * b.gives - a.sets * a.gives || a.name.localeCompare(b.name));
+}
+// Divide as skins entre os jogadores pelos pontos. Em cada tipo de goblet, os conjuntos vão do mais valioso para o
+// menos, sempre para quem está com menos pontos daquele tipo (no empate, para quem tem menos no total). Um conjunto
+// nunca é repartido. As sobras, que não fecham troca, vão no fim para quem ficou com menos.
+function splitSkins(found, players) {
+  const share = players.map(name => ({ name, pts: {}, all: 0, extra: 0, items: new Map() }));
+  for (const type of Object.keys(GOBLET_TYPES)) {
+    for (const p of share) p.pts[type] = 0;
+    const lowest = () => share.reduce((a, b) => (b.pts[type] - a.pts[type] || b.extra - a.extra || b.all - a.all) < 0 ? b : a);
+    const give = (skin, n, pts) => {
+      const p = lowest(), k = skin.name + (pts ? '' : '*'), cur = p.items.get(k) || { name: skin.name, type, n: 0, partial: !pts };
+      cur.n += n;
+      p.items.set(k, cur);
+      p.pts[type] += pts;
+      p.all += pts;
+      if (!pts) p.extra++;
+    };
+    const sets = [];
+    for (const f of found) if (f.type === type) for (let i = 0; i < f.sets; i++) sets.push(f);
+    for (const f of sets.sort((a, b) => b.gives - a.gives)) give(f, f.need, f.gives);
+    for (const f of found) if (f.type === type && f.left) give(f, f.left, 0);
+  }
+  return share;
+}
+const skinText = it => it.n + '× ' + it.name + (it.partial ? ' (' + tr('gob.partial') + ')' : '');
+function huntSkins(s) {
+  const found = huntSkinList(s);
+  if (!found.length) return null;
+  const types = Object.keys(GOBLET_TYPES).filter(t => found.some(f => f.type === t));
+  const total = t => found.reduce((a, f) => a + (f.type === t ? f.sets * f.gives : 0), 0);
+  const dot = t => el('i', { class: 'gob-dot gob-' + t, title: GOBLET_TYPES[t] });
+  const players = s.players.map(p => p.name);
+  const share = players.length > 1 ? splitSkins(found, players) : null;
+  const text = share && [tr('gob.title') + ' · ' + huntWhen(s),
+    ...share.map(p => p.name + ': ' + ([...p.items.values()].map(skinText).join(', ') || '–') + ' | ' + types.map(t => GOBLET_TYPES[t].split(' ')[0] + ' ' + p.pts[t]).join(', '))].join('\n');
+  return el('div', { class: 'hunt-skins' }, [
+    el('h3', { text: tr('gob.title') }),
+    el('p', { class: 'hunt-note', text: tr('gob.note') }),
+    el('p', { class: 'gob-totals' }, types.map(t => el('span', {}, dot(t), GOBLET_TYPES[t] + ': ', el('b', { text: fmtInt(total(t)) })))),
+    el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table gob-table' },
+      el('thead', {}, el('tr', {}, ['skin', 'qty', 'rate', 'pts'].map(k => el('th', { scope: 'col', text: tr('gob.col.' + k) })))),
+      el('tbody', {}, found.map(f => el('tr', {},
+        el('td', {}, dot(f.type), f.name),
+        el('td', { text: fmtInt(f.count) + (f.left ? ' (' + tr('gob.left', { n: f.left }) + ')' : '') }),
+        el('td', { text: f.need + ' → ' + f.gives }),
+        el('td', { class: f.sets ? null : 'none', text: fmtInt(f.sets * f.gives) })))))),
+    ...(share ? [   // espalhado: uma lista dentro da lista viraria texto
+      el('h3', { text: tr('gob.split') }),
+      el('p', { class: 'hunt-note', text: tr('gob.splitNote') }),
+      el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table gob-table gob-share' },
+        el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: tr('hunt.player') }), types.map(t => el('th', { scope: 'col' }, dot(t), GOBLET_TYPES[t].split(' ')[0])), el('th', { scope: 'col', text: tr('gob.col.gets') }))),
+        el('tbody', {}, share.map(p => el('tr', {},
+          el('td', { text: p.name }),
+          types.map(t => el('td', { class: p.pts[t] ? null : 'none', text: fmtInt(p.pts[t]) })),
+          el('td', { text: [...p.items.values()].map(skinText).join(', ') || '–' })))))),
+      el('div', { class: 'hunt-foot' }, el('button', { class: 'dlg', type: 'button', id: 'gob-copy', text: tr('gob.copy'),
+        onclick: async e => { const b = e.currentTarget, ok = await copyText(text); setText(b, tr(ok ? 'gob.copied' : 'hunt.copyFail')); setTimeout(() => setText(b, tr('gob.copy')), 1600); } })),
+    ] : []),
+  ]);
 }
 // Criaturas abatidas na hunt, com o ritmo por hora e o XP por abate de quem já está no banco de criaturas.
 // Com o XP de todas, dá para dizer quanto do XP de tabela dos abates o jogador recebeu.
@@ -5161,6 +5318,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 01:26',
+    pt: ['Analisador de hunt: nova seção "Skins para goblets". Mostra as skins do loot que viram Cursed, Malevolent e Vile Soul Goblets, quantos pontos cada uma vale e a divisão entre os jogadores pelos pontos.'],
+    en: ['Hunt analyzer: new "Skins for goblets" section. It shows the loot skins that become Cursed, Malevolent and Vile Soul Goblets, how many points each is worth and the split between the players by points.'],
+    es: ['Analizador de hunt: nueva sección "Skins para goblets". Muestra las skins del loot que se convierten en Cursed, Malevolent y Vile Soul Goblets, cuántos puntos vale cada una y el reparto entre los jugadores por puntos.'],
+    pl: ['Analizator polowań: nowa sekcja „Skiny na goblety”. Pokazuje skiny z łupu wymieniane na Cursed, Malevolent i Vile Soul Goblets, ile punktów jest warty każdy oraz podział między graczy według punktów.'],
+  },
   { at: '2026-10-11 00:41',
     pt: ['Comando de voz: além de dez, agora dá para somar ou tirar dois, cinco e trinta segundos ("mais cinco", "menos trinta").', 'Botões −5 s e +5 s nos cronômetros e na janela flutuante.'],
     en: ['Voice command: besides ten, you can now add or take off two, five and thirty seconds ("plus five", "minus thirty").', '−5 s and +5 s buttons on the timers and in the floating window.'],
