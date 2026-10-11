@@ -155,6 +155,16 @@ dialog#changes { width: min(560px, calc(100vw - 32px)); }
 dialog#creature-dlg { width: min(880px, calc(100vw - 32px)); scrollbar-width: thin; scrollbar-color: var(--edge) transparent; }
 #creature-title { font-size: 28px; line-height: 1.15; color: var(--amber); overflow-wrap: anywhere; }
 .creature-sheet { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+/* Abas de raridade da ficha: um ponto com a cor de cada uma; a que ainda não tem dados fica apagada */
+.unit-toggle.creature-tiers { align-self: flex-start; flex-wrap: wrap; margin-left: 0; }
+.creature-tiers button { display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; font-size: 13px; }
+.creature-tiers button::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+.creature-tiers .tier-common::before { background: var(--value); }
+.creature-tiers .tier-rare::before { background: #5aa9ff; }
+.creature-tiers .tier-legendary::before { background: var(--amber); }
+.creature-tiers button.empty { color: var(--faint); }
+.creature-tiers button.empty[aria-pressed="true"] { color: var(--ground); }
+.creature-alias { font-size: 14px; color: var(--label); }
 .creature-need { max-width: 70ch; padding: 10px 14px; border-left: 3px solid var(--amber); border-radius: 0 var(--r-sm) var(--r-sm) 0; background: var(--card); font-size: 14px; color: var(--title); }
 /* Em cima o que interessa para a caça (XP, HP e a relação entre os dois); embaixo os atributos de combate */
 .creature-stats { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; }
@@ -729,7 +739,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </section>
 
   <section class="page" id="page-creatures" hidden>
-  <p class="paste"><span data-i18n="creatures.paste.a">Com o print da ficha de uma criatura no bestiário copiado (aba Normal), aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="creatures.paste.b">nesta página. O XP e os atributos dela são atualizados para todos; um print mais novo corrige o que já estava.</span></p>
+  <p class="paste"><span data-i18n="creatures.paste.a">Com o print da ficha de uma criatura no bestiário copiado, em qualquer aba de raridade, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="creatures.paste.b">nesta página. O XP e os atributos dela são atualizados para todos; um print mais novo corrige o que já estava.</span></p>
 <div class="support tool" id="creatures" aria-labelledby="creatures-title">
   <div class="support-end">
     <h2 id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
@@ -1038,10 +1048,21 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'tier.label': 'Raridade',
+    'tier.normal': 'Normal',
+    'tier.common': 'Comum',
+    'tier.rare': 'Raro',
+    'tier.legendary': 'Lendário',
+    'tier.empty': 'Ainda sem dados desta raridade',
+    'creature.needTier': 'Ainda sem os dados da raridade {t}. No bestiário do jogo, abra a ficha desta criatura, clique na aba {t} e cole o print aqui.',
+    'creature.needLegend': 'Ainda sem os dados da raridade {t}. No jogo, a aba {t} mostra a criatura com outro nome: cole o print com esta ficha aberta, para ele entrar na criatura certa.',
+    'creature.legendName': 'Nome no jogo nesta raridade: {x}',
+    'read.bestTier': '{x}, raridade {t}: {v} de XP por abate.',
+    'err.bestLegend': 'Este print é da aba Lendário, que mostra a criatura com outro nome ({x}). Abra a ficha da criatura a que ele pertence, na página Criaturas, e cole o print com ela aberta.',
     'paste.best': 'O print da ficha de uma criatura no bestiário também vale: ele guarda ou atualiza o XP e os atributos dela.',
-    'creatures.paste.a': 'Com o print da ficha de uma criatura no bestiário copiado (aba Normal), aperte',
+    'creatures.paste.a': 'Com o print da ficha de uma criatura no bestiário copiado, em qualquer aba de raridade, aperte',
     'creatures.paste.b': 'nesta página. O XP e os atributos dela são atualizados para todos; um print mais novo corrige o que já estava.',
-    'creature.update': 'Os números mudaram no jogo? Cole um print novo da ficha desta criatura no bestiário (aba Normal) e eles são atualizados.',
+    'creature.update': 'Os números mudaram no jogo? Cole um print novo da ficha desta criatura no bestiário, na aba da raridade que mudou, e eles são atualizados.',
     'tone.azrak': 'Voz do Azrak',
     'tone.vivien': 'Voz da Vivien',
     'hunt.more': 'Ver no analisador',
@@ -1065,14 +1086,14 @@ const I18N = {
     'creature.needStats': 'Só o XP foi lido. Cole o print da ficha de novo para completar HP, ARM, DEF, SPD e Mana.',
     'creature.where': 'Onde aparece',
     'creature.whereNone': 'Nenhum respawn do banco tem esta criatura ainda.',
-    'creature.whereNote': 'Com os controles atuais da página: {g} e bônus de {p}%. O XP é por jogador.',
+    'creature.whereNote': 'Com os controles atuais da página: {g} e bônus de {p}%. O XP é por jogador e usa sempre a raridade Normal.',
     'creature.col.respawn': 'Respawn',
     'creature.col.count': 'Quantidade',
     'creature.col.time': 'Tempo',
     'creature.col.kills': 'Abates por hora',
     'creature.col.xp': 'XP por hora',
     'creature.s.xp': 'XP por abate',
-    'creature.s.xpD': 'raridade Normal, sem bônus',
+    'creature.s.xpD': 'raridade {t}, sem bônus',
     'creature.s.hp': 'HP',
     'creature.s.hpD': 'pontos de vida',
     'creature.s.ratio': 'XP por HP',
@@ -1434,10 +1455,21 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'tier.label': 'Rarity',
+    'tier.normal': 'Normal',
+    'tier.common': 'Common',
+    'tier.rare': 'Rare',
+    'tier.legendary': 'Legendary',
+    'tier.empty': 'No data for this rarity yet',
+    'creature.needTier': 'No data for the {t} rarity yet. In the game bestiary, open the page of this creature, click the {t} tab and paste the screenshot here.',
+    'creature.needLegend': 'No data for the {t} rarity yet. In the game, the {t} tab shows the creature under another name: paste the screenshot with this sheet open, so it goes to the right creature.',
+    'creature.legendName': 'Name in the game at this rarity: {x}',
+    'read.bestTier': '{x}, {t} rarity: {v} XP per kill.',
+    'err.bestLegend': 'This screenshot is from the Legendary tab, which shows the creature under another name ({x}). Open the sheet of the creature it belongs to, on the Creatures page, and paste the screenshot with it open.',
     'paste.best': 'A screenshot of a creature page in the bestiary works too: it saves or updates its XP and stats.',
-    'creatures.paste.a': 'With a screenshot of a creature page in the bestiary copied (Normal tab), press',
+    'creatures.paste.a': 'With a screenshot of a creature page in the bestiary copied, on any rarity tab, press',
     'creatures.paste.b': 'on this page. Its XP and stats are updated for everyone; a newer screenshot corrects what was there.',
-    'creature.update': 'Did the numbers change in the game? Paste a new screenshot of the bestiary page of this creature (Normal tab) and they are updated.',
+    'creature.update': 'Did the numbers change in the game? Paste a new screenshot of the bestiary page of this creature, on the tab of the rarity that changed, and they are updated.',
     'tone.azrak': 'Azrak voice',
     'tone.vivien': 'Vivien voice',
     'hunt.more': 'Open in the analyzer',
@@ -1461,14 +1493,14 @@ const I18N = {
     'creature.needStats': 'Only the XP was read. Paste the screenshot of its page again to fill in HP, ARM, DEF, SPD and Mana.',
     'creature.where': 'Where it appears',
     'creature.whereNone': 'No respawn in the bank has this creature yet.',
-    'creature.whereNote': 'With the current controls on the page: {g} and a {p}% bonus. XP is per player.',
+    'creature.whereNote': 'With the current controls on the page: {g} and a {p}% bonus. XP is per player and always uses the Normal rarity.',
     'creature.col.respawn': 'Respawn',
     'creature.col.count': 'Count',
     'creature.col.time': 'Time',
     'creature.col.kills': 'Kills per hour',
     'creature.col.xp': 'XP per hour',
     'creature.s.xp': 'XP per kill',
-    'creature.s.xpD': 'Normal rarity, no bonus',
+    'creature.s.xpD': '{t} rarity, no bonus',
     'creature.s.hp': 'HP',
     'creature.s.hpD': 'hit points',
     'creature.s.ratio': 'XP per HP',
@@ -1830,10 +1862,21 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'tier.label': 'Rareza',
+    'tier.normal': 'Normal',
+    'tier.common': 'Común',
+    'tier.rare': 'Raro',
+    'tier.legendary': 'Legendario',
+    'tier.empty': 'Aún sin datos de esta rareza',
+    'creature.needTier': 'Aún sin los datos de la rareza {t}. En el bestiario del juego, abre la ficha de esta criatura, haz clic en la pestaña {t} y pega la captura aquí.',
+    'creature.needLegend': 'Aún sin los datos de la rareza {t}. En el juego, la pestaña {t} muestra la criatura con otro nombre: pega la captura con esta ficha abierta, para que entre en la criatura correcta.',
+    'creature.legendName': 'Nombre en el juego en esta rareza: {x}',
+    'read.bestTier': '{x}, rareza {t}: {v} de XP por muerte.',
+    'err.bestLegend': 'Esta captura es de la pestaña Legendario, que muestra la criatura con otro nombre ({x}). Abre la ficha de la criatura a la que pertenece, en la página Criaturas, y pega la captura con ella abierta.',
     'paste.best': 'La captura de la ficha de una criatura en el bestiario también sirve: guarda o actualiza su XP y sus atributos.',
-    'creatures.paste.a': 'Con la captura de la ficha de una criatura en el bestiario copiada (pestaña Normal), pulsa',
+    'creatures.paste.a': 'Con la captura de la ficha de una criatura en el bestiario copiada, en cualquier pestaña de rareza, pulsa',
     'creatures.paste.b': 'en esta página. Su XP y sus atributos se actualizan para todos; una captura más nueva corrige lo que había.',
-    'creature.update': '¿Cambiaron los números en el juego? Pega una captura nueva de la ficha de esta criatura en el bestiario (pestaña Normal) y se actualizan.',
+    'creature.update': '¿Cambiaron los números en el juego? Pega una captura nueva de la ficha de esta criatura en el bestiario, en la pestaña de la rareza que cambió, y se actualizan.',
     'tone.azrak': 'Voz de Azrak',
     'tone.vivien': 'Voz de Vivien',
     'hunt.more': 'Ver en el analizador',
@@ -1857,14 +1900,14 @@ const I18N = {
     'creature.needStats': 'Solo se leyó el XP. Pega de nuevo la captura de la ficha para completar HP, ARM, DEF, SPD y Mana.',
     'creature.where': 'Dónde aparece',
     'creature.whereNone': 'Ningún respawn del banco tiene esta criatura todavía.',
-    'creature.whereNote': 'Con los controles actuales de la página: {g} y bonus del {p}%. El XP es por jugador.',
+    'creature.whereNote': 'Con los controles actuales de la página: {g} y bonus del {p}%. El XP es por jugador y usa siempre la rareza Normal.',
     'creature.col.respawn': 'Respawn',
     'creature.col.count': 'Cantidad',
     'creature.col.time': 'Tiempo',
     'creature.col.kills': 'Muertes por hora',
     'creature.col.xp': 'XP por hora',
     'creature.s.xp': 'XP por muerte',
-    'creature.s.xpD': 'rareza Normal, sin bonus',
+    'creature.s.xpD': 'rareza {t}, sin bonus',
     'creature.s.hp': 'HP',
     'creature.s.hpD': 'puntos de vida',
     'creature.s.ratio': 'XP por HP',
@@ -2226,10 +2269,21 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'tier.label': 'Rzadkość',
+    'tier.normal': 'Normalny',
+    'tier.common': 'Pospolity',
+    'tier.rare': 'Rzadki',
+    'tier.legendary': 'Legendarny',
+    'tier.empty': 'Brak danych tej rzadkości',
+    'creature.needTier': 'Brak danych rzadkości {t}. W bestiariuszu gry otwórz kartę tego stworzenia, kliknij zakładkę {t} i wklej zrzut tutaj.',
+    'creature.needLegend': 'Brak danych rzadkości {t}. W grze zakładka {t} pokazuje stworzenie pod inną nazwą: wklej zrzut przy otwartej tej karcie, aby trafił do właściwego stworzenia.',
+    'creature.legendName': 'Nazwa w grze przy tej rzadkości: {x}',
+    'read.bestTier': '{x}, rzadkość {t}: {v} XP za zabicie.',
+    'err.bestLegend': 'Ten zrzut pochodzi z zakładki Legendarny, która pokazuje stworzenie pod inną nazwą ({x}). Otwórz kartę właściwego stworzenia na stronie Stworzenia i wklej zrzut przy otwartej karcie.',
     'paste.best': 'Zrzut karty stworzenia z bestiariusza też działa: zapisuje lub aktualizuje jego XP i statystyki.',
-    'creatures.paste.a': 'Po skopiowaniu zrzutu karty stworzenia z bestiariusza (zakładka Normalny) naciśnij',
+    'creatures.paste.a': 'Po skopiowaniu zrzutu karty stworzenia z bestiariusza, z dowolnej zakładki rzadkości, naciśnij',
     'creatures.paste.b': 'na tej stronie. Jego XP i statystyki zostaną zaktualizowane dla wszystkich; nowszy zrzut poprawia poprzednie dane.',
-    'creature.update': 'Liczby zmieniły się w grze? Wklej nowy zrzut karty tego stworzenia z bestiariusza (zakładka Normalny), a zostaną zaktualizowane.',
+    'creature.update': 'Liczby zmieniły się w grze? Wklej nowy zrzut karty tego stworzenia z bestiariusza, z zakładki rzadkości, która się zmieniła, a zostaną zaktualizowane.',
     'tone.azrak': 'Głos Azraka',
     'tone.vivien': 'Głos Vivien',
     'hunt.more': 'Zobacz w analizatorze',
@@ -2253,14 +2307,14 @@ const I18N = {
     'creature.needStats': 'Odczytano tylko XP. Wklej zrzut karty ponownie, aby uzupełnić HP, ARM, DEF, SPD i Manę.',
     'creature.where': 'Gdzie występuje',
     'creature.whereNone': 'Żaden respawn w bazie nie ma jeszcze tego stworzenia.',
-    'creature.whereNote': 'Przy obecnych ustawieniach strony: {g} i bonus {p}%. XP na gracza.',
+    'creature.whereNote': 'Przy obecnych ustawieniach strony: {g} i bonus {p}%. XP na gracza, zawsze dla rzadkości Normalnej.',
     'creature.col.respawn': 'Respawn',
     'creature.col.count': 'Liczba',
     'creature.col.time': 'Czas',
     'creature.col.kills': 'Zabicia na godzinę',
     'creature.col.xp': 'XP na godzinę',
     'creature.s.xp': 'XP za zabicie',
-    'creature.s.xpD': 'rzadkość Normalna, bez bonusu',
+    'creature.s.xpD': 'rzadkość: {t}, bez bonusu',
     'creature.s.hp': 'HP',
     'creature.s.hpD': 'punkty życia',
     'creature.s.ratio': 'XP na HP',
@@ -3332,12 +3386,47 @@ const LS_XP_MINE = 'medivia-respawn.criaturas-meu.v1';    // lidos aqui que aind
 const xp = { cloud: new Map(), mine: new Map(), fullAt: 0, loading: false, rev: 0, key: '' };
 // Atributos da ficha que vão junto com o XP, e o maior valor aceito de cada um.
 const XP_STATS = { hp: 1e8, armLo: 1e6, armHi: 1e6, defLo: 1e6, defHi: 1e6, spd: 1e6, mana: 1e8 };
-function xpDoc(raw) {
-  if (!raw || typeof raw.name !== 'string' || !raw.name.trim() || int(raw.exp, 0, 1e8) == null) return null;
-  const d = { name: raw.name.trim().slice(0, 60), exp: int(raw.exp, 0, 1e8), at: raw.at || null, owner: raw.owner || null };
+// As raridades além da Normal. Cada uma guarda os mesmos números da ficha; a Lendária tem também nome próprio
+// (no jogo, a aba Lendário mostra outra criatura: o "Blood Sphinx" lendário chama "Goremaw").
+const XP_TIERS = ['common', 'rare', 'legendary'];
+const TIER_NAMES = ['normal', ...XP_TIERS];   // na ordem das abas do jogo
+function xpNumbers(raw) {
+  const d = {}, exp = int(raw.exp, 0, 1e8);
+  if (exp != null) d.exp = exp;
   for (const [k, max] of Object.entries(XP_STATS)) { const v = int(raw[k], 0, max); if (v != null) d[k] = v; }
   return d;
 }
+function xpDoc(raw) {
+  if (!raw || typeof raw.name !== 'string' || !raw.name.trim()) return null;
+  const d = { name: raw.name.trim().slice(0, 60), ...xpNumbers(raw), at: raw.at || null, owner: raw.owner || null };
+  const tiers = {};
+  for (const t of XP_TIERS) {
+    const r = raw.tiers && typeof raw.tiers === 'object' ? raw.tiers[t] : null;
+    if (!r || typeof r !== 'object') continue;
+    const one = xpNumbers(r);
+    if (typeof r.name === 'string' && r.name.trim()) one.name = r.name.trim().slice(0, 60);
+    if (Object.keys(one).length) tiers[t] = one;
+  }
+  if (Object.keys(tiers).length) d.tiers = tiers;
+  return d;
+}
+// Junta dois registros da mesma criatura: o segundo corrige o que traz, e o que ele não traz fica como estava.
+function xpMerge(a, b) {
+  if (!a || !b) return a || b || null;
+  const d = { ...a, ...b };
+  if (a.tiers || b.tiers) {
+    d.tiers = {};
+    for (const t of XP_TIERS) {
+      const one = { ...((a.tiers || {})[t] || {}), ...((b.tiers || {})[t] || {}) };
+      if (Object.keys(one).length) d.tiers[t] = one;
+    }
+  }
+  return d;
+}
+// A criatura como a página a vê: o banco de todos mais o que foi lido aqui e ainda não subiu.
+const creatureOf = id => xpMerge(xp.cloud.get(id), xp.mine.get(id));
+const xpSig = d => JSON.stringify([d.exp ?? null, ...Object.keys(XP_STATS).map(k => d[k] ?? null),
+  XP_TIERS.map(t => { const o = (d.tiers || {})[t]; return o ? [o.name ?? null, o.exp ?? null, ...Object.keys(XP_STATS).map(k => o[k] ?? null)] : null; })]);
 {
   const cache = lsGet(LS_XP, null);
   for (const [id, raw] of Object.entries(cache && cache.docs && typeof cache.docs === 'object' ? cache.docs : {})) {
@@ -3353,9 +3442,9 @@ function xpDoc(raw) {
     xp.mine.set(id, d);
   }
 }
-const xpKey = () => JSON.stringify([xp.cloud, xp.mine].map(m => [...m].map(([id, d]) => [id, d.exp, ...Object.keys(XP_STATS).map(k => d[k] ?? null)])));
-// XP por abate de uma criatura, ou null se ninguém mandou ainda. O que foi lido aqui vale antes do banco.
-const expOf = name => { const id = slug(name), d = xp.mine.get(id) || xp.cloud.get(id); return d ? d.exp : null; };
+const xpKey = () => JSON.stringify([xp.cloud, xp.mine].map(m => [...m].map(([id, d]) => [id, xpSig(d)])));
+// XP por abate de uma criatura na raridade Normal (é a que entra na conta do respawn), ou null se ninguém mandou ainda.
+const expOf = name => { const d = creatureOf(slug(name)); return d && d.exp != null ? d.exp : null; };
 // Guarda a cópia local e redesenha; a página só é refeita quando algum valor mudou de fato.
 function xpChanged() {
   const key = xpKey();
@@ -3412,13 +3501,13 @@ async function pushXp(id) {
   const got = await cloudFetch('/creatures/' + id);
   if (!got.ok && got.status !== 404) return 'later';
   const cur = got.ok ? xpDoc(docRaw(got.json)) : null;
-  // O print mais novo corrige o que leu; o que ele não leu fica como estava no banco.
-  const stats = {};
-  for (const k of Object.keys(XP_STATS)) { const v = mine[k] ?? (cur ? cur[k] : null); if (v != null) stats[k] = v; }
-  if (cur && cur.exp === mine.exp && Object.keys(XP_STATS).every(k => (cur[k] ?? null) === (stats[k] ?? null))) xp.cloud.set(id, cur);
+  // O print mais novo corrige o que leu; o que ele não leu (inclusive as outras raridades) fica como estava no banco.
+  const next = xpMerge(cur, mine);
+  if (cur && xpSig(cur) === xpSig(next)) xp.cloud.set(id, cur);
   else {
     // O nome e quem enviou primeiro ficam; os valores são os do print mais novo.
-    const raw = { name: cur ? cur.name : mine.name, exp: mine.exp, ...stats, owner: cur && cur.owner ? cur.owner : uid };
+    const raw = { name: cur ? cur.name : mine.name, ...xpNumbers(next), owner: cur && cur.owner ? cur.owner : uid };
+    if (next.tiers) raw.tiers = next.tiers;
     const res = await cloudCommit({
       update: { name: cloud.root + '/creatures/' + id, fields: toFs(raw).mapValue.fields },
       updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
@@ -3433,10 +3522,14 @@ async function pushXp(id) {
 async function flushXp() {
   for (const id of [...xp.mine.keys()]) { try { await pushXp(id); } catch { /* fica para a próxima */ } }
 }
-// Guarda o XP lido de um print. Devolve 'cloud' (já está no banco de todos) ou 'local'.
-async function saveXp(name, exp, stats) {
-  const id = slug(name);
-  xp.mine.set(id, { ...(xp.mine.get(id) || {}), name, exp, ...stats });
+// Guarda os números lidos de um print na raridade dele ('normal' ou uma das XP_TIERS).
+// Devolve 'cloud' (já está no banco de todos) ou 'local'.
+async function saveXp(id, name, tier, data) {
+  const cur = xp.mine.get(id) || {}, known = creatureOf(id);
+  const next = { ...cur, name: known ? known.name : name };
+  if (tier === 'normal') Object.assign(next, data, { name });   // o print da aba Normal é quem dá o nome da criatura
+  else next.tiers = { ...(cur.tiers || {}), [tier]: { ...((cur.tiers || {})[tier] || {}), ...data } };
+  xp.mine.set(id, next);
   xpChanged();
   if (!cloud.on) return 'local';
   let sent = 'later';
@@ -4459,13 +4552,29 @@ async function readImage(blob) {
   try {
     const p = await readPrint(blob);
     if (p.kind === 'bestiary') {
-      // Ficha de uma criatura: guarda o XP por abate dela. Só a raridade Normal entra na conta do respawn.
-      if (p.tab) throw new UserError(tr('err.bestTab'));
+      // Ficha de uma criatura: guarda os números na raridade da aba que estava escolhida no print.
+      // Só a raridade Normal entra na conta do respawn.
       if (!p.name || !slug(p.name)) throw new UserError(tr('err.bestName'));
       if (p.exp == null) throw new UserError(tr('err.bestExp', { x: p.name }));
-      const where = await saveXp(p.name, p.exp, p.stats || {});
-      if (pageNow === 'creatures') showCreature(slug(p.name));   // quem está nas criaturas já vê a ficha preenchida
-      setStatus('ok', tr('read.best', { x: p.name, v: fmtInt(p.exp) }) + ' ' + tr(where === 'cloud' ? 'read.cloud' : 'read.bestLocal') + ' ' + tr('read.discarded'));
+      const tier = TIER_NAMES[p.tab] || 'normal', data = { exp: p.exp, ...(p.stats || {}) };
+      let id = slug(p.name), name = p.name;
+      if (tier === 'legendary') {
+        // A aba Lendário mostra o nome da criatura lendária, não o da criatura. Ela entra: na criatura que já tem esse
+        // nome lendário, na que tem esse mesmo nome, ou na que está com a ficha aberta. Sem nenhuma, não dá para saber.
+        const all = new Set([...xp.cloud.keys(), ...xp.mine.keys()]);
+        const owner = [...all].find(k => { const t = (creatureOf(k).tiers || {}).legendary; return t && t.name && slug(t.name) === id; });
+        if (owner) id = owner;
+        else if (!all.has(id) && !creatureRows().some(c => c.id === id)) {
+          if (!creatureId) throw new UserError(tr('err.bestLegend', { x: p.name }));
+          id = creatureId;
+        }
+        data.name = p.name;
+        name = (creatureOf(id) || creatureRows().find(c => c.id === id) || { name: p.name }).name;
+      }
+      const where = await saveXp(id, name, tier, data);
+      if (pageNow === 'creatures' || creatureId) { creatureTier = tier; showCreature(id); }   // a ficha abre já na raridade lida
+      setStatus('ok', tr(tier === 'normal' ? 'read.best' : 'read.bestTier', { x: name, t: tr('tier.' + tier), v: fmtInt(p.exp) }) + ' ' +
+        tr(where === 'cloud' ? 'read.cloud' : 'read.bestLocal') + ' ' + tr('read.discarded'));
       return;
     }
     if (p.failed) throw new UserError(tr('err.mapperRows'));
@@ -4917,8 +5026,8 @@ function huntKills(s, hours) {
   if (!s.kills.length) return null;
   const title = t => t.replace(/(^|[\s-])([a-z])/g, (m, a, b) => a + b.toUpperCase());   // o jogo grava os nomes em minúsculas
   const rows = s.kills.map(k => {
-    const id = slug(k.name), d = xp.mine.get(id) || xp.cloud.get(id);
-    return { id, name: d ? d.name : title(k.name), n: k.n, exp: d ? d.exp : null };
+    const id = slug(k.name), d = creatureOf(id);
+    return { id, name: d ? d.name : title(k.name), n: k.n, exp: d && d.exp != null ? d.exp : null };
   }).sort((a, b) => b.n - a.n);
   const missing = rows.filter(r => r.exp == null).length, book = rows.reduce((t, r) => t + (r.exp || 0) * r.n, 0);
   return el('div', { class: 'hunt-kills' }, [
@@ -4926,7 +5035,7 @@ function huntKills(s, hours) {
     el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table' },
       el('thead', {}, el('tr', {}, [tr('creatures.col.name'), tr('hunt.kills.n'), tr('hunt.kills.rate'), tr('creature.s.xp')].map(t => el('th', { scope: 'col', text: t })))),
       el('tbody', {}, rows.map(r => el('tr', {},
-        el('td', {}, el('button', { class: 'creature-link', type: 'button', text: r.name, title: tr('creature.open'), onclick: () => showCreature(r.id) })),
+        el('td', {}, el('button', { class: 'creature-link', type: 'button', text: r.name, title: tr('creature.open'), onclick: () => { creatureTier = 'normal'; showCreature(r.id); } })),
         el('td', { text: fmtInt(r.n) }),
         el('td', { class: hours ? null : 'none', text: hours ? fmtInt(Math.round(r.n / hours)) : '–' }),
         el('td', { class: r.exp == null ? 'none' : null, text: r.exp == null ? '?' : fmtInt(r.exp) })))))),
@@ -5042,6 +5151,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 00:17',
+    pt: ['Criaturas: a ficha ganhou as abas Normal, Comum, Raro e Lendário. O print do bestiário de qualquer aba é guardado na raridade certa.', 'A conta de XP do respawn continua usando só a raridade Normal.'],
+    en: ['Creatures: the sheet now has the Normal, Common, Rare and Legendary tabs. A bestiary screenshot of any tab is saved under the right rarity.', 'The respawn XP estimate still uses the Normal rarity only.'],
+    es: ['Criaturas: la ficha ahora tiene las pestañas Normal, Común, Raro y Legendario. La captura del bestiario de cualquier pestaña se guarda en la rareza correcta.', 'La cuenta de XP del respawn sigue usando solo la rareza Normal.'],
+    pl: ['Stworzenia: karta ma teraz zakładki Normalny, Pospolity, Rzadki i Legendarny. Zrzut z bestiariusza z dowolnej zakładki trafia do właściwej rzadkości.', 'Szacowanie XP respawnu nadal używa tylko rzadkości Normalnej.'],
+  },
   { at: '2026-10-11 00:07',
     pt: ['O site agora avisa, no Cronômetro, na página de Criaturas e na ficha, que o print da ficha do bestiário pode ser colado para guardar ou atualizar o XP e os atributos da criatura.'],
     en: ['The site now says, on the Timer, on the Creatures page and on the sheet, that a bestiary page screenshot can be pasted to save or update the XP and stats of a creature.'],
@@ -5358,7 +5473,7 @@ function creatureRows() {
     for (const m of r.monsters) { const id = slug(m.name); if (id) row(id, m.name).where.push({ id: r.id, name: r.name, count: m.count }); }
   }
   for (const id of new Set([...xp.cloud.keys(), ...xp.mine.keys()])) {
-    const d = { ...(xp.cloud.get(id) || {}), ...(xp.mine.get(id) || {}) };   // o que foi lido aqui vale antes do banco
+    const d = creatureOf(id);   // o que foi lido aqui vale antes do banco
     Object.assign(row(id, d.name), d);
   }
   return [...rows.values()];
@@ -5377,7 +5492,7 @@ function renderCreatures() {
   $('#creatures-table').replaceChildren(
     el('thead', {}, el('tr', {}, [tr('creatures.col.name'), 'XP', 'HP', 'ARM', 'DEF', 'SPD', 'Mana', tr('creatures.col.where')].map(t => el('th', { scope: 'col', text: t })))),
     el('tbody', {}, list.length ? list.map(c => el('tr', {},
-      el('td', {}, el('button', { class: 'creature-link', type: 'button', text: c.name, title: tr('creature.open'), onclick: () => showCreature(c.id) })),
+      el('td', {}, el('button', { class: 'creature-link', type: 'button', text: c.name, title: tr('creature.open'), onclick: () => { creatureTier = 'normal'; showCreature(c.id); } })),
       el('td', { class: c.exp == null ? 'none' : 'xp', title: c.exp == null ? tr('mob.xpTip') : null, text: c.exp == null ? '?' : fmtInt(c.exp) }),
       cell(num(c.hp)), cell(range(c.armLo, c.armHi)), cell(range(c.defLo, c.defHi)), cell(num(c.spd)), cell(num(c.mana)),
       c.where.length
@@ -5385,10 +5500,13 @@ function renderCreatures() {
         : cell(null)))
       : el('tr', {}, el('td', { class: 'none', colSpan: 8, text: tr('creatures.none') }))));
   if (creatureId) renderCreature();
+  else if (creatureWanted && pageNow === 'creatures') { showCreature(creatureWanted); if (creatureId) creatureWanted = null; }   // os dados chegaram
 }
 // Ficha de uma criatura. Os atributos vêm do print do bestiário; "Onde aparece" vem dos respawns do banco, com o
 // tempo, os abates e o XP por jogador calculados para o grupo e o bônus escolhidos nos controles da página.
 let creatureId = null;
+let creatureTier = 'normal';   // aba de raridade aberta na ficha
+let creatureWanted = null;     // ficha pedida pelo endereço (#creatures/nome) antes de os dados chegarem
 // A ficha abre por cima da página, como janela: a lista continua onde estava. Sem id, fecha.
 function showCreature(id) {
   const dlg = $('#creature-dlg');
@@ -5403,8 +5521,16 @@ function renderCreature() {
   const loc = document.documentElement.lang || 'en';
   const num = v => v == null ? null : fmtInt(v);
   const range = (lo, hi) => lo == null ? null : lo === hi ? fmtInt(lo) : fmtInt(lo) + ' – ' + fmtInt(hi);
+  // Os números mostrados são os da aba de raridade aberta; "Onde aparece" usa sempre a Normal, como a conta do respawn.
+  const tier = TIER_NAMES.includes(creatureTier) ? creatureTier : 'normal', tierName = tr('tier.' + tier);
+  const v = tier === 'normal' ? c : (c.tiers || {})[tier] || {};
   const stat = (key, value, cls) => el('div', { class: 'creature-stat' + (cls ? ' ' + cls : '') + (value == null ? ' none' : '') },
-    el('span', { text: tr('creature.s.' + key) }), el('b', { text: value == null ? '?' : value }), el('small', { text: tr('creature.s.' + key + 'D') }));
+    el('span', { text: tr('creature.s.' + key) }), el('b', { text: value == null ? '?' : value }), el('small', { text: tr('creature.s.' + key + 'D', { t: tierName }) }));
+  const tabs = el('div', { class: 'unit-toggle creature-tiers', role: 'group', 'aria-label': tr('tier.label') }, TIER_NAMES.map(t => {
+    const has = t === 'normal' ? c.exp != null : !!(c.tiers || {})[t];
+    return el('button', { class: 'tier-' + t + (has ? '' : ' empty'), type: 'button', id: 'tier-' + t, 'aria-pressed': String(t === tier), text: tr('tier.' + t),
+      title: has ? null : tr('tier.empty'), onclick: () => { creatureTier = t; renderCreature(); } });
+  }));
   const where = c.where.map(w => {
     const r = getRespawn(w.id), m = r && r.monsters.find(x => slug(x.name) === c.id);
     if (!m) return null;
@@ -5412,14 +5538,17 @@ function renderCreature() {
     return { ...w, sec, kills, xp: c.exp == null ? null : kills * c.exp * 100 / ui.party };
   }).filter(Boolean);
   const open = id => { showCreature(null); select(id); goTo('timer'); };
-  const need = c.exp == null ? 'creature.needXp' : c.hp == null ? 'creature.needStats' : null;
+  const need = tier !== 'normal' ? (v.exp == null ? (tier === 'legendary' ? 'creature.needLegend' : 'creature.needTier') : null)
+    : c.exp == null ? 'creature.needXp' : c.hp == null ? 'creature.needStats' : null;
   setText($('#creature-title'), c.name);
   $('#creature-sheet').replaceChildren(...[   // o aviso só existe quando falta dado: sem o filtro, o vazio viraria texto
-    need ? el('p', { class: 'creature-need', text: tr(need) }) : null,
+    tabs,
+    tier === 'legendary' && v.name ? el('p', { class: 'creature-alias', text: tr('creature.legendName', { x: v.name }) }) : null,
+    need ? el('p', { class: 'creature-need', text: tr(need, { t: tierName }) }) : null,
     el('div', { class: 'creature-stats' },
-      stat('xp', num(c.exp), 'main xp'), stat('hp', num(c.hp), 'main'),
-      stat('ratio', c.exp != null && c.hp ? (c.exp / c.hp).toLocaleString(loc, { maximumFractionDigits: 2 }) : null, 'main'),
-      stat('arm', range(c.armLo, c.armHi)), stat('def', range(c.defLo, c.defHi)), stat('spd', num(c.spd)), stat('mana', num(c.mana))),
+      stat('xp', num(v.exp), 'main xp'), stat('hp', num(v.hp), 'main'),
+      stat('ratio', v.exp != null && v.hp ? (v.exp / v.hp).toLocaleString(loc, { maximumFractionDigits: 2 }) : null, 'main'),
+      stat('arm', range(v.armLo, v.armHi)), stat('def', range(v.defLo, v.defHi)), stat('spd', num(v.spd)), stat('mana', num(v.mana))),
     el('section', { class: 'creature-where' },
       el('h3', { text: tr('creature.where') }),
       where.length ? [
@@ -6378,7 +6507,8 @@ function goTo(route, push = true) {
   pageNow = to;
   for (const p of PAGES) $('#page-' + p).hidden = p !== to;
   for (const b of document.querySelectorAll('[data-go]')) { if (b.dataset.go === to) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
-  if (to === 'creatures') { renderCreatures(); if (sub && slug(sub) === sub) showCreature(sub); }   // #creatures/malformis já abre a ficha
+  creatureWanted = to === 'creatures' && sub && slug(sub) === sub ? sub : null;   // #creatures/malformis já abre a ficha
+  if (to === 'creatures') renderCreatures();   // se os dados ainda não chegaram, a ficha abre quando chegarem
   if (to === 'hunt') renderHunt();
   const hash = to === 'timer' ? '' : '#' + to;
   if (push && location.hash !== hash) { try { history.pushState(null, '', location.pathname + location.search + hash); } catch { /* o endereço fica como está */ } }

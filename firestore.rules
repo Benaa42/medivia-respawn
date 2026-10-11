@@ -44,7 +44,8 @@ service cloud.firestore {
 
     // XP das criaturas, lido do bestiário do jogo: um documento por criatura.
     // - Qualquer pessoa lê.
-    // - Quem tem a identidade anônima do site cria a criatura (nome, XP por abate e, se lidos, HP, ARM, DEF, SPD e Mana).
+    // - Quem tem a identidade anônima do site cria a criatura (nome e, se lidos, XP por abate, HP, ARM, DEF, SPD e Mana).
+    // - "tiers" guarda os mesmos números das raridades Comum, Raro e Lendário, quando alguém manda o print dessas abas.
     // - Qualquer pessoa com identidade corrige o XP com um print mais novo; o nome e quem enviou primeiro não mudam.
     // - Só quem enviou primeiro apaga.
     match /creatures/{id} {
@@ -52,10 +53,26 @@ service cloud.firestore {
       function stat(d, k, max) {
         return !(k in d) || (d[k] is int && d[k] >= 0 && d[k] <= max);
       }
+      // Os números de uma raridade (Comum, Raro ou Lendário); a Lendária pode ter nome próprio.
+      function tier(t) {
+        return t is map
+          && t.keys().hasOnly(['name', 'exp', 'hp', 'armLo', 'armHi', 'defLo', 'defHi', 'spd', 'mana'])
+          && (!('name' in t) || (t.name is string && t.name.size() >= 1 && t.name.size() <= 60))
+          && stat(t, 'exp', 100000000) && stat(t, 'hp', 100000000) && stat(t, 'mana', 100000000) && stat(t, 'spd', 1000000)
+          && stat(t, 'armLo', 1000000) && stat(t, 'armHi', 1000000) && stat(t, 'defLo', 1000000) && stat(t, 'defHi', 1000000);
+      }
+      function tiers(d) {
+        return !('tiers' in d) || (
+          d.tiers is map && d.tiers.keys().hasOnly(['common', 'rare', 'legendary'])
+          && (!('common' in d.tiers) || tier(d.tiers.common))
+          && (!('rare' in d.tiers) || tier(d.tiers.rare))
+          && (!('legendary' in d.tiers) || tier(d.tiers.legendary))
+        );
+      }
       function shape(d) {
-        return d.keys().hasOnly(['name', 'exp', 'hp', 'armLo', 'armHi', 'defLo', 'defHi', 'spd', 'mana', 'owner', 'at'])
+        return d.keys().hasOnly(['name', 'exp', 'hp', 'armLo', 'armHi', 'defLo', 'defHi', 'spd', 'mana', 'tiers', 'owner', 'at'])
           && d.name is string && d.name.size() >= 1 && d.name.size() <= 60
-          && d.exp is int && d.exp >= 0 && d.exp <= 100000000
+          && stat(d, 'exp', 100000000) && tiers(d)
           && stat(d, 'hp', 100000000) && stat(d, 'mana', 100000000) && stat(d, 'spd', 1000000)
           && stat(d, 'armLo', 1000000) && stat(d, 'armHi', 1000000) && stat(d, 'defLo', 1000000) && stat(d, 'defHi', 1000000)
           && d.owner is string
