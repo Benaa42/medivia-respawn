@@ -588,48 +588,36 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .hunt-skins h3 + .hunt-note { margin-top: -6px; max-width: 78ch; }
 .hunt-skins .creatures-wrap { flex: none; min-height: 0; }
 .hunt-skins h3:not(:first-child) { margin-top: 8px; }
-/* Itens do loot: a figura do jogo numa casa de mochila, com a quantidade no canto */
-.slot { position: relative; flex: none; display: inline-grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--edge); border-radius: 8px; background: var(--ground); vertical-align: middle; }
+/* Figuras dos itens: a skin numa casa de mochila; o token sem moldura; o goblet com os cantos arredondados,
+   porque a figura dele vem com fundo cinza em vez de transparente */
+.slot { flex: none; display: inline-grid; place-items: center; width: 36px; height: 36px; border: 1px solid #3a4647; border-radius: 8px; background: #2a3435; vertical-align: middle; }   /* fundo mais claro que o bloco: há figuras quase pretas */
 .slot img { display: block; max-width: 32px; max-height: 32px; image-rendering: pixelated; }
-.slot b { position: absolute; right: 3px; bottom: 2px; font: 700 11px/1 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; color: var(--title); text-shadow: 0 0 2px #000, 0 1px 2px #000, 0 0 4px #000; }
-.slot.bare { width: 32px; height: 32px; border: 0; border-radius: 0; background: none; }
-.slot.goblet { background: #222; }   /* o mesmo cinza do fundo da figura, que não é transparente */
+.slot.bare, .slot.goblet { width: 32px; height: 32px; border: 0; border-radius: 0; background: none; }
+.slot.goblet img { border-radius: 7px; }
 /* Elite tokens: bloco curto, uma linha por tipo, com o total e a parte de cada jogador */
 .hunt-tokens { gap: 6px; }
 .tok-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
 .tok-line { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 18px; font-size: 14px; color: var(--label); }
 .tok-line b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
 .tok-line .tok-name { display: inline-flex; align-items: center; gap: 6px; color: var(--title); font-weight: 600; }
+.gob-totals { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 14px; color: var(--label); }
+.gob-totals span:not(.slot) { display: inline-flex; align-items: center; gap: 8px; }
+.gob-totals b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
+.gob-item { display: inline-flex; align-items: center; gap: 10px; }
 .creatures-table.gob-table { min-width: 460px; }
 .creatures-table.gob-table td { padding-block: 5px; vertical-align: middle; }
 .creatures-table.gob-table td:first-child { color: var(--title); font-weight: 600; }
 .creatures-table.gob-table td:last-child, .creatures-table.gob-table th:last-child { min-width: 0; text-align: right; white-space: nowrap; }
 .creatures-table.gob-table td:last-child { color: var(--title); font-weight: 700; }
 .creatures-table.gob-table td.none { color: var(--faint); font-weight: 400; }
-.gob-item { display: inline-flex; align-items: center; gap: 10px; }
-/* Linha que abre cada tipo de goblet: a figura, o nome e o total do tipo */
-.creatures-table.gob-table .gob-group th { position: static; padding: 12px 10px 6px; background: none; box-shadow: inset 0 -1px 0 var(--edge); font: 600 14px/1.3 var(--font-ui); color: var(--title); text-align: left; }
-.creatures-table.gob-table .gob-group td { padding: 12px 10px 6px; font-size: 16px; }
-/* Divisão: um cartão por jogador */
-.gob-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; }
-.gob-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; padding: 14px; border-radius: 14px; background: var(--card); }
-.gob-cards[data-n="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* 2 + 2, em vez de 3 + 1 */
-@media (max-width: 700px) { .gob-cards[data-n="4"] { grid-template-columns: minmax(0, 1fr); } }
-.gob-card-head { display: flex; flex-direction: column; gap: 4px; padding-bottom: 10px; border-bottom: 1px solid var(--edge); }
-.gob-card h4 { min-width: 0; font: 700 16px/1.3 var(--font-ui); color: var(--amber); overflow-wrap: anywhere; }
-.gob-tally { display: flex; flex-wrap: wrap; gap: 6px 16px; }
-.gob-tally > span { display: inline-flex; align-items: center; gap: 8px; }
-.gob-tally b { font: 700 16px/1 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; color: var(--title); }
-.gob-tally .none b { font-weight: 400; color: var(--faint); }
-.gob-tally .none img { opacity: .4; }
-.gob-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 6px 14px; margin: 0; padding: 0; list-style: none; }
-.gob-items li { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 14px; line-height: 1.25; color: var(--title); }
-.gob-items li > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.gob-items small { display: block; font-size: 12px; color: var(--faint); }
-/* Sobra que não fecha troca: casa tracejada e figura apagada */
-.gob-items .spare { color: var(--label); }
-.gob-items .spare .slot { border-style: dashed; }
-.gob-items .spare .slot img { opacity: .6; }
+.creatures-table.gob-share td:first-child { color: var(--amber); }
+.creatures-table.gob-share td:last-child, .creatures-table.gob-share th:last-child { min-width: 220px; text-align: left; white-space: normal; }
+.creatures-table.gob-share td:last-child { color: var(--label); font-weight: 400; }
+/* "Fica com": cada skin com a figura ao lado; a sobra que não fecha troca fica apagada */
+.gob-gets { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+.gob-gets .spare { color: var(--faint); }
+.gob-gets .spare .slot { border-style: dashed; }
+.gob-gets .spare .slot img { opacity: .6; }
 .hunt-kills .creatures-table { min-width: 420px; }
 .hunt-kills .creatures-table td:last-child, .hunt-kills .creatures-table th:last-child { min-width: 0; text-align: right; white-space: nowrap; }
 .hunt-kills .creatures-table td:last-child { color: var(--title); }
@@ -1112,6 +1100,7 @@ const I18N = {
     'gob.col.qty': 'Quantidade',
     'gob.col.rate': 'Troca',
     'gob.col.pts': 'Goblets',
+    'gob.col.gets': 'Fica com',
     'gob.left': 'sobram {n}',
     'gob.split': 'Divisão entre os jogadores',
     'gob.splitNote': 'Cada tipo de goblet é dividido para os pontos ficarem o mais iguais possível, sem repartir um conjunto. As sobras, que não fecham uma troca, vão para quem ficou com menos.',
@@ -1534,6 +1523,7 @@ const I18N = {
     'gob.col.qty': 'Count',
     'gob.col.rate': 'Exchange',
     'gob.col.pts': 'Goblets',
+    'gob.col.gets': 'Gets',
     'gob.left': '{n} left over',
     'gob.split': 'Split between the players',
     'gob.splitNote': 'Each goblet type is split so the points come out as even as possible, without breaking up a set. Leftovers, which do not complete an exchange, go to whoever got less.',
@@ -1956,6 +1946,7 @@ const I18N = {
     'gob.col.qty': 'Cantidad',
     'gob.col.rate': 'Cambio',
     'gob.col.pts': 'Goblets',
+    'gob.col.gets': 'Se queda con',
     'gob.left': 'sobran {n}',
     'gob.split': 'Reparto entre los jugadores',
     'gob.splitNote': 'Cada tipo de goblet se reparte para que los puntos queden lo más iguales posible, sin dividir un conjunto. Las sobras, que no completan un cambio, van a quien recibió menos.',
@@ -2378,6 +2369,7 @@ const I18N = {
     'gob.col.qty': 'Liczba',
     'gob.col.rate': 'Wymiana',
     'gob.col.pts': 'Goblety',
+    'gob.col.gets': 'Dostaje',
     'gob.left': 'zostaje {n}',
     'gob.split': 'Podział między graczy',
     'gob.splitNote': 'Każdy rodzaj gobletu jest dzielony tak, aby punkty wyszły jak najbardziej równo, bez rozbijania zestawu. Resztki, które nie dają wymiany, trafiają do tego, kto dostał mniej.',
@@ -5200,13 +5192,11 @@ const ITEM_IMG = { cursed: 'img/goblet-cursed.gif', malevolent: 'img/goblet-male
   silver: 'img/token-silver.png', golden: 'img/token-golden.png', crystal: 'img/token-crystal.png' };
 const itemSlug = name => name.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-');
 const skinImg = name => 'img/skins/' + itemSlug(name) + '.' + (ITEM_EXT.get(name) || 'webp');
-// Um item na tela: a figura numa casa como a da mochila do jogo, com a quantidade no canto quando passa de 1.
-// "bare" tira a moldura (tokens ao lado do nome); "goblet" usa o fundo cinza que a figura do goblet já traz.
-// Se a figura faltar, a casa fica vazia.
-function itemSlot(src, n, cls) {
+// A figura de um item. As skins vão numa casa como a da mochila do jogo; "bare" tira a moldura (tokens) e "goblet"
+// é para os goblets, que já trazem um fundo cinza na figura. Se a figura faltar, o espaço fica vazio.
+function itemSlot(src, cls) {
   return el('span', { class: 'slot' + (cls ? ' ' + cls : '') },
-    el('img', { src, alt: '', loading: 'lazy', decoding: 'async', onerror: e => e.currentTarget.remove() }),
-    n > 1 ? el('b', { text: fmtInt(n) }) : null);
+    el('img', { src, alt: '', loading: 'lazy', decoding: 'async', onerror: e => e.currentTarget.remove() }));
 }
 const skinText = it => it.n + '× ' + it.name + (it.partial ? ' (' + tr('gob.partial') + ')' : '');
 function huntSkins(s) {
@@ -5214,7 +5204,7 @@ function huntSkins(s) {
   if (!found.length) return null;
   const types = Object.keys(GOBLET_TYPES).filter(t => found.some(f => f.type === t));
   const total = t => found.reduce((a, f) => a + (f.type === t ? f.sets * f.gives : 0), 0);
-  const goblet = t => itemSlot(ITEM_IMG[t], null, 'goblet');
+  const goblet = t => { const g = itemSlot(ITEM_IMG[t], 'goblet'); g.title = GOBLET_TYPES[t]; return g; };
   const players = s.players.map(p => p.name);
   const share = players.length > 1 ? splitSkins(found, players) : null;
   const text = share && [tr('gob.title') + ' · ' + huntWhen(s),
@@ -5222,31 +5212,26 @@ function huntSkins(s) {
   return el('div', { class: 'hunt-skins' }, [
     el('h3', { text: tr('gob.title') }),
     el('p', { class: 'hunt-note', text: tr('gob.note') }),
-    // Um grupo de linhas por tipo de goblet: o goblet e o total do tipo abrem o grupo, as skins vêm embaixo.
+    el('p', { class: 'gob-totals' }, types.map(t => el('span', {}, goblet(t), GOBLET_TYPES[t] + ': ', el('b', { text: fmtInt(total(t)) })))),
+    // A skin ao lado do nome; o goblet que ela rende vai na coluna da troca.
     el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table gob-table' },
       el('thead', {}, el('tr', {}, ['skin', 'qty', 'rate', 'pts'].map(k => el('th', { scope: 'col', text: tr('gob.col.' + k) })))),
-      types.map(t => el('tbody', {},
-        el('tr', { class: 'gob-group' },
-          el('th', { scope: 'rowgroup', colSpan: 3 }, el('span', { class: 'gob-item' }, goblet(t), GOBLET_TYPES[t])),
-          el('td', { text: fmtInt(total(t)) })),
-        found.filter(f => f.type === t).map(f => el('tr', {},
-          el('td', {}, el('span', { class: 'gob-item' }, itemSlot(skinImg(f.name)), f.name)),
-          el('td', { text: fmtInt(f.count) + (f.left ? ' (' + tr('gob.left', { n: f.left }) + ')' : '') }),
-          el('td', { text: f.need + ' → ' + f.gives }),
-          el('td', { class: f.sets ? null : 'none', text: fmtInt(f.sets * f.gives) }))))))),
+      el('tbody', {}, found.map(f => el('tr', {},
+        el('td', {}, el('span', { class: 'gob-item' }, itemSlot(skinImg(f.name)), f.name)),
+        el('td', { text: fmtInt(f.count) + (f.left ? ' (' + tr('gob.left', { n: f.left }) + ')' : '') }),
+        el('td', {}, el('span', { class: 'gob-item' }, f.need + ' → ' + f.gives, goblet(f.type))),
+        el('td', { class: f.sets ? null : 'none', text: fmtInt(f.sets * f.gives) })))))),
     ...(share ? [   // espalhado: uma lista dentro da lista viraria texto
       el('h3', { text: tr('gob.split') }),
       el('p', { class: 'hunt-note', text: tr('gob.splitNote') }),
-      // Um cartão por jogador: os goblets que as skins dele rendem e as skins que ele leva, com a quantidade na casa.
-      el('div', { class: 'gob-cards', 'data-n': share.length }, share.map(p => el('section', { class: 'gob-card' },
-        el('div', { class: 'gob-card-head' },
-          el('h4', { text: p.name }),
-          el('p', { class: 'gob-tally' }, types.map(t => el('span', { class: p.pts[t] ? null : 'none', title: GOBLET_TYPES[t] }, goblet(t), el('b', { text: fmtInt(p.pts[t]) }))))),
-        p.items.size
-          ? el('ul', { class: 'gob-items' }, [...p.items.values()].map(it => el('li', { class: it.partial ? 'spare' : null },
-            itemSlot(skinImg(it.name), it.n),
-            el('span', {}, it.name, it.partial ? el('small', { text: tr('gob.partial') }) : null))))
-          : el('p', { class: 'hunt-note', text: '–' })))),
+      el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table gob-table gob-share' },
+        el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: tr('hunt.player') }), types.map(t => el('th', { scope: 'col' }, el('span', { class: 'gob-item' }, goblet(t), GOBLET_TYPES[t].split(' ')[0]))), el('th', { scope: 'col', text: tr('gob.col.gets') }))),
+        el('tbody', {}, share.map(p => el('tr', {},
+          el('td', { text: p.name }),
+          types.map(t => el('td', { class: p.pts[t] ? null : 'none', text: fmtInt(p.pts[t]) })),
+          el('td', {}, p.items.size
+            ? el('span', { class: 'gob-gets' }, [...p.items.values()].map(it => el('span', { class: it.partial ? 'gob-item spare' : 'gob-item' }, itemSlot(skinImg(it.name)), skinText(it))))
+            : '–')))))),
       el('div', { class: 'hunt-foot' }, el('button', { class: 'dlg', type: 'button', id: 'gob-copy', text: tr('gob.copy'),
         onclick: async e => { const b = e.currentTarget, ok = await copyText(text); setText(b, tr(ok ? 'gob.copied' : 'hunt.copyFail')); setTimeout(() => setText(b, tr('gob.copy')), 1600); } })),
     ] : []),
@@ -5282,7 +5267,7 @@ function huntTokens(s) {
       share ? el('button', { class: 'hunt-link', type: 'button', id: 'tok-copy', text: tr('gob.copy'),
         onclick: async e => { const b = e.currentTarget, ok = await copyText(text); setText(b, tr(ok ? 'gob.copied' : 'hunt.copyFail')); setTimeout(() => setText(b, tr('gob.copy')), 1600); } }) : null),
     ...types.map(([id, name]) => el('p', { class: 'tok-line' },   // espalhado: uma lista dentro da lista viraria texto
-      el('span', { class: 'tok-name' }, itemSlot(ITEM_IMG[id], null, 'bare'), name + ': ', el('b', { text: fmtInt(count[id]) })),
+      el('span', { class: 'tok-name' }, itemSlot(ITEM_IMG[id], 'bare'), name + ': ', el('b', { text: fmtInt(count[id]) })),
       share ? share.map(p => el('span', {}, p.name + ' ', el('b', { text: fmtInt(p.n[id]) }))) : null)),
   ]);
 }
@@ -5417,11 +5402,11 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
-  { at: '2026-10-11 03:14',
-    pt: ['Analisador de hunt: as skins, os goblets e os elite tokens aparecem com a figura do jogo.', 'A divisão das skins virou um cartão por jogador, com os goblets que ele recebe e as skins que leva.'],
-    en: ['Hunt analyzer: skins, goblets and elite tokens are shown with their in-game picture.', 'The skin split is now one card per player, with the goblets each one gets and the skins to take.'],
-    es: ['Analizador de hunt: las skins, los goblets y los elite tokens aparecen con la figura del juego.', 'El reparto de las skins ahora es una tarjeta por jugador, con los goblets que recibe y las skins que se lleva.'],
-    pl: ['Analizator polowań: skiny, goblety i elite tokeny są pokazane z obrazkiem z gry.', 'Podział skinów to teraz jedna karta na gracza, z gobletami, które dostaje, i skinami, które zabiera.'],
+  { at: '2026-10-11 03:55',
+    pt: ['Analisador de hunt: as skins, os goblets e os elite tokens aparecem com a figura do jogo.'],
+    en: ['Hunt analyzer: skins, goblets and elite tokens are shown with their in-game picture.'],
+    es: ['Analizador de hunt: las skins, los goblets y los elite tokens aparecen con la figura del juego.'],
+    pl: ['Analizator polowań: skiny, goblety i elite tokeny są pokazane z obrazkiem z gry.'],
   },
   { at: '2026-10-11 01:56',
     pt: ['O painel "Última hunt" passou a se chamar "Hunts".'],
