@@ -297,7 +297,7 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .clock-who { font-weight: 600; color: var(--amber); overflow-wrap: anywhere; }
 .clock-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: auto; padding-top: 10px; }
 /* Acerto de 10 segundos, para quem iniciou o cronômetro atrasado ou adiantado */
-.clock-nudge { display: flex; flex: 1 0 100%; justify-content: center; gap: 8px; }
+.clock-nudge { display: flex; flex: 1 0 100%; flex-wrap: wrap; justify-content: center; gap: 6px; }
 .dlg.nudge { padding: 5px 12px; background: none; color: var(--label); font-size: 13px; font-variant-numeric: lining-nums tabular-nums; }
 .dlg.nudge:disabled { opacity: 0.45; pointer-events: none; }
 .clock-float { margin-top: 8px; font-size: 13px; color: var(--label); }
@@ -1150,18 +1150,18 @@ const I18N = {
     'voice.h.restartD': 'Recomeça a contagem, de todos ou só daquele',
     'voice.h.reset': '"zerar" · "zerar um"',
     'voice.h.resetD': 'Zera todos ou só aquele',
-    'voice.h.more': '"mais dez" · "mais dez um"',
-    'voice.h.moreD': 'Soma 10 segundos nos que estão contando, ou só naquele',
-    'voice.h.less': '"menos dez" · "menos dez um"',
-    'voice.h.lessD': 'Tira 10 segundos dos que estão contando, ou só daquele',
+    'voice.h.more': '"mais dois" · "mais cinco" · "mais dez" · "mais trinta"',
+    'voice.h.moreD': 'Soma 2, 5, 10 ou 30 segundos nos que estão contando; com o número ("mais cinco um"), só naquele',
+    'voice.h.less': '"menos dois" · "menos cinco" · "menos dez" · "menos trinta"',
+    'voice.h.lessD': 'Tira 2, 5, 10 ou 30 segundos dos que estão contando; com o número ("menos cinco um"), só daquele',
     'voice.h.tip': 'Fale só o comando, sem outras palavras; dá para emendar dois ("iniciar mais dez"). O número é o que aparece no canto de cada cronômetro com a voz ligada. Com a janela flutuante aberta, o comando sem número vale só para os cronômetros que estão nela; com "todos" ("iniciar todos") vale para todos. Deixe a voz ligada em uma aba só.',
-    'voice.did.more': 'Voz: 10 segundos somados.',
-    'voice.did.moreOne': 'Voz: 10 segundos somados no cronômetro {n}.',
-    'voice.did.less': 'Voz: 10 segundos tirados.',
-    'voice.did.lessOne': 'Voz: 10 segundos tirados do cronômetro {n}.',
+    'voice.did.more': 'Voz: {s} segundos somados.',
+    'voice.did.moreOne': 'Voz: {s} segundos somados no cronômetro {n}.',
+    'voice.did.less': 'Voz: {s} segundos tirados.',
+    'voice.did.lessOne': 'Voz: {s} segundos tirados do cronômetro {n}.',
     'voice.noRun': 'Voz: nenhum cronômetro contando para acertar.',
-    'nudge.less': 'Tirar 10 segundos do cronômetro',
-    'nudge.more': 'Somar 10 segundos ao cronômetro',
+    'nudge.less': 'Tirar {s} segundos do cronômetro',
+    'nudge.more': 'Somar {s} segundos ao cronômetro',
     'voice.nomic': 'Nenhum microfone encontrado. Ligue um microfone e marque o comando de voz de novo.',
     'voice.network': 'Voz: o serviço de reconhecimento do navegador não respondeu. Só funciona no Chrome e no Edge, com internet.',
     'voice.label': 'Ativar comando de voz',
@@ -1557,18 +1557,18 @@ const I18N = {
     'voice.h.restartD': 'Starts the count again, for all or just that one',
     'voice.h.reset': '"reset" · "reset one"',
     'voice.h.resetD': 'Resets all or just that one',
-    'voice.h.more': '"plus ten" · "plus ten one"',
-    'voice.h.moreD': 'Adds 10 seconds to the running timers, or just that one',
-    'voice.h.less': '"minus ten" · "minus ten one"',
-    'voice.h.lessD': 'Takes 10 seconds off the running timers, or just that one',
+    'voice.h.more': '"plus two" · "plus five" · "plus ten" · "plus thirty"',
+    'voice.h.moreD': 'Adds 2, 5, 10 or 30 seconds to the running timers; with the number ("plus five one"), just that one',
+    'voice.h.less': '"minus two" · "minus five" · "minus ten" · "minus thirty"',
+    'voice.h.lessD': 'Takes 2, 5, 10 or 30 seconds off the running timers; with the number ("minus five one"), just that one',
     'voice.h.tip': 'Say only the command, nothing else; two can be chained ("start plus ten"). The number is the one shown on the corner of each timer while voice is on. With the floating window open, a command without a number applies only to the timers shown in it; with "all" ("start all") it applies to every timer. Keep voice on in one tab only.',
-    'voice.did.more': 'Voice: 10 seconds added.',
-    'voice.did.moreOne': 'Voice: 10 seconds added to timer {n}.',
-    'voice.did.less': 'Voice: 10 seconds taken off.',
-    'voice.did.lessOne': 'Voice: 10 seconds taken off timer {n}.',
+    'voice.did.more': 'Voice: {s} seconds added.',
+    'voice.did.moreOne': 'Voice: {s} seconds added to timer {n}.',
+    'voice.did.less': 'Voice: {s} seconds taken off.',
+    'voice.did.lessOne': 'Voice: {s} seconds taken off timer {n}.',
     'voice.noRun': 'Voice: no timer is running to adjust.',
-    'nudge.less': 'Take 10 seconds off the timer',
-    'nudge.more': 'Add 10 seconds to the timer',
+    'nudge.less': 'Take {s} seconds off the timer',
+    'nudge.more': 'Add {s} seconds to the timer',
     'voice.nomic': 'No microphone found. Connect a microphone and turn voice command on again.',
     'voice.network': 'Voice: the browser\'s recognition service did not answer. It only works in Chrome and Edge, with an internet connection.',
     'voice.label': 'Turn on voice command',
@@ -1964,18 +1964,18 @@ const I18N = {
     'voice.h.restartD': 'Vuelve a empezar la cuenta, de todos o solo de ese',
     'voice.h.reset': '"restablecer" · "restablecer uno"',
     'voice.h.resetD': 'Restablece todos o solo ese',
-    'voice.h.more': '"más diez" · "más diez uno"',
-    'voice.h.moreD': 'Suma 10 segundos a los que están contando, o solo a ese',
-    'voice.h.less': '"menos diez" · "menos diez uno"',
-    'voice.h.lessD': 'Quita 10 segundos a los que están contando, o solo a ese',
+    'voice.h.more': '"más dos" · "más cinco" · "más diez" · "más treinta"',
+    'voice.h.moreD': 'Suma 2, 5, 10 o 30 segundos a los que están contando; con el número ("más cinco uno"), solo a ese',
+    'voice.h.less': '"menos dos" · "menos cinco" · "menos diez" · "menos treinta"',
+    'voice.h.lessD': 'Quita 2, 5, 10 o 30 segundos a los que están contando; con el número ("menos cinco uno"), solo a ese',
     'voice.h.tip': 'Di solo el comando, sin otras palabras; se pueden encadenar dos ("iniciar más diez"). El número es el que aparece en la esquina de cada cronómetro con la voz activada. Con la ventana flotante abierta, el comando sin número vale solo para los cronómetros que están en ella; con "todos" ("iniciar todos") vale para todos. Deja la voz activada en una sola pestaña.',
-    'voice.did.more': 'Voz: 10 segundos sumados.',
-    'voice.did.moreOne': 'Voz: 10 segundos sumados al cronómetro {n}.',
-    'voice.did.less': 'Voz: 10 segundos quitados.',
-    'voice.did.lessOne': 'Voz: 10 segundos quitados al cronómetro {n}.',
+    'voice.did.more': 'Voz: {s} segundos sumados.',
+    'voice.did.moreOne': 'Voz: {s} segundos sumados al cronómetro {n}.',
+    'voice.did.less': 'Voz: {s} segundos quitados.',
+    'voice.did.lessOne': 'Voz: {s} segundos quitados al cronómetro {n}.',
     'voice.noRun': 'Voz: ningún cronómetro está contando para ajustar.',
-    'nudge.less': 'Quitar 10 segundos al cronómetro',
-    'nudge.more': 'Añadir 10 segundos al cronómetro',
+    'nudge.less': 'Quitar {s} segundos al cronómetro',
+    'nudge.more': 'Añadir {s} segundos al cronómetro',
     'voice.nomic': 'No se encontró ningún micrófono. Conecta un micrófono y activa de nuevo el comando de voz.',
     'voice.network': 'Voz: el servicio de reconocimiento del navegador no respondió. Solo funciona en Chrome y Edge, con internet.',
     'voice.label': 'Activar comando de voz',
@@ -2371,18 +2371,18 @@ const I18N = {
     'voice.h.restartD': 'Zaczyna odliczanie od nowa, dla wszystkich lub tylko tego',
     'voice.h.reset': '„zeruj” · „zeruj jeden”',
     'voice.h.resetD': 'Zeruje wszystkie lub tylko ten',
-    'voice.h.more': '„plus dziesięć” · „plus dziesięć jeden”',
-    'voice.h.moreD': 'Dodaje 10 sekund do odliczających liczników lub tylko do tego',
-    'voice.h.less': '„minus dziesięć” · „minus dziesięć jeden”',
-    'voice.h.lessD': 'Odejmuje 10 sekund od odliczających liczników lub tylko od tego',
+    'voice.h.more': '„plus dwa” · „plus pięć” · „plus dziesięć” · „plus trzydzieści”',
+    'voice.h.moreD': 'Dodaje 2, 5, 10 lub 30 sekund do odliczających liczników; z numerem („plus pięć jeden”) tylko do tego',
+    'voice.h.less': '„minus dwa” · „minus pięć” · „minus dziesięć” · „minus trzydzieści”',
+    'voice.h.lessD': 'Odejmuje 2, 5, 10 lub 30 sekund od odliczających liczników; z numerem („minus pięć jeden”) tylko od tego',
     'voice.h.tip': 'Powiedz samo polecenie, bez innych słów; można połączyć dwa („start plus dziesięć”). Numer to ten widoczny w rogu każdego licznika, gdy głos jest włączony. Gdy pływające okno jest otwarte, polecenie bez numeru dotyczy tylko liczników, które w nim są; z „wszystkie” („start wszystkie”) dotyczy wszystkich. Włącz głos tylko w jednej karcie.',
-    'voice.did.more': 'Głos: dodano 10 sekund.',
-    'voice.did.moreOne': 'Głos: dodano 10 sekund do licznika {n}.',
-    'voice.did.less': 'Głos: odjęto 10 sekund.',
-    'voice.did.lessOne': 'Głos: odjęto 10 sekund od licznika {n}.',
+    'voice.did.more': 'Głos: dodano {s} s.',
+    'voice.did.moreOne': 'Głos: dodano {s} s do licznika {n}.',
+    'voice.did.less': 'Głos: odjęto {s} s.',
+    'voice.did.lessOne': 'Głos: odjęto {s} s od licznika {n}.',
     'voice.noRun': 'Głos: żaden licznik nie odlicza.',
-    'nudge.less': 'Odejmij 10 sekund od licznika',
-    'nudge.more': 'Dodaj 10 sekund do licznika',
+    'nudge.less': 'Odejmij {s} sekund od licznika',
+    'nudge.more': 'Dodaj {s} sekund do licznika',
     'voice.nomic': 'Nie znaleziono mikrofonu. Podłącz mikrofon i włącz polecenia głosowe ponownie.',
     'voice.network': 'Głos: usługa rozpoznawania mowy przeglądarki nie odpowiedziała. Działa tylko w Chrome i Edge, z internetem.',
     'voice.label': 'Włącz polecenia głosowe',
@@ -4015,8 +4015,8 @@ function paintFloat(now) {
         const btn = el('button', { type: 'button', onclick: () => startTimer(g.key) });
         const zero = el('button', { class: 'zero', type: 'button', text: tr('reset'), onclick: () => resetTimer(g.key) });
         const who = el('span', { title: g.who });
-        const nudges = [-10, 10].map(n => el('button', { type: 'button', text: (n < 0 ? '−' : '+') + '10', title: tr(n < 0 ? 'nudge.less' : 'nudge.more'),
-          'aria-label': tr(n < 0 ? 'nudge.less' : 'nudge.more'), onclick: () => nudgeTimer(g.key, n) }));
+        const nudges = [-10, -5, 5, 10].map(n => el('button', { type: 'button', text: (n < 0 ? '−' : '+') + Math.abs(n), title: tr(n < 0 ? 'nudge.less' : 'nudge.more', { s: Math.abs(n) }),
+          'aria-label': tr(n < 0 ? 'nudge.less' : 'nudge.more', { s: Math.abs(n) }), onclick: () => nudgeTimer(g.key, n) }));
         const root = el('div', { class: 'f-row' }, el('div', { class: 'f-main' }, b, who),
           el('div', { class: 'f-btns' }, btn, zero, el('div', { class: 'f-nudge' }, nudges)));
         float.rowEls.set(g.key, { root, b, btn, zero, who, nudges });
@@ -4077,7 +4077,7 @@ async function toggleFloat() {
           'button:hover{border-color:var(--teal)}' +
           '.f-btns{display:flex;flex:none;flex-direction:column;gap:4px}' +
           'button.zero{border-color:var(--edge);color:var(--label)}' +
-          '.f-nudge{display:flex;gap:4px}.f-nudge button{flex:1;padding:3px 0 2px;border-color:var(--edge);color:var(--label);font-size:12px}' +
+          '.f-nudge{display:flex;gap:3px}.f-nudge button{flex:1;min-width:27px;padding:3px 0 2px;border-color:var(--edge);color:var(--label);font-size:12px}' +
           'button:disabled{opacity:.45;pointer-events:none}' +
           'button.all{margin-top:10px;width:100%}button.all+button.all{margin-top:6px}' +
           'p.voice{margin:8px 0 0;font-size:12px;color:var(--label)}' }));
@@ -4469,8 +4469,10 @@ function renderSheet() {
       el('button', { type: 'button', id: 'lap-more-' + tag, text: '+', 'aria-label': tr('lap.more'), title: tr('lap.more'),
         onclick: () => lapsSet(rid, base, lapsGet(rid, base) + 1) }),
       el('button', { class: 'hunt-link', type: 'button', id: 'lap-zero-' + tag, text: tr('lap.reset'), onclick: () => lapsSet(rid, base, 0) }));
-    const nudges = [-10, 10].map(n => el('button', { class: 'dlg nudge', type: 'button', id: (n < 0 ? 'nudge-less-' : 'nudge-more-') + tag, disabled: true,
-      text: (n < 0 ? '−' : '+') + '10 s', title: tr(n < 0 ? 'nudge.less' : 'nudge.more'), 'aria-label': tr(n < 0 ? 'nudge.less' : 'nudge.more'), onclick: () => nudgeTimer(key, n) }));
+    const nudges = [-10, -5, 5, 10].map(n => el('button', {
+      class: 'dlg nudge', type: 'button', id: (n < 0 ? 'nudge-less' : 'nudge-more') + (Math.abs(n) === 10 ? '' : Math.abs(n)) + '-' + tag, disabled: true,
+      text: (n < 0 ? '−' : '+') + Math.abs(n) + ' s', title: tr(n < 0 ? 'nudge.less' : 'nudge.more', { s: Math.abs(n) }),
+      'aria-label': tr(n < 0 ? 'nudge.less' : 'nudge.more', { s: Math.abs(n) }), onclick: () => nudgeTimer(key, n) }));
     const root = el('article', { class: ui.unit === 'm' ? 'clock mmss' : 'clock', 'data-state': 'idle' },
       ring,
       note,
@@ -5158,6 +5160,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 00:41',
+    pt: ['Comando de voz: além de dez, agora dá para somar ou tirar dois, cinco e trinta segundos ("mais cinco", "menos trinta").', 'Botões −5 s e +5 s nos cronômetros e na janela flutuante.'],
+    en: ['Voice command: besides ten, you can now add or take off two, five and thirty seconds ("plus five", "minus thirty").', '−5 s and +5 s buttons on the timers and in the floating window.'],
+    es: ['Comando de voz: además de diez, ahora se pueden sumar o quitar dos, cinco y treinta segundos ("más cinco", "menos treinta").', 'Botones −5 s y +5 s en los cronómetros y en la ventana flotante.'],
+    pl: ['Polecenia głosowe: oprócz dziesięciu można teraz dodać lub odjąć dwie, pięć i trzydzieści sekund („plus pięć”, „minus trzydzieści”).', 'Przyciski −5 s i +5 s przy licznikach i w pływającym oknie.'],
+  },
   { at: '2026-10-11 00:34',
     pt: ['Correção: a página não se desloca mais para o lado ao trocar de ferramenta no menu.'],
     en: ['Fix: the page no longer shifts sideways when switching tools in the menu.'],
@@ -6347,19 +6355,19 @@ optTone.addEventListener('change', () => {
    O navegador só entrega a frase pronta perto de um segundo depois; por isso o cronômetro conta de quando a fala começou. */
 const VOICE = {
   pt: { lang: 'pt-BR', start: ['iniciar', 'inicia', 'inicie', 'reiniciar', 'reinicia', 'reinicie'], reset: ['zerar', 'zera', 'zere'],
-    more: ['mais', 'mas'], less: ['menos'], ten: ['dez', '10'], all: ['todos', 'tudo'],
+    more: ['mais', 'mas'], less: ['menos'], amounts: [[2, ['dois', 'duas', '2']], [5, ['cinco', '5']], [10, ['dez', '10']], [30, ['trinta', '30']]], all: ['todos', 'tudo'],
     skip: ['o', 'os', 'no', 'do', 'ao', 'cronometro', 'cronometros', 'timer', 'numero', 'segundos'],
     nums: [['um', 'uma', 'hum'], ['dois', 'duas'], ['tres'], ['quatro'], ['cinco'], ['seis']] },
   en: { lang: 'en-US', start: ['start', 'restart'], reset: ['reset'],
-    more: ['plus', 'add'], less: ['minus', 'less'], ten: ['ten', '10'], all: ['all', 'everything'],
+    more: ['plus', 'add'], less: ['minus', 'less'], amounts: [[2, ['two', '2']], [5, ['five', '5']], [10, ['ten', '10']], [30, ['thirty', '30']]], all: ['all', 'everything'],
     skip: ['the', 'timer', 'timers', 'number', 'seconds', 'on'],
     nums: [['one', 'won'], ['two', 'too', 'to'], ['three'], ['four', 'for'], ['five'], ['six']] },
   es: { lang: 'es-ES', start: ['iniciar', 'inicia', 'inicie', 'reiniciar', 'reinicia', 'reinicie'], reset: ['restablecer', 'restablece'],
-    more: ['mas'], less: ['menos'], ten: ['diez', '10'], all: ['todos', 'todo'],
+    more: ['mas'], less: ['menos'], amounts: [[2, ['dos', '2']], [5, ['cinco', '5']], [10, ['diez', '10']], [30, ['treinta', '30']]], all: ['todos', 'todo'],
     skip: ['el', 'los', 'al', 'en', 'cronometro', 'cronometros', 'numero', 'segundos'],
     nums: [['uno', 'un', 'una'], ['dos'], ['tres'], ['cuatro'], ['cinco'], ['seis']] },
   pl: { lang: 'pl-PL', start: ['start', 'startuj', 'restart'], reset: ['zeruj', 'wyzeruj'],
-    more: ['plus', 'dodaj'], less: ['minus', 'odejmij'], ten: ['dziesiec', '10'], all: ['wszystkie', 'wszystko', 'wszystkich'],
+    more: ['plus', 'dodaj'], less: ['minus', 'odejmij'], amounts: [[2, ['dwa', 'dwie', '2']], [5, ['piec', '5']], [10, ['dziesiec', '10']], [30, ['trzydziesci', '30']]], all: ['wszystkie', 'wszystko', 'wszystkich'],
     skip: ['licznik', 'liczniki', 'numer', 'sekund', 'na', 'do'], fix: [['od nowa', 'restart']],
     nums: [['jeden', 'raz'], ['dwa'], ['trzy'], ['cztery'], ['piec'], ['szesc']] },
 };
@@ -6381,10 +6389,12 @@ function voiceParse(text) {
     const c = { cmd: v.start.includes(toks[i]) ? 'start' : v.reset.includes(toks[i]) ? 'reset' : null, n: 0, all: false };
     let next = i + 1;
     if (!c.cmd && (v.more.includes(toks[i]) || v.less.includes(toks[i]))) {
-      // "mais dez" e "menos dez". O número do cronômetro pode vir colado: "mais 102" é "mais dez dois".
-      const glued = /^10([1-9])$/.exec(toks[next] || '');
-      if (glued) c.n = +glued[1];
-      else if (!v.ten.includes(toks[next])) return null;
+      // "mais dez", "menos cinco"... Só valem 2, 5, 10 e 30 segundos: com poucos valores não há confusão quando o
+      // navegador cola o número do cronômetro no dos segundos ("mais 102" é "mais dez dois"; "mais 51" é "mais cinco um").
+      const tok = toks[next] || '', word = v.amounts.find(a => a[1].includes(tok)), glued = /^(30|10|5|2)([1-9])$/.exec(tok);
+      if (word) c.sec = word[0];
+      else if (glued) { c.sec = +glued[1]; c.n = +glued[2]; }
+      else return null;
       c.cmd = v.more.includes(toks[i]) ? 'more' : 'less';
       next++;
     }
@@ -6408,11 +6418,11 @@ function voiceDo(c, keys, at) {
     // O acerto só vale para cronômetro que está contando (ou na pausa entre voltas).
     const live = picked.filter(key => { const t = timers.get(key); return t.endAt != null || t.pauseUntil != null; });
     if (!live.length) return ['err', tr('voice.noRun')];
-    for (const key of live) nudgeTimer(key, c.cmd === 'more' ? 10 : -10);
+    for (const key of live) nudgeTimer(key, c.cmd === 'more' ? c.sec : -c.sec);
   } else {
     for (const key of picked) { if (c.cmd === 'start') startTimer(key, at); else resetTimer(key); }
   }
-  return ['ok', tr('voice.did.' + c.cmd + (c.n ? 'One' : ''), { n: c.n })];
+  return ['ok', tr('voice.did.' + c.cmd + (c.n ? 'One' : ''), { n: c.n, s: c.sec })];
 }
 function voiceRun(cmds, at) {
   const keys = groupsAll().map(g => g.key);
