@@ -164,7 +164,7 @@ dialog#creature-dlg { width: min(880px, calc(100vw - 32px)); scrollbar-width: th
 .creature-tiers .tier-legendary::before { background: var(--amber); }
 .creature-tiers button.empty { color: var(--faint); }
 .creature-tiers button.empty[aria-pressed="true"] { color: var(--ground); }
-.creature-alias { font-size: 14px; color: var(--label); }
+.creature-legend { font-size: 0.72em; font-weight: 600; color: var(--label); }
 .creature-need { max-width: 70ch; padding: 10px 14px; border-left: 3px solid var(--amber); border-radius: 0 var(--r-sm) var(--r-sm) 0; background: var(--card); font-size: 14px; color: var(--title); }
 /* Em cima o que interessa para a caça (XP, HP e a relação entre os dois); embaixo os atributos de combate */
 .creature-stats { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; }
@@ -5151,6 +5151,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 00:26',
+    pt: ['Criaturas: na aba Lendário, o nome que a criatura tem no jogo aparece entre parênteses ao lado do nome dela.'],
+    en: ['Creatures: on the Legendary tab, the name the creature has in the game is shown in brackets next to its name.'],
+    es: ['Criaturas: en la pestaña Legendario, el nombre que la criatura tiene en el juego aparece entre paréntesis junto a su nombre.'],
+    pl: ['Stworzenia: na zakładce Legendarny nazwa stworzenia w grze jest podana w nawiasie obok jego nazwy.'],
+  },
   { at: '2026-10-11 00:17',
     pt: ['Criaturas: a ficha ganhou as abas Normal, Comum, Raro e Lendário. O print do bestiário de qualquer aba é guardado na raridade certa.', 'A conta de XP do respawn continua usando só a raridade Normal.'],
     en: ['Creatures: the sheet now has the Normal, Common, Rare and Legendary tabs. A bestiary screenshot of any tab is saved under the right rarity.', 'The respawn XP estimate still uses the Normal rarity only.'],
@@ -5540,10 +5546,10 @@ function renderCreature() {
   const open = id => { showCreature(null); select(id); goTo('timer'); };
   const need = tier !== 'normal' ? (v.exp == null ? (tier === 'legendary' ? 'creature.needLegend' : 'creature.needTier') : null)
     : c.exp == null ? 'creature.needXp' : c.hp == null ? 'creature.needStats' : null;
-  setText($('#creature-title'), c.name);
+  // Na aba Lendário o título leva, entre parênteses, o nome que a criatura tem no jogo nessa raridade.
+  $('#creature-title').replaceChildren(...[c.name, tier === 'legendary' && v.name ? el('span', { class: 'creature-legend', text: ' (' + v.name + ')' }) : null].filter(Boolean));
   $('#creature-sheet').replaceChildren(...[   // o aviso só existe quando falta dado: sem o filtro, o vazio viraria texto
     tabs,
-    tier === 'legendary' && v.name ? el('p', { class: 'creature-alias', text: tr('creature.legendName', { x: v.name }) }) : null,
     need ? el('p', { class: 'creature-need', text: tr(need, { t: tierName }) }) : null,
     el('div', { class: 'creature-stats' },
       stat('xp', num(v.exp), 'main xp'), stat('hp', num(v.hp), 'main'),
