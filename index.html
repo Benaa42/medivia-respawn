@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" href="favicon.png" sizes="48x48" type="image/png"><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" href="favicon.png?v=2" sizes="48x48" type="image/png"><link rel="icon" href="favicon.svg?v=2" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png?v=2"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
 <title>Medivia Respawn</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -614,7 +614,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       <p data-i18n="tagline">Cronômetro de respawn para as suas caçadas no Medivia, com o grupo e o bônus já calculados.</p>
       <p class="nav-links"><a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a></p>
     </div>
-    <a class="maker" href="https://github.com/Benaa42" target="_blank" rel="noopener"><img src="vibeforge.svg" width="252" height="72" alt="Vibeforge, produzido por Bena" data-i18n-attr="alt:maker.alt"></a>
+    <a class="maker" href="https://github.com/Benaa42" target="_blank" rel="noopener"><img src="vibeforge.svg?v=2" width="288" height="72" alt="Vibeforge" data-i18n-attr="alt:maker.alt"></a>
   </header>
 
   <div class="toolbar">
@@ -917,7 +917,7 @@ const I18N = {
     'html.lang': 'pt-BR',
     'tagline': 'Cronômetro de respawn para as suas caçadas no Medivia, com o grupo e o bônus já calculados.',
     'mapper': 'Mapper da wiki',
-    'maker.alt': 'Vibeforge, produzido por Bena',
+    'maker.alt': 'Vibeforge',
     'lang.label': 'Idioma',
     'paste.a': 'Com o print da janela de bônus copiado, aperte',
     'paste.b': 'em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.',
@@ -1307,7 +1307,7 @@ const I18N = {
     'html.lang': 'en',
     'tagline': 'Respawn timer for your Medivia hunts, with party size and bonus already worked out.',
     'mapper': 'Wiki mapper',
-    'maker.alt': 'Vibeforge, produced by Bena',
+    'maker.alt': 'Vibeforge',
     'lang.label': 'Language',
     'paste.a': 'With the bonus window screenshot copied, press',
     'paste.b': 'anywhere on this page. It is read right away, with no need to click anything first.',
@@ -1697,7 +1697,7 @@ const I18N = {
     'html.lang': 'es',
     'tagline': 'Cronómetro de respawn para tus cacerías en Medivia, con el grupo y el bonus ya calculados.',
     'mapper': 'Mapper de la wiki',
-    'maker.alt': 'Vibeforge, producido por Bena',
+    'maker.alt': 'Vibeforge',
     'lang.label': 'Idioma',
     'paste.a': 'Con la captura de la ventana de bonus copiada, pulsa',
     'paste.b': 'en cualquier parte de esta página. Se lee al instante, sin hacer clic en nada antes.',
@@ -2087,7 +2087,7 @@ const I18N = {
     'html.lang': 'pl',
     'tagline': 'Licznik respawnu na twoje polowania w Medivii, z drużyną i bonusem już wliczonymi.',
     'mapper': 'Mapper z wiki',
-    'maker.alt': 'Vibeforge, autor: Bena',
+    'maker.alt': 'Vibeforge',
     'lang.label': 'Język',
     'paste.a': 'Po skopiowaniu zrzutu okna bonusu naciśnij',
     'paste.b': 'w dowolnym miejscu tej strony. Zrzut jest odczytywany od razu, bez klikania czegokolwiek wcześniej.',
@@ -4987,6 +4987,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 22:39',
+    pt: ['Assinatura Vibeforge só com o nome, e o emblema da bigorna centrado no anel; o ícone da aba acompanha.'],
+    en: ['Vibeforge signature with the name only, and the anvil emblem centred in the ring; the tab icon follows.'],
+    es: ['Firma Vibeforge solo con el nombre, y el emblema del yunque centrado en el anillo; el icono de la pestaña lo acompaña.'],
+    pl: ['Podpis Vibeforge z samą nazwą, a emblemat kowadła wyśrodkowany w pierścieniu; ikona karty również.'],
+  },
   { at: '2026-10-10 22:33',
     pt: ['O resumo da última hunt voltou para a página do Cronômetro; o Analisador de hunt continua com a versão completa.', 'O botão Janela flutuante ganhou destaque.', 'Criaturas e Sorteio: a ficha da criatura e o sorteio abrem por cima da página, como janela.'],
     en: ['The last hunt summary is back on the Timer page; the Hunt analyzer keeps the full version.', 'The Floating window button now stands out.', 'Creatures and Raffle: the creature sheet and the raffle open on top of the page, as a window.'],
