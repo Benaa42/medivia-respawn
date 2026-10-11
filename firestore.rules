@@ -49,17 +49,27 @@ service cloud.firestore {
     // - Qualquer pessoa com identidade corrige o XP com um print mais novo; o nome e quem enviou primeiro não mudam.
     // - Só quem enviou primeiro apaga.
     match /creatures/{id} {
-      // Atributo opcional da ficha: inteiro entre zero e o máximo.
-      function stat(d, k, max) {
-        return !(k in d) || (d[k] is int && d[k] >= 0 && d[k] <= max);
+      // Os números da ficha, todos opcionais: XP, HP e Mana de 0 a 100.000.000; SPD, ARM e DEF de 0 a 1.000.000.
+      // Cada número é conferido com uma conta só, porque o Firestore limita quantas verificações uma gravação pode
+      // fazer e uma criatura com as quatro raridades tem 32 números (a versão anterior, com três comparações por
+      // número, estourava o limite a partir de 22). Multiplicar por um recusa o que não é número; o formato só com
+      // dígitos recusa negativo, fração e número grande demais.
+      function nums(d) {
+        return string(d.get('exp', 0) * 1).matches('^([0-9]{1,8}|100000000)$')
+          && string(d.get('hp', 0) * 1).matches('^([0-9]{1,8}|100000000)$')
+          && string(d.get('mana', 0) * 1).matches('^([0-9]{1,8}|100000000)$')
+          && string(d.get('spd', 0) * 1).matches('^([0-9]{1,6}|1000000)$')
+          && string(d.get('armLo', 0) * 1).matches('^([0-9]{1,6}|1000000)$')
+          && string(d.get('armHi', 0) * 1).matches('^([0-9]{1,6}|1000000)$')
+          && string(d.get('defLo', 0) * 1).matches('^([0-9]{1,6}|1000000)$')
+          && string(d.get('defHi', 0) * 1).matches('^([0-9]{1,6}|1000000)$');
       }
       // Os números de uma raridade (Comum, Raro ou Lendário); a Lendária pode ter nome próprio.
       function tier(t) {
         return t is map
           && t.keys().hasOnly(['name', 'exp', 'hp', 'armLo', 'armHi', 'defLo', 'defHi', 'spd', 'mana'])
           && (!('name' in t) || (t.name is string && t.name.size() >= 1 && t.name.size() <= 60))
-          && stat(t, 'exp', 100000000) && stat(t, 'hp', 100000000) && stat(t, 'mana', 100000000) && stat(t, 'spd', 1000000)
-          && stat(t, 'armLo', 1000000) && stat(t, 'armHi', 1000000) && stat(t, 'defLo', 1000000) && stat(t, 'defHi', 1000000);
+          && nums(t);
       }
       function tiers(d) {
         return !('tiers' in d) || (
@@ -72,9 +82,7 @@ service cloud.firestore {
       function shape(d) {
         return d.keys().hasOnly(['name', 'exp', 'hp', 'armLo', 'armHi', 'defLo', 'defHi', 'spd', 'mana', 'tiers', 'owner', 'at'])
           && d.name is string && d.name.size() >= 1 && d.name.size() <= 60
-          && stat(d, 'exp', 100000000) && tiers(d)
-          && stat(d, 'hp', 100000000) && stat(d, 'mana', 100000000) && stat(d, 'spd', 1000000)
-          && stat(d, 'armLo', 1000000) && stat(d, 'armHi', 1000000) && stat(d, 'defLo', 1000000) && stat(d, 'defHi', 1000000)
+          && nums(d) && tiers(d)
           && d.owner is string
           && d.at == request.time;
       }
