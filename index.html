@@ -714,7 +714,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       </footer>
     </aside>
     <aside class="win hunt" id="hunt-side" aria-labelledby="hunt-side-title">
-      <h2 class="win-name" id="hunt-side-title" data-i18n="hunt.title">Última hunt</h2>
+      <h2 class="win-name" id="hunt-side-title" data-i18n="hunt.title">Hunts</h2>
       <div id="hunt-side-body"></div>
       <div class="hunt-foot">
         <button class="dlg" type="button" data-go="raffle" data-i18n="raffle.open">Sortear itens</button>
@@ -767,7 +767,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 
   <section class="page" id="page-hunt" hidden>
     <section class="win hunt" id="hunt" aria-labelledby="hunt-title">
-      <h2 class="win-name" id="hunt-title" data-i18n="hunt.title">Última hunt</h2>
+      <h2 class="win-name" id="hunt-title" data-i18n="hunt.title">Hunts</h2>
       <div id="hunt-body"></div>
       <div class="hunt-foot"><button class="dlg" type="button" id="raffle-btn" data-i18n="raffle.open">Sortear itens</button></div>
       <input class="sr" type="file" id="hunt-file" accept=".txt,text/plain" tabindex="-1" aria-hidden="true">
@@ -1360,7 +1360,7 @@ const I18N = {
     'support.kofi.go': 'Abrir o Ko-fi',
     'support.close': 'Fechar',
     'support.pix.link': 'Abrir o link de pagamento do banco',
-    'hunt.title': 'Última hunt',
+    'hunt.title': 'Hunts',
     'hunt.intro': 'Veja aqui o resumo de cada hunt salva no jogo: quanto cada jogador gastou e quanto recebe.',
     'hunt.connect': 'Conectar hunts.txt',
     'hunt.tip': 'Na janela que abrir, cole este caminho no campo do nome do arquivo:',
@@ -1783,7 +1783,7 @@ const I18N = {
     'support.kofi.go': 'Open Ko-fi',
     'support.close': 'Close',
     'support.pix.link': 'Open the bank payment link',
-    'hunt.title': 'Last hunt',
+    'hunt.title': 'Hunts',
     'hunt.intro': 'See a summary of each hunt you save in the game: how much each player spent and how much each one gets.',
     'hunt.connect': 'Connect hunts.txt',
     'hunt.tip': 'In the dialog that opens, paste this path into the file name field:',
@@ -2206,7 +2206,7 @@ const I18N = {
     'support.kofi.go': 'Abrir Ko-fi',
     'support.close': 'Cerrar',
     'support.pix.link': 'Abrir el enlace de pago del banco',
-    'hunt.title': 'Última cacería',
+    'hunt.title': 'Hunts',
     'hunt.intro': 'Mira aquí el resumen de cada cacería guardada en el juego: cuánto gastó cada jugador y cuánto recibe.',
     'hunt.connect': 'Conectar hunts.txt',
     'hunt.tip': 'En la ventana que se abra, pega esta ruta en el campo del nombre del archivo:',
@@ -2629,7 +2629,7 @@ const I18N = {
     'support.kofi.go': 'Otwórz Ko-fi',
     'support.close': 'Zamknij',
     'support.pix.link': 'Otwórz link do płatności w banku',
-    'hunt.title': 'Ostatnie polowanie',
+    'hunt.title': 'Polowania',
     'hunt.intro': 'Zobacz podsumowanie każdego polowania zapisanego w grze: ile wydał każdy gracz i ile każdy dostaje.',
     'hunt.connect': 'Połącz hunts.txt',
     'hunt.tip': 'W oknie, które się otworzy, wklej tę ścieżkę w polu nazwy pliku:',
@@ -5374,6 +5374,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 01:56',
+    pt: ['O painel "Última hunt" passou a se chamar "Hunts".'],
+    en: ['The "Last hunt" panel is now called "Hunts".'],
+    es: ['El panel "Última hunt" ahora se llama "Hunts".'],
+    pl: ['Panel „Ostatnie polowanie” nazywa się teraz „Polowania”.'],
+  },
   { at: '2026-10-11 01:50',
     pt: ['Analisador de hunt: os elite tokens aparecem antes das skins para goblets.'],
     en: ['Hunt analyzer: the elite tokens now come before the skins for goblets.'],
