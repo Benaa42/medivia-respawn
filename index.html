@@ -644,6 +644,8 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .tok-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
 .tok-line { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 18px; font-size: 14px; color: var(--label); }
 .tok-line b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
+.tok-line small { font-size: 12px; color: var(--faint); font-variant-numeric: lining-nums tabular-nums; }
+.hunt-tokens .hunt-note { max-width: 78ch; }
 .tok-line .tok-name { display: inline-flex; align-items: center; gap: 6px; color: var(--title); font-weight: 600; }
 .gob-totals { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 14px; color: var(--label); }
 .gob-totals span:not(.slot) { display: inline-flex; align-items: center; gap: 8px; }
@@ -1165,6 +1167,9 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'tok.byBoost': 'Cada tipo de token é dividido na proporção dos elite boosters daquele tipo que cada jogador gastou nesta hunt (o número entre parênteses).',
+    'tok.used': '{n} boosters gastos na hunt',
+    'tok.noBoost': 'ninguém gastou este booster: partes iguais',
     'calc.nav': 'Calculadora',
     'calc.title': 'Comprar pronto ou montar?',
     'calc.intro': 'Compare o preço de um item pronto no mercado com o custo de comprar os ingredientes e montar. Os preços em Medivia Coin viram gold pela cotação que você informar.',
@@ -1620,6 +1625,9 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'tok.byBoost': 'Each token type is split in proportion to the elite boosters of that type each player spent on this hunt (the number in brackets).',
+    'tok.used': '{n} boosters spent on the hunt',
+    'tok.noBoost': 'nobody spent this booster: equal parts',
     'calc.nav': 'Calculator',
     'calc.title': 'Buy it ready or craft it?',
     'calc.intro': 'Compare the price of a ready item on the market with the cost of buying the ingredients and crafting it. Prices in Medivia Coin are turned into gold at the rate you enter.',
@@ -2075,6 +2083,9 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'tok.byBoost': 'Cada tipo de token se reparte en proporción a los elite boosters de ese tipo que cada jugador gastó en esta hunt (el número entre paréntesis).',
+    'tok.used': '{n} boosters gastados en la hunt',
+    'tok.noBoost': 'nadie gastó este booster: partes iguales',
     'calc.nav': 'Calculadora',
     'calc.title': '¿Comprar hecho o montar?',
     'calc.intro': 'Compara el precio de un item hecho en el mercado con el coste de comprar los ingredientes y montarlo. Los precios en Medivia Coin se pasan a gold con la cotización que indiques.',
@@ -2530,6 +2541,9 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'tok.byBoost': 'Każdy rodzaj tokenu jest dzielony proporcjonalnie do elite boosterów tego rodzaju, które każdy gracz zużył na tym polowaniu (liczba w nawiasie).',
+    'tok.used': 'zużyte boostery na polowaniu: {n}',
+    'tok.noBoost': 'nikt nie zużył tego boostera: po równo',
     'calc.nav': 'Kalkulator',
     'calc.title': 'Kupić gotowe czy złożyć?',
     'calc.intro': 'Porównaj cenę gotowego przedmiotu na rynku z kosztem kupna składników i złożenia go. Ceny w Medivia Coin są przeliczane na gold po kursie, który podasz.',
@@ -5054,7 +5068,13 @@ function parseHunts(text) {
     for (const m of block.matchAll(/^- (.+) \(looted: (\d+), value: -?\d+\)\s*$/gm)) s.items.push({ name: m[1], n: Number(m[2]) });
     const dead = block.split(/^Monsters killed:\n/m)[1];
     if (dead) for (const m of dead.matchAll(/^- (.+) \(killed: (\d+)\)\s*$/gm)) s.kills.push({ name: m[1], n: Number(m[2]) });
-    for (const m of block.matchAll(/^Supplies used \((.+)\): (-?\d+)/gm)) s.players.push({ name: m[1], spent: Number(m[2]), payout: null });
+    // Cada jogador tem a lista do que gastou logo abaixo do nome; dela saem os elite boosters usados na hunt
+    // ("- crystal elite booster (used: 56, cost: 0)"), que servem para dividir os elite tokens do loot.
+    for (const m of block.matchAll(/^Supplies used \((.+)\): (-?\d+)[^\n]*\n?((?:- .*\n?)*)/gm)) {
+      const boost = {};
+      for (const b of m[3].matchAll(/^- (silver|golden|crystal) elite boosters? \(used: (\d+)/gim)) boost[b[1].toLowerCase()] = (boost[b[1].toLowerCase()] || 0) + Number(b[2]);
+      s.players.push({ name: m[1], spent: Number(m[2]), payout: null, boost });
+    }
     const pay = block.match(/^Suggested payout:\n((?:- .*\n?)*)/m);
     if (pay) for (const m of pay[1].matchAll(/^- (.+): (-?\d+)\s*$/gm)) {
       const p = s.players.find(x => x.name === m[1]);
@@ -5453,37 +5473,56 @@ function huntSkins(s) {
 }
 /* ---------- Elite tokens ----------
    Três tokens caem nas hunts: silver, golden e crystal elite token (é assim que o jogo grava no hunts.txt).
-   Cada tipo é dividido em partes iguais entre os jogadores. O que não divide certo vai um para cada jogador, em
-   rodízio de um tipo para o outro, para a sobra não cair sempre na mesma pessoa. */
+   No NPC, 30 tokens viram 1 elite booster do mesmo tipo, que dá 10 usos; os usos são gastos para potencializar
+   o respawn, e o hunts.txt registra quantos cada jogador gastou. Por isso os tokens de cada tipo são divididos
+   na proporção dos boosters daquele tipo que cada jogador gastou na hunt: quem gastou mais recebe mais de volta.
+   Quando ninguém gastou booster de um tipo, os tokens dele vão em partes iguais (o que não divide certo vai um
+   para cada jogador, em rodízio de um tipo para o outro). */
 const ELITE_TOKENS = [['silver', 'Silver Elite Token'], ['golden', 'Golden Elite Token'], ['crystal', 'Crystal Elite Token']];
 function huntTokens(s) {
   const count = {};
   for (const [id, name] of ELITE_TOKENS) count[id] = (s.items || []).reduce((a, it) => a + (skinKey(it.name) === skinKey(name) ? it.n : 0), 0);
   const types = ELITE_TOKENS.filter(([id]) => count[id]);
   if (!types.length) return null;
-  const players = s.players.map(p => p.name);
   let share = null, text = '';
-  if (players.length > 1) {
-    share = players.map(name => ({ name, n: {} }));
+  const byBoost = {};   // tipo -> true quando a divisão daquele token seguiu os boosters gastos
+  if (s.players.length > 1) {
+    share = s.players.map(p => ({ name: p.name, n: {}, used: p.boost || {} }));
     let turn = 0;
     for (const [id] of types) {
-      const each = Math.floor(count[id] / players.length), rest = count[id] % players.length;
-      for (const p of share) p.n[id] = each;
-      for (let i = 0; i < rest; i++) share[(turn + i) % players.length].n[id]++;
-      turn = (turn + rest) % players.length;
+      const total = share.reduce((a, p) => a + (p.used[id] || 0), 0);
+      if (total > 0) {
+        // Proporcional: a parte inteira de cada um e, para os tokens que sobram, quem ficou com a maior fração
+        // (no empate, quem gastou mais).
+        byBoost[id] = true;
+        const exact = share.map(p => count[id] * (p.used[id] || 0) / total);
+        share.forEach((p, i) => { p.n[id] = Math.floor(exact[i]); });
+        const left = count[id] - share.reduce((a, p) => a + p.n[id], 0);
+        const order = share.map((p, i) => i).sort((a, b) => (exact[b] - Math.floor(exact[b])) - (exact[a] - Math.floor(exact[a])) || (share[b].used[id] || 0) - (share[a].used[id] || 0) || a - b);
+        for (let i = 0; i < left; i++) share[order[i]].n[id]++;
+      } else {
+        const each = Math.floor(count[id] / share.length), rest = count[id] % share.length;
+        for (const p of share) p.n[id] = each;
+        for (let i = 0; i < rest; i++) share[(turn + i) % share.length].n[id]++;
+        turn = (turn + rest) % share.length;
+      }
     }
     text = [tr('tok.title') + ' · ' + huntWhen(s), ...share.map(p => p.name + ': ' + types.map(([id, name]) => p.n[id] + '× ' + name).join(', '))].join('\n');
   }
+  const some = types.some(([id]) => byBoost[id]);
   // Bloco curto: o título com o botão de copiar ao lado e uma linha por tipo de token (total e quanto cada um leva).
-  return el('div', { class: 'hunt-skins hunt-tokens', title: tr(share ? 'tok.note' : 'tok.solo') }, [
+  return el('div', { class: 'hunt-skins hunt-tokens', title: tr(!share ? 'tok.solo' : some ? 'tok.byBoost' : 'tok.note') }, [
     el('div', { class: 'tok-head' },
       el('h3', { text: tr('tok.title') }),
       share ? el('button', { class: 'hunt-link', type: 'button', id: 'tok-copy', text: tr('gob.copy'),
         onclick: async e => { const b = e.currentTarget, ok = await copyText(text); setText(b, tr(ok ? 'gob.copied' : 'hunt.copyFail')); setTimeout(() => setText(b, tr('gob.copy')), 1600); } }) : null),
     ...types.map(([id, name]) => el('p', { class: 'tok-line' },   // espalhado: uma lista dentro da lista viraria texto
       el('span', { class: 'tok-name' }, itemSlot(ITEM_IMG[id], 'bare'), name + ': ', el('b', { text: fmtInt(count[id]) })),
-      share ? share.map(p => el('span', {}, p.name + ' ', el('b', { text: fmtInt(p.n[id]) }))) : null)),
-  ]);
+      share ? share.map(p => el('span', {}, p.name + ' ', el('b', { text: fmtInt(p.n[id]) }),
+        byBoost[id] ? el('small', { text: ' (' + fmtInt(p.used[id] || 0) + ')', title: tr('tok.used', { n: fmtInt(p.used[id] || 0) }) }) : null)) : null,
+      share && some && !byBoost[id] ? el('small', { text: tr('tok.noBoost') }) : null)),
+    some ? el('p', { class: 'hunt-note', text: tr('tok.byBoost') }) : null,
+  ].filter(Boolean));
 }
 // Criaturas abatidas na hunt, com o ritmo por hora e o XP por abate de quem já está no banco de criaturas.
 // Com o XP de todas, dá para dizer quanto do XP de tabela dos abates o jogador recebeu.
@@ -5616,6 +5655,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 18:59',
+    pt: ['Analisador de hunt: os elite tokens do loot agora são divididos na proporção dos elite boosters que cada jogador gastou na hunt. Sem booster gasto daquele tipo, a divisão continua em partes iguais.'],
+    en: ['Hunt analyzer: the elite tokens in the loot are now split in proportion to the elite boosters each player spent on the hunt. With no booster of that type spent, the split stays equal.'],
+    es: ['Analizador de hunt: los elite tokens del loot ahora se reparten en proporción a los elite boosters que cada jugador gastó en la hunt. Sin boosters de ese tipo gastados, el reparto sigue en partes iguales.'],
+    pl: ['Analizator polowań: elite tokeny z łupu są teraz dzielone proporcjonalnie do elite boosterów zużytych przez każdego gracza na polowaniu. Gdy nikt nie zużył boostera danego rodzaju, podział pozostaje równy.'],
+  },
   { at: '2026-10-11 15:56',
     pt: ['Nova ferramenta no menu: Calculadora. Ela compara comprar um item pronto com comprar os ingredientes e montar, convertendo os preços em Medivia Coin pela cotação do mercado, e mostra em que preço a resposta se inverte.'],
     en: ['New tool in the menu: Calculator. It compares buying a ready item with buying the ingredients and crafting it, converting Medivia Coin prices at the market rate, and shows at which price the answer flips.'],
