@@ -126,31 +126,32 @@ kbd {
 #room-pane .dlg:disabled { opacity: 0.45; cursor: default; }
 dialog#changes { width: min(560px, calc(100vw - 32px)); }
 /* Tela de criaturas: uma tabela; em tela estreita ela rola de lado dentro da própria moldura */
-dialog#creatures { width: min(940px, calc(100vw - 32px)); }
+/* A moldura não rola: o título e o Fechar ficam parados, e só a lista ou a ficha rola, com uma barra fina */
+dialog#creatures { width: min(940px, calc(100vw - 32px)); overflow: hidden; }
 .creatures-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
 #creatures-search { flex: 1 1 220px; min-width: 0; padding: 9px 12px; border: 1px solid transparent; border-radius: var(--r-sm); background: var(--card); color: var(--title); }
 #creatures-search::placeholder { color: var(--faint); }
 #creatures-search:focus { border-color: var(--edge); }
 .creatures-sort { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
 /* A lista rola dentro da moldura (para os lados e para baixo); a busca e o cabeçalho ficam à vista */
-.creatures-wrap { flex: 1 1 auto; min-height: 160px; overflow: auto; }
-.creatures-table { width: 100%; min-width: 660px; border-collapse: collapse; font-size: 14px; font-variant-numeric: lining-nums tabular-nums; }
+.creatures-wrap { flex: 1 1 auto; min-height: 160px; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--edge) transparent; }
+.creatures-table { width: 100%; min-width: 780px; border-collapse: collapse; font-size: 14px; font-variant-numeric: lining-nums tabular-nums; }
 .creatures-table th { position: sticky; top: 0; padding: 6px 10px; background: var(--box); box-shadow: inset 0 -1px 0 var(--edge); font: 500 12px/1.3 var(--font-ui); color: var(--faint); text-align: right; white-space: nowrap; }
 .creatures-table td { padding: 8px 10px; border-bottom: 1px solid var(--edge); color: var(--title); text-align: right; vertical-align: top; white-space: nowrap; }
 .creatures-table th:first-child, .creatures-table td:first-child, .creatures-table th:last-child, .creatures-table td:last-child { text-align: left; }
-.creatures-table td:first-child { font-weight: 600; color: var(--amber); white-space: normal; }
-.creatures-table td:last-child { color: var(--label); white-space: normal; }
+.creatures-table td:first-child { font-weight: 600; color: var(--amber); }
+.creatures-table td:last-child { min-width: 200px; color: var(--label); white-space: normal; }
 .creatures-table td.xp { font-weight: 700; color: var(--value); }
 .creatures-table td.none { font-weight: 400; color: var(--faint); }
 .creatures-table .hunt-link { color: var(--label); text-align: left; }
 .creatures-table .hunt-link:hover { color: var(--title); }
 /* A lista e a ficha ocupam o mesmo espaço da moldura, uma de cada vez */
-.creatures-pane { display: flex; flex: 1 1 auto; flex-direction: column; gap: 14px; min-height: 0; }
+.creatures-pane { display: flex; flex: 1 1 auto; flex-direction: column; gap: 14px; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--edge) transparent; }
 .creatures-pane[hidden] { display: none; }
 .creature-link { padding: 0; border: 0; background: none; color: var(--amber); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
 .creature-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 /* Ficha da criatura: o nome, os atributos em quadros e a tabela de onde ela aparece */
-.creature-sheet { overflow-y: auto; }
+.creature-sheet { padding-right: 4px; }
 .creature-back { align-self: flex-start; }
 .creature-name { font: 800 28px/1.15 var(--font-display); color: var(--amber); overflow-wrap: anywhere; }
 .creature-need { max-width: 70ch; padding: 10px 14px; border-left: 3px solid var(--amber); border-radius: 0 var(--r-sm) var(--r-sm) 0; background: var(--card); font-size: 14px; color: var(--title); }
@@ -171,7 +172,7 @@ dialog#creatures { width: min(940px, calc(100vw - 32px)); }
 .creature-where h3 { font: 600 16px/1.3 var(--font-ui); color: var(--title); }
 .creature-where .creatures-wrap { flex: none; min-height: 0; }
 .creatures-table.where { min-width: 520px; }
-.creatures-table.where th:last-child, .creatures-table.where td:last-child { text-align: right; white-space: nowrap; }
+.creatures-table.where th:last-child, .creatures-table.where td:last-child { min-width: 0; text-align: right; white-space: nowrap; }
 .creatures-table.where td:last-child { font-weight: 700; color: var(--value); }
 .creatures-table.where td.none:last-child { font-weight: 400; color: var(--faint); }
 .changes-list { display: flex; flex-direction: column; gap: 16px; }
