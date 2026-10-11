@@ -3,3 +3,6 @@ sons-originais/
 
 # Figuras originais dos itens (como vieram da wiki): o site usa as cópias preparadas em img/
 Images/
+
+# Configuração local do Claude (prévia do site)
+.claude/
