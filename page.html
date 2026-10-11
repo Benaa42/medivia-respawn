@@ -591,6 +591,12 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .gob-dot.gob-cursed { background: #b48cff; }
 .gob-dot.gob-malevolent { background: #5aa9ff; }
 .gob-dot.gob-vile { background: var(--value); }
+.gob-dot.tok-silver { background: #c9d1d6; }
+.gob-dot.tok-golden { background: var(--amber); }
+.gob-dot.tok-crystal { background: #7fd8ff; }
+.creatures-table.tok-table { min-width: 320px; }
+.creatures-table.gob-table.tok-table td:first-child { color: var(--amber); }
+.creatures-table.tok-table td { font-weight: 700; }
 .gob-totals { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: 14px; color: var(--label); }
 .gob-totals b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
 .creatures-table.gob-table { min-width: 460px; }
@@ -1074,6 +1080,9 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'tok.title': 'Elite tokens',
+    'tok.note': 'Tokens do loot desta hunt, cada tipo dividido em partes iguais. O que não divide certo vai um para cada jogador, em rodízio.',
+    'tok.solo': 'Tokens do loot desta hunt.',
     'gob.title': 'Skins para goblets',
     'gob.note': 'Skins do loot desta hunt que podem ser trocadas por goblets, pelos valores da wiki. Skin que precisa de várias para uma troca só conta quando fecha o conjunto.',
     'gob.col.skin': 'Skin',
@@ -1494,6 +1503,9 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'tok.title': 'Elite tokens',
+    'tok.note': 'Tokens in the loot of this hunt, each type split into equal parts. What does not divide evenly goes one to each player, in turns.',
+    'tok.solo': 'Tokens in the loot of this hunt.',
     'gob.title': 'Skins for goblets',
     'gob.note': 'Skins in the loot of this hunt that can be exchanged for goblets, at the wiki rates. A skin that needs several for one exchange only counts when the set is complete.',
     'gob.col.skin': 'Skin',
@@ -1914,6 +1926,9 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'tok.title': 'Elite tokens',
+    'tok.note': 'Tokens del loot de esta hunt, cada tipo repartido en partes iguales. Lo que no se divide exacto va uno para cada jugador, por turnos.',
+    'tok.solo': 'Tokens del loot de esta hunt.',
     'gob.title': 'Skins para goblets',
     'gob.note': 'Skins del loot de esta hunt que se pueden cambiar por goblets, con los valores de la wiki. La skin que necesita varias para un cambio solo cuenta cuando completa el conjunto.',
     'gob.col.skin': 'Skin',
@@ -2334,6 +2349,9 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'tok.title': 'Elite tokeny',
+    'tok.note': 'Tokeny z łupu tego polowania, każdy rodzaj dzielony po równo. To, co się nie dzieli równo, trafia po jednym do kolejnych graczy.',
+    'tok.solo': 'Tokeny z łupu tego polowania.',
     'gob.title': 'Skiny na goblety',
     'gob.note': 'Skiny z łupu tego polowania, które można wymienić na goblety, według stawek z wiki. Skin wymagający kilku sztuk na wymianę liczy się dopiero po skompletowaniu zestawu.',
     'gob.col.skin': 'Skin',
@@ -5098,7 +5116,7 @@ function huntFill(body, tag, wide) {
       link('hunt.disconnect', disconnectHunt)),
     el('p', { class: hunt.state === 'on' ? 'hunt-note hunt-live' : 'hunt-note', text: tr(hunt.state === 'on' ? 'hunt.live' : 'hunt.once') }),
   ].filter(Boolean);   // sem os itens vazios: o vazio viraria o texto "null"
-  if (wide) body.replaceChildren(...[el('div', { class: 'hunt-grid' }, el('div', { class: 'hunt-main' }, main), huntKills(s, hours)), huntSkins(s)].filter(Boolean));
+  if (wide) body.replaceChildren(...[el('div', { class: 'hunt-grid' }, el('div', { class: 'hunt-main' }, main), huntKills(s, hours)), huntSkins(s), huntTokens(s)].filter(Boolean));
   else body.replaceChildren(...main);
 }
 /* ---------- Skins que viram goblets ----------
@@ -5182,6 +5200,43 @@ function huntSkins(s) {
           types.map(t => el('td', { class: p.pts[t] ? null : 'none', text: fmtInt(p.pts[t]) })),
           el('td', { text: [...p.items.values()].map(skinText).join(', ') || '–' })))))),
       el('div', { class: 'hunt-foot' }, el('button', { class: 'dlg', type: 'button', id: 'gob-copy', text: tr('gob.copy'),
+        onclick: async e => { const b = e.currentTarget, ok = await copyText(text); setText(b, tr(ok ? 'gob.copied' : 'hunt.copyFail')); setTimeout(() => setText(b, tr('gob.copy')), 1600); } })),
+    ] : []),
+  ]);
+}
+/* ---------- Elite tokens ----------
+   Três tokens caem nas hunts: silver, golden e crystal elite token (é assim que o jogo grava no hunts.txt).
+   Cada tipo é dividido em partes iguais entre os jogadores. O que não divide certo vai um para cada jogador, em
+   rodízio de um tipo para o outro, para a sobra não cair sempre na mesma pessoa. */
+const ELITE_TOKENS = [['silver', 'Silver Elite Token'], ['golden', 'Golden Elite Token'], ['crystal', 'Crystal Elite Token']];
+function huntTokens(s) {
+  const count = {};
+  for (const [id, name] of ELITE_TOKENS) count[id] = (s.items || []).reduce((a, it) => a + (skinKey(it.name) === skinKey(name) ? it.n : 0), 0);
+  const types = ELITE_TOKENS.filter(([id]) => count[id]);
+  if (!types.length) return null;
+  const players = s.players.map(p => p.name);
+  const dot = id => el('i', { class: 'gob-dot tok-' + id });
+  let share = null, text = '';
+  if (players.length > 1) {
+    share = players.map(name => ({ name, n: {} }));
+    let turn = 0;
+    for (const [id] of types) {
+      const each = Math.floor(count[id] / players.length), rest = count[id] % players.length;
+      for (const p of share) p.n[id] = each;
+      for (let i = 0; i < rest; i++) share[(turn + i) % players.length].n[id]++;
+      turn = (turn + rest) % players.length;
+    }
+    text = [tr('tok.title') + ' · ' + huntWhen(s), ...share.map(p => p.name + ': ' + types.map(([id, name]) => p.n[id] + '× ' + name).join(', '))].join('\n');
+  }
+  return el('div', { class: 'hunt-skins' }, [
+    el('h3', { text: tr('tok.title') }),
+    el('p', { class: 'hunt-note', text: tr(share ? 'tok.note' : 'tok.solo') }),
+    el('p', { class: 'gob-totals' }, types.map(([id, name]) => el('span', {}, dot(id), name + ': ', el('b', { text: fmtInt(count[id]) })))),
+    ...(share ? [   // espalhado: uma lista dentro da lista viraria texto
+      el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table gob-table tok-table' },
+        el('thead', {}, el('tr', {}, el('th', { scope: 'col', text: tr('hunt.player') }), types.map(([id, name]) => el('th', { scope: 'col' }, dot(id), name.split(' ')[0])))),
+        el('tbody', {}, share.map(p => el('tr', {}, el('td', { text: p.name }), types.map(([id]) => el('td', { class: p.n[id] ? null : 'none', text: fmtInt(p.n[id]) }))))))),
+      el('div', { class: 'hunt-foot' }, el('button', { class: 'dlg', type: 'button', id: 'tok-copy', text: tr('gob.copy'),
         onclick: async e => { const b = e.currentTarget, ok = await copyText(text); setText(b, tr(ok ? 'gob.copied' : 'hunt.copyFail')); setTimeout(() => setText(b, tr('gob.copy')), 1600); } })),
     ] : []),
   ]);
@@ -5317,6 +5372,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 01:37',
+    pt: ['Analisador de hunt: os elite tokens do loot (silver, golden e crystal) aparecem com o total e a divisão em partes iguais entre os jogadores.'],
+    en: ['Hunt analyzer: the elite tokens in the loot (silver, golden and crystal) are shown with the total and an equal split between the players.'],
+    es: ['Analizador de hunt: los elite tokens del loot (silver, golden y crystal) aparecen con el total y el reparto en partes iguales entre los jugadores.'],
+    pl: ['Analizator polowań: elite tokeny z łupu (silver, golden i crystal) są pokazane z sumą i równym podziałem między graczy.'],
+  },
   { at: '2026-10-11 01:26',
     pt: ['Analisador de hunt: nova seção "Skins para goblets". Mostra as skins do loot que viram Cursed, Malevolent e Vile Soul Goblets, quantos pontos cada uma vale e a divisão entre os jogadores pelos pontos.'],
     en: ['Hunt analyzer: new "Skins for goblets" section. It shows the loot skins that become Cursed, Malevolent and Vile Soul Goblets, how many points each is worth and the split between the players by points.'],
