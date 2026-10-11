@@ -144,6 +144,36 @@ dialog#creatures { width: min(940px, calc(100vw - 32px)); }
 .creatures-table td.none { font-weight: 400; color: var(--faint); }
 .creatures-table .hunt-link { color: var(--label); text-align: left; }
 .creatures-table .hunt-link:hover { color: var(--title); }
+/* A lista e a ficha ocupam o mesmo espaço da moldura, uma de cada vez */
+.creatures-pane { display: flex; flex: 1 1 auto; flex-direction: column; gap: 14px; min-height: 0; }
+.creatures-pane[hidden] { display: none; }
+.creature-link { padding: 0; border: 0; background: none; color: var(--amber); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+.creature-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* Ficha da criatura: o nome, os atributos em quadros e a tabela de onde ela aparece */
+.creature-sheet { overflow-y: auto; }
+.creature-back { align-self: flex-start; }
+.creature-name { font: 800 28px/1.15 var(--font-display); color: var(--amber); overflow-wrap: anywhere; }
+.creature-need { max-width: 70ch; padding: 10px 14px; border-left: 3px solid var(--amber); border-radius: 0 var(--r-sm) var(--r-sm) 0; background: var(--card); font-size: 14px; color: var(--title); }
+/* Em cima o que interessa para a caça (XP, HP e a relação entre os dois); embaixo os atributos de combate */
+.creature-stats { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 10px; }
+.creature-stat { display: flex; grid-column: span 3; flex-direction: column; gap: 3px; min-width: 0; padding: 12px 14px; border-radius: var(--r-md); background: var(--card); }
+.creature-stat.main { grid-column: span 4; }
+@media (max-width: 640px) {
+  .creature-stat, .creature-stat.main { grid-column: span 6; }
+  .creature-stat.xp { grid-column: span 12; }
+}
+.creature-stat span { font: 500 12px/1.3 var(--font-ui); color: var(--faint); }
+.creature-stat b { font: 700 23px/1.2 var(--font-display); color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
+.creature-stat small { font-size: 12px; line-height: 1.35; color: var(--label); }
+.creature-stat.xp b { color: var(--value); }
+.creature-stat.none b { color: var(--faint); }
+.creature-where { display: flex; flex-direction: column; gap: 8px; }
+.creature-where h3 { font: 600 16px/1.3 var(--font-ui); color: var(--title); }
+.creature-where .creatures-wrap { flex: none; min-height: 0; }
+.creatures-table.where { min-width: 520px; }
+.creatures-table.where th:last-child, .creatures-table.where td:last-child { text-align: right; white-space: nowrap; }
+.creatures-table.where td:last-child { font-weight: 700; color: var(--value); }
+.creatures-table.where td.none:last-child { font-weight: 400; color: var(--faint); }
 .changes-list { display: flex; flex-direction: column; gap: 16px; }
 .changes-list h3 { margin-bottom: 5px; font: 600 13px/1.3 var(--font-ui); color: var(--amber); font-variant-numeric: lining-nums tabular-nums; }
 .changes-list ul { display: flex; flex-direction: column; gap: 4px; margin: 0; padding-left: 1.2em; font-size: 14px; color: var(--label); }
@@ -732,6 +762,7 @@ details.backup textarea {
     <h2 id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
     <button class="dlg stop" type="button" id="creatures-close" data-i18n="support.close" autofocus>Fechar</button>
   </div>
+  <div class="creatures-pane" id="creatures-list">
   <p class="support-note" data-i18n="creatures.intro">XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus.</p>
   <div class="creatures-bar">
     <input type="search" id="creatures-search" placeholder="Buscar criatura ou respawn" aria-label="Buscar criatura ou respawn" autocomplete="off" data-i18n-attr="placeholder:creatures.search;aria-label:creatures.search">
@@ -746,6 +777,8 @@ details.backup textarea {
   </div>
   <p class="support-note" id="creatures-count" role="status"></p>
   <div class="creatures-wrap"><table class="creatures-table" id="creatures-table"></table></div>
+  </div>
+  <div class="creatures-pane creature-sheet" id="creature-sheet" hidden></div>
 </dialog>
 
 <dialog class="support" id="support" aria-labelledby="support-title">
@@ -920,6 +953,32 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'creature.open': 'Abrir a ficha desta criatura',
+    'creature.back': 'Voltar à lista',
+    'creature.needXp': 'Falta o XP desta criatura. Cole o print da ficha dela no bestiário do jogo, na aba Normal, e os dados aparecem aqui.',
+    'creature.needStats': 'Só o XP foi lido. Cole o print da ficha de novo para completar HP, ARM, DEF, SPD e Mana.',
+    'creature.where': 'Onde aparece',
+    'creature.whereNone': 'Nenhum respawn do banco tem esta criatura ainda.',
+    'creature.whereNote': 'Com os controles atuais da página: {g} e bônus de {p}%. O XP é por jogador.',
+    'creature.col.respawn': 'Respawn',
+    'creature.col.count': 'Quantidade',
+    'creature.col.time': 'Tempo',
+    'creature.col.kills': 'Abates por hora',
+    'creature.col.xp': 'XP por hora',
+    'creature.s.xp': 'XP por abate',
+    'creature.s.xpD': 'raridade Normal, sem bônus',
+    'creature.s.hp': 'HP',
+    'creature.s.hpD': 'pontos de vida',
+    'creature.s.ratio': 'XP por HP',
+    'creature.s.ratioD': 'XP ganho a cada ponto de vida tirado',
+    'creature.s.arm': 'ARM',
+    'creature.s.armD': 'armadura: faixa de redução de dano',
+    'creature.s.def': 'DEF',
+    'creature.s.defD': 'defesa: redução extra contra armas corpo a corpo',
+    'creature.s.spd': 'SPD',
+    'creature.s.spdD': 'velocidade de movimento',
+    'creature.s.mana': 'Mana',
+    'creature.s.manaD': 'mana da criatura',
     'creatures.open': 'Criaturas',
     'creatures.title': 'Criaturas',
     'creatures.intro': 'XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus. Para completar uma criatura, cole o print da ficha dela no bestiário do jogo, na aba Normal.',
@@ -1269,6 +1328,32 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'creature.open': 'Open the sheet of this creature',
+    'creature.back': 'Back to the list',
+    'creature.needXp': 'This creature has no XP yet. Paste a screenshot of its page in the game bestiary, on the Normal tab, and the data shows up here.',
+    'creature.needStats': 'Only the XP was read. Paste the screenshot of its page again to fill in HP, ARM, DEF, SPD and Mana.',
+    'creature.where': 'Where it appears',
+    'creature.whereNone': 'No respawn in the bank has this creature yet.',
+    'creature.whereNote': 'With the current controls on the page: {g} and a {p}% bonus. XP is per player.',
+    'creature.col.respawn': 'Respawn',
+    'creature.col.count': 'Count',
+    'creature.col.time': 'Time',
+    'creature.col.kills': 'Kills per hour',
+    'creature.col.xp': 'XP per hour',
+    'creature.s.xp': 'XP per kill',
+    'creature.s.xpD': 'Normal rarity, no bonus',
+    'creature.s.hp': 'HP',
+    'creature.s.hpD': 'hit points',
+    'creature.s.ratio': 'XP per HP',
+    'creature.s.ratioD': 'XP gained for each hit point taken',
+    'creature.s.arm': 'ARM',
+    'creature.s.armD': 'armor: damage reduction range',
+    'creature.s.def': 'DEF',
+    'creature.s.defD': 'defense: extra reduction against melee weapons',
+    'creature.s.spd': 'SPD',
+    'creature.s.spdD': 'movement speed',
+    'creature.s.mana': 'Mana',
+    'creature.s.manaD': 'mana of the creature',
     'creatures.open': 'Creatures',
     'creatures.title': 'Creatures',
     'creatures.intro': 'XP and stats come from bestiary screenshots; the respawns, from screenshots of the bonus window. To complete a creature, paste a screenshot of its page in the game bestiary, on the Normal tab.',
@@ -1618,6 +1703,32 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'creature.open': 'Abrir la ficha de esta criatura',
+    'creature.back': 'Volver a la lista',
+    'creature.needXp': 'Falta el XP de esta criatura. Pega la captura de su ficha en el bestiario del juego, en la pestaña Normal, y los datos aparecen aquí.',
+    'creature.needStats': 'Solo se leyó el XP. Pega de nuevo la captura de la ficha para completar HP, ARM, DEF, SPD y Mana.',
+    'creature.where': 'Dónde aparece',
+    'creature.whereNone': 'Ningún respawn del banco tiene esta criatura todavía.',
+    'creature.whereNote': 'Con los controles actuales de la página: {g} y bonus del {p}%. El XP es por jugador.',
+    'creature.col.respawn': 'Respawn',
+    'creature.col.count': 'Cantidad',
+    'creature.col.time': 'Tiempo',
+    'creature.col.kills': 'Muertes por hora',
+    'creature.col.xp': 'XP por hora',
+    'creature.s.xp': 'XP por muerte',
+    'creature.s.xpD': 'rareza Normal, sin bonus',
+    'creature.s.hp': 'HP',
+    'creature.s.hpD': 'puntos de vida',
+    'creature.s.ratio': 'XP por HP',
+    'creature.s.ratioD': 'XP ganado por cada punto de vida quitado',
+    'creature.s.arm': 'ARM',
+    'creature.s.armD': 'armadura: rango de reducción de daño',
+    'creature.s.def': 'DEF',
+    'creature.s.defD': 'defensa: reducción extra contra armas cuerpo a cuerpo',
+    'creature.s.spd': 'SPD',
+    'creature.s.spdD': 'velocidad de movimiento',
+    'creature.s.mana': 'Mana',
+    'creature.s.manaD': 'maná de la criatura',
     'creatures.open': 'Criaturas',
     'creatures.title': 'Criaturas',
     'creatures.intro': 'El XP y los atributos vienen de las capturas del bestiario; los respawns, de las capturas de la ventana de bonus. Para completar una criatura, pega la captura de su ficha en el bestiario del juego, en la pestaña Normal.',
@@ -1967,6 +2078,32 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'creature.open': 'Otwórz kartę tego stworzenia',
+    'creature.back': 'Wróć do listy',
+    'creature.needXp': 'Brak XP tego stworzenia. Wklej zrzut jego karty z bestiariusza gry, na zakładce Normalny, a dane pojawią się tutaj.',
+    'creature.needStats': 'Odczytano tylko XP. Wklej zrzut karty ponownie, aby uzupełnić HP, ARM, DEF, SPD i Manę.',
+    'creature.where': 'Gdzie występuje',
+    'creature.whereNone': 'Żaden respawn w bazie nie ma jeszcze tego stworzenia.',
+    'creature.whereNote': 'Przy obecnych ustawieniach strony: {g} i bonus {p}%. XP na gracza.',
+    'creature.col.respawn': 'Respawn',
+    'creature.col.count': 'Liczba',
+    'creature.col.time': 'Czas',
+    'creature.col.kills': 'Zabicia na godzinę',
+    'creature.col.xp': 'XP na godzinę',
+    'creature.s.xp': 'XP za zabicie',
+    'creature.s.xpD': 'rzadkość Normalna, bez bonusu',
+    'creature.s.hp': 'HP',
+    'creature.s.hpD': 'punkty życia',
+    'creature.s.ratio': 'XP na HP',
+    'creature.s.ratioD': 'XP za każdy zabrany punkt życia',
+    'creature.s.arm': 'ARM',
+    'creature.s.armD': 'pancerz: zakres redukcji obrażeń',
+    'creature.s.def': 'DEF',
+    'creature.s.defD': 'obrona: dodatkowa redukcja przeciw broni białej',
+    'creature.s.spd': 'SPD',
+    'creature.s.spdD': 'szybkość ruchu',
+    'creature.s.mana': 'Mana',
+    'creature.s.manaD': 'mana stworzenia',
     'creatures.open': 'Stworzenia',
     'creatures.title': 'Stworzenia',
     'creatures.intro': 'XP i statystyki pochodzą ze zrzutów bestiariusza, a respawny ze zrzutów okna bonusu. Aby uzupełnić stworzenie, wklej zrzut jego karty z bestiariusza gry, na zakładce Normalny.',
@@ -4669,10 +4806,10 @@ if (support.pix || support.kofi) {
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
   { at: '2026-10-10 21:08',
-    pt: ['Tela nova "Criaturas", no topo da página: lista todas as criaturas que os prints já trouxeram, com XP, HP, ARM, DEF, SPD, Mana e os respawns onde aparecem.', 'O print do bestiário agora guarda também HP, ARM, DEF, SPD e Mana.'],
-    en: ['New "Creatures" screen, at the top of the page: it lists every creature the screenshots have brought in, with XP, HP, ARM, DEF, SPD, Mana and the respawns where they appear.', 'The bestiary screenshot now also saves HP, ARM, DEF, SPD and Mana.'],
-    es: ['Nueva pantalla "Criaturas", en la parte superior de la página: lista todas las criaturas que ya trajeron las capturas, con XP, HP, ARM, DEF, SPD, Mana y los respawns donde aparecen.', 'La captura del bestiario ahora guarda también HP, ARM, DEF, SPD y Mana.'],
-    pl: ['Nowy ekran „Stworzenia” u góry strony: lista wszystkich stworzeń ze zrzutów, z XP, HP, ARM, DEF, SPD, Maną i respawnami, w których występują.', 'Zrzut z bestiariusza zapisuje teraz także HP, ARM, DEF, SPD i Manę.'],
+    pt: ['Tela nova "Criaturas", no topo da página: lista todas as criaturas que os prints já trouxeram, com XP, HP, ARM, DEF, SPD, Mana e os respawns onde aparecem.', 'Clicar numa criatura abre a ficha dela: atributos, XP por HP e os respawns onde aparece, com abates e XP por hora.', 'O print do bestiário agora guarda também HP, ARM, DEF, SPD e Mana.'],
+    en: ['New "Creatures" screen, at the top of the page: it lists every creature the screenshots have brought in, with XP, HP, ARM, DEF, SPD, Mana and the respawns where they appear.', 'Clicking a creature opens its sheet: stats, XP per HP and the respawns where it appears, with kills and XP per hour.', 'The bestiary screenshot now also saves HP, ARM, DEF, SPD and Mana.'],
+    es: ['Nueva pantalla "Criaturas", en la parte superior de la página: lista todas las criaturas que ya trajeron las capturas, con XP, HP, ARM, DEF, SPD, Mana y los respawns donde aparecen.', 'Al hacer clic en una criatura se abre su ficha: atributos, XP por HP y los respawns donde aparece, con muertes y XP por hora.', 'La captura del bestiario ahora guarda también HP, ARM, DEF, SPD y Mana.'],
+    pl: ['Nowy ekran „Stworzenia” u góry strony: lista wszystkich stworzeń ze zrzutów, z XP, HP, ARM, DEF, SPD, Maną i respawnami, w których występują.', 'Kliknięcie stworzenia otwiera jego kartę: statystyki, XP na HP i respawny, w których występuje, z zabiciami i XP na godzinę.', 'Zrzut z bestiariusza zapisuje teraz także HP, ARM, DEF, SPD i Manę.'],
   },
   { at: '2026-10-10 20:28',
     pt: ['XP estimada: agora é por jogador, como no mapper. Em grupo, o XP de cada abate é dividido por 1,34 (dupla), 1,6 (trio) ou 1,78 (squad); antes o site mostrava o total sem dividir.'],
@@ -4967,15 +5104,65 @@ function renderCreatures() {
   $('#creatures-table').replaceChildren(
     el('thead', {}, el('tr', {}, [tr('creatures.col.name'), 'XP', 'HP', 'ARM', 'DEF', 'SPD', 'Mana', tr('creatures.col.where')].map(t => el('th', { scope: 'col', text: t })))),
     el('tbody', {}, list.length ? list.map(c => el('tr', {},
-      el('td', { text: c.name }),
+      el('td', {}, el('button', { class: 'creature-link', type: 'button', text: c.name, title: tr('creature.open'), onclick: () => showCreature(c.id) })),
       el('td', { class: c.exp == null ? 'none' : 'xp', title: c.exp == null ? tr('mob.xpTip') : null, text: c.exp == null ? '?' : fmtInt(c.exp) }),
       cell(num(c.hp)), cell(range(c.armLo, c.armHi)), cell(range(c.defLo, c.defHi)), cell(num(c.spd)), cell(num(c.mana)),
       c.where.length
         ? el('td', {}, c.where.flatMap((w, i) => [i ? ', ' : null, el('button', { class: 'hunt-link', type: 'button', text: w.name + ' (' + w.count + 'x)', onclick: () => open(w.id) })]))
         : cell(null)))
       : el('tr', {}, el('td', { class: 'none', colSpan: 8, text: tr('creatures.none') }))));
+  if (creatureId) renderCreature();
+}
+// Ficha de uma criatura. Os atributos vêm do print do bestiário; "Onde aparece" vem dos respawns do banco, com o
+// tempo, os abates e o XP por jogador calculados para o grupo e o bônus escolhidos nos controles da página.
+let creatureId = null;
+function showCreature(id) {
+  creatureId = id;
+  $('#creatures-list').hidden = !!id;
+  $('#creature-sheet').hidden = !id;
+  if (id) renderCreature();
+  $('#creatures').scrollTop = 0;
+}
+function renderCreature() {
+  const c = creatureRows().find(x => x.id === creatureId);
+  if (!c) { showCreature(null); return; }
+  const loc = document.documentElement.lang || 'en';
+  const num = v => v == null ? null : fmtInt(v);
+  const range = (lo, hi) => lo == null ? null : lo === hi ? fmtInt(lo) : fmtInt(lo) + ' – ' + fmtInt(hi);
+  const stat = (key, value, cls) => el('div', { class: 'creature-stat' + (cls ? ' ' + cls : '') + (value == null ? ' none' : '') },
+    el('span', { text: tr('creature.s.' + key) }), el('b', { text: value == null ? '?' : value }), el('small', { text: tr('creature.s.' + key + 'D') }));
+  const where = c.where.map(w => {
+    const r = getRespawn(w.id), m = r && r.monsters.find(x => slug(x.name) === c.id);
+    if (!m) return null;
+    const sec = respawnAt(m.base, ui.pct, ui.party), kills = killsPerHour(sec, m.count);
+    return { ...w, sec, kills, xp: c.exp == null ? null : kills * c.exp * 100 / ui.party };
+  }).filter(Boolean);
+  const open = id => { const dlg = $('#creatures'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); select(id); };
+  const need = c.exp == null ? 'creature.needXp' : c.hp == null ? 'creature.needStats' : null;
+  $('#creature-sheet').replaceChildren(...[   // o aviso só existe quando falta dado: sem o filtro, o vazio viraria texto
+    el('button', { class: 'hunt-link creature-back', type: 'button', id: 'creature-back', text: tr('creature.back'), onclick: () => showCreature(null) }),
+    el('h3', { class: 'creature-name', text: c.name }),
+    need ? el('p', { class: 'creature-need', text: tr(need) }) : null,
+    el('div', { class: 'creature-stats' },
+      stat('xp', num(c.exp), 'main xp'), stat('hp', num(c.hp), 'main'),
+      stat('ratio', c.exp != null && c.hp ? (c.exp / c.hp).toLocaleString(loc, { maximumFractionDigits: 2 }) : null, 'main'),
+      stat('arm', range(c.armLo, c.armHi)), stat('def', range(c.defLo, c.defHi)), stat('spd', num(c.spd)), stat('mana', num(c.mana))),
+    el('section', { class: 'creature-where' },
+      el('h3', { text: tr('creature.where') }),
+      where.length ? [
+        el('p', { class: 'support-note', text: tr('creature.whereNote', { g: tr('party.' + ui.party), p: ui.pct }) }),
+        el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table where' },
+          el('thead', {}, el('tr', {}, ['respawn', 'count', 'time', 'kills', 'xp'].map(k => el('th', { scope: 'col', text: tr('creature.col.' + k) })))),
+          el('tbody', {}, where.map(w => el('tr', {},
+            el('td', {}, el('button', { class: 'creature-link', type: 'button', text: w.name, onclick: () => open(w.id) })),
+            el('td', { text: w.count + 'x' }),
+            el('td', { text: fmtTime(w.sec) + ' ' + unitName() }),
+            el('td', { text: fmtInt(w.kills) }),
+            el('td', { class: w.xp == null ? 'none' : null, text: w.xp == null ? '?' : fmtXp(w.xp) })))))),
+      ] : el('p', { class: 'support-note', text: tr('creature.whereNone') }))].filter(Boolean));
 }
 $('#creatures-top').addEventListener('click', () => {
+  showCreature(null);
   renderCreatures();
   const dlg = $('#creatures');
   if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
