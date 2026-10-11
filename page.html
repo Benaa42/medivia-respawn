@@ -36,6 +36,10 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+/* O espaço da barra de rolagem fica sempre reservado: assim a página não anda para o lado ao trocar de uma
+   ferramenta comprida (com barra) para uma curta (sem barra). */
+html { scrollbar-gutter: stable; }
+@supports not (scrollbar-gutter: stable) { html { overflow-y: scroll; } }
 body {
   margin: 0;
   background: var(--ground);
@@ -5154,6 +5158,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 00:34',
+    pt: ['Correção: a página não se desloca mais para o lado ao trocar de ferramenta no menu.'],
+    en: ['Fix: the page no longer shifts sideways when switching tools in the menu.'],
+    es: ['Corrección: la página ya no se desplaza hacia un lado al cambiar de herramienta en el menú.'],
+    pl: ['Poprawka: strona nie przesuwa się już w bok przy zmianie narzędzia w menu.'],
+  },
   { at: '2026-10-11 00:31',
     pt: ['Barra de ferramentas em dourado: contorno dourado e a aba aberta em dourado cheio, para o menu se destacar do resto da página.'],
     en: ['Tool bar in gold: a gold outline and the open tab in solid gold, so the menu stands out from the rest of the page.'],
