@@ -696,6 +696,8 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
             <option value="manafull" data-i18n="tone.manafull">Mana cheia</option>
             <option value="message" data-i18n="tone.message">Mensagem</option>
             <option value="onscreen" data-i18n="tone.onscreen">Jogador na tela</option>
+            <option value="azrak" data-i18n="tone.azrak">Voz do Azrak</option>
+            <option value="vivien" data-i18n="tone.vivien">Voz da Vivien</option>
           </select>
           <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <svg class="ico mic" aria-hidden="true"><use href="#i-mic"/></svg><span data-i18n="voice.label">Ativar comando de voz</span></label>
           <button class="voice-help-btn" type="button" id="voice-help-btn" aria-expanded="false" aria-controls="voice-help" title="Ver os comandos de voz" aria-label="Ver os comandos de voz" data-i18n-attr="title:voice.help;aria-label:voice.help">?</button>
@@ -1032,6 +1034,8 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'tone.azrak': 'Voz do Azrak',
+    'tone.vivien': 'Voz da Vivien',
     'hunt.more': 'Ver no analisador',
     'float.tip': 'Abre os cronômetros numa janelinha que fica por cima do jogo',
     'nav.label': 'Ferramentas',
@@ -1422,6 +1426,8 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'tone.azrak': 'Azrak voice',
+    'tone.vivien': 'Vivien voice',
     'hunt.more': 'Open in the analyzer',
     'float.tip': 'Opens the timers in a small window that stays on top of the game',
     'nav.label': 'Tools',
@@ -1812,6 +1818,8 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'tone.azrak': 'Voz de Azrak',
+    'tone.vivien': 'Voz de Vivien',
     'hunt.more': 'Ver en el analizador',
     'float.tip': 'Abre los cronómetros en una ventanita que queda por encima del juego',
     'nav.label': 'Herramientas',
@@ -2202,6 +2210,8 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'tone.azrak': 'Głos Azraka',
+    'tone.vivien': 'Głos Vivien',
     'hunt.more': 'Zobacz w analizatorze',
     'float.tip': 'Otwiera liczniki w małym oknie, które pozostaje nad grą',
     'nav.label': 'Narzędzia',
@@ -2509,6 +2519,17 @@ for (const name of ['drag1', 'drag2', 'dreadlord', 'hydra', 'whoosh', 'heartbeat
 // volume (gain) e repetido (repeat, com gap segundos entre uma vez e outra).
 // "Jogador na tela": o trecho com som, 12% mais rápido, duas vezes seguidas.
 TONES.onscreen = { warn: TONES.sino.warn, done: TONES.sino.done, file: 'sounds/onscreen.mp3', from: 0.06, len: 0.98, rate: 1.12, gain: 1.4, repeat: 2, gap: 0.08 };
+// Vozes dizendo "Monsters respawned". Cada voz tem várias gravações (sounds/azrak-1.mp3, azrak-2.mp3...); a cada aviso
+// toca uma delas, sorteada, sem repetir a anterior. De cada arquivo entra só o trecho com fala (começo e duração, em
+// segundos; o resto é silêncio) e o volume é igualado entre as gravações (terceiro número).
+const VOICES = {
+  azrak: [[0.05, 3.31, 1.77], [0.05, 3.42, 1.81], [0.04, 3.15, 2.12], [0.03, 3.32, 2.12], [0, 3.45, 2.43], [0.06, 4.34, 1.98]],
+  vivien: [[0.04, 3.01, 1.6], [0.06, 3.38, 1.81], [0.04, 4.35, 1.63]],
+};
+for (const [name, takes] of Object.entries(VOICES)) {
+  TONES[name] = { warn: TONES.sino.warn, done: TONES.sino.done,
+    files: takes.map(([from, len, gain], i) => ({ file: 'sounds/' + name + '-' + (i + 1) + '.mp3', from, len, gain })) };
+}
 
 /* ---------- Contas do jogo ----------
    Conferidas contra prints de 10% a 50%: respawn = piso(base / (1 + bônus));
@@ -3673,32 +3694,43 @@ function tone(freq, at, len, vol, wave = 'sine') {
   return { o, at: t };
 }
 // Áudios gravados: cada arquivo é baixado e decodificado só quando o tipo é escolhido, e fica guardado.
-const samples = new Map();   // tipo -> AudioBuffer, ou a promessa dele enquanto baixa
-function loadSample(name) {
-  const def = TONES[name];
-  if (!def || !def.file || !audio) return Promise.resolve(null);
-  if (!samples.has(name)) {
-    samples.set(name, fetch(new URL(def.file, document.baseURI))
+const samples = new Map();   // arquivo -> AudioBuffer, ou a promessa dele enquanto baixa
+// As gravações de um tipo de alerta: uma só, ou várias para sortear (as vozes).
+const takesOf = def => def.files || (def.file ? [def] : []);
+function loadFile(file) {
+  if (!samples.has(file)) {
+    samples.set(file, fetch(new URL(file, document.baseURI))
       .then(r => { if (!r.ok) throw new Error('sem o arquivo'); return r.arrayBuffer(); })
       .then(b => audio.decodeAudioData(b))
-      .then(buf => { samples.set(name, buf); return buf; })
-      .catch(() => { samples.delete(name); return null; }));
+      .then(buf => { samples.set(file, buf); return buf; })
+      .catch(() => { samples.delete(file); return null; }));
   }
-  return Promise.resolve(samples.get(name));
+  return Promise.resolve(samples.get(file));
 }
+// Baixa as gravações do tipo. Devolve se alguma ficou pronta.
+function loadSample(name) {
+  const def = TONES[name];
+  if (!def || !audio || !takesOf(def).length) return Promise.resolve(false);
+  return Promise.all(takesOf(def).map(t => loadFile(t.file))).then(list => list.some(Boolean));
+}
+const lastTake = {};   // tipo -> arquivo da última gravação sorteada, para a seguinte ser outra
 // Toca um dos avisos ('warn' ou 'done') do tipo de alerta escolhido, daqui a "at" segundos.
 function play(kind, at) {
-  const def = TONES[ui.tone];
-  if (kind === 'done' && def.file) {
-    const buf = samples.get(ui.tone);
-    if (buf && typeof buf.then !== 'function') {
-      const from = def.from || 0, len = def.len || buf.duration - from, rate = def.rate || 1;
+  const def = TONES[ui.tone], takes = takesOf(def);
+  if (kind === 'done' && takes.length) {
+    const ready = takes.filter(t => { const b = samples.get(t.file); return b && typeof b.then !== 'function'; });
+    if (ready.length) {
+      // Com mais de uma gravação pronta, sorteia uma que não seja a última que tocou.
+      const pool = ready.length > 1 ? ready.filter(t => t.file !== lastTake[ui.tone]) : ready;
+      const take = pool[Math.floor(Math.random() * pool.length)], buf = samples.get(take.file);
+      lastTake[ui.tone] = take.file;
+      const from = take.from || 0, len = take.len || buf.duration - from, rate = def.rate || 1;
       const t0 = audio.currentTime + Math.max(0, at), step = len / rate + (def.gap || 0);
       return Array.from({ length: def.repeat || 1 }, (_, i) => {
         const o = audio.createBufferSource(), g = audio.createGain();
         o.buffer = buf;
         o.playbackRate.value = rate;
-        g.gain.value = def.gain || 1;
+        g.gain.value = take.gain || 1;
         o.connect(g); g.connect(master);
         const t = t0 + i * step;
         o.start(t, from, len);
@@ -4990,6 +5022,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-10 23:34',
+    pt: ['Novos alertas com voz: "Voz do Azrak" e "Voz da Vivien" dizem "Monsters respawned". Cada um tem várias gravações e toca uma diferente a cada aviso.'],
+    en: ['New spoken alerts: "Azrak voice" and "Vivien voice" say "Monsters respawned". Each has several recordings and plays a different one every time.'],
+    es: ['Nuevas alertas con voz: "Voz de Azrak" y "Voz de Vivien" dicen "Monsters respawned". Cada una tiene varias grabaciones y suena una distinta en cada aviso.'],
+    pl: ['Nowe alarmy głosowe: „Głos Azraka” i „Głos Vivien” mówią „Monsters respawned”. Każdy ma kilka nagrań i za każdym razem odtwarza inne.'],
+  },
   { at: '2026-10-10 22:46',
     pt: ['Comando de voz: a opção ganhou um ícone de microfone e passou a se chamar "Ativar comando de voz".'],
     en: ['Voice command: the option now has a microphone icon and reads "Turn on voice command".'],
