@@ -2892,30 +2892,28 @@ function tr(key, vars) {
 }
 
 /* ---------- Sons de alerta ----------
-   Cada tipo tem o aviso dos 10 segundos e o de zerar.
+   Cada tipo é o som que toca quando o cronômetro zera. Os avisos do caminho (ao iniciar, faltando 30 e 10 segundos,
+   comando de voz) são bipes iguais para todos os tipos: ver "Bipes de aviso".
    Os três primeiros são sintetizados. Cada nota: [forma da onda, frequência em Hz, atraso em s, duração em s, volume].
-   Os outros são áudios gravados (pasta sounds/), tocados ao zerar; nos 10 segundos eles usam a nota curta do Sino. */
+   Os outros são áudios gravados (pasta sounds/); enquanto o arquivo não chega, vale o som do Sino. */
 const TONES = {
   sino: {
-    warn: [['sine', 523, 0, 0.14, 0.05]],
     done: [['sine', 784, 0, 0.3, 0.12], ['sine', 1047, 0.17, 0.5, 0.1]],
   },
   bipe: {
-    warn: [['square', 880, 0, 0.07, 0.022]],
     done: [['square', 1175, 0, 0.09, 0.045], ['square', 1175, 0.16, 0.09, 0.045], ['square', 1175, 0.32, 0.15, 0.045]],
   },
   trompa: {
-    warn: [['triangle', 196, 0, 0.24, 0.1]],
     done: [['sawtooth', 196, 0, 0.42, 0.04], ['triangle', 196, 0, 0.42, 0.12], ['sawtooth', 294, 0.36, 0.75, 0.04], ['triangle', 294, 0.36, 0.75, 0.12]],
   },
 };
 for (const name of ['drag1', 'drag2', 'dreadlord', 'hydra', 'whoosh', 'heartbeat', 'levelup', 'manafull', 'message']) {
-  TONES[name] = { warn: TONES.sino.warn, done: TONES.sino.done, file: 'sounds/' + name + '.wav' };
+  TONES[name] = { done: TONES.sino.done, file: 'sounds/' + name + '.wav' };
 }
 // Um áudio gravado também pode tocar só um trecho (from e len, em segundos), mais rápido (rate), com outro
 // volume (gain) e repetido (repeat, com gap segundos entre uma vez e outra).
 // "Jogador na tela": o trecho com som, 12% mais rápido, duas vezes seguidas.
-TONES.onscreen = { warn: TONES.sino.warn, done: TONES.sino.done, file: 'sounds/onscreen.mp3', from: 0.06, len: 0.98, rate: 1.12, gain: 1.4, repeat: 2, gap: 0.08 };
+TONES.onscreen = { done: TONES.sino.done, file: 'sounds/onscreen.mp3', from: 0.06, len: 0.98, rate: 1.12, gain: 1.4, repeat: 2, gap: 0.08 };
 // Vozes dizendo "Monsters respawned". Cada voz tem várias gravações (sounds/azrak-1.mp3, azrak-2.mp3...); a cada aviso
 // toca uma delas, sorteada, sem repetir a anterior. De cada arquivo entra só o trecho com fala (começo e duração, em
 // segundos; o resto é silêncio) e o volume é igualado entre as gravações (terceiro número).
@@ -2925,7 +2923,7 @@ const VOICES = {
   aghata: [[0.05, 3.81, 2.3], [0.04, 4.03, 2], [0.11, 4.02, 2.1], [0.04, 3.83, 2.3]],
 };
 for (const [name, takes] of Object.entries(VOICES)) {
-  TONES[name] = { warn: TONES.sino.warn, done: TONES.sino.done,
+  TONES[name] = { done: TONES.sino.done,
     files: takes.map(([from, len, gain], i) => ({ file: 'sounds/' + name + '-' + (i + 1) + '.mp3', from, len, gain })) };
 }
 
@@ -4162,10 +4160,10 @@ function loadSample(name) {
   return Promise.all(takesOf(def).map(t => loadFile(t.file))).then(list => list.some(Boolean));
 }
 const lastTake = {};   // tipo -> arquivo da última gravação sorteada, para a seguinte ser outra
-// Toca um dos avisos ('warn' ou 'done') do tipo de alerta escolhido, daqui a "at" segundos.
-function play(kind, at) {
+// Toca o som de zerar do tipo de alerta escolhido, daqui a "at" segundos.
+function play(at) {
   const def = TONES[ui.tone], takes = takesOf(def);
-  if (kind === 'done' && takes.length) {
+  if (takes.length) {
     const ready = takes.filter(t => { const b = samples.get(t.file); return b && typeof b.then !== 'function'; });
     if (ready.length) {
       // Com mais de uma gravação pronta, sorteia uma que não seja a última que tocou.
@@ -4188,7 +4186,53 @@ function play(kind, at) {
     // O arquivo ainda não chegou: por ora vale a nota do Sino, e os avisos são reagendados quando ele chegar.
     loadSample(ui.tone).then(ready => { if (ready) for (const t of timers.values()) scheduleSounds(t); });
   }
-  return def[kind].map(([wave, freq, delay, len, vol]) => tone(freq, at + delay, len, vol, wave));
+  return def.done.map(([wave, freq, delay, len, vol]) => tone(freq, at + delay, len, vol, wave));
+}
+/* ---------- Bipes de aviso ----------
+   Um bipe curto e alto, igual em todos os tipos de alerta; o que muda é quantas vezes ele toca:
+     ao iniciar um cronômetro .......... 1 bipe
+     comando de voz (acerto ou zerar) .. 2 bipes
+     faltando 30 segundos .............. 1 bipe
+     faltando 10 segundos .............. 3 bipes
+   O "iniciar" falado dá só o bipe de início. */
+const CUE = { wave: 'sine', freq: 880, len: 0.11, vol: 0.2, gap: 0.17 };
+const cue = (n, at) => Array.from({ length: n }, (_, i) => tone(CUE.freq, at + i * CUE.gap, CUE.len, CUE.vol, CUE.wave));
+// Bipe para agora. Vários pedidos na mesma ação (iniciar todos, ou "iniciar" e "mais dez" na mesma fala) viram um
+// toque só, o de mais bipes: três cronômetros largando juntos não dão três bipes empilhados.
+let cueWant = 0;
+function cueNow(n) {
+  if (!ui.sound || !audio) return;
+  if (!cueWant) queueMicrotask(() => { const k = cueWant; cueWant = 0; if (audio) cue(k, 0); });
+  cueWant = Math.max(cueWant, n);
+}
+// Os bipes dos 30 e dos 10 segundos de todos os cronômetros são agendados juntos, no relógio do áudio. Sempre que um
+// cronômetro muda (largou, zerou, foi acertado, saiu) a lista é refeita; avisos de cronômetros diferentes que cairiam
+// praticamente juntos viram um só.
+let cueNodes = [], cuesPending = false;
+function scheduleCues() {
+  cuesPending = false;
+  for (const n of cueNodes) if (audio && n.at > audio.currentTime) { try { n.o.stop(); n.o.disconnect(); } catch { /* já parou */ } }
+  cueNodes = [];
+  if (!ui.sound || !audio) return;
+  const now = Date.now(), marks = [];
+  for (const t of timers.values()) {
+    if (t.endAt == null) continue;
+    const left = (t.endAt - now) / 1000;
+    if (left > 30) marks.push([left - 30, 1]);
+    if (left > 10) marks.push([left - 10, 3]);
+  }
+  marks.sort((a, b) => a[0] - b[0]);
+  let last = -9;
+  for (const [when, n] of marks) {
+    if (when - last < 0.7) continue;
+    last = when;
+    cueNodes.push(...cue(n, when));
+  }
+}
+function cuesDirty() {
+  if (cuesPending) return;
+  cuesPending = true;
+  queueMicrotask(scheduleCues);
 }
 // Amostra do alerta ao mexer no volume ou trocar o tipo. Uma amostra nova interrompe a anterior.
 let demo = [];
@@ -4197,7 +4241,7 @@ function preview() {
   demo = [];
   if (!audio) return;
   const name = ui.tone;
-  loadSample(name).then(() => { if (audio && ui.tone === name) demo = play('done', 0); });
+  loadSample(name).then(() => { if (audio && ui.tone === name) demo = play(0); });
 }
 // Cancela só o que ainda não começou a tocar: um aviso em andamento termina sozinho.
 function cancelSounds(t) {
@@ -4205,6 +4249,7 @@ function cancelSounds(t) {
     if (audio && n.at > audio.currentTime) { try { n.o.stop(); n.o.disconnect(); } catch { /* já parou */ } }
   }
   t.nodes = [];
+  cuesDirty();   // os bipes dos 30 e dos 10 segundos acompanham qualquer mudança no cronômetro
 }
 // Os avisos são agendados no relógio do áudio já na largada, então tocam na hora certa
 // mesmo com a aba em segundo plano, atrás do jogo.
@@ -4213,8 +4258,7 @@ function scheduleSounds(t) {
   if (!ui.sound || !audio || t.endAt == null) return;
   const left = (t.endAt - Date.now()) / 1000;
   if (left <= 0) return;
-  if (left > 10) t.nodes.push(...play('warn', left - 10));
-  t.nodes.push(...play('done', left));
+  t.nodes.push(...play(left));
 }
 function keepAwake() {
   if (!wake && navigator.wakeLock) {
@@ -4230,6 +4274,7 @@ function startTimer(key, at) {   // "at": de quando contar (o comando de voz con
   t.doneAt = null;
   t.pauseUntil = null;
   scheduleSounds(t);
+  cueNow(1);   // bipe de início (as voltas que recomeçam sozinhas não passam por aqui)
   lapsAdd(t, 1);
   tick();
 }
@@ -4246,7 +4291,7 @@ function nudgeTimer(key, sec) {
   if (t.pauseUntil != null) t.pauseUntil += sec * 1000;
   else if (t.endAt != null) {
     t.endAt += sec * 1000;
-    if (t.endAt <= Date.now() && ui.sound && audio) play('done', 0);   // tirou mais do que faltava: a criatura já nasceu
+    if (t.endAt <= Date.now() && ui.sound && audio) play(0);   // tirou mais do que faltava: a criatura já nasceu
     scheduleSounds(t);
   } else return;
   tick();
@@ -5655,6 +5700,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 19:34',
+    pt: ['Bipes do cronômetro mais altos e com um padrão para cada momento: um bipe ao iniciar, um faltando 30 segundos e três faltando 10 segundos.', 'Comando de voz: dois bipes confirmam os acertos (+10, −10, +5…) e o zerar; o "iniciar" dá o bipe de início.'],
+    en: ['Louder timer beeps with a pattern for each moment: one beep on start, one with 30 seconds left and three with 10 seconds left.', 'Voice command: two beeps confirm adjustments (+10, −10, +5…) and reset; "start" gives the start beep.'],
+    es: ['Bips del cronómetro más altos y con un patrón para cada momento: un bip al iniciar, uno cuando faltan 30 segundos y tres cuando faltan 10.', 'Comando de voz: dos bips confirman los ajustes (+10, −10, +5…) y el reinicio; "iniciar" da el bip de inicio.'],
+    pl: ['Głośniejsze sygnały licznika, z innym wzorem na każdy moment: jeden przy starcie, jeden na 30 sekund przed końcem i trzy na 10 sekund przed końcem.', 'Polecenia głosowe: dwa sygnały potwierdzają korekty (+10, −10, +5…) i zerowanie; „start” daje sygnał startu.'],
+  },
   { at: '2026-10-11 18:59',
     pt: ['Analisador de hunt: os elite tokens do loot agora são divididos na proporção dos elite boosters que cada jogador gastou na hunt. Sem booster gasto daquele tipo, a divisão continua em partes iguais.'],
     en: ['Hunt analyzer: the elite tokens in the loot are now split in proportion to the elite boosters each player spent on the hunt. With no booster of that type spent, the split stays equal.'],
@@ -6984,7 +7035,7 @@ function voiceRun(cmds, at) {
   if (!keys.length) return;
   const done = cmds.map(c => voiceDo(c, keys, at));
   setStatus(...done[done.length - 1]);
-  if (done.some(d => d[0] === 'ok') && ui.sound && audio) for (const [wave, freq, delay, len, vol] of TONES.sino.warn) tone(freq, delay, len, vol, wave);   // um toque curto confirma que ouviu
+  if (cmds.some((c, i) => done[i][0] === 'ok' && c.cmd !== 'start')) cueNow(2);   // dois bipes confirmam o comando; o "iniciar" já dá o bipe de início
 }
 // Mostra na tela o que o navegador entendeu da fala: é assim que se vê por que um comando não pegou.
 // state: 'live' (ainda falando), 'ok' (era comando) ou 'no' (não era).
