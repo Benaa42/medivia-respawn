@@ -44,14 +44,20 @@ service cloud.firestore {
 
     // XP das criaturas, lido do bestiário do jogo: um documento por criatura.
     // - Qualquer pessoa lê.
-    // - Quem tem a identidade anônima do site cria a criatura (nome e XP por abate).
+    // - Quem tem a identidade anônima do site cria a criatura (nome, XP por abate e, se lidos, HP, ARM, DEF, SPD e Mana).
     // - Qualquer pessoa com identidade corrige o XP com um print mais novo; o nome e quem enviou primeiro não mudam.
     // - Só quem enviou primeiro apaga.
     match /creatures/{id} {
+      // Atributo opcional da ficha: inteiro entre zero e o máximo.
+      function stat(d, k, max) {
+        return !(k in d) || (d[k] is int && d[k] >= 0 && d[k] <= max);
+      }
       function shape(d) {
-        return d.keys().hasOnly(['name', 'exp', 'owner', 'at'])
+        return d.keys().hasOnly(['name', 'exp', 'hp', 'armLo', 'armHi', 'defLo', 'defHi', 'spd', 'mana', 'owner', 'at'])
           && d.name is string && d.name.size() >= 1 && d.name.size() <= 60
           && d.exp is int && d.exp >= 0 && d.exp <= 100000000
+          && stat(d, 'hp', 100000000) && stat(d, 'mana', 100000000) && stat(d, 'spd', 1000000)
+          && stat(d, 'armLo', 1000000) && stat(d, 'armHi', 1000000) && stat(d, 'defLo', 1000000) && stat(d, 'defHi', 1000000)
           && d.owner is string
           && d.at == request.time;
       }
