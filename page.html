@@ -219,6 +219,7 @@ dialog.support[open] { display: flex; flex-direction: column; gap: 14px; }
   color: var(--title);
 }
 .paste kbd { margin-inline: 2px; }
+.paste small { display: block; margin-top: 5px; font-size: 13px; font-weight: 400; color: var(--label); }
 
 .desk { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; align-items: start; }
 .win { display: flex; flex-direction: column; min-width: 0; }
@@ -640,7 +641,8 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </div>
 
   <section class="page" id="page-timer">
-  <p class="paste"><span data-i18n="paste.a">Com o print da janela de bônus copiado, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="paste.b">em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</span></p>
+  <p class="paste"><span data-i18n="paste.a">Com o print da janela de bônus copiado, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="paste.b">em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</span>
+    <small data-i18n="paste.best">O print da ficha de uma criatura no bestiário também vale: ele guarda ou atualiza o XP e os atributos dela.</small></p>
 
   <div class="desk">
     <div class="side">
@@ -726,13 +728,14 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </section>
 
   <section class="page" id="page-creatures" hidden>
+  <p class="paste"><span data-i18n="creatures.paste.a">Com o print da ficha de uma criatura no bestiário copiado (aba Normal), aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="creatures.paste.b">nesta página. O XP e os atributos dela são atualizados para todos; um print mais novo corrige o que já estava.</span></p>
 <div class="support tool" id="creatures" aria-labelledby="creatures-title">
   <div class="support-end">
     <h2 id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
   </div>
   <p class="status" id="creatures-status" role="status" hidden></p>
   <div class="creatures-pane" id="creatures-list">
-  <p class="support-note" data-i18n="creatures.intro">XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus.</p>
+  <p class="support-note" data-i18n="creatures.intro">XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus. Clique numa criatura para abrir a ficha dela.</p>
   <div class="creatures-bar">
     <input type="search" id="creatures-search" placeholder="Buscar criatura ou respawn" aria-label="Buscar criatura ou respawn" autocomplete="off" data-i18n-attr="placeholder:creatures.search;aria-label:creatures.search">
     <label class="creatures-sort"><span data-i18n="creatures.sort">Ordenar por</span>
@@ -1034,6 +1037,10 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'paste.best': 'O print da ficha de uma criatura no bestiário também vale: ele guarda ou atualiza o XP e os atributos dela.',
+    'creatures.paste.a': 'Com o print da ficha de uma criatura no bestiário copiado (aba Normal), aperte',
+    'creatures.paste.b': 'nesta página. O XP e os atributos dela são atualizados para todos; um print mais novo corrige o que já estava.',
+    'creature.update': 'Os números mudaram no jogo? Cole um print novo da ficha desta criatura no bestiário (aba Normal) e eles são atualizados.',
     'tone.azrak': 'Voz do Azrak',
     'tone.vivien': 'Voz da Vivien',
     'hunt.more': 'Ver no analisador',
@@ -1079,7 +1086,7 @@ const I18N = {
     'creature.s.manaD': 'mana da criatura',
     'creatures.open': 'Criaturas',
     'creatures.title': 'Criaturas',
-    'creatures.intro': 'XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus. Para completar uma criatura, cole o print da ficha dela no bestiário do jogo, na aba Normal.',
+    'creatures.intro': 'XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus. Clique numa criatura para abrir a ficha dela.',
     'creatures.search': 'Buscar criatura ou respawn',
     'creatures.sort': 'Ordenar por',
     'creatures.by.name': 'Nome',
@@ -1426,6 +1433,10 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'paste.best': 'A screenshot of a creature page in the bestiary works too: it saves or updates its XP and stats.',
+    'creatures.paste.a': 'With a screenshot of a creature page in the bestiary copied (Normal tab), press',
+    'creatures.paste.b': 'on this page. Its XP and stats are updated for everyone; a newer screenshot corrects what was there.',
+    'creature.update': 'Did the numbers change in the game? Paste a new screenshot of the bestiary page of this creature (Normal tab) and they are updated.',
     'tone.azrak': 'Azrak voice',
     'tone.vivien': 'Vivien voice',
     'hunt.more': 'Open in the analyzer',
@@ -1471,7 +1482,7 @@ const I18N = {
     'creature.s.manaD': 'mana of the creature',
     'creatures.open': 'Creatures',
     'creatures.title': 'Creatures',
-    'creatures.intro': 'XP and stats come from bestiary screenshots; the respawns, from screenshots of the bonus window. To complete a creature, paste a screenshot of its page in the game bestiary, on the Normal tab.',
+    'creatures.intro': 'XP and stats come from bestiary screenshots; the respawns, from screenshots of the bonus window. Click a creature to open its sheet.',
     'creatures.search': 'Search creature or respawn',
     'creatures.sort': 'Sort by',
     'creatures.by.name': 'Name',
@@ -1818,6 +1829,10 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'paste.best': 'La captura de la ficha de una criatura en el bestiario también sirve: guarda o actualiza su XP y sus atributos.',
+    'creatures.paste.a': 'Con la captura de la ficha de una criatura en el bestiario copiada (pestaña Normal), pulsa',
+    'creatures.paste.b': 'en esta página. Su XP y sus atributos se actualizan para todos; una captura más nueva corrige lo que había.',
+    'creature.update': '¿Cambiaron los números en el juego? Pega una captura nueva de la ficha de esta criatura en el bestiario (pestaña Normal) y se actualizan.',
     'tone.azrak': 'Voz de Azrak',
     'tone.vivien': 'Voz de Vivien',
     'hunt.more': 'Ver en el analizador',
@@ -1863,7 +1878,7 @@ const I18N = {
     'creature.s.manaD': 'maná de la criatura',
     'creatures.open': 'Criaturas',
     'creatures.title': 'Criaturas',
-    'creatures.intro': 'El XP y los atributos vienen de las capturas del bestiario; los respawns, de las capturas de la ventana de bonus. Para completar una criatura, pega la captura de su ficha en el bestiario del juego, en la pestaña Normal.',
+    'creatures.intro': 'El XP y los atributos vienen de las capturas del bestiario; los respawns, de las capturas de la ventana de bonus. Haz clic en una criatura para abrir su ficha.',
     'creatures.search': 'Buscar criatura o respawn',
     'creatures.sort': 'Ordenar por',
     'creatures.by.name': 'Nombre',
@@ -2210,6 +2225,10 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'paste.best': 'Zrzut karty stworzenia z bestiariusza też działa: zapisuje lub aktualizuje jego XP i statystyki.',
+    'creatures.paste.a': 'Po skopiowaniu zrzutu karty stworzenia z bestiariusza (zakładka Normalny) naciśnij',
+    'creatures.paste.b': 'na tej stronie. Jego XP i statystyki zostaną zaktualizowane dla wszystkich; nowszy zrzut poprawia poprzednie dane.',
+    'creature.update': 'Liczby zmieniły się w grze? Wklej nowy zrzut karty tego stworzenia z bestiariusza (zakładka Normalny), a zostaną zaktualizowane.',
     'tone.azrak': 'Głos Azraka',
     'tone.vivien': 'Głos Vivien',
     'hunt.more': 'Zobacz w analizatorze',
@@ -2255,7 +2274,7 @@ const I18N = {
     'creature.s.manaD': 'mana stworzenia',
     'creatures.open': 'Stworzenia',
     'creatures.title': 'Stworzenia',
-    'creatures.intro': 'XP i statystyki pochodzą ze zrzutów bestiariusza, a respawny ze zrzutów okna bonusu. Aby uzupełnić stworzenie, wklej zrzut jego karty z bestiariusza gry, na zakładce Normalny.',
+    'creatures.intro': 'XP i statystyki pochodzą ze zrzutów bestiariusza, a respawny ze zrzutów okna bonusu. Kliknij stworzenie, aby otworzyć jego kartę.',
     'creatures.search': 'Szukaj stworzenia lub respawnu',
     'creatures.sort': 'Sortuj według',
     'creatures.by.name': 'Nazwa',
@@ -5022,6 +5041,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-11 00:07',
+    pt: ['O site agora avisa, no Cronômetro, na página de Criaturas e na ficha, que o print da ficha do bestiário pode ser colado para guardar ou atualizar o XP e os atributos da criatura.'],
+    en: ['The site now says, on the Timer, on the Creatures page and on the sheet, that a bestiary page screenshot can be pasted to save or update the XP and stats of a creature.'],
+    es: ['El sitio ahora avisa, en el Cronómetro, en la página de Criaturas y en la ficha, que la captura de la ficha del bestiario se puede pegar para guardar o actualizar el XP y los atributos de la criatura.'],
+    pl: ['Strona informuje teraz, w Liczniku, na stronie Stworzeń i na karcie, że zrzut karty z bestiariusza można wkleić, aby zapisać lub zaktualizować XP i statystyki stworzenia.'],
+  },
   { at: '2026-10-10 23:34',
     pt: ['Novos alertas com voz: "Voz do Azrak" e "Voz da Vivien" dizem "Monsters respawned". Cada um tem várias gravações e toca uma diferente a cada aviso.'],
     en: ['New spoken alerts: "Azrak voice" and "Vivien voice" say "Monsters respawned". Each has several recordings and plays a different one every time.'],
@@ -5406,7 +5431,8 @@ function renderCreature() {
             el('td', { text: fmtTime(w.sec) + ' ' + unitName() }),
             el('td', { text: fmtInt(w.kills) }),
             el('td', { class: w.xp == null ? 'none' : null, text: w.xp == null ? '?' : fmtXp(w.xp) })))))),
-      ] : el('p', { class: 'support-note', text: tr('creature.whereNone') }))].filter(Boolean));
+      ] : el('p', { class: 'support-note', text: tr('creature.whereNone') })),
+    need ? null : el('p', { class: 'support-note', text: tr('creature.update') })].filter(Boolean));   // com dado faltando, o aviso de cima já diz o que colar
 }
 $('#creature-close').addEventListener('click', () => showCreature(null));
 $('#creature-dlg').addEventListener('close', () => { creatureId = null; });
