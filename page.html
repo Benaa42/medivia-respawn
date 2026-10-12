@@ -854,7 +854,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
           <button class="dlg go float-cta" type="button" id="float-btn" title="Abre os cronômetros numa janelinha que fica por cima do jogo" data-i18n-attr="title:float.tip"><svg class="ico" aria-hidden="true"><use href="#i-pip"/></svg><span data-i18n="float">Janela flutuante</span></button>
           <button class="dlg go" type="button" id="read-btn" data-i18n="read">Ler print</button>
         </div>
-        <label class="toggle float-game" title="Deixa a janela flutuante com o cinza dos painéis do jogo, para ela se misturar à tela" data-i18n-attr="title:float.gameTip"><input type="checkbox" id="opt-float-game"> <span data-i18n="float.game">Janela flutuante nas cores do jogo</span></label>
+        <label class="toggle float-game" title="Troca o fundo esverdeado da janela flutuante pelo preto neutro do chat do jogo, para ela se misturar à tela" data-i18n-attr="title:float.gameTip"><input type="checkbox" id="opt-float-game"> <span data-i18n="float.game">Janela flutuante nas cores do jogo</span></label>
         <input class="sr" type="file" id="file" accept="image/*" tabindex="-1" aria-hidden="true">
       </footer>
       <p class="status" id="status" role="status" data-kind="info" data-i18n="status.default">Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print. O print do mapper da wiki, com o painel do respawn aberto, também vale.</p>
@@ -1228,7 +1228,7 @@ const I18N = {
     'legend.col.props': 'Propriedades e efeitos',
     'creature.exclusive': 'Só o lendário deixa:',
     'float.game': 'Janela flutuante nas cores do jogo',
-    'float.gameTip': 'Deixa a janela flutuante com o cinza dos painéis do jogo, para ela se misturar à tela',
+    'float.gameTip': 'Troca o fundo esverdeado da janela flutuante pelo preto neutro do chat do jogo, para ela se misturar à tela',
     'creature.specialAny': 'item lendário (o de moldura colorida no saque)',
     'read.frame': 'Item lendário de moldura {c}: cai em {v} das vezes.',
     'frame.red': 'vermelha',
@@ -1718,7 +1718,7 @@ const I18N = {
     'legend.col.props': 'Properties and effects',
     'creature.exclusive': 'Only the legendary drops:',
     'float.game': 'Floating window in the game colours',
-    'float.gameTip': 'Gives the floating window the grey of the game panels, so it blends into the screen',
+    'float.gameTip': 'Swaps the greenish background of the floating window for the neutral black of the game chat, so it blends into the screen',
     'creature.specialAny': 'legendary item (the one with the coloured frame in the loot)',
     'read.frame': 'Legendary item with a {c} frame: it drops {v} of the time.',
     'frame.red': 'red',
@@ -2208,7 +2208,7 @@ const I18N = {
     'legend.col.props': 'Propiedades y efectos',
     'creature.exclusive': 'Solo lo suelta el legendario:',
     'float.game': 'Ventana flotante con los colores del juego',
-    'float.gameTip': 'Deja la ventana flotante con el gris de los paneles del juego, para que se mezcle con la pantalla',
+    'float.gameTip': 'Cambia el fondo verdoso de la ventana flotante por el negro neutro del chat del juego, para que se mezcle con la pantalla',
     'creature.specialAny': 'item legendario (el del marco de color en el botín)',
     'read.frame': 'Item legendario de marco {c}: cae el {v} de las veces.',
     'frame.red': 'rojo',
@@ -2698,7 +2698,7 @@ const I18N = {
     'legend.col.props': 'Właściwości i efekty',
     'creature.exclusive': 'Wypada tylko z legendarnego:',
     'float.game': 'Pływające okno w kolorach gry',
-    'float.gameTip': 'Nadaje pływającemu oknu szarość paneli gry, aby wtapiało się w ekran',
+    'float.gameTip': 'Zamienia zielonkawe tło pływającego okna na neutralną czerń czatu gry, aby wtapiało się w ekran',
     'creature.specialAny': 'przedmiot legendarny (ten z kolorową ramką w łupie)',
     'read.frame': 'Przedmiot legendarny z ramką {c}: wypada w {v} przypadków.',
     'frame.red': 'czerwoną',
@@ -4711,11 +4711,11 @@ function tick() {
 setInterval(tick, 250);
 
 /* Janela flutuante: fica por cima do jogo (em janela ou sem bordas). */
-// Cores do jogo para a janela flutuante (opção "nas cores do jogo"): os painéis do Medivia são de um cinza-escuro
-// neutro, sem o tom esverdeado do site, com os títulos em laranja e os números em verde. Tiradas de um print da
-// tela do jogo; trocam as mesmas variáveis de cor que a janela já usa.
-const FLOAT_GAME = { '--ground': '#1a1a1a', '--title': '#f0f0f0', '--label': '#c8c8c8', '--amber': '#e8a23a', '--value': '#1fc82a',
-  '--teal': '#e8a23a', '--btn': '#282828', '--btn-edge': '#454545', '--edge': '#303030' };
+// Cores do jogo para a janela flutuante (opção "nas cores do jogo"). Só os fundos e as linhas mudam: o preto neutro
+// da área do chat do Medivia (medido num print da tela do jogo) no lugar do fundo esverdeado do site, e cinzas
+// neutros nos botões e nas divisórias. Textos e formato dos botões ficam como no visual normal da janela.
+// (A primeira versão usava o cinza mais claro dos painéis laterais do jogo, e o centro da janela destoava.)
+const FLOAT_GAME = { '--ground': '#0f0f0f', '--btn': '#1c1c1c', '--btn-edge': '#333333', '--edge': '#2a2a2a' };
 // Aplica (ou tira) as cores do jogo na janela flutuante que estiver aberta.
 function floatTheme() {
   if (float.win) float.win.document.documentElement.classList.toggle('game', !!ui.floatGame);
@@ -4812,8 +4812,8 @@ async function toggleFloat() {
           'button:disabled{opacity:.45;pointer-events:none}' +
           'button.all{margin-top:10px;width:100%}button.all+button.all{margin-top:6px}' +
           'p.voice{margin:8px 0 0;font-size:12px;color:var(--label)}' +
-          // Cores do jogo: as mesmas variáveis com outros valores, e os botões com o canto reto dos botões do jogo.
-          ':root.game{' + Object.entries(FLOAT_GAME).map(([k, v]) => k + ':' + v).join(';') + '}.game button{border-radius:3px}' }));
+          // Cores do jogo: as mesmas variáveis de fundo e de linha com outros valores.
+          ':root.game{' + Object.entries(FLOAT_GAME).map(([k, v]) => k + ':' + v).join(';') + '}' }));
       float.list = el('div');
       float.all = el('button', { class: 'all', type: 'button', text: tr('startAll'), onclick: () => { for (const g of groupsNow()) startTimer(g.key); } });
       float.none = el('button', { class: 'all zero', type: 'button', text: tr('resetAll'), onclick: () => { for (const g of groupsNow()) resetTimer(g.key); } });
@@ -6099,6 +6099,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 19:18',
+    pt: ['Janela flutuante nas cores do jogo: o centro tinha ficado claro demais. Agora o fundo é o preto neutro do chat do jogo, e os botões e textos ficam como no visual normal.'],
+    en: ['Floating window in the game colours: the centre had come out too light. The background is now the neutral black of the game chat, and buttons and text stay as in the normal look.'],
+    es: ['Ventana flotante con los colores del juego: el centro había quedado demasiado claro. Ahora el fondo es el negro neutro del chat del juego, y los botones y textos quedan como en el aspecto normal.'],
+    pl: ['Pływające okno w kolorach gry: środek wyszedł zbyt jasny. Teraz tło to neutralna czerń czatu gry, a przyciski i teksty zostają jak w zwykłym wyglądzie.'],
+  },
   { at: '2026-10-12 19:17',
     pt: ['Itens lendários: entraram as outras duas tabelas da wiki, com a figura de cada item: os exclusivos dos lendários (chaves, troféus, mochilas) e as menções honrosas.', 'A Necromantic Backpack, que não tinha figura na wiki, ganhou a dela, animada como no jogo.', 'Na ficha da criatura, a aba Lendário mostra também os itens que só o lendário dela deixa.'],
     en: ['Legendary items: the other two wiki tables are in, with the picture of each item: the legendary exclusives (keys, trophies, backpacks) and the honorable mentions.', 'The Necromantic Backpack, which had no picture on the wiki, got its own, animated as in the game.', 'On the creature sheet, the Legendary tab also shows the items only its legendary drops.'],
