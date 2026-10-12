@@ -203,6 +203,9 @@ dialog#creature-dlg { width: min(880px, calc(100vw - 32px)); scrollbar-width: th
 .creature-odds h3 small { font-size: 12px; font-weight: 400; color: var(--faint); }
 .creature-odds b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
 .creature-odds .creature-hint { font-size: 13px; color: var(--faint); }
+/* A conta que interessa: vir o lendário e ainda cair o item */
+.creature-odds .creature-real { font-size: 15px; color: var(--title); }
+.creature-odds .creature-real b { color: var(--value); }
 .creature-where { display: flex; flex-direction: column; gap: 8px; }
 .creature-where h3 { font: 600 16px/1.3 var(--font-ui); color: var(--title); }
 .creature-where .creatures-wrap { flex: none; min-height: 0; }
@@ -1204,6 +1207,10 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'creature.specialAny': 'item lendário (o de moldura colorida no saque)',
+    'read.frame': 'Item lendário de moldura {c}: cai em {v} das vezes.',
+    'frame.red': 'vermelha',
+    'frame.yellow': 'amarela',
     'legend.view.creatures': 'Criaturas',
     'legend.view.items': 'Itens lendários',
     'legend.intro': 'Itens lendários do jogo e as criaturas que os deixam, pela wiki do Medivia. Eles caem da versão lendária da criatura. Clique numa criatura para abrir a ficha dela; a chance real aparece quando os prints do bestiário já a trouxeram.',
@@ -1221,7 +1228,7 @@ const I18N = {
     'creature.dropIn': 'ou seja, de 1 em {a} a 1 em {b} abates',
     'creature.dropInOne': 'ou seja, 1 em {b} abates',
     'creature.needOdds': 'Para a chance real falta saber de quanto em quanto vem o lendário: cole um print desta ficha no bestiário com o mouse parado sobre a aba Lendário.',
-    'creature.needDrop': 'Para ver a chance do item especial, cole um print da aba Lendário desta ficha com o mouse parado sobre o item no saque.',
+    'creature.needDrop': 'Para ver a chance real do item, cole um print da aba Lendário desta ficha no bestiário com o mouse parado sobre a aba Lendário: a dica traz a chance de vir o lendário, e a cor da moldura do item no saque diz a chance de ele cair.',
     'read.drop': 'Item especial: {x}.',
     'read.odds': 'A raridade {t} vem 1 vez em {n}.',
     'tok.byBoost': 'Cada tipo de token é dividido na proporção dos elite boosters daquele tipo que cada jogador gastou nesta hunt (o número entre parênteses).',
@@ -1682,6 +1689,10 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'creature.specialAny': 'legendary item (the one with the coloured frame in the loot)',
+    'read.frame': 'Legendary item with a {c} frame: it drops {v} of the time.',
+    'frame.red': 'red',
+    'frame.yellow': 'yellow',
     'legend.view.creatures': 'Creatures',
     'legend.view.items': 'Legendary items',
     'legend.intro': 'Legendary items of the game and the creatures that drop them, from the Medivia wiki. They drop from the legendary version of the creature. Click a creature to open its sheet; the real chance shows once bestiary screenshots have brought it in.',
@@ -1699,7 +1710,7 @@ const I18N = {
     'creature.dropIn': 'that is, from 1 in {a} to 1 in {b} kills',
     'creature.dropInOne': 'that is, 1 in {b} kills',
     'creature.needOdds': 'For the real chance, the site still needs how often the legendary comes: paste a screenshot of this page in the bestiary with the mouse resting on the Legendary tab.',
-    'creature.needDrop': 'To see the chance of the special item, paste a screenshot of the Legendary tab of this page with the mouse resting on the item in the loot.',
+    'creature.needDrop': 'To see the real chance of the item, paste a screenshot of the Legendary tab of this page in the bestiary with the mouse resting on the Legendary tab: the tooltip gives the chance of a legendary, and the colour of the item frame in the loot tells the chance of the drop.',
     'read.drop': 'Special item: {x}.',
     'read.odds': 'The {t} rarity comes 1 time in {n}.',
     'tok.byBoost': 'Each token type is split in proportion to the elite boosters of that type each player spent on this hunt (the number in brackets).',
@@ -2160,6 +2171,10 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'creature.specialAny': 'item legendario (el del marco de color en el botín)',
+    'read.frame': 'Item legendario de marco {c}: cae el {v} de las veces.',
+    'frame.red': 'rojo',
+    'frame.yellow': 'amarillo',
     'legend.view.creatures': 'Criaturas',
     'legend.view.items': 'Items legendarios',
     'legend.intro': 'Items legendarios del juego y las criaturas que los sueltan, según la wiki de Medivia. Caen de la versión legendaria de la criatura. Haz clic en una criatura para abrir su ficha; la probabilidad real aparece cuando las capturas del bestiario ya la trajeron.',
@@ -2177,7 +2192,7 @@ const I18N = {
     'creature.dropIn': 'es decir, de 1 en {a} a 1 en {b} muertes',
     'creature.dropInOne': 'es decir, 1 en {b} muertes',
     'creature.needOdds': 'Para la probabilidad real falta saber cada cuánto viene el legendario: pega una captura de esta ficha en el bestiario con el ratón quieto sobre la pestaña Legendario.',
-    'creature.needDrop': 'Para ver la probabilidad del item especial, pega una captura de la pestaña Legendario de esta ficha con el ratón quieto sobre el item en el botín.',
+    'creature.needDrop': 'Para ver la probabilidad real del item, pega una captura de la pestaña Legendario de esta ficha en el bestiario con el ratón quieto sobre la pestaña Legendario: la ayuda trae la probabilidad de que venga el legendario, y el color del marco del item en el botín dice la probabilidad de que caiga.',
     'read.drop': 'Item especial: {x}.',
     'read.odds': 'La rareza {t} viene 1 vez en {n}.',
     'tok.byBoost': 'Cada tipo de token se reparte en proporción a los elite boosters de ese tipo que cada jugador gastó en esta hunt (el número entre paréntesis).',
@@ -2638,6 +2653,10 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'creature.specialAny': 'przedmiot legendarny (ten z kolorową ramką w łupie)',
+    'read.frame': 'Przedmiot legendarny z ramką {c}: wypada w {v} przypadków.',
+    'frame.red': 'czerwoną',
+    'frame.yellow': 'żółtą',
     'legend.view.creatures': 'Stworzenia',
     'legend.view.items': 'Przedmioty legendarne',
     'legend.intro': 'Przedmioty legendarne w grze i stworzenia, z których wypadają, według wiki Medivii. Wypadają z legendarnej wersji stworzenia. Kliknij stworzenie, aby otworzyć jego kartę; rzeczywista szansa pojawia się, gdy przyniosły ją zrzuty z bestiariusza.',
@@ -2655,7 +2674,7 @@ const I18N = {
     'creature.dropIn': 'czyli od 1 na {a} do 1 na {b} zabójstw',
     'creature.dropInOne': 'czyli 1 na {b} zabójstw',
     'creature.needOdds': 'Do rzeczywistej szansy brakuje informacji, jak często pojawia się legendarny: wklej zrzut tej strony z bestiariusza z kursorem zatrzymanym na zakładce Legendarny.',
-    'creature.needDrop': 'Aby zobaczyć szansę na przedmiot specjalny, wklej zrzut zakładki Legendarny tej strony z kursorem zatrzymanym na przedmiocie w łupie.',
+    'creature.needDrop': 'Aby zobaczyć rzeczywistą szansę na przedmiot, wklej zrzut zakładki Legendarny tej strony z bestiariusza z kursorem zatrzymanym na zakładce Legendarny: podpowiedź podaje szansę na legendarnego, a kolor ramki przedmiotu w łupie mówi o szansie na wypadnięcie.',
     'read.drop': 'Przedmiot specjalny: {x}.',
     'read.odds': 'Rzadkość {t} pojawia się 1 raz na {n}.',
     'tok.byBoost': 'Każdy rodzaj tokenu jest dzielony proporcjonalnie do elite boosterów tego rodzaju, które każdy gracz zużył na tym polowaniu (liczba w nawiasie).',
@@ -3302,7 +3321,39 @@ async function ocrLines(blob) {
     try { await w.setParameters({ tessedit_pageseg_mode: '11' }); } catch { /* o leitor volta ao normal na próxima página */ }
     return out;
   };
-  return { lines, crop, digits, peek, block, green, row, close: () => { c.width = c.height = 0; bmp.close(); } };
+  // Casas de item com moldura vermelha ou amarela num trecho do print (o saque do bestiário). Uma moldura são duas
+  // linhas horizontais da mesma cor e do mesmo tamanho, uma em cima da outra à distância de um quadrado.
+  const frames = (x, y, wd, ht) => {
+    const found = { red: 0, yellow: 0 };
+    x = Math.max(0, Math.round(x)); y = Math.max(0, Math.round(y));
+    wd = Math.min(bmp.width - x, Math.round(wd)); ht = Math.min(bmp.height - y, Math.round(ht));
+    if (wd < 20 || ht < 20) return found;
+    const k = document.createElement('canvas');
+    k.width = wd;
+    k.height = ht;
+    const kg = k.getContext('2d', { willReadFrequently: true });
+    kg.drawImage(bmp, x, y, wd, ht, 0, 0, wd, ht);
+    const px = kg.getImageData(0, 0, wd, ht).data;
+    const kind = i => {
+      const r = px[i], g = px[i + 1], b = px[i + 2];
+      if (r < 140 || r > 220) return null;
+      return g < 75 && b < 65 ? 'red' : Math.abs(r - g) < 28 && b < 115 && r - b > 55 ? 'yellow' : null;
+    };
+    const runs = [];
+    for (let yy = 0; yy < ht; yy++) {
+      for (let xx = 0; xx < wd; xx++) {
+        const c = kind((yy * wd + xx) * 4);
+        if (!c) continue;
+        let end = xx;
+        while (end < wd && kind((yy * wd + end) * 4) === c) end++;
+        if (end - xx >= 22 && end - xx <= 70) runs.push({ c, y: yy, x: xx, len: end - xx });
+        xx = end;
+      }
+    }
+    for (const a of runs) if (runs.some(b => b.c === a.c && b.y > a.y && Math.abs(b.x - a.x) <= 3 && Math.abs(b.len - a.len) <= 4 && Math.abs(b.y - a.y - a.len) <= 5)) found[a.c]++;
+    return found;
+  };
+  return { lines, crop, digits, peek, block, frames, green, row, close: () => { c.width = c.height = 0; bmp.close(); } };
 }
 
 // O mais frequente de uma lista de leituras (as vazias não contam).
@@ -3408,7 +3459,15 @@ async function readMapper(ocr) {
 // mudam os números da ficha; só a primeira, Normal, serve para a conta. Devolve null quando o print não é do bestiário.
 async function readBestiary(ocr) {
   const L = ocr.lines, find = re => L.find(l => re.test(l.text));
-  const hp = find(/^HP$/), exp = hp && L.find(l => /^EXP$/.test(l.text) && Math.abs(l.y - hp.y) < l.h * 2);
+  const hp = find(/^HP$/);
+  let exp = hp && L.find(l => /^EXP$/.test(l.text) && Math.abs(l.y - hp.y) < l.h * 2);
+  if (hp && !exp) {
+    // O título EXP some da leitura quando a seta do mouse está por perto (sobre a aba Lendário, logo acima dele).
+    // O lugar dele sai dos outros quadros: na altura do HP, à distância que separa ARM de DEF (ou SPD de MANA).
+    const pair = [[/^ARM$/, /^DEF$/], [/^SPD$/, /^MANA$/]].map(([a, b]) => [find(a), find(b)]).find(([a, b]) => a && b);
+    const gap = pair ? pair[1].x + pair[1].w / 2 - pair[0].x - pair[0].w / 2 : 0;
+    if (gap > hp.w * 2) exp = { text: 'EXP', conf: 0, x: hp.x + hp.w / 2 + gap - hp.w * 0.7, y: hp.y, w: hp.w * 1.4, h: hp.h, words: [] };
+  }
   if (!exp || !find(/^(ARM|DEF|SPD|MANA)$/)) return null;
   const out = { kind: 'bestiary', name: null, exp: null, tab: null, stats: {} };
   const h = exp.h, pitch = Math.abs(exp.x + exp.w / 2 - hp.x - hp.w / 2);   // distância entre os quadros
@@ -3481,6 +3540,10 @@ async function readBestiary(ocr) {
       .sort((a, b) => b.y - a.y).map(l => tierOf(l.text)).find(Boolean);
     if (tier && n >= 1 && n <= 1e7) out.odds = { tier, n };
   }
+  // Moldura do item lendário no saque, à direita dos quadros. O jogo pinta a moldura pela raridade do item, e a
+  // chance de ele cair segue a cor: vermelha, 0,30% a 0,90%; amarela, 0,15% a 0,30%.
+  const framed = ocr.frames(exp.x + exp.w / 2 + pitch * 0.6, 0, 1e5, hp.y + h * 18);
+  if (framed.red || framed.yellow) out.frame = framed.red ? 'red' : 'yellow';
   // Dica de um item do saque (o mouse sobre ele), em três linhas: o nome, a raridade do item e a faixa de chance,
   // por exemplo "Heliodor Ring / (very rare) / (0.30% to 0.90%)". A leitura da página costuma pegar só a faixa;
   // o bloco em volta dela é relido de perto cinco vezes, e o nome e a faixa valem, cada um, quando é o valor que
@@ -3939,12 +4002,12 @@ function oddsOf(raw) {
   if (!o || typeof o !== 'object') return null;
   const d = {};
   for (const k of ['c', 'r', 'l']) { const v = int(o[k], 1, 1e7); if (v != null) d[k] = v; }
-  if (typeof o.item === 'string' && o.item.trim()) {
-    const lo = int(o.lo, 0, 10000), hi = int(o.hi, 0, 10000);
-    if (lo != null && hi != null && lo <= hi) {
-      Object.assign(d, { item: o.item.trim().slice(0, 60), lo, hi });
-      if (typeof o.tag === 'string' && o.tag.trim()) d.tag = o.tag.trim().slice(0, 24);
-    }
+  // A faixa de chance vale sozinha (pode vir só da cor da moldura do item); o nome e a raridade do item são opcionais.
+  const lo = int(o.lo, 0, 10000), hi = int(o.hi, 0, 10000);
+  if (lo != null && hi != null && lo <= hi) {
+    Object.assign(d, { lo, hi });
+    if (typeof o.item === 'string' && o.item.trim()) d.item = o.item.trim().slice(0, 60);
+    if (typeof o.tag === 'string' && o.tag.trim()) d.tag = o.tag.trim().slice(0, 24);
   }
   return Object.keys(d).length ? d : null;
 }
@@ -5174,46 +5237,66 @@ async function readImage(blob) {
   try {
     const p = await readPrint(blob);
     if (p.kind === 'bestiary') {
+      const all = new Set([...xp.cloud.keys(), ...xp.mine.keys()]), key = slug(p.name || '');
+      const exists = k => all.has(k) || creatureRows().some(c => c.id === k);
+      // A aba Lendário pode mostrar a criatura com outro nome (Ancient Dragon vira Solflare): acha a dona desse nome.
+      const legendOwner = k => [...all].find(id => { const t = (creatureOf(id).tiers || {}).legendary; return t && t.name && slug(t.name) === k; });
+      const itemsOf = id => LEGEND_ITEMS.filter(i => i.from.some(f => slug(legendCreature(f)) === id));
+      // Chance do item lendário pela cor da moldura dele no saque; o nome vem da tabela quando a criatura só tem um.
+      const frameOdds = id => {
+        if (!p.frame) return null;
+        const [lo, hi] = p.frame === 'red' ? [30, 90] : [15, 30], items = itemsOf(id);
+        return { lo, hi, ...(items.length === 1 ? { item: items[0].name } : {}) };
+      };
+      const pctText = o => [o.lo, o.hi].map(n => (n / 100).toLocaleString(document.documentElement.lang || 'en', { minimumFractionDigits: 2 }) + '%').join(' – ');
       if (p.odds) {
-        // Print com o mouse parado sobre uma aba de raridade. A dica cobre parte das abas, e aí não dá para confiar
-        // em qual aba estava aberta: deste print entra só a chance da raridade da dica, sem os números da ficha.
-        // A criatura é a do nome do print, a que tem esse nome como lendária ou a que está com a ficha aberta.
-        const key = slug(p.name || ''), all = new Set([...xp.cloud.keys(), ...xp.mine.keys()]);
-        const owner = [...all].find(k => { const t = (creatureOf(k).tiers || {}).legendary; return t && t.name && slug(t.name) === key; });
-        const id = owner || (key && (all.has(key) || creatureRows().some(c => c.id === key)) ? key : creatureId);
+        // Print com o mouse parado sobre uma aba de raridade: a dica diz de quanto em quanto essa raridade vem. Se a
+        // dica é a da Lendário e o saque mostra o item de moldura colorida, o mesmo print já dá a conta inteira.
+        // A criatura é a dona desse nome lendário, a do nome do print (se já existe ou está na tabela de itens
+        // lendários) ou a que está com a ficha aberta.
+        const id = legendOwner(key) || (key && (exists(key) || itemsOf(key).length) ? key : creatureId);
         if (!id) throw new UserError(tr('err.bestOdds'));
-        const name = (creatureOf(id) || creatureRows().find(c => c.id === id) || { name: p.name }).name;
-        const where = await saveXp(id, name, null, null, { [{ common: 'c', rare: 'r', legendary: 'l' }[p.odds.tier]]: p.odds.n });
+        const known = creatureOf(id) || creatureRows().find(c => c.id === id), name = known ? known.name : p.name;
+        // A dica cobre parte das abas, então a aba aberta quase nunca é lida. A ficha do print conta como a da
+        // Lendário quando o XP dela é 8,8 vezes o da Normal (a regra do jogo); sem o XP da Normal para comparar,
+        // quando a leitura das abas não disse outra coisa. Só aí valem a moldura do item e os números da ficha.
+        const base = known ? known.exp : null;
+        const onLegend = p.odds.tier === 'legendary' && p.exp != null && (base == null ? p.tab == null || p.tab === 3 : Math.abs(p.exp - base * 8.8) <= 2);
+        const legend = p.odds.tier === 'legendary', drop = onLegend ? frameOdds(id) : null;
+        const odds = { [{ common: 'c', rare: 'r', legendary: 'l' }[p.odds.tier]]: p.odds.n, ...(drop || {}) };
+        const sure = legend && onLegend && !!drop;   // com item de moldura colorida no saque, os números da ficha entram
+        const data = sure ? { exp: p.exp, ...(p.stats || {}), ...(key && key !== id ? { name: p.name } : {}) } : null;
+        const where = await saveXp(id, name, sure ? 'legendary' : null, data, odds);
         if (pageNow === 'creatures' || creatureId) { creatureTier = p.odds.tier; showCreature(id); }
         setStatus('ok', name + ': ' + tr('read.odds', { t: tr('tier.' + p.odds.tier), n: fmtInt(p.odds.n) }) + ' ' +
+          (drop ? tr('read.frame', { c: tr('frame.' + p.frame), v: pctText(drop) }) + ' ' : '') +
           tr(where === 'cloud' ? 'read.cloud' : 'read.bestLocal') + ' ' + tr('read.discarded'));
         return;
       }
       // Ficha de uma criatura: guarda os números na raridade da aba que estava escolhida no print.
       // Só a raridade Normal entra na conta do respawn.
-      if (!p.name || !slug(p.name)) throw new UserError(tr('err.bestName'));
+      if (!key) throw new UserError(tr('err.bestName'));
       if (p.exp == null) throw new UserError(tr('err.bestExp', { x: p.name }));
       const tier = TIER_NAMES[p.tab] || 'normal', data = { exp: p.exp, ...(p.stats || {}) };
-      let id = slug(p.name), name = p.name;
+      let id = key, name = p.name;
       if (tier === 'legendary') {
-        // A aba Lendário mostra o nome da criatura lendária, não o da criatura. Ela entra: na criatura que já tem esse
-        // nome lendário, na que tem esse mesmo nome, ou na que está com a ficha aberta. Sem nenhuma, não dá para saber.
-        const all = new Set([...xp.cloud.keys(), ...xp.mine.keys()]);
-        const owner = [...all].find(k => { const t = (creatureOf(k).tiers || {}).legendary; return t && t.name && slug(t.name) === id; });
+        // O print da aba Lendário entra: na criatura que já tem esse nome lendário, na que tem esse mesmo nome (ou
+        // está na tabela de itens lendários), ou na que está com a ficha aberta. Sem nenhuma, não dá para saber.
+        const owner = legendOwner(key);
         if (owner) id = owner;
-        else if (!all.has(id) && !creatureRows().some(c => c.id === id)) {
+        else if (!exists(key) && !itemsOf(key).length) {
           if (!creatureId) throw new UserError(tr('err.bestLegend', { x: p.name }));
           id = creatureId;
         }
-        data.name = p.name;
+        if (key !== id) data.name = p.name;   // só quando a lendária tem nome próprio
         name = (creatureOf(id) || creatureRows().find(c => c.id === id) || { name: p.name }).name;
       }
-      // Dica de um item do saque no print: na aba Lendário, é o item especial da criatura lendária.
-      const drop = p.drop && tier === 'legendary' ? p.drop : null;
+      // Na aba Lendário: a dica do item (mouse sobre ele) traz nome e faixa de chance; sem ela, vale a cor da moldura.
+      const drop = tier === 'legendary' ? p.drop || frameOdds(id) : null;
       const where = await saveXp(id, name, tier, data, drop);
       if (pageNow === 'creatures' || creatureId) { creatureTier = tier; showCreature(id); }   // a ficha abre já na raridade lida
       setStatus('ok', tr(tier === 'normal' ? 'read.best' : 'read.bestTier', { x: name, t: tr('tier.' + tier), v: fmtInt(p.exp) }) + ' ' +
-        (drop ? tr('read.drop', { x: drop.item }) + ' ' : '') +
+        (drop && drop.item ? tr('read.drop', { x: drop.item }) + ' ' : '') + (drop && !p.drop ? tr('read.frame', { c: tr('frame.' + p.frame), v: pctText(drop) }) + ' ' : '') +
         tr(where === 'cloud' ? 'read.cloud' : 'read.bestLocal') + ' ' + tr('read.discarded'));
       return;
     }
@@ -5958,6 +6041,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 17:49',
+    pt: ['Chance real do item lendário com um print só: na aba Lendário do bestiário, pare o mouse sobre a aba Lendário e cole o print. A dica dá a chance de vir o lendário e a cor da moldura do item no saque dá a chance de ele cair (vermelha: 0,30% a 0,90%; amarela: 0,15% a 0,30%).', 'Esse print também cria a criatura no site quando ela ainda não existe e está na tabela de itens lendários.'],
+    en: ['Real chance of the legendary item from a single screenshot: on the Legendary tab of the bestiary, rest the mouse on the Legendary tab and paste the screenshot. The tooltip gives the chance of a legendary and the colour of the item frame in the loot gives the chance of the drop (red: 0.30% to 0.90%; yellow: 0.15% to 0.30%).', 'That screenshot also creates the creature on the site when it does not exist yet and is in the legendary items table.'],
+    es: ['Probabilidad real del item legendario con una sola captura: en la pestaña Legendario del bestiario, deja el ratón sobre la pestaña Legendario y pega la captura. La ayuda da la probabilidad de que venga el legendario y el color del marco del item en el botín da la de que caiga (rojo: 0,30% a 0,90%; amarillo: 0,15% a 0,30%).', 'Esa captura también crea la criatura en el sitio cuando aún no existe y está en la tabla de items legendarios.'],
+    pl: ['Rzeczywista szansa na przedmiot legendarny z jednego zrzutu: w zakładce Legendarny bestiariusza zatrzymaj kursor na zakładce Legendarny i wklej zrzut. Podpowiedź podaje szansę na legendarnego, a kolor ramki przedmiotu w łupie szansę na wypadnięcie (czerwona: 0,30% do 0,90%; żółta: 0,15% do 0,30%).', 'Ten zrzut tworzy też stworzenie na stronie, jeśli jeszcze go nie ma, a jest w tabeli przedmiotów legendarnych.'],
+  },
   { at: '2026-10-12 17:09',
     pt: ['Criaturas: nova vista "Itens lendários", com os 19 itens lendários do jogo, a figura de cada um, espaço, rank, efeito e as criaturas que os deixam (dados da wiki do Medivia).', 'Na ficha da criatura, a aba Lendário mostra os itens lendários dela com a figura, mesmo antes de alguém colar o print da chance.'],
     en: ['Creatures: new "Legendary items" view, with the 19 legendary items of the game, their picture, slot, rank, effect and the creatures that drop them (data from the Medivia wiki).', 'On the creature sheet, the Legendary tab shows its legendary items with their picture, even before anyone pastes the screenshot with the chance.'],
@@ -6463,8 +6552,9 @@ const legendImg = name => 'img/legendary/' + itemSlug(name) + '.' + (LEGEND_GIF.
 const legendCreature = from => from.replace(/ \(.*$/, '');   // "Ythog (Throne of Tides Dungeon)" -> "Ythog"
 // Chance real de um item por criatura morta, quando os prints do bestiário já trouxeram as duas partes da conta
 // (de quanto em quanto vem o lendário e a faixa de chance do item): devolve "33 667 – 101 000" (1 em tantos abates).
-function legendOdds(o, item) {
-  if (!o || !o.l || !o.hi || !o.item || slug(o.item) !== slug(item)) return null;
+function legendOdds(o, item, single) {
+  if (!o || !o.l || !o.hi) return null;
+  if (o.item ? slug(o.item) !== slug(item) : !single) return null;   // chance sem nome só vale para criatura de um item só
   const best = fmtInt(o.l * 10000 / o.hi);
   return o.lo > 0 && o.lo !== o.hi ? best + ' – ' + fmtInt(o.l * 10000 / o.lo) : best;
 }
@@ -6472,7 +6562,7 @@ let creaturesView = 'creatures';   // 'creatures' (a lista) ou 'legend' (a tabel
 function renderLegend() {
   const rows = new Map(creatureRows().map(c => [c.id, c]));
   const source = (from, item) => {
-    const name = legendCreature(from), c = rows.get(slug(name)), real = c && legendOdds(c.odds, item);
+    const name = legendCreature(from), c = rows.get(slug(name)), real = c && legendOdds(c.odds, item, LEGEND_ITEMS.filter(i => i.from.some(f => slug(legendCreature(f)) === c.id)).length === 1);
     return el('span', { class: 'legend-from' },
       c ? el('button', { class: 'creature-link', type: 'button', text: name, onclick: () => { creatureTier = 'legendary'; showCreature(c.id); } }) : name,
       from.slice(name.length), real ? el('small', { text: ' ' + tr('legend.real', { v: real }) }) : null);
@@ -6529,14 +6619,18 @@ function renderCreature() {
   // Chances: de quanto em quanto a raridade aberta aparece e, na Lendário, o item especial. A chance real de pegar
   // o item é a de vir o lendário vezes a do item cair com ele morto.
   const odds = c.odds || {}, appear = { common: odds.c, rare: odds.r, legendary: odds.l }[tier];
-  const pct = n => n.toLocaleString(loc, n < 0.00005 ? { maximumSignificantDigits: 2 } : { minimumFractionDigits: n < 0.1 ? 4 : 2, maximumFractionDigits: n < 0.1 ? 4 : 2 }) + '%';
+  const pct = n => n.toLocaleString(loc, n < 0.01 ? { maximumSignificantDigits: 2 } : { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';   // chances minúsculas: dois algarismos que contam
   const oneIn = hundredths => fmtInt(odds.l * 10000 / hundredths);
   const ranged = odds.lo > 0 && odds.lo !== odds.hi;   // faixa de verdade: os dois extremos valem e são diferentes
   // Itens lendários desta criatura: os da tabela da wiki e, se o print trouxe um nome que não está nela, o do print.
   // A chance só existe para o item cujo print (mouse sobre ele no saque) já foi colado.
   const drops = LEGEND_ITEMS.filter(i => i.from.some(f => slug(legendCreature(f)) === c.id)).map(i => ({ ...i, listed: true }));
   if (odds.item && !drops.some(i => slug(i.name) === slug(odds.item))) drops.push({ name: odds.item });
-  const hasChance = i => !!odds.item && slug(odds.item) === slug(i.name);
+  // A faixa de chance é do item que o print nomeou. Sem nome (a chance veio da cor da moldura), é do único item da
+  // criatura; se ela tem mais de um ou nenhum na tabela, vai numa linha à parte.
+  let owner = odds.hi == null ? null : odds.item ? drops.find(i => slug(i.name) === slug(odds.item)) : drops.length === 1 ? drops[0] : null;
+  if (odds.hi != null && !owner) { owner = { name: tr('creature.specialAny') }; drops.push(owner); }
+  const hasChance = i => i === owner;
   const special = tier !== 'legendary' ? [] : drops.flatMap(i => [
     el('h3', {}, i.listed ? itemSlot(legendImg(i.name)) : null,
       el('span', {}, tr('creature.special') + ' ', el('b', { text: i.name }),
@@ -6546,7 +6640,7 @@ function renderCreature() {
     ...(hasChance(i) ? [
       el('p', {}, tr('creature.dropWhen') + ' ', el('b', { text: odds.lo === odds.hi ? pct(odds.lo / 100) : pct(odds.lo / 100) + ' – ' + pct(odds.hi / 100) }), '.'),
       odds.l
-        ? el('p', {}, tr('creature.dropReal') + ' ', el('b', { text: ranged ? pct(odds.lo / 100 / odds.l) + ' – ' + pct(odds.hi / 100 / odds.l) : pct(odds.hi / 100 / odds.l) }),
+        ? el('p', { class: 'creature-real' }, tr('creature.dropReal') + ' ', el('b', { text: ranged ? pct(odds.lo / 100 / odds.l) + ' – ' + pct(odds.hi / 100 / odds.l) : pct(odds.hi / 100 / odds.l) }),
           odds.hi ? ', ' + (ranged ? tr('creature.dropIn', { a: oneIn(odds.lo), b: oneIn(odds.hi) }) : tr('creature.dropInOne', { b: oneIn(odds.hi) })) : '', '.')
         : el('p', { class: 'creature-hint', text: tr('creature.needOdds') }),
     ] : []),
@@ -6555,7 +6649,8 @@ function renderCreature() {
   const need = tier !== 'normal' ? (v.exp == null ? (tier === 'legendary' ? 'creature.needLegend' : 'creature.needTier') : null)
     : c.exp == null ? 'creature.needXp' : c.hp == null ? 'creature.needStats' : null;
   // Na aba Lendário o título leva, entre parênteses, o nome que a criatura tem no jogo nessa raridade.
-  $('#creature-title').replaceChildren(...[c.name, tier === 'legendary' && v.name ? el('span', { class: 'creature-legend', text: ' (' + v.name + ')' }) : null].filter(Boolean));
+  // Quando a lendária tem o mesmo nome da criatura (Sea Dragon), não há o que acrescentar.
+  $('#creature-title').replaceChildren(...[c.name, tier === 'legendary' && v.name && slug(v.name) !== c.id ? el('span', { class: 'creature-legend', text: ' (' + v.name + ')' }) : null].filter(Boolean));
   $('#creature-sheet').replaceChildren(...[   // o aviso só existe quando falta dado: sem o filtro, o vazio viraria texto
     tabs,
     need ? el('p', { class: 'creature-need', text: tr(need, { t: tierName }) }) : null,
