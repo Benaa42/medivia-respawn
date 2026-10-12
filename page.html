@@ -4718,6 +4718,9 @@ setInterval(tick, 250);
 // neutros nos botões e nas divisórias. Textos e formato dos botões ficam como no visual normal da janela.
 // (A primeira versão usava o cinza mais claro dos painéis laterais do jogo, e o centro da janela destoava.)
 const FLOAT_GAME = { '--ground': '#0f0f0f', '--btn': '#1c1c1c', '--btn-edge': '#333333', '--edge': '#2a2a2a' };
+// Nas cores do jogo a janela ganha uma barrinha embaixo, da cor da barra de título que o Chrome põe em cima
+// (#202124 no tema escuro, medida num print), para o miolo preto ficar fechado nos dois lados.
+const FLOAT_BAR = { color: '#202124', height: 12 };
 // Aplica (ou tira) as cores do jogo na janela flutuante que estiver aberta.
 function floatTheme() {
   if (float.win) float.win.document.documentElement.classList.toggle('game', !!ui.floatGame);
@@ -4815,7 +4818,9 @@ async function toggleFloat() {
           'button.all{margin-top:10px;width:100%}button.all+button.all{margin-top:6px}' +
           'p.voice{margin:8px 0 0;font-size:12px;color:var(--label)}' +
           // Cores do jogo: as mesmas variáveis de fundo e de linha com outros valores.
-          ':root.game{' + Object.entries(FLOAT_GAME).map(([k, v]) => k + ':' + v).join(';') + '}' }));
+          ':root.game{' + Object.entries(FLOAT_GAME).map(([k, v]) => k + ':' + v).join(';') + '}' +
+          '.game body{padding-bottom:' + (FLOAT_BAR.height + 12) + 'px}' +
+          '.game body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:' + FLOAT_BAR.height + 'px;background:' + FLOAT_BAR.color + '}' }));
       float.list = el('div');
       float.all = el('button', { class: 'all', type: 'button', text: tr('startAll'), onclick: () => { for (const g of groupsNow()) startTimer(g.key); } });
       float.none = el('button', { class: 'all zero', type: 'button', text: tr('resetAll'), onclick: () => { for (const g of groupsNow()) resetTimer(g.key); } });
@@ -6101,6 +6106,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 19:31',
+    pt: ['Janela flutuante nas cores do jogo: ganhou uma barrinha embaixo, na mesma cor da barra de cima.'],
+    en: ['Floating window in the game colours: it now has a small bar at the bottom, in the same colour as the top bar.'],
+    es: ['Ventana flotante con los colores del juego: ahora tiene una barrita abajo, del mismo color que la barra de arriba.'],
+    pl: ['Pływające okno w kolorach gry: ma teraz mały pasek na dole, w tym samym kolorze co górny.'],
+  },
   { at: '2026-10-12 19:28',
     pt: ['Criaturas: "Exclusivos dos lendários" e "Menções honrosas" agora têm abas próprias, ao lado de "Criaturas" e "Itens lendários".'],
     en: ['Creatures: "Legendary exclusives" and "Honorable mentions" now have their own tabs, next to "Creatures" and "Legendary items".'],
