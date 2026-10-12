@@ -4720,8 +4720,9 @@ setInterval(tick, 250);
 // (A primeira versão usava o cinza mais claro dos painéis laterais do jogo, e o centro da janela destoava.)
 const FLOAT_GAME = { '--ground': '#0f0f0f', '--btn': '#1c1c1c', '--btn-edge': '#333333', '--edge': '#2a2a2a' };
 // Nas cores do jogo a janela ganha uma barrinha embaixo, da cor da barra de título que o Chrome põe em cima
-// (#202124 no tema escuro, medida num print), para o miolo preto ficar fechado nos dois lados.
-const FLOAT_BAR = { color: '#202124', height: 12 };
+// (#202124 no tema escuro, medida num print), para o miolo preto ficar fechado nos dois lados. A altura é a que
+// alinha o começo dela com a faixa de baixo do chat do jogo, com a janela encostada ali (28 px no print do usuário).
+const FLOAT_BAR = { color: '#202124', height: 28 };
 // Aplica (ou tira) as cores do jogo na janela flutuante que estiver aberta.
 function floatTheme() {
   if (float.win) float.win.document.documentElement.classList.toggle('game', !!ui.floatGame);
@@ -6107,6 +6108,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 19:33',
+    pt: ['Janela flutuante nas cores do jogo: a barra de baixo ficou mais alta, na altura da faixa de baixo do chat do jogo.'],
+    en: ['Floating window in the game colours: the bottom bar is taller now, level with the bottom strip of the game chat.'],
+    es: ['Ventana flotante con los colores del juego: la barra de abajo ahora es más alta, a la altura de la franja inferior del chat del juego.'],
+    pl: ['Pływające okno w kolorach gry: dolny pasek jest teraz wyższy, na wysokości dolnego paska czatu gry.'],
+  },
   { at: '2026-10-12 19:31',
     pt: ['Janela flutuante nas cores do jogo: ganhou uma barrinha embaixo, na mesma cor da barra de cima.'],
     en: ['Floating window in the game colours: it now has a small bar at the bottom, in the same colour as the top bar.'],
