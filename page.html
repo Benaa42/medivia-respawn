@@ -853,6 +853,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
           <button class="dlg go" type="button" id="read-btn" data-i18n="read">Ler print</button>
         </div>
         <label class="toggle float-game" title="Troca o fundo esverdeado da janela flutuante pelo preto neutro do chat do jogo, para ela se misturar à tela" data-i18n-attr="title:float.gameTip"><input type="checkbox" id="opt-float-game"> <span data-i18n="float.game">Janela flutuante nas cores do jogo</span></label>
+        <label class="toggle float-game" title="Põe os botões embaixo do tempo, para a janela flutuante poder ser mais alta e menos larga" data-i18n-attr="title:float.tallTip"><input type="checkbox" id="opt-float-tall"> <span data-i18n="float.tall">Janela flutuante estreita, com os botões embaixo do tempo</span></label>
         <input class="sr" type="file" id="file" accept="image/*" tabindex="-1" aria-hidden="true">
       </footer>
       <p class="status" id="status" role="status" data-kind="info" data-i18n="status.default">Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print. O print do mapper da wiki, com o painel do respawn aberto, também vale.</p>
@@ -1223,6 +1224,8 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'float.tall': 'Janela flutuante estreita, com os botões embaixo do tempo',
+    'float.tallTip': 'Põe os botões embaixo do tempo, para a janela flutuante poder ser mais alta e menos larga',
     'legend.exclusive': 'Exclusivos dos lendários',
     'legend.exclusiveNote': 'Itens especiais que só a versão lendária da criatura deixa, mas que não contam como item lendário.',
     'legend.honorable': 'Menções honrosas',
@@ -1713,6 +1716,8 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'float.tall': 'Narrow floating window, with the buttons under the time',
+    'float.tallTip': 'Puts the buttons under the time, so the floating window can be taller and less wide',
     'legend.exclusive': 'Legendary exclusives',
     'legend.exclusiveNote': 'Special items that only the legendary version of the creature drops, but that do not count as legendary items.',
     'legend.honorable': 'Honorable mentions',
@@ -2203,6 +2208,8 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'float.tall': 'Ventana flotante estrecha, con los botones debajo del tiempo',
+    'float.tallTip': 'Pone los botones debajo del tiempo, para que la ventana flotante pueda ser más alta y menos ancha',
     'legend.exclusive': 'Exclusivos de los legendarios',
     'legend.exclusiveNote': 'Items especiales que solo suelta la versión legendaria de la criatura, pero que no cuentan como item legendario.',
     'legend.honorable': 'Menciones honoríficas',
@@ -2693,6 +2700,8 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'float.tall': 'Wąskie pływające okno, z przyciskami pod czasem',
+    'float.tallTip': 'Umieszcza przyciski pod czasem, aby pływające okno mogło być wyższe i węższe',
     'legend.exclusive': 'Tylko z legendarnych',
     'legend.exclusiveNote': 'Specjalne przedmioty, które wypadają tylko z legendarnej wersji stworzenia, ale nie liczą się jako przedmioty legendarne.',
     'legend.honorable': 'Wyróżnienia',
@@ -4724,7 +4733,10 @@ const FLOAT_GAME = { '--ground': '#0f0f0f', '--btn': '#1c1c1c', '--btn-edge': '#
 const FLOAT_BAR = { color: '#202124', height: 28 };
 // Aplica (ou tira) as cores do jogo na janela flutuante que estiver aberta.
 function floatTheme() {
-  if (float.win) float.win.document.documentElement.classList.toggle('game', !!ui.floatGame);
+  if (!float.win) return;
+  const root = float.win.document.documentElement;
+  root.classList.toggle('game', !!ui.floatGame);
+  root.classList.toggle('tall', !!ui.floatTall);   // janela estreita: os botões descem para baixo do tempo
 }
 const float = { win: null, list: null, all: null, none: null, rowEls: new Map(), sig: '', canvas: null, video: null };
 // Na mesma ordem da página: primeiro o respawn principal, e em cada um do tempo maior para o menor.
@@ -4797,7 +4809,12 @@ async function toggleFloat() {
   armAudio();   // o clique aqui libera o som mesmo que os cronômetros sejam iniciados pela janela flutuante
   try {
     if ('documentPictureInPicture' in window) {
-      const w = await window.documentPictureInPicture.requestWindow({ width: 320, height: 112 + Math.max(1, groupsNow().length) * 124 });
+      // Larga: o tempo de um lado e os botões do outro. Estreita: os botões embaixo do tempo, então a janela abre
+      // mais fina e mais alta (o navegador tem uma largura mínima própria e pode abrir um pouco mais larga que isso).
+      const rows = Math.max(1, groupsNow().length);
+      const w = await window.documentPictureInPicture.requestWindow(ui.floatTall
+        ? { width: 200, height: 108 + rows * 134 + (rows > 1 ? 72 : 0) }   // cada cronômetro ocupa uns 134 px; com mais de um entram os botões de todos
+        : { width: 320, height: 112 + rows * 124 });
       const cs = getComputedStyle(document.documentElement);
       const vars = ['--ground', '--title', '--label', '--amber', '--value', '--teal', '--btn', '--btn-edge', '--edge']
         .map(n => n + ':' + cs.getPropertyValue(n)).join(';');
@@ -4818,6 +4835,9 @@ async function toggleFloat() {
           'button:disabled{opacity:.45;pointer-events:none}' +
           'button.all{margin-top:10px;width:100%}button.all+button.all{margin-top:6px}' +
           'p.voice{margin:8px 0 0;font-size:12px;color:var(--label)}' +
+          // Janela estreita: cada cronômetro vira uma coluna, com Iniciar e Zerar lado a lado e os acertos embaixo.
+          '.tall .f-row{flex-direction:column;align-items:stretch;gap:6px}' +
+          '.tall .f-btns{display:grid;grid-template-columns:1fr 1fr;gap:4px}.tall .f-nudge{grid-column:1/-1}' +
           // Cores do jogo: as mesmas variáveis de fundo e de linha com outros valores.
           ':root.game{' + Object.entries(FLOAT_GAME).map(([k, v]) => k + ':' + v).join(';') + '}' +
           '.game body{padding-bottom:' + (FLOAT_BAR.height + 12) + 'px}' +
@@ -6107,6 +6127,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 19:44',
+    pt: ['Janela flutuante: nova opção "estreita", que põe os botões embaixo do tempo. Com ela a janela abre mais fina e mais alta, para caber num canto estreito da tela.'],
+    en: ['Floating window: new "narrow" option, which puts the buttons under the time. With it the window opens thinner and taller, to fit a narrow corner of the screen.'],
+    es: ['Ventana flotante: nueva opción "estrecha", que pone los botones debajo del tiempo. Con ella la ventana se abre más fina y más alta, para caber en un rincón estrecho de la pantalla.'],
+    pl: ['Pływające okno: nowa opcja „wąskie”, która umieszcza przyciski pod czasem. Okno otwiera się wtedy węższe i wyższe, aby zmieścić się w wąskim rogu ekranu.'],
+  },
   { at: '2026-10-12 19:33',
     pt: ['Janela flutuante nas cores do jogo: a barra de baixo ficou mais alta, na altura da faixa de baixo do chat do jogo.'],
     en: ['Floating window in the game colours: the bottom bar is taller now, level with the bottom strip of the game chat.'],
@@ -7563,6 +7589,8 @@ $('#opt-loop').addEventListener('change', e => { ui.loop = e.target.checked; sav
 optPause.addEventListener('input', () => { ui.pause = int(optPause.value, 0, 600) || 0; saveUi(); });
 $('#opt-float-game').checked = !!ui.floatGame;
 $('#opt-float-game').addEventListener('change', e => { ui.floatGame = e.target.checked; saveUi(); floatTheme(); tick(); });
+$('#opt-float-tall').checked = !!ui.floatTall;
+$('#opt-float-tall').addEventListener('change', e => { ui.floatTall = e.target.checked; saveUi(); floatTheme(); tick(); });
 $('#opt-sound').addEventListener('change', e => {
   ui.sound = e.target.checked;
   saveUi();
