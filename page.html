@@ -185,6 +185,13 @@ dialog#creature-dlg { width: min(880px, calc(100vw - 32px)); scrollbar-width: th
 .creature-stat small { font-size: 12px; line-height: 1.35; color: var(--label); }
 .creature-stat.xp b { color: var(--value); }
 .creature-stat.none b { color: var(--faint); }
+/* Chances da raridade e item especial da lendária */
+.creature-odds { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: var(--r-md); background: var(--card); font-size: 14px; color: var(--label); }
+.creature-odds h3 { margin-top: 4px; font: 600 15px/1.3 var(--font-ui); color: var(--label); }
+.creature-odds h3 b { color: var(--amber); }
+.creature-odds h3 small { font-size: 12px; font-weight: 400; color: var(--faint); }
+.creature-odds b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
+.creature-odds .creature-hint { font-size: 13px; color: var(--faint); }
 .creature-where { display: flex; flex-direction: column; gap: 8px; }
 .creature-where h3 { font: 600 16px/1.3 var(--font-ui); color: var(--title); }
 .creature-where .creatures-wrap { flex: none; min-height: 0; }
@@ -1178,6 +1185,17 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'err.bestOdds': 'Li a chance da raridade, mas não sei de qual criatura é. Abra a ficha da criatura na página Criaturas e cole o print com ela aberta.',
+    'creature.appear': 'Uma criatura vem {t} cerca de 1 vez em',
+    'creature.special': 'Item especial:',
+    'creature.dropWhen': 'Com o lendário morto, a chance de o item cair é de',
+    'creature.dropReal': 'Chance real por criatura morta, contando a de vir o lendário:',
+    'creature.dropIn': 'ou seja, de 1 em {a} a 1 em {b} abates',
+    'creature.dropInOne': 'ou seja, 1 em {b} abates',
+    'creature.needOdds': 'Para a chance real falta saber de quanto em quanto vem o lendário: cole um print desta ficha no bestiário com o mouse parado sobre a aba Lendário.',
+    'creature.needDrop': 'Para ver a chance do item especial, cole um print da aba Lendário desta ficha com o mouse parado sobre o item no saque.',
+    'read.drop': 'Item especial: {x}.',
+    'read.odds': 'A raridade {t} vem 1 vez em {n}.',
     'tok.byBoost': 'Cada tipo de token é dividido na proporção dos elite boosters daquele tipo que cada jogador gastou nesta hunt (o número entre parênteses).',
     'tok.used': '{n} boosters gastos na hunt',
     'tok.noBoost': 'ninguém gastou este booster: partes iguais',
@@ -1636,6 +1654,17 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'err.bestOdds': 'The rarity chance was read, but not which creature it belongs to. Open the creature sheet on the Creatures page and paste the screenshot with it open.',
+    'creature.appear': 'A creature comes as {t} about 1 time in',
+    'creature.special': 'Special item:',
+    'creature.dropWhen': 'With the legendary dead, the chance of the item dropping is',
+    'creature.dropReal': 'Real chance per creature killed, counting the chance of a legendary:',
+    'creature.dropIn': 'that is, from 1 in {a} to 1 in {b} kills',
+    'creature.dropInOne': 'that is, 1 in {b} kills',
+    'creature.needOdds': 'For the real chance, the site still needs how often the legendary comes: paste a screenshot of this page in the bestiary with the mouse resting on the Legendary tab.',
+    'creature.needDrop': 'To see the chance of the special item, paste a screenshot of the Legendary tab of this page with the mouse resting on the item in the loot.',
+    'read.drop': 'Special item: {x}.',
+    'read.odds': 'The {t} rarity comes 1 time in {n}.',
     'tok.byBoost': 'Each token type is split in proportion to the elite boosters of that type each player spent on this hunt (the number in brackets).',
     'tok.used': '{n} boosters spent on the hunt',
     'tok.noBoost': 'nobody spent this booster: equal parts',
@@ -2094,6 +2123,17 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'err.bestOdds': 'Se leyó la probabilidad de la rareza, pero no de qué criatura es. Abre la ficha de la criatura en la página Criaturas y pega la captura con ella abierta.',
+    'creature.appear': 'Una criatura viene {t} cerca de 1 vez en',
+    'creature.special': 'Item especial:',
+    'creature.dropWhen': 'Con el legendario muerto, la probabilidad de que caiga el item es de',
+    'creature.dropReal': 'Probabilidad real por criatura muerta, contando la de que venga el legendario:',
+    'creature.dropIn': 'es decir, de 1 en {a} a 1 en {b} muertes',
+    'creature.dropInOne': 'es decir, 1 en {b} muertes',
+    'creature.needOdds': 'Para la probabilidad real falta saber cada cuánto viene el legendario: pega una captura de esta ficha en el bestiario con el ratón quieto sobre la pestaña Legendario.',
+    'creature.needDrop': 'Para ver la probabilidad del item especial, pega una captura de la pestaña Legendario de esta ficha con el ratón quieto sobre el item en el botín.',
+    'read.drop': 'Item especial: {x}.',
+    'read.odds': 'La rareza {t} viene 1 vez en {n}.',
     'tok.byBoost': 'Cada tipo de token se reparte en proporción a los elite boosters de ese tipo que cada jugador gastó en esta hunt (el número entre paréntesis).',
     'tok.used': '{n} boosters gastados en la hunt',
     'tok.noBoost': 'nadie gastó este booster: partes iguales',
@@ -2552,6 +2592,17 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'err.bestOdds': 'Odczytano szansę rzadkości, ale nie wiadomo, którego stworzenia dotyczy. Otwórz kartę stworzenia na stronie Stworzenia i wklej zrzut przy otwartej karcie.',
+    'creature.appear': 'Stworzenie pojawia się jako {t} mniej więcej 1 raz na',
+    'creature.special': 'Przedmiot specjalny:',
+    'creature.dropWhen': 'Po zabiciu legendarnego szansa na wypadnięcie przedmiotu to',
+    'creature.dropReal': 'Rzeczywista szansa na zabite stworzenie, licząc szansę na legendarnego:',
+    'creature.dropIn': 'czyli od 1 na {a} do 1 na {b} zabójstw',
+    'creature.dropInOne': 'czyli 1 na {b} zabójstw',
+    'creature.needOdds': 'Do rzeczywistej szansy brakuje informacji, jak często pojawia się legendarny: wklej zrzut tej strony z bestiariusza z kursorem zatrzymanym na zakładce Legendarny.',
+    'creature.needDrop': 'Aby zobaczyć szansę na przedmiot specjalny, wklej zrzut zakładki Legendarny tej strony z kursorem zatrzymanym na przedmiocie w łupie.',
+    'read.drop': 'Przedmiot specjalny: {x}.',
+    'read.odds': 'Rzadkość {t} pojawia się 1 raz na {n}.',
     'tok.byBoost': 'Każdy rodzaj tokenu jest dzielony proporcjonalnie do elite boosterów tego rodzaju, które każdy gracz zużył na tym polowaniu (liczba w nawiasie).',
     'tok.used': 'zużyte boostery na polowaniu: {n}',
     'tok.noBoost': 'nikt nie zużył tego boostera: po równo',
@@ -3170,7 +3221,33 @@ async function ocrLines(blob) {
     for (let i = 0; i < px.length; i += 4) out.push(Math.max(px[i], px[i + 1], px[i + 2]));
     return out;
   };
-  return { lines, crop, digits, peek, green, row, close: () => { c.width = c.height = 0; bmp.close(); } };
+  // Relê um bloco de poucas linhas (uma dica do jogo, com o mouse sobre um item) ampliado e em preto e branco puro.
+  // Faz cinco releituras, com ampliações e cortes diferentes, e devolve as linhas de cada uma.
+  const block = async (x, y, wd, ht) => {
+    const out = [];
+    x = Math.max(0, x); y = Math.max(0, y); wd = Math.min(bmp.width - x, wd); ht = Math.min(bmp.height - y, ht);
+    if (wd < 8 || ht < 8) return out;
+    try {
+      await w.setParameters({ tessedit_pageseg_mode: '6' });
+      for (const [zoom, cut] of [[4, 150], [4, 180], [5, 130], [5, 165], [3, 150]]) {
+        const k = document.createElement('canvas'), cw = Math.round(wd * zoom), ch = Math.round(ht * zoom);
+        k.width = cw + 40;
+        k.height = ch + 40;
+        const kg = k.getContext('2d', { willReadFrequently: true });
+        kg.fillStyle = '#000';
+        kg.fillRect(0, 0, k.width, k.height);
+        kg.imageSmoothingQuality = 'high';
+        kg.drawImage(bmp, x, y, wd, ht, 20, 20, cw, ch);
+        const kd = kg.getImageData(0, 0, k.width, k.height), kp = kd.data;
+        for (let i = 0; i < kp.length; i += 4) kp[i] = kp[i + 1] = kp[i + 2] = Math.max(kp[i], kp[i + 1], kp[i + 2]) >= cut ? 0 : 255;
+        kg.putImageData(kd, 0, 0);
+        out.push(((await w.recognize(k)).data.text || '').trim().split(/\n+/));
+      }
+    } catch { /* fica com o que já leu */ }
+    try { await w.setParameters({ tessedit_pageseg_mode: '11' }); } catch { /* o leitor volta ao normal na próxima página */ }
+    return out;
+  };
+  return { lines, crop, digits, peek, block, green, row, close: () => { c.width = c.height = 0; bmp.close(); } };
 }
 
 // O mais frequente de uma lista de leituras (as vazias não contam).
@@ -3338,6 +3415,37 @@ async function readBestiary(ocr) {
     if (runs.length < 3 || runs.length > 6) continue;
     const top = Math.max(...runs), rest = runs.filter(v => v !== top);
     if (runs.length - rest.length === 1 && top - Math.max(...rest) >= 10) out.tab = runs.indexOf(top);   // 0 = Normal
+  }
+  // Dica de uma aba de raridade (o mouse parado sobre ela): "Chance: aproximadamente 1 em 303", com o nome da
+  // raridade logo acima. Vale para a raridade da dica, que pode não ser a da aba aberta.
+  const chance = L.find(l => /aprox|approx|oko[lł]o|chance|szans|probab/i.test(l.text) && /\b1\s+\S{1,3}\s+\d[\d ]{0,8}\s*$/.test(l.text));
+  if (chance) {
+    const n = +chance.text.match(/\b1\s+\S{1,3}\s+(\d[\d ]{0,8})\s*$/)[1].replace(/ /g, '');
+    const tierOf = t => /lend|legend|leyend/i.test(t) ? 'legendary' : /^\W*rar|rzad/i.test(t) ? 'rare' : /com[uú]|common|pospol/i.test(t) ? 'common' : null;
+    const tier = L.filter(l => l !== chance && l.y < chance.y && chance.y - l.y < chance.h * 2.5 && l.x + l.w > chance.x && l.x < chance.x + chance.w)
+      .sort((a, b) => b.y - a.y).map(l => tierOf(l.text)).find(Boolean);
+    if (tier && n >= 1 && n <= 1e7) out.odds = { tier, n };
+  }
+  // Dica de um item do saque (o mouse sobre ele), em três linhas: o nome, a raridade do item e a faixa de chance,
+  // por exemplo "Heliodor Ring / (very rare) / (0.30% to 0.90%)". A leitura da página costuma pegar só a faixa;
+  // o bloco em volta dela é relido de perto cinco vezes, e o nome e a faixa valem, cada um, quando é o valor que
+  // mais se repete e aparece em pelo menos duas releituras.
+  const pctRe = /(\d{1,3}[.,]\d{1,2})\s*%\s*\S{1,3}\s*(\d{1,3}[.,]\d{1,2})\s*%/;
+  const pctLine = L.find(l => /%\s*\S{1,3}\s*[\d.,\s]{1,8}%/.test(l.text));   // na página os dígitos podem sair errados; basta achar a linha
+  if (pctLine) {
+    const reads = (await ocr.block(pctLine.x - h * 4, pctLine.y - h * 5.5, pctLine.w + h * 8, pctLine.h + h * 6)).map(lines => {
+      const i = lines.findIndex(t => pctRe.test(t));
+      if (i < 2) return null;
+      const m = lines[i].match(pctRe), tag = lines[i - 1].match(/\(\s*([A-Za-zÀ-ÿ ]{3,24})\s*\)/), item = lines[i - 2].match(/[A-Z][A-Za-z'’-]+(?: [A-Za-z][A-Za-z'’-]*)*\s*$/);
+      const lo = Math.round(parseFloat(m[1].replace(',', '.')) * 100), hi = Math.round(parseFloat(m[2].replace(',', '.')) * 100);
+      return { item: item ? item[0].trim() : null, tag: tag ? tag[1].trim().toLowerCase() : null, pair: lo <= hi && hi <= 10000 ? lo + '-' + hi : null };
+    }).filter(Boolean);
+    const pick = key => { const best = vote(reads.map(r => r[key])); return best != null && reads.filter(r => r[key] === best).length >= 2 ? best : null; };
+    const item = pick('item'), pair = pick('pair'), tag = pick('tag');
+    if (item && pair) {
+      const [lo, hi] = pair.split('-').map(Number);
+      out.drop = { item: item.slice(0, 60), lo, hi, ...(tag ? { tag } : {}) };
+    }
   }
   return out;
 }
@@ -3766,6 +3874,25 @@ function xpNumbers(raw) {
   for (const [k, max] of Object.entries(XP_STATS)) { const v = int(raw[k], 0, max); if (v != null) d[k] = v; }
   return d;
 }
+// "odds": de quanto em quanto cada raridade aparece (1 em N: c = Comum, r = Raro, l = Lendário) e o item especial da
+// lendária: o nome (item), a raridade do item (tag) e a faixa de chance dele com o lendário morto (lo e hi, em
+// centésimos de por cento: 0,30% é 30). No banco isso vai num texto JSON curto, num campo só: o Firestore limita
+// quantas verificações uma gravação pode fazer, e conferir cada número nas regras pesaria demais. Quem lê confere aqui.
+function oddsOf(raw) {
+  let o = raw;
+  if (typeof raw === 'string') { try { o = JSON.parse(raw); } catch { return null; } }
+  if (!o || typeof o !== 'object') return null;
+  const d = {};
+  for (const k of ['c', 'r', 'l']) { const v = int(o[k], 1, 1e7); if (v != null) d[k] = v; }
+  if (typeof o.item === 'string' && o.item.trim()) {
+    const lo = int(o.lo, 0, 10000), hi = int(o.hi, 0, 10000);
+    if (lo != null && hi != null && lo <= hi) {
+      Object.assign(d, { item: o.item.trim().slice(0, 60), lo, hi });
+      if (typeof o.tag === 'string' && o.tag.trim()) d.tag = o.tag.trim().slice(0, 24);
+    }
+  }
+  return Object.keys(d).length ? d : null;
+}
 function xpDoc(raw) {
   if (!raw || typeof raw.name !== 'string' || !raw.name.trim()) return null;
   const d = { name: raw.name.trim().slice(0, 60), ...xpNumbers(raw), at: raw.at || null, owner: raw.owner || null };
@@ -3778,6 +3905,8 @@ function xpDoc(raw) {
     if (Object.keys(one).length) tiers[t] = one;
   }
   if (Object.keys(tiers).length) d.tiers = tiers;
+  const odds = oddsOf(raw.odds);
+  if (odds) d.odds = odds;
   return d;
 }
 // Junta dois registros da mesma criatura: o segundo corrige o que traz, e o que ele não traz fica como estava.
@@ -3791,12 +3920,14 @@ function xpMerge(a, b) {
       if (Object.keys(one).length) d.tiers[t] = one;
     }
   }
+  if (a.odds || b.odds) d.odds = { ...(a.odds || {}), ...(b.odds || {}) };
   return d;
 }
 // A criatura como a página a vê: o banco de todos mais o que foi lido aqui e ainda não subiu.
 const creatureOf = id => xpMerge(xp.cloud.get(id), xp.mine.get(id));
 const xpSig = d => JSON.stringify([d.exp ?? null, ...Object.keys(XP_STATS).map(k => d[k] ?? null),
-  XP_TIERS.map(t => { const o = (d.tiers || {})[t]; return o ? [o.name ?? null, o.exp ?? null, ...Object.keys(XP_STATS).map(k => o[k] ?? null)] : null; })]);
+  XP_TIERS.map(t => { const o = (d.tiers || {})[t]; return o ? [o.name ?? null, o.exp ?? null, ...Object.keys(XP_STATS).map(k => o[k] ?? null)] : null; }),
+  ['c', 'r', 'l', 'item', 'tag', 'lo', 'hi'].map(k => (d.odds || {})[k] ?? null)]);
 {
   const cache = lsGet(LS_XP, null);
   for (const [id, raw] of Object.entries(cache && cache.docs && typeof cache.docs === 'object' ? cache.docs : {})) {
@@ -3878,12 +4009,27 @@ async function pushXp(id) {
     // O nome e quem enviou primeiro ficam; os valores são os do print mais novo.
     const raw = { name: cur ? cur.name : mine.name, ...xpNumbers(next), owner: cur && cur.owner ? cur.owner : uid };
     if (next.tiers) raw.tiers = next.tiers;
-    const res = await cloudCommit({
+    if (next.odds) raw.odds = JSON.stringify(next.odds);
+    const send = () => cloudCommit({
       update: { name: cloud.root + '/creatures/' + id, fields: toFs(raw).mapValue.fields },
       updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
     });
+    let res = await send(), held = false;
+    if (!res.ok && raw.odds) {
+      // O banco pode ainda não aceitar o campo "odds" (regras antigas). Aí sobe o resto, e as chances ficam
+      // guardadas aqui para a próxima tentativa; se o resto já está igual no banco, não há o que mandar.
+      if (cur && xpSig({ ...next, odds: cur.odds }) === xpSig(cur)) return 'later';
+      delete raw.odds;
+      held = true;
+      res = await send();
+    }
     if (!res.ok) return 'later';
-    xp.cloud.set(id, { ...raw, at: res.json.commitTime || new Date().toISOString() });
+    xp.cloud.set(id, { ...raw, ...(next.odds && !held ? { odds: next.odds } : {}), at: res.json.commitTime || new Date().toISOString() });
+    if (held) {
+      xp.mine.set(id, { name: raw.name, odds: next.odds });
+      xpChanged();
+      return 'sent';
+    }
   }
   if (xp.mine.get(id) === mine) xp.mine.delete(id);
   xpChanged();
@@ -3894,11 +4040,12 @@ async function flushXp() {
 }
 // Guarda os números lidos de um print na raridade dele ('normal' ou uma das XP_TIERS).
 // Devolve 'cloud' (já está no banco de todos) ou 'local'.
-async function saveXp(id, name, tier, data) {
+async function saveXp(id, name, tier, data, odds) {
   const cur = xp.mine.get(id) || {}, known = creatureOf(id);
   const next = { ...cur, name: known ? known.name : name };
+  if (odds) next.odds = { ...(cur.odds || {}), ...odds };
   if (tier === 'normal') Object.assign(next, data, { name });   // o print da aba Normal é quem dá o nome da criatura
-  else next.tiers = { ...(cur.tiers || {}), [tier]: { ...((cur.tiers || {})[tier] || {}), ...data } };
+  else if (tier) next.tiers = { ...(cur.tiers || {}), [tier]: { ...((cur.tiers || {})[tier] || {}), ...data } };   // sem raridade, só as chances entram
   xp.mine.set(id, next);
   xpChanged();
   if (!cloud.on) return 'local';
@@ -4972,6 +5119,21 @@ async function readImage(blob) {
   try {
     const p = await readPrint(blob);
     if (p.kind === 'bestiary') {
+      if (p.odds) {
+        // Print com o mouse parado sobre uma aba de raridade. A dica cobre parte das abas, e aí não dá para confiar
+        // em qual aba estava aberta: deste print entra só a chance da raridade da dica, sem os números da ficha.
+        // A criatura é a do nome do print, a que tem esse nome como lendária ou a que está com a ficha aberta.
+        const key = slug(p.name || ''), all = new Set([...xp.cloud.keys(), ...xp.mine.keys()]);
+        const owner = [...all].find(k => { const t = (creatureOf(k).tiers || {}).legendary; return t && t.name && slug(t.name) === key; });
+        const id = owner || (key && (all.has(key) || creatureRows().some(c => c.id === key)) ? key : creatureId);
+        if (!id) throw new UserError(tr('err.bestOdds'));
+        const name = (creatureOf(id) || creatureRows().find(c => c.id === id) || { name: p.name }).name;
+        const where = await saveXp(id, name, null, null, { [{ common: 'c', rare: 'r', legendary: 'l' }[p.odds.tier]]: p.odds.n });
+        if (pageNow === 'creatures' || creatureId) { creatureTier = p.odds.tier; showCreature(id); }
+        setStatus('ok', name + ': ' + tr('read.odds', { t: tr('tier.' + p.odds.tier), n: fmtInt(p.odds.n) }) + ' ' +
+          tr(where === 'cloud' ? 'read.cloud' : 'read.bestLocal') + ' ' + tr('read.discarded'));
+        return;
+      }
       // Ficha de uma criatura: guarda os números na raridade da aba que estava escolhida no print.
       // Só a raridade Normal entra na conta do respawn.
       if (!p.name || !slug(p.name)) throw new UserError(tr('err.bestName'));
@@ -4991,9 +5153,12 @@ async function readImage(blob) {
         data.name = p.name;
         name = (creatureOf(id) || creatureRows().find(c => c.id === id) || { name: p.name }).name;
       }
-      const where = await saveXp(id, name, tier, data);
+      // Dica de um item do saque no print: na aba Lendário, é o item especial da criatura lendária.
+      const drop = p.drop && tier === 'legendary' ? p.drop : null;
+      const where = await saveXp(id, name, tier, data, drop);
       if (pageNow === 'creatures' || creatureId) { creatureTier = tier; showCreature(id); }   // a ficha abre já na raridade lida
       setStatus('ok', tr(tier === 'normal' ? 'read.best' : 'read.bestTier', { x: name, t: tr('tier.' + tier), v: fmtInt(p.exp) }) + ' ' +
+        (drop ? tr('read.drop', { x: drop.item }) + ' ' : '') +
         tr(where === 'cloud' ? 'read.cloud' : 'read.bestLocal') + ' ' + tr('read.discarded'));
       return;
     }
@@ -5738,6 +5903,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 13:30',
+    pt: ['Criaturas: a ficha mostra o item especial da raridade Lendário e a chance real de pegá-lo, juntando a chance de vir o lendário com a de o item cair.', 'Para alimentar: cole um print da aba Lendário no bestiário com o mouse sobre o item do saque, e outro com o mouse sobre a aba Lendário (a dica "Chance: aproximadamente 1 em …").'],
+    en: ['Creatures: the sheet shows the special item of the Legendary rarity and the real chance of getting it, combining the chance of a legendary with the chance of the drop.', 'To feed it: paste a screenshot of the Legendary tab in the bestiary with the mouse over the loot item, and another with the mouse over the Legendary tab (the "Chance: approximately 1 in …" tooltip).'],
+    es: ['Criaturas: la ficha muestra el item especial de la rareza Legendario y la probabilidad real de conseguirlo, juntando la de que venga el legendario con la de que caiga el item.', 'Para alimentarla: pega una captura de la pestaña Legendario en el bestiario con el ratón sobre el item del botín, y otra con el ratón sobre la pestaña Legendario.'],
+    pl: ['Stworzenia: karta pokazuje przedmiot specjalny rzadkości Legendarny i rzeczywistą szansę na jego zdobycie, łącząc szansę na legendarnego z szansą na wypadnięcie.', 'Aby uzupełnić dane: wklej zrzut zakładki Legendarny z bestiariusza z kursorem nad przedmiotem w łupie oraz drugi z kursorem nad zakładką Legendarny.'],
+  },
   { at: '2026-10-12 11:42',
     pt: ['No computador, o menu de ferramentas agora acompanha a rolagem: fica flutuando no topo da janela.'],
     en: ['On desktop, the tools menu now follows the scroll: it stays floating at the top of the window.'],
@@ -6227,6 +6398,20 @@ function renderCreature() {
     return { ...w, sec, kills, xp: c.exp == null ? null : kills * c.exp * 100 / ui.party };
   }).filter(Boolean);
   const open = id => { showCreature(null); select(id); goTo('timer'); };
+  // Chances: de quanto em quanto a raridade aberta aparece e, na Lendário, o item especial. A chance real de pegar
+  // o item é a de vir o lendário vezes a do item cair com ele morto.
+  const odds = c.odds || {}, appear = { common: odds.c, rare: odds.r, legendary: odds.l }[tier];
+  const pct = n => n.toLocaleString(loc, n < 0.00005 ? { maximumSignificantDigits: 2 } : { minimumFractionDigits: n < 0.1 ? 4 : 2, maximumFractionDigits: n < 0.1 ? 4 : 2 }) + '%';
+  const oneIn = hundredths => fmtInt(odds.l * 10000 / hundredths);
+  const ranged = odds.lo > 0 && odds.lo !== odds.hi;   // faixa de verdade: os dois extremos valem e são diferentes
+  const special = tier === 'legendary' && odds.item ? [
+    el('h3', {}, tr('creature.special') + ' ', el('b', { text: odds.item }), odds.tag ? el('small', { text: ' (' + odds.tag + ')' }) : null),
+    el('p', {}, tr('creature.dropWhen') + ' ', el('b', { text: odds.lo === odds.hi ? pct(odds.lo / 100) : pct(odds.lo / 100) + ' – ' + pct(odds.hi / 100) }), '.'),
+    odds.l
+      ? el('p', {}, tr('creature.dropReal') + ' ', el('b', { text: ranged ? pct(odds.lo / 100 / odds.l) + ' – ' + pct(odds.hi / 100 / odds.l) : pct(odds.hi / 100 / odds.l) }),
+        odds.hi ? ', ' + (ranged ? tr('creature.dropIn', { a: oneIn(odds.lo), b: oneIn(odds.hi) }) : tr('creature.dropInOne', { b: oneIn(odds.hi) })) : '', '.')
+      : el('p', { class: 'creature-hint', text: tr('creature.needOdds') }),
+  ] : tier === 'legendary' && v.exp != null ? [el('p', { class: 'creature-hint', text: tr('creature.needDrop') })] : [];
   const need = tier !== 'normal' ? (v.exp == null ? (tier === 'legendary' ? 'creature.needLegend' : 'creature.needTier') : null)
     : c.exp == null ? 'creature.needXp' : c.hp == null ? 'creature.needStats' : null;
   // Na aba Lendário o título leva, entre parênteses, o nome que a criatura tem no jogo nessa raridade.
@@ -6238,6 +6423,9 @@ function renderCreature() {
       stat('xp', num(v.exp), 'main xp'), stat('hp', num(v.hp), 'main'),
       stat('ratio', v.exp != null && v.hp ? (v.exp / v.hp).toLocaleString(loc, { maximumFractionDigits: 2 }) : null, 'main'),
       stat('arm', range(v.armLo, v.armHi)), stat('def', range(v.defLo, v.defHi)), stat('spd', num(v.spd)), stat('mana', num(v.mana))),
+    appear || special.length ? el('section', { class: 'creature-odds' },
+      appear ? el('p', {}, tr('creature.appear', { t: tierName }) + ' ', el('b', { text: fmtInt(appear) }), '.') : null,
+      special) : null,
     el('section', { class: 'creature-where' },
       el('h3', { text: tr('creature.where') }),
       where.length ? [

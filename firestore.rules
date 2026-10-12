@@ -46,6 +46,9 @@ service cloud.firestore {
     // - Qualquer pessoa lê.
     // - Quem tem a identidade anônima do site cria a criatura (nome e, se lidos, XP por abate, HP, ARM, DEF, SPD e Mana).
     // - "tiers" guarda os mesmos números das raridades Comum, Raro e Lendário, quando alguém manda o print dessas abas.
+    // - "odds" é um texto curto com as chances lidas das dicas do bestiário: de quanto em quanto cada raridade aparece
+    //   e o item especial da lendária. Vai num campo só, em texto, para não gastar o limite de verificações de uma
+    //   gravação; o site confere o conteúdo ao ler.
     // - Qualquer pessoa com identidade corrige o XP com um print mais novo; o nome e quem enviou primeiro não mudam.
     // - Só quem enviou primeiro apaga.
     match /creatures/{id} {
@@ -80,9 +83,10 @@ service cloud.firestore {
         );
       }
       function shape(d) {
-        return d.keys().hasOnly(['name', 'exp', 'hp', 'armLo', 'armHi', 'defLo', 'defHi', 'spd', 'mana', 'tiers', 'owner', 'at'])
+        return d.keys().hasOnly(['name', 'exp', 'hp', 'armLo', 'armHi', 'defLo', 'defHi', 'spd', 'mana', 'tiers', 'odds', 'owner', 'at'])
           && d.name is string && d.name.size() >= 1 && d.name.size() <= 60
           && nums(d) && tiers(d)
+          && (!('odds' in d) || (d.odds is string && d.odds.size() <= 200))
           && d.owner is string
           && d.at == request.time;
       }
