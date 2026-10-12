@@ -195,6 +195,13 @@ dialog#creature-dlg { width: min(880px, calc(100vw - 32px)); scrollbar-width: th
 .creatures-table.legend-table td:nth-child(4) { min-width: 240px; max-width: 380px; color: var(--label); white-space: normal; }
 .creatures-table.legend-table td:last-child { min-width: 260px; }
 .legend-table .legend-from small { color: var(--faint); font-size: 12px; white-space: nowrap; }
+.legend-title { margin-top: 10px; font: 600 16px/1.3 var(--font-ui); color: var(--title); }
+.legend-title + .support-note { margin-top: -8px; }
+#legend-list .creatures-wrap { flex: none; min-height: 0; }
+/* Tabela de três colunas (item, propriedades, criaturas) e de duas (item, criaturas) */
+.creatures-table.legend-props { min-width: 720px; }
+.creatures-table.legend-props td:nth-child(2) { min-width: 240px; max-width: 420px; color: var(--label); white-space: normal; }
+.creatures-table.legend-short { min-width: 480px; }
 /* Chances da raridade e item especial da lendária */
 .creature-odds { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: var(--r-md); background: var(--card); font-size: 14px; color: var(--label); }
 .creature-odds h3 { display: flex; align-items: center; gap: 10px; margin-top: 4px; font: 600 15px/1.3 var(--font-ui); color: var(--label); }
@@ -920,6 +927,12 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   <div class="creatures-pane" id="legend-list" hidden>
   <p class="support-note" data-i18n="legend.intro">Itens lendários do jogo e as criaturas que os deixam, pela wiki do Medivia. Eles caem da versão lendária da criatura. Clique numa criatura para abrir a ficha dela; a chance real aparece quando os prints do bestiário já a trouxeram.</p>
   <div class="creatures-wrap"><table class="creatures-table legend-table" id="legend-table"></table></div>
+  <h3 class="legend-title" data-i18n="legend.exclusive">Exclusivos dos lendários</h3>
+  <p class="support-note" data-i18n="legend.exclusiveNote">Itens especiais que só a versão lendária da criatura deixa, mas que não contam como item lendário.</p>
+  <div class="creatures-wrap"><table class="creatures-table legend-table legend-props" id="legend-exclusive"></table></div>
+  <h3 class="legend-title" data-i18n="legend.honorable">Menções honrosas</h3>
+  <p class="support-note" data-i18n="legend.honorableNote">Itens que não são exclusivos dos lendários, mas são muito raros ou muito procurados.</p>
+  <div class="creatures-wrap"><table class="creatures-table legend-table legend-short" id="legend-honorable"></table></div>
   </div>
 </div>
   </section>
@@ -1208,6 +1221,12 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'legend.exclusive': 'Exclusivos dos lendários',
+    'legend.exclusiveNote': 'Itens especiais que só a versão lendária da criatura deixa, mas que não contam como item lendário.',
+    'legend.honorable': 'Menções honrosas',
+    'legend.honorableNote': 'Itens que não são exclusivos dos lendários, mas são muito raros ou muito procurados.',
+    'legend.col.props': 'Propriedades e efeitos',
+    'creature.exclusive': 'Só o lendário deixa:',
     'float.game': 'Janela flutuante nas cores do jogo',
     'float.gameTip': 'Deixa a janela flutuante com o cinza dos painéis do jogo, para ela se misturar à tela',
     'creature.specialAny': 'item lendário (o de moldura colorida no saque)',
@@ -1692,6 +1711,12 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'legend.exclusive': 'Legendary exclusives',
+    'legend.exclusiveNote': 'Special items that only the legendary version of the creature drops, but that do not count as legendary items.',
+    'legend.honorable': 'Honorable mentions',
+    'legend.honorableNote': 'Items that are not exclusive to legendary monsters, but are very rare or sought after.',
+    'legend.col.props': 'Properties and effects',
+    'creature.exclusive': 'Only the legendary drops:',
     'float.game': 'Floating window in the game colours',
     'float.gameTip': 'Gives the floating window the grey of the game panels, so it blends into the screen',
     'creature.specialAny': 'legendary item (the one with the coloured frame in the loot)',
@@ -2176,6 +2201,12 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'legend.exclusive': 'Exclusivos de los legendarios',
+    'legend.exclusiveNote': 'Items especiales que solo suelta la versión legendaria de la criatura, pero que no cuentan como item legendario.',
+    'legend.honorable': 'Menciones honoríficas',
+    'legend.honorableNote': 'Items que no son exclusivos de los legendarios, pero son muy raros o muy buscados.',
+    'legend.col.props': 'Propiedades y efectos',
+    'creature.exclusive': 'Solo lo suelta el legendario:',
     'float.game': 'Ventana flotante con los colores del juego',
     'float.gameTip': 'Deja la ventana flotante con el gris de los paneles del juego, para que se mezcle con la pantalla',
     'creature.specialAny': 'item legendario (el del marco de color en el botín)',
@@ -2660,6 +2691,12 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'legend.exclusive': 'Tylko z legendarnych',
+    'legend.exclusiveNote': 'Specjalne przedmioty, które wypadają tylko z legendarnej wersji stworzenia, ale nie liczą się jako przedmioty legendarne.',
+    'legend.honorable': 'Wyróżnienia',
+    'legend.honorableNote': 'Przedmioty, które nie wypadają wyłącznie z legendarnych, ale są bardzo rzadkie lub poszukiwane.',
+    'legend.col.props': 'Właściwości i efekty',
+    'creature.exclusive': 'Wypada tylko z legendarnego:',
     'float.game': 'Pływające okno w kolorach gry',
     'float.gameTip': 'Nadaje pływającemu oknu szarość paneli gry, aby wtapiało się w ekran',
     'creature.specialAny': 'przedmiot legendarny (ten z kolorową ramką w łupie)',
@@ -6062,6 +6099,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 19:17',
+    pt: ['Itens lendários: entraram as outras duas tabelas da wiki, com a figura de cada item: os exclusivos dos lendários (chaves, troféus, mochilas) e as menções honrosas.', 'A Necromantic Backpack, que não tinha figura na wiki, ganhou a dela, animada como no jogo.', 'Na ficha da criatura, a aba Lendário mostra também os itens que só o lendário dela deixa.'],
+    en: ['Legendary items: the other two wiki tables are in, with the picture of each item: the legendary exclusives (keys, trophies, backpacks) and the honorable mentions.', 'The Necromantic Backpack, which had no picture on the wiki, got its own, animated as in the game.', 'On the creature sheet, the Legendary tab also shows the items only its legendary drops.'],
+    es: ['Items legendarios: entraron las otras dos tablas de la wiki, con la figura de cada item: los exclusivos de los legendarios (llaves, trofeos, mochilas) y las menciones honoríficas.', 'La Necromantic Backpack, que no tenía figura en la wiki, ya tiene la suya, animada como en el juego.', 'En la ficha de la criatura, la pestaña Legendario muestra también los items que solo suelta su legendario.'],
+    pl: ['Przedmioty legendarne: doszły dwie pozostałe tabele z wiki, z obrazkiem każdego przedmiotu: przedmioty tylko z legendarnych (klucze, trofea, plecaki) i wyróżnienia.', 'Necromantic Backpack, który nie miał obrazka na wiki, dostał własny, animowany jak w grze.', 'Na karcie stworzenia zakładka Legendarny pokazuje też przedmioty, które wypadają tylko z jego legendarnej wersji.'],
+  },
   { at: '2026-10-12 19:10',
     pt: ['Janela flutuante: nova opção "nas cores do jogo", que troca o fundo e os botões pelo cinza dos painéis do Medivia, com o nome em laranja e o tempo em verde, para ela se misturar à tela do jogo.'],
     en: ['Floating window: new "in the game colours" option, which swaps the background and buttons for the grey of the Medivia panels, with the name in orange and the time in green, so it blends into the game screen.'],
@@ -6574,8 +6617,39 @@ Starfish Amulet|Amulet|600|None.|Ythog (Throne of Tides Dungeon)`.split('\n').ma
   const [name, slot, rank, effect, from] = row.split('|');
   return { name, slot, rank: +rank || null, effect: /^unknown/i.test(effect) ? null : /^none/i.test(effect) ? '' : effect, from: from.split(', ') };
 });
-const LEGEND_GIF = new Set('Blade of The Pale King|Lifereaper Wand|Scepter of Shattered Skies|Scourge of Sheol|Serpent Vestments|Tidepiercer|Voidreaver'.split('|'));
-const legendImg = name => 'img/legendary/' + itemSlug(name) + '.' + (LEGEND_GIF.has(name) ? 'gif' : 'webp');
+// As outras duas tabelas da mesma página da wiki. Exclusivos: itens especiais que só a versão lendária deixa, mas
+// que não contam como item lendário (nome | propriedades e efeitos | criaturas). Menções honrosas: itens que não
+// são exclusivos dos lendários, mas são muito raros ou muito procurados (nome | criaturas).
+const LEGEND_EXCLUSIVE = `Key of The Bound Soul|One-time use to enter boss Maltherion arena.|Bloodlord, Necrolord, Reaper
+Anglerfish Doll|Use to temporarily change your appearence into Cryolure, Pyrolure or Acidlure. Use underwater to gain 100 movement speed bonus for 20 seconds.|Acidlure, Cryolure, Pyrolure
+Golden Machete|Same as regular Machete.|Azure Mercenary
+Demon Trophy|Hangable on wall.|Demon
+Ashlord Trophy|Hangable on wall.|Ashlord
+Lightbringer Trophy|Hangable on wall.|Lightbringer Hero
+Fire Ant Bag|Volume (15) container.|Fire Ant Soldier
+Necromantic Backpack|Volume (50) container.|Maltherion`.split('\n').map(row => { const [name, effect, from] = row.split('|'); return { name, effect, from: from.split(', ') }; });
+const LEGEND_HONORABLE = `Curselight|Malice, Abysslurker, Voidflayer, Dark Apprentice, Grimmaw, Abyssbinder, Abyssworm, Spectralscale, Spiralmaw, Wrathling, Voidscale, Abyss Reaper, Rift Soldier, Voidling
+Infernal Scaleplate|Ancient Dragon
+Octopus Hatchling|Soulchainer
+Emerald Mask|Typhon, Venerator
+Umbral Platemail|Corruptor
+Sunfire Robe|Cerberus
+White Dress|Wight
+Demonbone Legs|Tar Priest
+Wizard Hat|Warlock
+Dwarven Armor|Dwarf General
+Red Scale Armor|Dragon Lord`.split('\n').map(row => { const [name, from] = row.split('|'); return { name, from: from.split(', ') }; });
+// Figuras das três tabelas em img/legendary, img/exclusive e img/honorable. Quase todas são WebP; LEGEND_EXT lista
+// as que não são (a lista sai do preparar-imagens.js). A Necromantic Backpack não tinha figura na wiki: a dela foi
+// montada de uma gravação do item no jogo (ferramentas/animar-sprite.js) e traz o fundo da casa da mochila.
+const LEGEND_EXT = new Map(Object.entries({
+  gif: 'Blade of The Pale King|Key of The Bound Soul|Lifereaper Wand|Scepter of Shattered Skies|Scourge of Sheol|Serpent Vestments|Tidepiercer|Voidreaver',
+  png: 'Dwarven Armor|Necromantic Backpack',
+}).flatMap(([ext, list]) => list.split('|').map(name => [name, ext])));
+const lootImg = (folder, name) => 'img/' + folder + '/' + itemSlug(name) + '.' + (LEGEND_EXT.get(name) || 'webp');
+const legendImg = name => lootImg('legendary', name);
+// A casa com a figura de um item das tabelas; a que já traz fundo próprio vai sem a moldura do site.
+const lootSlot = (folder, name) => itemSlot(lootImg(folder, name), name === 'Necromantic Backpack' ? 'goblet' : '');
 const legendCreature = from => from.replace(/ \(.*$/, '');   // "Ythog (Throne of Tides Dungeon)" -> "Ythog"
 // Chance real de um item por criatura morta, quando os prints do bestiário já trouxeram as duas partes da conta
 // (de quanto em quanto vem o lendário e a faixa de chance do item): devolve "33 667 – 101 000" (1 em tantos abates).
@@ -6589,11 +6663,24 @@ let creaturesView = 'creatures';   // 'creatures' (a lista) ou 'legend' (a tabel
 function renderLegend() {
   const rows = new Map(creatureRows().map(c => [c.id, c]));
   const source = (from, item) => {
-    const name = legendCreature(from), c = rows.get(slug(name)), real = c && legendOdds(c.odds, item, LEGEND_ITEMS.filter(i => i.from.some(f => slug(legendCreature(f)) === c.id)).length === 1);
+    const name = legendCreature(from), c = rows.get(slug(name));
+    const real = c && item && legendOdds(c.odds, item, LEGEND_ITEMS.filter(i => i.from.some(f => slug(legendCreature(f)) === c.id)).length === 1);
     return el('span', { class: 'legend-from' },
       c ? el('button', { class: 'creature-link', type: 'button', text: name, onclick: () => { creatureTier = 'legendary'; showCreature(c.id); } }) : name,
       from.slice(name.length), real ? el('small', { text: ' ' + tr('legend.real', { v: real }) }) : null);
   };
+  const fromCell = (list, item) => el('td', {}, list.flatMap((f, i) => i ? [', ', source(f, item)] : [source(f, item)]));   // lista plana: uma lista dentro da lista viraria texto
+  $('#legend-exclusive').replaceChildren(
+    el('thead', {}, el('tr', {}, ['item', 'props', 'from'].map(k => el('th', { scope: 'col', text: tr('legend.col.' + k) })))),
+    el('tbody', {}, LEGEND_EXCLUSIVE.map(it => el('tr', {},
+      el('td', {}, el('span', { class: 'gob-item' }, lootSlot('exclusive', it.name), it.name)),
+      el('td', { text: it.effect }),
+      fromCell(it.from, null)))));
+  $('#legend-honorable').replaceChildren(
+    el('thead', {}, el('tr', {}, ['item', 'from'].map(k => el('th', { scope: 'col', text: tr('legend.col.' + k) })))),
+    el('tbody', {}, LEGEND_HONORABLE.map(it => el('tr', {},
+      el('td', {}, el('span', { class: 'gob-item' }, lootSlot('honorable', it.name), it.name)),
+      fromCell(it.from, null)))));
   $('#legend-table').replaceChildren(
     el('thead', {}, el('tr', {}, ['item', 'slot', 'rank', 'effect', 'from'].map(k => el('th', { scope: 'col', text: tr('legend.col.' + k) })))),
     el('tbody', {}, LEGEND_ITEMS.map(it => el('tr', {},
@@ -6673,6 +6760,10 @@ function renderCreature() {
     ] : []),
   ]).filter(Boolean);
   if (tier === 'legendary' && (v.exp != null || drops.length) && !drops.some(hasChance)) special.push(el('p', { class: 'creature-hint', text: tr('creature.needDrop') }));
+  // Itens que só a versão lendária desta criatura deixa, sem serem itens lendários (troféus, chaves, mochilas)
+  if (tier === 'legendary') for (const i of LEGEND_EXCLUSIVE.filter(x => x.from.some(f => slug(legendCreature(f)) === c.id))) {
+    special.push(el('h3', {}, lootSlot('exclusive', i.name), el('span', {}, tr('creature.exclusive') + ' ', el('b', { text: i.name }))), el('p', { text: i.effect }));
+  }
   const need = tier !== 'normal' ? (v.exp == null ? (tier === 'legendary' ? 'creature.needLegend' : 'creature.needTier') : null)
     : c.exp == null ? 'creature.needXp' : c.hp == null ? 'creature.needStats' : null;
   // Na aba Lendário o título leva, entre parênteses, o nome que a criatura tem no jogo nessa raridade.
