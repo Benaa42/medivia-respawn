@@ -6099,6 +6099,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 19:28',
+    pt: ['Necromantic Backpack: a figura foi trocada por uma gravação nova do item no jogo, com a animação completa.'],
+    en: ['Necromantic Backpack: the picture was replaced by a new recording of the item in the game, with the full animation.'],
+    es: ['Necromantic Backpack: la figura fue cambiada por una grabación nueva del item en el juego, con la animación completa.'],
+    pl: ['Necromantic Backpack: obrazek został zastąpiony nowym nagraniem przedmiotu w grze, z pełną animacją.'],
+  },
   { at: '2026-10-12 19:18',
     pt: ['Janela flutuante nas cores do jogo: o centro tinha ficado claro demais. Agora o fundo é o preto neutro do chat do jogo, e os botões e textos ficam como no visual normal.'],
     en: ['Floating window in the game colours: the centre had come out too light. The background is now the neutral black of the game chat, and buttons and text stay as in the normal look.'],
@@ -6646,11 +6652,11 @@ Wizard Hat|Warlock
 Dwarven Armor|Dwarf General
 Red Scale Armor|Dragon Lord`.split('\n').map(row => { const [name, from] = row.split('|'); return { name, from: from.split(', ') }; });
 // Figuras das três tabelas em img/legendary, img/exclusive e img/honorable. Quase todas são WebP; LEGEND_EXT lista
-// as que não são (a lista sai do preparar-imagens.js). A Necromantic Backpack não tinha figura na wiki: a dela foi
-// montada de uma gravação do item no jogo (ferramentas/animar-sprite.js) e traz o fundo da casa da mochila.
+// as que não são (a lista sai do preparar-imagens.js). A Necromantic Backpack não tinha figura na wiki: a dela é
+// um GIF gravado do item no jogo, com o ciclo inteiro da animação, e traz o fundo da casa da mochila.
 const LEGEND_EXT = new Map(Object.entries({
-  gif: 'Blade of The Pale King|Key of The Bound Soul|Lifereaper Wand|Scepter of Shattered Skies|Scourge of Sheol|Serpent Vestments|Tidepiercer|Voidreaver',
-  png: 'Dwarven Armor|Necromantic Backpack',
+  gif: 'Blade of The Pale King|Key of The Bound Soul|Lifereaper Wand|Necromantic Backpack|Scepter of Shattered Skies|Scourge of Sheol|Serpent Vestments|Tidepiercer|Voidreaver',
+  png: 'Dwarven Armor',
 }).flatMap(([ext, list]) => list.split('|').map(name => [name, ext])));
 const lootImg = (folder, name) => 'img/' + folder + '/' + itemSlug(name) + '.' + (LEGEND_EXT.get(name) || 'webp');
 const legendImg = name => lootImg('legendary', name);

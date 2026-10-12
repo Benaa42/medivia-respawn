@@ -54,9 +54,9 @@ foreach ($tr in [regex]::Matches($html, '<tr\b[^>]*>((?:(?!<tr\b).)*?)</tr>', $o
 
     $img = [regex]::Match($celulas[$colImagem].Groups[2].Value, '<img\b[^>]*?\ssrc="([^"]+)"', $opt)
     $nome = (Limpar $celulas[$colItem].Groups[2].Value) -replace '^\d+\s*x\s*', ''
-    if (-not $img.Success -or -not $nome) { continue }
-    if ($vistos.ContainsKey($nome)) { continue }
+    if (-not $nome -or $vistos.ContainsKey($nome)) { continue }
     $vistos[$nome] = $true
+    if (-not $img.Success) { $faltando += "$nome (a wiki não tem imagem deste item)"; continue }
 
     $src = [System.Net.WebUtility]::HtmlDecode($img.Groups[1].Value)
     if ($src -match '^(https?:)?//|^data:') { $faltando += "$nome (imagem não foi salva junto: $src)"; continue }
