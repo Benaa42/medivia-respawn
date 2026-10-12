@@ -1,9 +1,12 @@
-﻿# Copia as imagens da coluna "Image" das tabelas da wiki para Images\Skins, com o nome do item.
+﻿# Copia as imagens da coluna "Image" das tabelas da wiki para uma pasta do projeto, com o nome do item.
 # A wiki bloqueia download automático (verificação "você é humano"), então o script trabalha
 # em cima da página salva pelo navegador: Ctrl+S > "Página da Web, completa".
 param(
-    # .html salvo pelo navegador; sem isso, pega o Serena*.htm* mais recente da pasta Downloads
+    # .html salvo pelo navegador; sem isso, pega o <Pagina>*.htm* mais recente da pasta Downloads
     [string]$HtmlPath,
+    [string]$Pagina = 'Serena',
+    # Limita a uma seção da página (título como aparece na wiki, ex.: "Legendary Items"); sem isso, todas
+    [string]$Secao,
     [string]$Destino
 )
 
@@ -11,14 +14,20 @@ $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 if (-not $Destino) { $Destino = Join-Path (Split-Path -Parent $here) 'Images\Skins' }
 
 if (-not $HtmlPath) {
-    $achado = Get-ChildItem (Join-Path $env:USERPROFILE 'Downloads') -Filter 'Serena*.htm*' -File -ErrorAction SilentlyContinue |
+    $achado = Get-ChildItem (Join-Path $env:USERPROFILE 'Downloads') -Filter "$Pagina*.htm*" -File -ErrorAction SilentlyContinue |
         Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    if (-not $achado) { throw 'Nenhum Serena*.html na pasta Downloads. Salve a página (Ctrl+S > "Página da Web, completa") ou informe -HtmlPath.' }
+    if (-not $achado) { throw "Nenhum $Pagina*.html na pasta Downloads. Salve a página (Ctrl+S > 'Página da Web, completa') ou informe -HtmlPath." }
     $HtmlPath = $achado.FullName
 }
 $HtmlPath = (Resolve-Path -LiteralPath $HtmlPath).Path
 $base = Split-Path -Parent $HtmlPath
 $html = Get-Content -Raw -Encoding UTF8 -LiteralPath $HtmlPath
+if ($Secao) {
+    $inicio = $html.IndexOf('class="mw-headline" id="' + ($Secao -replace ' ', '_') + '"')
+    if ($inicio -lt 0) { throw "Seção '$Secao' não encontrada em $HtmlPath" }
+    $fim = $html.IndexOf('class="mw-headline"', $inicio + 1)
+    $html = if ($fim -lt 0) { $html.Substring($inicio) } else { $html.Substring($inicio, $fim - $inicio) }
+}
 New-Item -ItemType Directory -Force $Destino | Out-Null
 
 $opt = [System.Text.RegularExpressions.RegexOptions]'Singleline, IgnoreCase'
@@ -34,9 +43,10 @@ foreach ($tr in [regex]::Matches($html, '<tr\b[^>]*>((?:(?!<tr\b).)*?)</tr>', $o
 
     if ($celulas[0].Groups[1].Value -eq 'th') {
         # Cabeçalho: liga a leitura se a tabela tiver a coluna Image, desliga se não tiver
-        $titulos = @($celulas | ForEach-Object { Limpar $_.Groups[2].Value })
+        $titulos = @($celulas | ForEach-Object { (Limpar $_.Groups[2].Value).TrimEnd(':') })
         $colImagem = [array]::IndexOf($titulos, 'Image')
         $colItem = [array]::IndexOf($titulos, 'Item')
+        if ($colItem -lt 0) { $colItem = [array]::IndexOf($titulos, 'Name') }
         if ($colImagem -ge 0 -and $colItem -lt 0) { $colItem = $colImagem + 1 }
         continue
     }

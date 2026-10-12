@@ -3,6 +3,7 @@
 //   node ferramentas/preparar-imagens.js
 // Os originais têm espaço, apóstrofo e extensão que nem sempre bate com o conteúdo (muito .png é WebP por dentro).
 // No fim, mostra as skins da tabela de goblets que ficaram sem imagem e a lista SKIN_EXT para colar no page.html.
+// Os itens lendários (Images/Legendary) vão para img/legendary/ do mesmo jeito, com a lista LEGEND_EXT.
 const fs = require('fs');
 const path = require('path');
 const root = path.join(__dirname, '..');
@@ -51,6 +52,24 @@ for (const f of fs.readdirSync(from)) {
   fs.copyFileSync(src, path.join(to, out + '.' + k));
   others.push(out + '.' + k);
 }
+
+// Itens lendários (Images/Legendary): o nome do arquivo é o nome do item. Confere com a tabela LEGEND_ITEMS do page.html.
+const legendExt = {}, legendSeen = new Set();
+if (fs.existsSync(path.join(from, 'Legendary'))) {
+  fs.mkdirSync(path.join(to, 'legendary'), { recursive: true });
+  for (const f of fs.readdirSync(path.join(from, 'Legendary'))) {
+    const src = path.join(from, 'Legendary', f), name = path.parse(f).name, k = kind(src);
+    fs.copyFileSync(src, path.join(to, 'legendary', itemSlug(name) + '.' + k));
+    legendSeen.add(itemSlug(name));
+    if (k !== 'webp') (legendExt[k] = legendExt[k] || []).push(name);
+  }
+}
+const legendBlock = /const LEGEND_ITEMS = `([\s\S]*?)`/.exec(page);
+const legendNames = legendBlock ? legendBlock[1].split('\n').map(row => row.split('|')[0].trim()).filter(Boolean) : [];
+const legendMissing = legendNames.filter(n => !legendSeen.has(itemSlug(n)));
+console.log(`${legendSeen.size} itens lendários com imagem` + (legendNames.length ? ` de ${legendNames.length} na tabela` : ''));
+if (legendMissing.length) console.log('Lendários sem imagem: ' + legendMissing.join(', '));
+console.log('LEGEND_EXT = ' + JSON.stringify(Object.fromEntries(Object.entries(legendExt).map(([k, v]) => [k, v.sort().join('|')]))));
 
 const missing = [...names].filter(([k]) => !seen.has(k)).map(([, n]) => n);
 console.log(`${seen.size} de ${names.size} skins com imagem; goblets e tokens: ${others.join(', ')}`);
