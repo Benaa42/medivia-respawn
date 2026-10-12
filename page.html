@@ -185,9 +185,19 @@ dialog#creature-dlg { width: min(880px, calc(100vw - 32px)); scrollbar-width: th
 .creature-stat small { font-size: 12px; line-height: 1.35; color: var(--label); }
 .creature-stat.xp b { color: var(--value); }
 .creature-stat.none b { color: var(--faint); }
+/* Página Criaturas: troca entre a lista de criaturas e a tabela de itens lendários */
+.unit-toggle.creatures-view { align-self: flex-start; margin-left: 0; }
+.creatures-table.legend-table { min-width: 900px; }
+.creatures-table.legend-table td { vertical-align: middle; }
+.creatures-table.legend-table td:first-child { white-space: nowrap; }
+.creatures-table.legend-table th:nth-child(2), .creatures-table.legend-table td:nth-child(2),
+.creatures-table.legend-table th:nth-child(4), .creatures-table.legend-table td:nth-child(4) { text-align: left; }
+.creatures-table.legend-table td:nth-child(4) { min-width: 240px; max-width: 380px; color: var(--label); white-space: normal; }
+.creatures-table.legend-table td:last-child { min-width: 260px; }
+.legend-table .legend-from small { color: var(--faint); font-size: 12px; white-space: nowrap; }
 /* Chances da raridade e item especial da lendária */
 .creature-odds { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: var(--r-md); background: var(--card); font-size: 14px; color: var(--label); }
-.creature-odds h3 { margin-top: 4px; font: 600 15px/1.3 var(--font-ui); color: var(--label); }
+.creature-odds h3 { display: flex; align-items: center; gap: 10px; margin-top: 4px; font: 600 15px/1.3 var(--font-ui); color: var(--label); }
 .creature-odds h3 b { color: var(--amber); }
 .creature-odds h3 small { font-size: 12px; font-weight: 400; color: var(--faint); }
 .creature-odds b { color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
@@ -882,6 +892,10 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
     <h2 id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
   </div>
   <p class="status" id="creatures-status" role="status" hidden></p>
+  <div class="unit-toggle creatures-view" role="group" aria-label="Criaturas" data-i18n-attr="aria-label:creatures.title">
+    <button type="button" id="view-creatures" aria-pressed="true" data-i18n="legend.view.creatures">Criaturas</button>
+    <button type="button" id="view-legend" aria-pressed="false" data-i18n="legend.view.items">Itens lendários</button>
+  </div>
   <div class="creatures-pane" id="creatures-list">
   <p class="support-note" data-i18n="creatures.intro">XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus. Clique numa criatura para abrir a ficha dela.</p>
   <div class="creatures-bar">
@@ -897,6 +911,10 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </div>
   <p class="support-note" id="creatures-count" role="status"></p>
   <div class="creatures-wrap"><table class="creatures-table" id="creatures-table"></table></div>
+  </div>
+  <div class="creatures-pane" id="legend-list" hidden>
+  <p class="support-note" data-i18n="legend.intro">Itens lendários do jogo e as criaturas que os deixam, pela wiki do Medivia. Eles caem da versão lendária da criatura. Clique numa criatura para abrir a ficha dela; a chance real aparece quando os prints do bestiário já a trouxeram.</p>
+  <div class="creatures-wrap"><table class="creatures-table legend-table" id="legend-table"></table></div>
   </div>
 </div>
   </section>
@@ -1185,6 +1203,15 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'legend.view.creatures': 'Criaturas',
+    'legend.view.items': 'Itens lendários',
+    'legend.intro': 'Itens lendários do jogo e as criaturas que os deixam, pela wiki do Medivia. Eles caem da versão lendária da criatura. Clique numa criatura para abrir a ficha dela; a chance real aparece quando os prints do bestiário já a trouxeram.',
+    'legend.col.item': 'Item',
+    'legend.col.slot': 'Espaço',
+    'legend.col.rank': 'Rank',
+    'legend.col.effect': 'Efeito especial',
+    'legend.col.from': 'Criaturas que deixam',
+    'legend.real': '(1 em {v} abates)',
     'err.bestOdds': 'Li a chance da raridade, mas não sei de qual criatura é. Abra a ficha da criatura na página Criaturas e cole o print com ela aberta.',
     'creature.appear': 'Uma criatura vem {t} cerca de 1 vez em',
     'creature.special': 'Item especial:',
@@ -1654,6 +1681,15 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'legend.view.creatures': 'Creatures',
+    'legend.view.items': 'Legendary items',
+    'legend.intro': 'Legendary items of the game and the creatures that drop them, from the Medivia wiki. They drop from the legendary version of the creature. Click a creature to open its sheet; the real chance shows once bestiary screenshots have brought it in.',
+    'legend.col.item': 'Item',
+    'legend.col.slot': 'Slot',
+    'legend.col.rank': 'Rank',
+    'legend.col.effect': 'Special effect',
+    'legend.col.from': 'Dropped by',
+    'legend.real': '(1 in {v} kills)',
     'err.bestOdds': 'The rarity chance was read, but not which creature it belongs to. Open the creature sheet on the Creatures page and paste the screenshot with it open.',
     'creature.appear': 'A creature comes as {t} about 1 time in',
     'creature.special': 'Special item:',
@@ -2123,6 +2159,15 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'legend.view.creatures': 'Criaturas',
+    'legend.view.items': 'Items legendarios',
+    'legend.intro': 'Items legendarios del juego y las criaturas que los sueltan, según la wiki de Medivia. Caen de la versión legendaria de la criatura. Haz clic en una criatura para abrir su ficha; la probabilidad real aparece cuando las capturas del bestiario ya la trajeron.',
+    'legend.col.item': 'Item',
+    'legend.col.slot': 'Espacio',
+    'legend.col.rank': 'Rango',
+    'legend.col.effect': 'Efecto especial',
+    'legend.col.from': 'Criaturas que lo sueltan',
+    'legend.real': '(1 en {v} muertes)',
     'err.bestOdds': 'Se leyó la probabilidad de la rareza, pero no de qué criatura es. Abre la ficha de la criatura en la página Criaturas y pega la captura con ella abierta.',
     'creature.appear': 'Una criatura viene {t} cerca de 1 vez en',
     'creature.special': 'Item especial:',
@@ -2592,6 +2637,15 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'legend.view.creatures': 'Stworzenia',
+    'legend.view.items': 'Przedmioty legendarne',
+    'legend.intro': 'Przedmioty legendarne w grze i stworzenia, z których wypadają, według wiki Medivii. Wypadają z legendarnej wersji stworzenia. Kliknij stworzenie, aby otworzyć jego kartę; rzeczywista szansa pojawia się, gdy przyniosły ją zrzuty z bestiariusza.',
+    'legend.col.item': 'Przedmiot',
+    'legend.col.slot': 'Miejsce',
+    'legend.col.rank': 'Ranga',
+    'legend.col.effect': 'Efekt specjalny',
+    'legend.col.from': 'Wypada z',
+    'legend.real': '(1 na {v} zabójstw)',
     'err.bestOdds': 'Odczytano szansę rzadkości, ale nie wiadomo, którego stworzenia dotyczy. Otwórz kartę stworzenia na stronie Stworzenia i wklej zrzut przy otwartej karcie.',
     'creature.appear': 'Stworzenie pojawia się jako {t} mniej więcej 1 raz na',
     'creature.special': 'Przedmiot specjalny:',
@@ -5672,7 +5726,7 @@ const SKIN_EXT = {
 const ITEM_EXT = new Map(Object.entries(SKIN_EXT).flatMap(([ext, list]) => list.split('|').map(name => [name, ext])));
 const ITEM_IMG = { cursed: 'img/goblet-cursed.gif', malevolent: 'img/goblet-malevolent.webp', vile: 'img/goblet-vile.webp',
   silver: 'img/token-silver.png', golden: 'img/token-golden.png', crystal: 'img/token-crystal.png' };
-const itemSlug = name => name.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-');
+const itemSlug = name => name.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const skinImg = name => 'img/skins/' + itemSlug(name) + '.' + (ITEM_EXT.get(name) || 'webp');
 // A figura de um item. As skins vão numa casa como a da mochila do jogo; "bare" tira a moldura (tokens) e "goblet"
 // é para os goblets, que já trazem um fundo cinza na figura. Se a figura faltar, o espaço fica vazio.
@@ -5903,6 +5957,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 17:09',
+    pt: ['Criaturas: nova vista "Itens lendários", com os 19 itens lendários do jogo, a figura de cada um, espaço, rank, efeito e as criaturas que os deixam (dados da wiki do Medivia).', 'Na ficha da criatura, a aba Lendário mostra os itens lendários dela com a figura, mesmo antes de alguém colar o print da chance.'],
+    en: ['Creatures: new "Legendary items" view, with the 19 legendary items of the game, their picture, slot, rank, effect and the creatures that drop them (data from the Medivia wiki).', 'On the creature sheet, the Legendary tab shows its legendary items with their picture, even before anyone pastes the screenshot with the chance.'],
+    es: ['Criaturas: nueva vista "Items legendarios", con los 19 items legendarios del juego, su figura, espacio, rango, efecto y las criaturas que los sueltan (datos de la wiki de Medivia).', 'En la ficha de la criatura, la pestaña Legendario muestra sus items legendarios con la figura, incluso antes de que alguien pegue la captura con la probabilidad.'],
+    pl: ['Stworzenia: nowy widok „Przedmioty legendarne” z 19 przedmiotami legendarnymi z gry, ich obrazkiem, miejscem, rangą, efektem i stworzeniami, z których wypadają (dane z wiki Medivii).', 'Na karcie stworzenia zakładka Legendarny pokazuje jego przedmioty legendarne z obrazkiem, nawet zanim ktoś wklei zrzut z szansą.'],
+  },
   { at: '2026-10-12 13:30',
     pt: ['Criaturas: a ficha mostra o item especial da raridade Lendário e a chance real de pegá-lo, juntando a chance de vir o lendário com a de o item cair.', 'Para alimentar: cole um print da aba Lendário no bestiário com o mouse sobre o item do saque, e outro com o mouse sobre a aba Lendário (a dica "Chance: aproximadamente 1 em …").'],
     en: ['Creatures: the sheet shows the special item of the Legendary rarity and the real chance of getting it, combining the chance of a legendary with the chance of the drop.', 'To feed it: paste a screenshot of the Legendary tab in the bestiary with the mouse over the loot item, and another with the mouse over the Legendary tab (the "Chance: approximately 1 in …" tooltip).'],
@@ -6339,6 +6399,7 @@ function creatureRows() {
   return [...rows.values()];
 }
 function renderCreatures() {
+  if (creaturesView === 'legend') renderLegend();   // a tabela de itens mostra chances e links que dependem das criaturas
   const text = slug($('#creatures-search').value), by = $('#creatures-sort').value, only = $('#creatures-missing').checked;
   const all = creatureRows();
   const list = all
@@ -6368,6 +6429,72 @@ let creatureId = null;
 let creatureTier = 'normal';   // aba de raridade aberta na ficha
 let creatureWanted = null;     // ficha pedida pelo endereço (#creatures/nome) antes de os dados chegarem
 // A ficha abre por cima da página, como janela: a lista continua onde estava. Sem id, fecha.
+/* ---------- Itens lendários ----------
+   Tabela "Legendary Items" da wiki do jogo (wiki.medivia.online), copiada em 2026-10-12. Cada linha:
+   nome | espaço | rank | efeito | criaturas que o deixam. O item cai da versão lendária da criatura.
+   Efeito "None." é item sem efeito; "UNKNOWN" é efeito que a wiki ainda não sabe. O que vem entre parênteses
+   depois de uma criatura é o lugar onde ela fica. As figuras ficam em img/legendary/ (ver preparar-imagens.js);
+   quase todas são WebP, e LEGEND_GIF lista as que são GIF. */
+const LEGEND_ITEMS = `Ent Leaf (Legendary)|Accessory|-|None.|Ent, Fairy Faeblade, Centaur Windrider, Feralwood Druid
+Icewake Ring|Ring|-|Upon equipping it regenerates health, mana and grants 5 speed underwater.|Hammerhead Shark, Crownscale Wyrm, Eelwyrm, Brinewyrm, Ythog (Throne of Tides Dungeon)
+Darkwyrm Plate Armor|Armor|200|None.|Shadow Drake
+Blade of The Pale King|Weapon|250|UNKNOWN|Maltherion
+Lifereaper Wand|Weapon|250|UNKNOWN|Maltherion
+Albino Scale Robe|Armor|300|Use to cast Dragon's Breath dealing primordial fire to targets in front of you.|Dragon Lord
+Heliodor Ring|Ring|350|None.|Ancient Dragon, Obsidian Dragon
+Flamequenchers|Boots|350|Destroys fire fields. Increases movement speed on lava cracks by 50. Increases health and mana regeneration.|Magma Dragon, Flamebringer
+Cobra Boots|Boots|400|The wearer can dodge a physical melee attack up to 1000 damage and grant 100 movement speed for 5 seconds once per 2 minutes.|Gorgon, Corrupted Spider, Swamp Demon, Huntsman Spider, Giant Cobra
+Bulwark of Twin Flames|Shield|400|Has a chance to deliver fire and ice attacks to enemies that melee attack you.|Frostclaw, Blazeclaw
+Wicked Gaze Mask|Helmet|400|Use to summon 5 lightning orbs that deal thunder damage to your current target.|Deranger, Ancient Watcher
+Scourge of Sheol|Weapon|400|Spend 500 mana to unleash massive primordial fire attack to all targets around you.|Dreadlord
+Voidreaver|Weapon|450|Has a chance to release a massive ammount of damage to your target.|Dread Knight, Warp Serpent, Darkwing, Abysmor, Abysslurker, Shadow Guard, Abyssbinder, Nightmaw, Abyssworm, Spiralmaw, Chaosmaw, Chaos Sentry, Netherhorn, Voidscale
+Scepter of Shattered Skies|Weapon|450|Use to summon call down massive chaotic energy from above, striking 4 times.|Abyssal Sorceress, Runeguard, Havoc Apostle, Shadow Knight, Ritualist, Voidflayer, Dark Apprentice, Wrathling, Abyss Reaper, Rift Soldier, Voidling
+Scaled Aegis of Ka'zerel|Armor|600|While using a bow or crossbow has 3% chance to transform you into a Sea Dragon, increasing your attack speed for 5 seconds.|Sea Dragon, Bloodscale Naga, Sea Dragonet, Duskfin Dragonet
+Serpent Vestments|Armor|600|Use to draw the cold of the underwater depths to cast Frozen Coil on a targeted creature.|Tidesinger Naga, Coralblade Naga, Mistweaver Naga
+Tidepiercer|Weapon|600|UNKNOWN|Tidebreaker Naga
+Tidebound Sigil|Accessory|600|None.|Ythog (Throne of Tides Dungeon)
+Starfish Amulet|Amulet|600|None.|Ythog (Throne of Tides Dungeon)`.split('\n').map(row => {
+  const [name, slot, rank, effect, from] = row.split('|');
+  return { name, slot, rank: +rank || null, effect: /^unknown/i.test(effect) ? null : /^none/i.test(effect) ? '' : effect, from: from.split(', ') };
+});
+const LEGEND_GIF = new Set('Blade of The Pale King|Lifereaper Wand|Scepter of Shattered Skies|Scourge of Sheol|Serpent Vestments|Tidepiercer|Voidreaver'.split('|'));
+const legendImg = name => 'img/legendary/' + itemSlug(name) + '.' + (LEGEND_GIF.has(name) ? 'gif' : 'webp');
+const legendCreature = from => from.replace(/ \(.*$/, '');   // "Ythog (Throne of Tides Dungeon)" -> "Ythog"
+// Chance real de um item por criatura morta, quando os prints do bestiário já trouxeram as duas partes da conta
+// (de quanto em quanto vem o lendário e a faixa de chance do item): devolve "33 667 – 101 000" (1 em tantos abates).
+function legendOdds(o, item) {
+  if (!o || !o.l || !o.hi || !o.item || slug(o.item) !== slug(item)) return null;
+  const best = fmtInt(o.l * 10000 / o.hi);
+  return o.lo > 0 && o.lo !== o.hi ? best + ' – ' + fmtInt(o.l * 10000 / o.lo) : best;
+}
+let creaturesView = 'creatures';   // 'creatures' (a lista) ou 'legend' (a tabela de itens lendários)
+function renderLegend() {
+  const rows = new Map(creatureRows().map(c => [c.id, c]));
+  const source = (from, item) => {
+    const name = legendCreature(from), c = rows.get(slug(name)), real = c && legendOdds(c.odds, item);
+    return el('span', { class: 'legend-from' },
+      c ? el('button', { class: 'creature-link', type: 'button', text: name, onclick: () => { creatureTier = 'legendary'; showCreature(c.id); } }) : name,
+      from.slice(name.length), real ? el('small', { text: ' ' + tr('legend.real', { v: real }) }) : null);
+  };
+  $('#legend-table').replaceChildren(
+    el('thead', {}, el('tr', {}, ['item', 'slot', 'rank', 'effect', 'from'].map(k => el('th', { scope: 'col', text: tr('legend.col.' + k) })))),
+    el('tbody', {}, LEGEND_ITEMS.map(it => el('tr', {},
+      el('td', {}, el('span', { class: 'gob-item' }, itemSlot(legendImg(it.name)), it.name)),
+      el('td', { text: it.slot }),
+      el('td', { class: it.rank == null ? 'none' : null, text: it.rank == null ? '–' : fmtInt(it.rank) }),
+      el('td', { class: it.effect ? null : 'none', text: it.effect == null ? '?' : it.effect || '–' }),
+      el('td', {}, it.from.flatMap((f, i) => i ? [', ', source(f, it.name)] : [source(f, it.name)]))))));   // lista plana: uma lista dentro da lista viraria texto
+}
+function setCreaturesView(view) {
+  creaturesView = view === 'legend' ? 'legend' : 'creatures';
+  $('#creatures-list').hidden = creaturesView !== 'creatures';
+  $('#legend-list').hidden = creaturesView !== 'legend';
+  $('#view-creatures').setAttribute('aria-pressed', String(creaturesView === 'creatures'));
+  $('#view-legend').setAttribute('aria-pressed', String(creaturesView === 'legend'));
+  if (creaturesView === 'legend') renderLegend();
+}
+$('#view-creatures').addEventListener('click', () => setCreaturesView('creatures'));
+$('#view-legend').addEventListener('click', () => setCreaturesView('legend'));
 function showCreature(id) {
   const dlg = $('#creature-dlg');
   creatureId = id;
@@ -6404,14 +6531,26 @@ function renderCreature() {
   const pct = n => n.toLocaleString(loc, n < 0.00005 ? { maximumSignificantDigits: 2 } : { minimumFractionDigits: n < 0.1 ? 4 : 2, maximumFractionDigits: n < 0.1 ? 4 : 2 }) + '%';
   const oneIn = hundredths => fmtInt(odds.l * 10000 / hundredths);
   const ranged = odds.lo > 0 && odds.lo !== odds.hi;   // faixa de verdade: os dois extremos valem e são diferentes
-  const special = tier === 'legendary' && odds.item ? [
-    el('h3', {}, tr('creature.special') + ' ', el('b', { text: odds.item }), odds.tag ? el('small', { text: ' (' + odds.tag + ')' }) : null),
-    el('p', {}, tr('creature.dropWhen') + ' ', el('b', { text: odds.lo === odds.hi ? pct(odds.lo / 100) : pct(odds.lo / 100) + ' – ' + pct(odds.hi / 100) }), '.'),
-    odds.l
-      ? el('p', {}, tr('creature.dropReal') + ' ', el('b', { text: ranged ? pct(odds.lo / 100 / odds.l) + ' – ' + pct(odds.hi / 100 / odds.l) : pct(odds.hi / 100 / odds.l) }),
-        odds.hi ? ', ' + (ranged ? tr('creature.dropIn', { a: oneIn(odds.lo), b: oneIn(odds.hi) }) : tr('creature.dropInOne', { b: oneIn(odds.hi) })) : '', '.')
-      : el('p', { class: 'creature-hint', text: tr('creature.needOdds') }),
-  ] : tier === 'legendary' && v.exp != null ? [el('p', { class: 'creature-hint', text: tr('creature.needDrop') })] : [];
+  // Itens lendários desta criatura: os da tabela da wiki e, se o print trouxe um nome que não está nela, o do print.
+  // A chance só existe para o item cujo print (mouse sobre ele no saque) já foi colado.
+  const drops = LEGEND_ITEMS.filter(i => i.from.some(f => slug(legendCreature(f)) === c.id)).map(i => ({ ...i, listed: true }));
+  if (odds.item && !drops.some(i => slug(i.name) === slug(odds.item))) drops.push({ name: odds.item });
+  const hasChance = i => !!odds.item && slug(odds.item) === slug(i.name);
+  const special = tier !== 'legendary' ? [] : drops.flatMap(i => [
+    el('h3', {}, i.listed ? itemSlot(legendImg(i.name)) : null,
+      el('span', {}, tr('creature.special') + ' ', el('b', { text: i.name }),
+        i.slot ? el('small', { text: ' ' + i.slot + (i.rank ? ' · rank ' + i.rank : '') }) : null,
+        hasChance(i) && odds.tag ? el('small', { text: ' (' + odds.tag + ')' }) : null)),
+    i.effect ? el('p', { text: i.effect }) : null,
+    ...(hasChance(i) ? [
+      el('p', {}, tr('creature.dropWhen') + ' ', el('b', { text: odds.lo === odds.hi ? pct(odds.lo / 100) : pct(odds.lo / 100) + ' – ' + pct(odds.hi / 100) }), '.'),
+      odds.l
+        ? el('p', {}, tr('creature.dropReal') + ' ', el('b', { text: ranged ? pct(odds.lo / 100 / odds.l) + ' – ' + pct(odds.hi / 100 / odds.l) : pct(odds.hi / 100 / odds.l) }),
+          odds.hi ? ', ' + (ranged ? tr('creature.dropIn', { a: oneIn(odds.lo), b: oneIn(odds.hi) }) : tr('creature.dropInOne', { b: oneIn(odds.hi) })) : '', '.')
+        : el('p', { class: 'creature-hint', text: tr('creature.needOdds') }),
+    ] : []),
+  ]).filter(Boolean);
+  if (tier === 'legendary' && (v.exp != null || drops.length) && !drops.some(hasChance)) special.push(el('p', { class: 'creature-hint', text: tr('creature.needDrop') }));
   const need = tier !== 'normal' ? (v.exp == null ? (tier === 'legendary' ? 'creature.needLegend' : 'creature.needTier') : null)
     : c.exp == null ? 'creature.needXp' : c.hp == null ? 'creature.needStats' : null;
   // Na aba Lendário o título leva, entre parênteses, o nome que a criatura tem no jogo nessa raridade.
@@ -7494,7 +7633,8 @@ function goTo(route, push = true) {
   pageNow = to;
   for (const p of PAGES) $('#page-' + p).hidden = p !== to;
   for (const b of document.querySelectorAll('[data-go]')) { if (b.dataset.go === to) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
-  creatureWanted = to === 'creatures' && sub && slug(sub) === sub ? sub : null;   // #creatures/malformis já abre a ficha
+  if (to === 'creatures') setCreaturesView(sub === 'itens' ? 'legend' : 'creatures');   // #creatures/itens abre a tabela de itens lendários
+  creatureWanted = to === 'creatures' && sub && sub !== 'itens' && slug(sub) === sub ? sub : null;   // #creatures/malformis já abre a ficha
   if (to === 'creatures') renderCreatures();   // se os dados ainda não chegaram, a ficha abre quando chegarem
   if (to === 'hunt') renderHunt();
   if (to === 'calc') renderCalc();
