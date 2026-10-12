@@ -571,6 +571,18 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .tabs button:hover { color: var(--amber); }
 .tabs button[aria-current="page"], .tabs button[aria-current="page"]:hover { background: var(--amber); color: var(--gold-ink); }
 .tabs .short { display: none; }
+/* No computador o menu acompanha a rolagem: fica flutuando no topo da janela. Enquanto a barra está presa lá
+   (.stuck, marcado pelo código), só o menu aparece; novidades, idioma e apoio somem até a página voltar ao começo.
+   A barra em si não recebe cliques, só o que está nela: o que rola por baixo continua clicável. O fundo do menu é
+   opaco (o dourado claro sobre a cor da página), para o conteúdo não aparecer através dele.
+   No celular nada muda: lá as abas já ficam numa barra fixa embaixo. */
+@media (min-width: 701px) {
+  .toolbar { position: sticky; top: 10px; z-index: 15; pointer-events: none; }
+  .toolbar > * { pointer-events: auto; }
+  .tabs { background: linear-gradient(var(--gold-wash), var(--gold-wash)), var(--ground); transition: box-shadow 0.2s; }
+  .toolbar.stuck .tabs { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55); }
+  .toolbar.stuck .toolbar-end { visibility: hidden; }
+}
 .toolbar-end { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-left: auto; }
 .toolbar-end .unit-toggle { margin-left: 0; }
 .page { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
@@ -5727,6 +5739,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 11:42',
+    pt: ['No computador, o menu de ferramentas agora acompanha a rolagem: fica flutuando no topo da janela.'],
+    en: ['On desktop, the tools menu now follows the scroll: it stays floating at the top of the window.'],
+    es: ['En el ordenador, el menú de herramientas ahora acompaña el desplazamiento: queda flotando en la parte superior de la ventana.'],
+    pl: ['Na komputerze menu narzędzi podąża teraz za przewijaniem: pozostaje u góry okna.'],
+  },
   { at: '2026-10-11 20:01',
     pt: ['Print da janela de bônus: em alguns prints o site dizia que não havia criatura, porque não achava o nome dela. Agora o nome é relido de perto, acima do tempo de respawn.'],
     en: ['Bonus window screenshot: on some screenshots the site said there was no creature, because it could not find its name. The name is now read again up close, above the spawn time.'],
@@ -7298,6 +7316,12 @@ function goTo(route, push = true) {
   if (was !== to) window.scrollTo(0, 0);
 }
 document.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) goTo(b.dataset.go); });
+// Marca a barra de ferramentas enquanto ela está presa no topo da janela (ver .toolbar.stuck no estilo): presa, ela
+// fica a 10 px do topo; solta, fica mais abaixo, no lugar dela na página.
+const toolbar = $('.toolbar');
+const markToolbar = () => toolbar.classList.toggle('stuck', window.scrollY > 0 && getComputedStyle(toolbar).position === 'sticky' && toolbar.getBoundingClientRect().top <= 11);
+window.addEventListener('scroll', markToolbar, { passive: true });
+window.addEventListener('resize', markToolbar);
 window.addEventListener('popstate', () => goTo(location.hash.slice(1), false));
 
 applyStatic();
