@@ -473,15 +473,20 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 /* Opções e botões do respawn */
 .win-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; }
 .bonus .win-foot, .bonus .status { padding-inline: 4px; }
-.opts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.opts { display: flex; flex: 1 0 100%; flex-wrap: wrap; align-items: center; gap: 10px 22px; }
+.opt-set { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }   /* o que anda junto: o som com o volume e o alerta, a voz com o "?" */
 .toggle { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; cursor: pointer; }
 .toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--value); }
-.toggle.float-game { align-self: flex-start; font-size: 13px; color: var(--label); }
+.toggle.float-game { font-size: 13px; color: var(--label); }
 .volume { width: 110px; accent-color: var(--value); cursor: pointer; }
 .toggle.pause { cursor: default; }
 .pause input { width: 62px; padding: 4px 8px; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); color: var(--title); font: 600 13px/1.2 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; }
 .clock[data-state="pause"] .ring-arc { stroke: var(--faint); }
 .dlgs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-left: auto; }
+/* A linha dos botões ocupa a largura toda: a janela flutuante com a opção dela de um lado, o Ler print do outro.
+   Vem por último, para os avisos e a lista dos comandos de voz abrirem logo abaixo das opções. */
+.dlgs.foot-acts { flex: 1 0 100%; order: 11; justify-content: space-between; gap: 10px 16px; margin-left: 0; padding-top: 12px; border-top: 1px solid var(--edge); }
+.float-set { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
 /* A janela flutuante é o que deixa o cronômetro por cima do jogo: é o botão de mais destaque da barra */
 .dlg.float-cta { display: inline-flex; align-items: center; gap: 9px; padding: 11px 20px; border-color: var(--value); background: var(--value); color: var(--ink); font-size: 15px; font-weight: 700; }
 .dlg.float-cta:hover { border-color: var(--value); filter: brightness(1.08); }
@@ -822,6 +827,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
         <div class="opts">
           <label class="toggle"><input type="checkbox" id="opt-loop"> <span data-i18n="loop">Repetir ao zerar</span></label>
           <label class="toggle pause" id="opt-pause-wrap" title="Segundos de espera depois de zerar, antes de a próxima volta começar sozinha" data-i18n-attr="title:pause.tip" hidden><span data-i18n="pause.label">Pausa entre voltas</span> <input type="number" id="opt-pause" min="0" max="600" step="5" inputmode="numeric"> <span data-i18n="pause.unit">s</span></label>
+          <span class="opt-set">
           <label class="toggle"><input type="checkbox" id="opt-sound"> <span data-i18n="sound">Som</span></label>
           <input type="range" class="volume" id="opt-volume" min="0" max="100" step="5" aria-label="Volume do som" title="Volume do som" data-i18n-attr="aria-label:volume;title:volume">
           <select class="tone" id="opt-tone" aria-label="Tipo de alerta" title="Tipo de alerta" data-i18n-attr="aria-label:tone.label;title:tone.label">
@@ -842,17 +848,22 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
             <option value="vivien" data-i18n="tone.vivien">Voz da Vivien</option>
             <option value="aghata" data-i18n="tone.aghata">Voz da Aghata</option>
           </select>
+          </span>
+          <span class="opt-set">
           <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <svg class="ico mic" aria-hidden="true"><use href="#i-mic"/></svg><span data-i18n="voice.label">Ativar comando de voz</span></label>
           <button class="voice-help-btn" type="button" id="voice-help-btn" aria-expanded="false" aria-controls="voice-help" title="Ver os comandos de voz" aria-label="Ver os comandos de voz" data-i18n-attr="title:voice.help;aria-label:voice.help">?</button>
+          </span>
         </div>
         <p class="voice-note" id="voice-note" role="status" hidden></p>
         <p class="voice-note voice-heard" id="voice-heard" hidden></p>
         <div class="voice-help" id="voice-help" hidden></div>
-        <div class="dlgs">
-          <button class="dlg go float-cta" type="button" id="float-btn" title="Abre os cronômetros numa janelinha que fica por cima do jogo" data-i18n-attr="title:float.tip"><svg class="ico" aria-hidden="true"><use href="#i-pip"/></svg><span data-i18n="float">Janela flutuante</span></button>
+        <div class="dlgs foot-acts">
+          <div class="float-set">
+            <button class="dlg go float-cta" type="button" id="float-btn" title="Abre os cronômetros numa janelinha que fica por cima do jogo" data-i18n-attr="title:float.tip"><svg class="ico" aria-hidden="true"><use href="#i-pip"/></svg><span data-i18n="float">Janela flutuante</span></button>
+            <label class="toggle float-game" title="Troca o fundo esverdeado da janela flutuante pelo preto neutro do chat do jogo, para ela se misturar à tela" data-i18n-attr="title:float.gameTip"><input type="checkbox" id="opt-float-game"> <span data-i18n="float.game">Nas cores do jogo</span></label>
+          </div>
           <button class="dlg go" type="button" id="read-btn" data-i18n="read">Ler print</button>
         </div>
-        <label class="toggle float-game" title="Troca o fundo esverdeado da janela flutuante pelo preto neutro do chat do jogo, para ela se misturar à tela" data-i18n-attr="title:float.gameTip"><input type="checkbox" id="opt-float-game"> <span data-i18n="float.game">Janela flutuante nas cores do jogo</span></label>
         <input class="sr" type="file" id="file" accept="image/*" tabindex="-1" aria-hidden="true">
       </footer>
       <p class="status" id="status" role="status" data-kind="info" data-i18n="status.default">Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print. O print do mapper da wiki, com o painel do respawn aberto, também vale.</p>
@@ -1229,7 +1240,7 @@ const I18N = {
     'legend.honorableNote': 'Itens que não são exclusivos dos lendários, mas são muito raros ou muito procurados.',
     'legend.col.props': 'Propriedades e efeitos',
     'creature.exclusive': 'Só o lendário deixa:',
-    'float.game': 'Janela flutuante nas cores do jogo',
+    'float.game': 'Nas cores do jogo',
     'float.gameTip': 'Troca o fundo esverdeado da janela flutuante pelo preto neutro do chat do jogo, para ela se misturar à tela',
     'creature.specialAny': 'item lendário (o de moldura colorida no saque)',
     'read.frame': 'Item lendário de moldura {c}: cai em {v} das vezes.',
@@ -1719,7 +1730,7 @@ const I18N = {
     'legend.honorableNote': 'Items that are not exclusive to legendary monsters, but are very rare or sought after.',
     'legend.col.props': 'Properties and effects',
     'creature.exclusive': 'Only the legendary drops:',
-    'float.game': 'Floating window in the game colours',
+    'float.game': 'In the game colours',
     'float.gameTip': 'Swaps the greenish background of the floating window for the neutral black of the game chat, so it blends into the screen',
     'creature.specialAny': 'legendary item (the one with the coloured frame in the loot)',
     'read.frame': 'Legendary item with a {c} frame: it drops {v} of the time.',
@@ -2209,7 +2220,7 @@ const I18N = {
     'legend.honorableNote': 'Items que no son exclusivos de los legendarios, pero son muy raros o muy buscados.',
     'legend.col.props': 'Propiedades y efectos',
     'creature.exclusive': 'Solo lo suelta el legendario:',
-    'float.game': 'Ventana flotante con los colores del juego',
+    'float.game': 'Con los colores del juego',
     'float.gameTip': 'Cambia el fondo verdoso de la ventana flotante por el negro neutro del chat del juego, para que se mezcle con la pantalla',
     'creature.specialAny': 'item legendario (el del marco de color en el botín)',
     'read.frame': 'Item legendario de marco {c}: cae el {v} de las veces.',
@@ -2699,7 +2710,7 @@ const I18N = {
     'legend.honorableNote': 'Przedmioty, które nie wypadają wyłącznie z legendarnych, ale są bardzo rzadkie lub poszukiwane.',
     'legend.col.props': 'Właściwości i efekty',
     'creature.exclusive': 'Wypada tylko z legendarnego:',
-    'float.game': 'Pływające okno w kolorach gry',
+    'float.game': 'W kolorach gry',
     'float.gameTip': 'Zamienia zielonkawe tło pływającego okna na neutralną czerń czatu gry, aby wtapiało się w ekran',
     'creature.specialAny': 'przedmiot legendarny (ten z kolorową ramką w łupie)',
     'read.frame': 'Przedmiot legendarny z ramką {c}: wypada w {v} przypadków.',
@@ -6123,6 +6134,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 20:50',
+    pt: ['Barra de opções do cronômetro reorganizada: as opções em uma linha e os botões na outra, com "nas cores do jogo" ao lado do botão da janela flutuante.'],
+    en: ['Timer options bar tidied up: the options on one line and the buttons on another, with "in the game colours" next to the floating window button.'],
+    es: ['Barra de opciones del cronómetro reorganizada: las opciones en una línea y los botones en otra, con "con los colores del juego" junto al botón de la ventana flotante.'],
+    pl: ['Pasek opcji licznika uporządkowany: opcje w jednym wierszu, przyciski w drugim, a „w kolorach gry” obok przycisku pływającego okna.'],
+  },
   { at: '2026-10-12 20:44',
     pt: ['Janela flutuante: a opção "estreita" foi retirada. O navegador não deixa a janela ficar tão fina quanto era preciso, então ela volta a ter um formato só. As cores do jogo e o tamanho lembrado continuam.'],
     en: ['Floating window: the "narrow" option was removed. The browser does not let the window get as thin as needed, so it is back to a single layout. The game colours and the remembered size remain.'],
