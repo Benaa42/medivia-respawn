@@ -53,22 +53,27 @@ for (const f of fs.readdirSync(from)) {
   others.push(out + '.' + k);
 }
 
-// Itens lendários (Images/Legendary): o nome do arquivo é o nome do item. Confere com a tabela LEGEND_ITEMS do page.html.
-const legendExt = {}, legendSeen = new Set();
-if (fs.existsSync(path.join(from, 'Legendary'))) {
-  fs.mkdirSync(path.join(to, 'legendary'), { recursive: true });
-  for (const f of fs.readdirSync(path.join(from, 'Legendary'))) {
-    const src = path.join(from, 'Legendary', f), name = path.parse(f).name, k = kind(src);
-    fs.copyFileSync(src, path.join(to, 'legendary', itemSlug(name) + '.' + k));
-    legendSeen.add(itemSlug(name));
-    if (k !== 'webp') (legendExt[k] = legendExt[k] || []).push(name);
+// Itens das três tabelas da página "Legendary Items" da wiki: lendários (Images/Legendary), exclusivos dos
+// lendários (Images/Exclusive) e menções honrosas (Images/Honorable). O nome do arquivo é o nome do item, e cada
+// pasta é conferida com a tabela dela no page.html. LEGEND_EXT junta os que não são WebP nas três pastas.
+const legendExt = {};
+for (const [folder, table, label] of [['Legendary', 'LEGEND_ITEMS', 'itens lendários'], ['Exclusive', 'LEGEND_EXCLUSIVE', 'exclusivos dos lendários'], ['Honorable', 'LEGEND_HONORABLE', 'menções honrosas']]) {
+  const seenHere = new Set();
+  if (fs.existsSync(path.join(from, folder))) {
+    fs.mkdirSync(path.join(to, folder.toLowerCase()), { recursive: true });
+    for (const f of fs.readdirSync(path.join(from, folder))) {
+      const src = path.join(from, folder, f), name = path.parse(f).name, k = kind(src);
+      fs.copyFileSync(src, path.join(to, folder.toLowerCase(), itemSlug(name) + '.' + k));
+      seenHere.add(itemSlug(name));
+      if (k !== 'webp') (legendExt[k] = legendExt[k] || []).push(name);
+    }
   }
+  const block = new RegExp('const ' + table + ' = `([\\s\\S]*?)`').exec(page);
+  const listed = block ? block[1].split('\n').map(row => row.split('|')[0].trim()).filter(Boolean) : [];
+  const lacking = listed.filter(n => !seenHere.has(itemSlug(n)));
+  console.log(`${seenHere.size} ${label} com imagem` + (listed.length ? ` de ${listed.length} na tabela` : ''));
+  if (lacking.length) console.log('  sem imagem: ' + lacking.join(', '));
 }
-const legendBlock = /const LEGEND_ITEMS = `([\s\S]*?)`/.exec(page);
-const legendNames = legendBlock ? legendBlock[1].split('\n').map(row => row.split('|')[0].trim()).filter(Boolean) : [];
-const legendMissing = legendNames.filter(n => !legendSeen.has(itemSlug(n)));
-console.log(`${legendSeen.size} itens lendários com imagem` + (legendNames.length ? ` de ${legendNames.length} na tabela` : ''));
-if (legendMissing.length) console.log('Lendários sem imagem: ' + legendMissing.join(', '));
 console.log('LEGEND_EXT = ' + JSON.stringify(Object.fromEntries(Object.entries(legendExt).map(([k, v]) => [k, v.sort().join('|')]))));
 
 const missing = [...names].filter(([k]) => !seen.has(k)).map(([, n]) => n);
