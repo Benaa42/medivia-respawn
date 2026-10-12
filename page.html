@@ -471,6 +471,7 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .opts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
 .toggle { display: inline-flex; align-items: center; gap: 7px; font-weight: 500; cursor: pointer; }
 .toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--value); }
+.toggle.float-game { align-self: flex-start; font-size: 13px; color: var(--label); }
 .volume { width: 110px; accent-color: var(--value); cursor: pointer; }
 .toggle.pause { cursor: default; }
 .pause input { width: 62px; padding: 4px 8px; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); color: var(--title); font: 600 13px/1.2 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; }
@@ -846,6 +847,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
           <button class="dlg go float-cta" type="button" id="float-btn" title="Abre os cronômetros numa janelinha que fica por cima do jogo" data-i18n-attr="title:float.tip"><svg class="ico" aria-hidden="true"><use href="#i-pip"/></svg><span data-i18n="float">Janela flutuante</span></button>
           <button class="dlg go" type="button" id="read-btn" data-i18n="read">Ler print</button>
         </div>
+        <label class="toggle float-game" title="Deixa a janela flutuante com o cinza dos painéis do jogo, para ela se misturar à tela" data-i18n-attr="title:float.gameTip"><input type="checkbox" id="opt-float-game"> <span data-i18n="float.game">Janela flutuante nas cores do jogo</span></label>
         <input class="sr" type="file" id="file" accept="image/*" tabindex="-1" aria-hidden="true">
       </footer>
       <p class="status" id="status" role="status" data-kind="info" data-i18n="status.default">Também dá para arrastar a imagem do print para cá ou escolher o arquivo em Ler print. O print do mapper da wiki, com o painel do respawn aberto, também vale.</p>
@@ -1206,6 +1208,8 @@ const I18N = {
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
+    'float.game': 'Janela flutuante nas cores do jogo',
+    'float.gameTip': 'Deixa a janela flutuante com o cinza dos painéis do jogo, para ela se misturar à tela',
     'creature.specialAny': 'item lendário (o de moldura colorida no saque)',
     'read.frame': 'Item lendário de moldura {c}: cai em {v} das vezes.',
     'frame.red': 'vermelha',
@@ -1688,6 +1692,8 @@ const I18N = {
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
+    'float.game': 'Floating window in the game colours',
+    'float.gameTip': 'Gives the floating window the grey of the game panels, so it blends into the screen',
     'creature.specialAny': 'legendary item (the one with the coloured frame in the loot)',
     'read.frame': 'Legendary item with a {c} frame: it drops {v} of the time.',
     'frame.red': 'red',
@@ -2170,6 +2176,8 @@ const I18N = {
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
+    'float.game': 'Ventana flotante con los colores del juego',
+    'float.gameTip': 'Deja la ventana flotante con el gris de los paneles del juego, para que se mezcle con la pantalla',
     'creature.specialAny': 'item legendario (el del marco de color en el botín)',
     'read.frame': 'Item legendario de marco {c}: cae el {v} de las veces.',
     'frame.red': 'rojo',
@@ -2652,6 +2660,8 @@ const I18N = {
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
+    'float.game': 'Pływające okno w kolorach gry',
+    'float.gameTip': 'Nadaje pływającemu oknu szarość paneli gry, aby wtapiało się w ekran',
     'creature.specialAny': 'przedmiot legendarny (ten z kolorową ramką w łupie)',
     'read.frame': 'Przedmiot legendarny z ramką {c}: wypada w {v} przypadków.',
     'frame.red': 'czerwoną',
@@ -4664,6 +4674,15 @@ function tick() {
 setInterval(tick, 250);
 
 /* Janela flutuante: fica por cima do jogo (em janela ou sem bordas). */
+// Cores do jogo para a janela flutuante (opção "nas cores do jogo"): os painéis do Medivia são de um cinza-escuro
+// neutro, sem o tom esverdeado do site, com os títulos em laranja e os números em verde. Tiradas de um print da
+// tela do jogo; trocam as mesmas variáveis de cor que a janela já usa.
+const FLOAT_GAME = { '--ground': '#1a1a1a', '--title': '#f0f0f0', '--label': '#c8c8c8', '--amber': '#e8a23a', '--value': '#1fc82a',
+  '--teal': '#e8a23a', '--btn': '#282828', '--btn-edge': '#454545', '--edge': '#303030' };
+// Aplica (ou tira) as cores do jogo na janela flutuante que estiver aberta.
+function floatTheme() {
+  if (float.win) float.win.document.documentElement.classList.toggle('game', !!ui.floatGame);
+}
 const float = { win: null, list: null, all: null, none: null, rowEls: new Map(), sig: '', canvas: null, video: null };
 // Na mesma ordem da página: primeiro o respawn principal, e em cada um do tempo maior para o menor.
 // Só os cronômetros que a pessoa deixou na janela flutuante; se tirou todos, aparecem todos (ela nunca fica vazia).
@@ -4713,7 +4732,7 @@ function paintFloat(now) {
   }
   if (float.canvas && document.pictureInPictureElement === float.video) {
     const cs = getComputedStyle(document.documentElement);
-    const col = n => cs.getPropertyValue(n).trim();
+    const col = n => (ui.floatGame && FLOAT_GAME[n]) || cs.getPropertyValue(n).trim();
     const gs = groupsNow();
     const c = float.canvas, g = c.getContext('2d');
     c.height = Math.max(1, gs.length) * 96 + 8;
@@ -4755,7 +4774,9 @@ async function toggleFloat() {
           '.f-nudge{display:flex;gap:3px}.f-nudge button{flex:1;min-width:27px;padding:3px 0 2px;border-color:var(--edge);color:var(--label);font-size:12px}' +
           'button:disabled{opacity:.45;pointer-events:none}' +
           'button.all{margin-top:10px;width:100%}button.all+button.all{margin-top:6px}' +
-          'p.voice{margin:8px 0 0;font-size:12px;color:var(--label)}' }));
+          'p.voice{margin:8px 0 0;font-size:12px;color:var(--label)}' +
+          // Cores do jogo: as mesmas variáveis com outros valores, e os botões com o canto reto dos botões do jogo.
+          ':root.game{' + Object.entries(FLOAT_GAME).map(([k, v]) => k + ':' + v).join(';') + '}.game button{border-radius:3px}' }));
       float.list = el('div');
       float.all = el('button', { class: 'all', type: 'button', text: tr('startAll'), onclick: () => { for (const g of groupsNow()) startTimer(g.key); } });
       float.none = el('button', { class: 'all zero', type: 'button', text: tr('resetAll'), onclick: () => { for (const g of groupsNow()) resetTimer(g.key); } });
@@ -4767,6 +4788,7 @@ async function toggleFloat() {
       w.setInterval(tick, 250);
       w.addEventListener('pagehide', () => { float.win = null; float.list = null; float.all = null; float.none = null; float.voice = null; });
       float.win = w;
+      floatTheme();
       tick();
       return;
     }
@@ -6040,6 +6062,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 19:10',
+    pt: ['Janela flutuante: nova opção "nas cores do jogo", que troca o fundo e os botões pelo cinza dos painéis do Medivia, com o nome em laranja e o tempo em verde, para ela se misturar à tela do jogo.'],
+    en: ['Floating window: new "in the game colours" option, which swaps the background and buttons for the grey of the Medivia panels, with the name in orange and the time in green, so it blends into the game screen.'],
+    es: ['Ventana flotante: nueva opción "con los colores del juego", que cambia el fondo y los botones por el gris de los paneles de Medivia, con el nombre en naranja y el tiempo en verde, para que se mezcle con la pantalla del juego.'],
+    pl: ['Pływające okno: nowa opcja „w kolorach gry”, która zmienia tło i przyciski na szarość paneli Medivii, z nazwą na pomarańczowo i czasem na zielono, aby okno wtapiało się w ekran gry.'],
+  },
   { at: '2026-10-12 17:49',
     pt: ['Chance real do item lendário com um print só: na aba Lendário do bestiário, pare o mouse sobre a aba Lendário e cole o print. A dica dá a chance de vir o lendário e a cor da moldura do item no saque dá a chance de ele cair (vermelha: 0,30% a 0,90%; amarela: 0,15% a 0,30%).', 'Esse print também cria a criatura no site quando ela ainda não existe e está na tabela de itens lendários.'],
     en: ['Real chance of the legendary item from a single screenshot: on the Legendary tab of the bestiary, rest the mouse on the Legendary tab and paste the screenshot. The tooltip gives the chance of a legendary and the colour of the item frame in the loot gives the chance of the drop (red: 0.30% to 0.90%; yellow: 0.15% to 0.30%).', 'That screenshot also creates the creature on the site when it does not exist yet and is in the legendary items table.'],
@@ -7403,6 +7431,8 @@ $('#opt-pause-wrap').hidden = !ui.loop;
 // A pausa só faz sentido com o cronômetro repetindo sozinho, então o campo aparece junto com essa opção.
 $('#opt-loop').addEventListener('change', e => { ui.loop = e.target.checked; saveUi(); $('#opt-pause-wrap').hidden = !ui.loop; });
 optPause.addEventListener('input', () => { ui.pause = int(optPause.value, 0, 600) || 0; saveUi(); });
+$('#opt-float-game').checked = !!ui.floatGame;
+$('#opt-float-game').addEventListener('change', e => { ui.floatGame = e.target.checked; saveUi(); floatTheme(); tick(); });
 $('#opt-sound').addEventListener('change', e => {
   ui.sound = e.target.checked;
   saveUi();
