@@ -4811,10 +4811,24 @@ async function toggleFloat() {
     if ('documentPictureInPicture' in window) {
       // Larga: o tempo de um lado e os botões do outro. Estreita: os botões embaixo do tempo, então a janela abre
       // mais fina e mais alta (o navegador tem uma largura mínima própria e pode abrir um pouco mais larga que isso).
-      const rows = Math.max(1, groupsNow().length);
-      const w = await window.documentPictureInPicture.requestWindow(ui.floatTall
-        ? { width: 165, height: 108 + rows * 166 + (rows > 1 ? 72 : 0) }   // cada cronômetro ocupa uns 166 px; com mais de um entram os botões de todos
+      // O tamanho que a pessoa deixou a janela (arrastando a borda) fica guardado por formato e por número de
+      // cronômetros, e é com ele que a janela abre da próxima vez. Sem tamanho guardado, a estreita abre só com a
+      // altura do conteúdo: uns 170 px por cronômetro, os botões de todos quando há mais de um e a barra de baixo.
+      const rows = Math.max(1, groupsNow().length), sizeKey = (ui.floatTall ? 'tall' : 'wide') + rows;
+      const kept = (ui.floatSize || {})[sizeKey];
+      const w = await window.documentPictureInPicture.requestWindow(
+        kept && kept.w >= 100 && kept.h >= 40 ? { width: kept.w, height: kept.h }
+        : ui.floatTall ? { width: 165, height: 28 + rows * 170 + (rows > 1 ? 72 : 0) + (ui.floatGame ? FLOAT_BAR.height : 0) }
         : { width: 320, height: 112 + rows * 124 });
+      let sizeTimer = null;
+      w.addEventListener('resize', () => {
+        clearTimeout(sizeTimer);   // só grava quando a pessoa para de arrastar
+        sizeTimer = setTimeout(() => {
+          if (float.win !== w || !(w.innerWidth > 0 && w.innerHeight > 0)) return;
+          ui.floatSize = { ...(ui.floatSize || {}), [sizeKey]: { w: w.innerWidth, h: w.innerHeight } };
+          saveUi();
+        }, 400);
+      });
       const cs = getComputedStyle(document.documentElement);
       const vars = ['--ground', '--title', '--label', '--amber', '--value', '--teal', '--btn', '--btn-edge', '--edge']
         .map(n => n + ':' + cs.getPropertyValue(n)).join(';');
@@ -6126,6 +6140,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 20:28',
+    pt: ['Janela flutuante: o site agora lembra o tamanho em que você deixou a janela e abre com ele da próxima vez.', 'Janela flutuante estreita: sem tamanho guardado, abre só com a altura do conteúdo, sem sobra embaixo.'],
+    en: ['Floating window: the site now remembers the size you left the window at and opens with it next time.', 'Narrow floating window: with no saved size, it opens just as tall as its content, with no spare room below.'],
+    es: ['Ventana flotante: el sitio ahora recuerda el tamaño en que dejaste la ventana y la abre así la próxima vez.', 'Ventana flotante estrecha: sin tamaño guardado, se abre solo con la altura del contenido, sin espacio de sobra abajo.'],
+    pl: ['Pływające okno: strona pamięta teraz rozmiar, w jakim zostawiłeś okno, i otwiera je tak następnym razem.', 'Wąskie pływające okno: bez zapisanego rozmiaru otwiera się tylko na wysokość zawartości, bez zapasu na dole.'],
+  },
   { at: '2026-10-12 20:12',
     pt: ['Janela flutuante estreita: Iniciar e Zerar agora ficam um abaixo do outro, para o conteúdo caber numa coluna fina.'],
     en: ['Narrow floating window: Start and Reset are now one below the other, so the content fits a thin column.'],
