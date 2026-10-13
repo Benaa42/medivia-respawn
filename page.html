@@ -186,7 +186,7 @@ dialog#creature-dlg { width: min(880px, calc(100vw - 32px)); scrollbar-width: th
 .creature-stat.xp b { color: var(--value); }
 .creature-stat.none b { color: var(--faint); }
 /* Página Criaturas: troca entre a lista de criaturas e a tabela de itens lendários */
-.unit-toggle.creatures-view { align-self: flex-start; flex-wrap: wrap; margin-left: 0; border-radius: 18px; }   /* quatro abas: no celular quebram em duas linhas */
+.unit-toggle.creatures-view { align-self: flex-start; margin-left: 0; }
 .creatures-table.legend-table { min-width: 900px; }
 .creatures-table.legend-table td { vertical-align: middle; }
 .creatures-table.legend-table td:first-child { white-space: nowrap; }
@@ -195,7 +195,9 @@ dialog#creature-dlg { width: min(880px, calc(100vw - 32px)); scrollbar-width: th
 .creatures-table.legend-table td:nth-child(4) { min-width: 240px; max-width: 380px; color: var(--label); white-space: normal; }
 .creatures-table.legend-table td:last-child { min-width: 260px; }
 .legend-table .legend-from small { color: var(--faint); font-size: 12px; white-space: nowrap; }
-#legend-list .creatures-wrap, #exclusive-list .creatures-wrap, #honorable-list .creatures-wrap { flex: none; min-height: 0; }
+.legend-title { margin-top: 10px; font: 600 16px/1.3 var(--font-ui); color: var(--title); }
+.legend-title + .support-note { margin-top: -8px; }
+#legend-list .creatures-wrap { flex: none; min-height: 0; }
 /* Tabela de três colunas (item, propriedades, criaturas) e de duas (item, criaturas) */
 .creatures-table.legend-props { min-width: 720px; }
 .creatures-table.legend-props td:nth-child(2) { min-width: 240px; max-width: 420px; color: var(--label); white-space: normal; }
@@ -916,8 +918,6 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   <div class="unit-toggle creatures-view" role="group" aria-label="Criaturas" data-i18n-attr="aria-label:creatures.title">
     <button type="button" id="view-creatures" aria-pressed="true" data-i18n="legend.view.creatures">Criaturas</button>
     <button type="button" id="view-legend" aria-pressed="false" data-i18n="legend.view.items">Itens lendários</button>
-    <button type="button" id="view-exclusive" aria-pressed="false" data-i18n="legend.exclusive">Exclusivos dos lendários</button>
-    <button type="button" id="view-honorable" aria-pressed="false" data-i18n="legend.honorable">Menções honrosas</button>
   </div>
   <div class="creatures-pane" id="creatures-list">
   <p class="support-note" data-i18n="creatures.intro">XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus. Clique numa criatura para abrir a ficha dela.</p>
@@ -938,12 +938,10 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   <div class="creatures-pane" id="legend-list" hidden>
   <p class="support-note" data-i18n="legend.intro">Itens lendários do jogo e as criaturas que os deixam, pela wiki do Medivia. Eles caem da versão lendária da criatura. Clique numa criatura para abrir a ficha dela; a chance real aparece quando os prints do bestiário já a trouxeram.</p>
   <div class="creatures-wrap"><table class="creatures-table legend-table" id="legend-table"></table></div>
-  </div>
-  <div class="creatures-pane" id="exclusive-list" hidden>
+  <h3 class="legend-title" data-i18n="legend.exclusive">Exclusivos dos lendários</h3>
   <p class="support-note" data-i18n="legend.exclusiveNote">Itens especiais que só a versão lendária da criatura deixa, mas que não contam como item lendário.</p>
   <div class="creatures-wrap"><table class="creatures-table legend-table legend-props" id="legend-exclusive"></table></div>
-  </div>
-  <div class="creatures-pane" id="honorable-list" hidden>
+  <h3 class="legend-title" data-i18n="legend.honorable">Menções honrosas</h3>
   <p class="support-note" data-i18n="legend.honorableNote">Itens que não são exclusivos dos lendários, mas são muito raros ou muito procurados.</p>
   <div class="creatures-wrap"><table class="creatures-table legend-table legend-short" id="legend-honorable"></table></div>
   </div>
@@ -6205,6 +6203,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-13 12:08',
+    pt: ['Criaturas: "Exclusivos dos lendários" e "Menções honrosas" deixaram de ser abas e voltaram para dentro de "Itens lendários", uma tabela abaixo da outra, como na wiki.'],
+    en: ['Creatures: "Legendary exclusives" and "Honorable mentions" are no longer tabs and are back inside "Legendary items", one table below the other, as on the wiki.'],
+    es: ['Criaturas: "Exclusivos de los legendarios" y "Menciones honoríficas" dejaron de ser pestañas y volvieron dentro de "Items legendarios", una tabla debajo de la otra, como en la wiki.'],
+    pl: ['Stworzenia: „Tylko z legendarnych” i „Wyróżnienia” nie są już zakładkami i wróciły do „Przedmiotów legendarnych”, jedna tabela pod drugą, jak na wiki.'],
+  },
   { at: '2026-10-13 12:05',
     pt: ['Item lendário lido do print: se o nome é de um item da tabela, a ficha da criatura já mostra figura, tipo, rank e efeito, e a criatura entra sozinha como origem do item na tabela de itens lendários.'],
     en: ['Legendary item read from a screenshot: if the name is an item of the table, the creature sheet already shows picture, type, rank and effect, and the creature is added by itself as a source of the item in the legendary items table.'],
@@ -6866,8 +6870,9 @@ function legendOdds(o, item, single) {
   const best = fmtInt(o.l * 10000 / o.hi);
   return o.lo > 0 && o.lo !== o.hi ? best + ' – ' + fmtInt(o.l * 10000 / o.lo) : best;
 }
-// As abas da página Criaturas e a parte da página de cada uma: a lista de criaturas e as três tabelas de itens.
-const CREATURE_VIEWS = { creatures: 'creatures-list', legend: 'legend-list', exclusive: 'exclusive-list', honorable: 'honorable-list' };
+// As abas da página Criaturas e a parte da página de cada uma: a lista de criaturas e os itens (as três tabelas da
+// wiki, uma abaixo da outra: itens lendários, exclusivos dos lendários e menções honrosas).
+const CREATURE_VIEWS = { creatures: 'creatures-list', legend: 'legend-list' };
 let creaturesView = 'creatures';
 function renderLegend() {
   const rows = new Map(creatureRows().map(c => [c.id, c]));
@@ -8068,8 +8073,9 @@ function goTo(route, push = true) {
   pageNow = to;
   for (const p of PAGES) $('#page-' + p).hidden = p !== to;
   for (const b of document.querySelectorAll('[data-go]')) { if (b.dataset.go === to) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
-  // #creatures/itens, #creatures/exclusivos e #creatures/mencoes abrem direto a aba; outro nome é a ficha de uma criatura
-  const views = { itens: 'legend', exclusivos: 'exclusive', mencoes: 'honorable' };
+  // #creatures/itens abre direto a aba dos itens (os endereços antigos das outras duas tabelas caem nela também);
+  // outro nome é a ficha de uma criatura
+  const views = { itens: 'legend', exclusivos: 'legend', mencoes: 'legend' };
   if (to === 'creatures') setCreaturesView(views[sub] || 'creatures');
   creatureWanted = to === 'creatures' && sub && !views[sub] && slug(sub) === sub ? sub : null;   // #creatures/malformis já abre a ficha
   if (to === 'creatures') renderCreatures();   // se os dados ainda não chegaram, a ficha abre quando chegarem
