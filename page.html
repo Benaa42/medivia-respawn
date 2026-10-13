@@ -74,11 +74,15 @@ kbd {
 
 .masthead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 28px; }
 .masthead > div { flex: 1 1 320px; min-width: 0; }
-.masthead h1 { font: 800 32px/1.05 var(--font-display); letter-spacing: -0.01em; color: var(--title); }
+.masthead h1 { display: flex; align-items: center; gap: 12px; font: 800 32px/1.05 var(--font-display); letter-spacing: -0.01em; color: var(--title); }
+.masthead h1 b { font-weight: inherit; color: var(--amber); }   /* "Labs" no dourado da marca */
+.brand-mark { flex: none; width: 44px; height: 44px; }
 .masthead p { max-width: 60ch; margin-top: 6px; }
 
-.maker { display: block; flex: none; }
-.maker img { display: block; width: auto; height: 46px; }
+/* O selo de quem fez o site fica no fim da página, pequeno e apagado; acende quando o mouse passa */
+.maker { display: flex; flex: 1 0 100%; justify-content: center; margin-top: 14px; opacity: 0.45; transition: opacity 0.15s; }
+.maker:hover, .maker:focus-visible { opacity: 0.9; }
+.maker img { display: block; width: auto; height: 26px; }
 .colophon { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; font-size: 13px; color: var(--faint); }
 .colophon p { max-width: 78ch; }
 /* Apoiar o projeto: um link discreto no rodapé que abre uma caixa com Pix e Ko-fi */
@@ -760,11 +764,10 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 <div class="wrap">
   <header class="masthead">
     <div>
-      <h1>Medivia Labs</h1>
+      <h1><img class="brand-mark" src="logo.svg?v=1" width="44" height="44" alt=""><span>Medivia <b>Labs</b></span></h1>
       <p data-i18n="tagline">Ferramentas para as suas caçadas no Medivia: cronômetro de respawn, analisador de hunt, criaturas, calculadora e sorteio.</p>
       <p class="nav-links"><a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a></p>
     </div>
-    <a class="maker" href="https://github.com/Benaa42" target="_blank" rel="noopener"><img src="vibeforge.svg?v=2" width="288" height="72" alt="Vibeforge" data-i18n-attr="alt:maker.alt"></a>
   </header>
 
   <div class="toolbar">
@@ -954,6 +957,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       <button class="support-btn" type="button" id="changes-btn" data-i18n="changes.open">Novidades</button>
       <button class="support-btn" type="button" id="support-btn" data-i18n="support.open" hidden>Apoiar o projeto</button>
     </div>
+    <a class="maker" href="https://github.com/Benaa42" target="_blank" rel="noopener"><img src="vibeforge.svg?v=2" width="288" height="72" alt="Vibeforge" data-i18n-attr="alt:maker.alt"></a>
   </footer>
 </div>
 
@@ -6207,6 +6211,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-13 14:05',
+    pt: ['O Medivia Labs ganhou uma marca: um frasco de laboratório dentro do anel do cronômetro. Ela aparece ao lado do nome e no ícone da aba.', 'O selo Vibeforge foi para o fim da página, mais discreto.'],
+    en: ['Medivia Labs now has a logo: a lab flask inside the timer ring. It shows next to the name and as the tab icon.', 'The Vibeforge seal moved to the end of the page, more discreet.'],
+    es: ['Medivia Labs ahora tiene un logo: un matraz de laboratorio dentro del anillo del cronómetro. Aparece junto al nombre y en el icono de la pestaña.', 'El sello Vibeforge pasó al final de la página, más discreto.'],
+    pl: ['Medivia Labs ma teraz logo: kolbę laboratoryjną w pierścieniu licznika. Widać je obok nazwy i jako ikonę karty.', 'Pieczęć Vibeforge trafiła na koniec strony i jest dyskretniejsza.'],
+  },
   { at: '2026-10-13 13:55',
     pt: ['O nome definitivo do site é Medivia Labs. O endereço continua o mesmo e nada do que você guardou muda.'],
     en: ['The final name of the site is Medivia Labs. The address stays the same and nothing you saved changes.'],
