@@ -6205,6 +6205,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-13 12:05',
+    pt: ['Item lendário lido do print: se o nome é de um item da tabela, a ficha da criatura já mostra figura, tipo, rank e efeito, e a criatura entra sozinha como origem do item na tabela de itens lendários.'],
+    en: ['Legendary item read from a screenshot: if the name is an item of the table, the creature sheet already shows picture, type, rank and effect, and the creature is added by itself as a source of the item in the legendary items table.'],
+    es: ['Item legendario leído de la captura: si el nombre es de un item de la tabla, la ficha de la criatura ya muestra imagen, tipo, rank y efecto, y la criatura entra sola como origen del item en la tabla de items legendarios.'],
+    pl: ['Przedmiot legendarny odczytany ze zrzutu: jeśli nazwa to przedmiot z tabeli, karta stworzenia od razu pokazuje obrazek, typ, rank i efekt, a stworzenie samo trafia do źródeł przedmiotu w tabeli przedmiotów legendarnych.'],
+  },
   { at: '2026-10-13 12:01',
     pt: ['Tabela de itens lendários: a chance real mostra só as criaturas mortas; a conta em lendários fica na ficha da criatura, a um clique do nome.'],
     en: ['Legendary items table: the real chance shows only the creatures killed; the count in legendaries stays on the creature sheet, one click on the name away.'],
@@ -6872,6 +6878,9 @@ function renderLegend() {
       c ? el('button', { class: 'creature-link', type: 'button', text: name, onclick: () => { creatureTier = 'legendary'; showCreature(c.id); } }) : name,
       from.slice(name.length), real ? el('small', { text: ' ' + tr('legend.real', { v: real }) }) : null);
   };
+  // Origens que os prints trouxeram e a wiki não lista: criaturas cujo item do print é este.
+  const printSources = it => [...rows.values()].filter(c => c.odds && c.odds.item && slug(c.odds.item) === slug(it.name)
+    && !it.from.some(f => slug(legendCreature(f)) === c.id)).map(c => c.name);
   const fromCell = (list, item) => el('td', {}, list.flatMap((f, i) => i ? [', ', source(f, item)] : [source(f, item)]));   // lista plana: uma lista dentro da lista viraria texto
   $('#legend-exclusive').replaceChildren(
     el('thead', {}, el('tr', {}, ['item', 'props', 'from'].map(k => el('th', { scope: 'col', text: tr('legend.col.' + k) })))),
@@ -6891,7 +6900,7 @@ function renderLegend() {
       el('td', { text: it.slot }),
       el('td', { class: it.rank == null ? 'none' : null, text: it.rank == null ? '–' : fmtInt(it.rank) }),
       el('td', { class: it.effect ? null : 'none', text: it.effect == null ? '?' : it.effect || '–' }),
-      el('td', {}, it.from.flatMap((f, i) => i ? [', ', source(f, it.name)] : [source(f, it.name)]))))));   // lista plana: uma lista dentro da lista viraria texto
+      el('td', {}, [...it.from, ...printSources(it)].flatMap((f, i) => i ? [', ', source(f, it.name)] : [source(f, it.name)]))))));   // lista plana: uma lista dentro da lista viraria texto
 }
 function setCreaturesView(view) {
   creaturesView = CREATURE_VIEWS[view] ? view : 'creatures';
@@ -6942,7 +6951,12 @@ function renderCreature() {
   // Itens lendários desta criatura: os da tabela da wiki e, se o print trouxe um nome que não está nela, o do print.
   // A chance só existe para o item cujo print (mouse sobre ele no saque) já foi colado.
   const drops = LEGEND_ITEMS.filter(i => i.from.some(f => slug(legendCreature(f)) === c.id)).map(i => ({ ...i, listed: true }));
-  if (odds.item && !drops.some(i => slug(i.name) === slug(odds.item))) drops.push({ name: odds.item });
+  // Se esse nome é de um item da tabela que a wiki ainda não liga a esta criatura (criatura nova), a ficha usa a
+  // figura, o tipo, o rank e o efeito da tabela; só um item que nem na tabela está fica sem figura.
+  if (odds.item && !drops.some(i => slug(i.name) === slug(odds.item))) {
+    const known = LEGEND_ITEMS.find(i => slug(i.name) === slug(odds.item));
+    drops.push(known ? { ...known, listed: true } : { name: odds.item });
+  }
   // A faixa de chance é do item que o print nomeou. Sem nome (a chance veio da cor da moldura), é do único item da
   // criatura; se ela tem mais de um ou nenhum na tabela, as chances vão sozinhas, sem título de item.
   let owner = odds.hi == null ? null : odds.item ? drops.find(i => slug(i.name) === slug(odds.item)) : drops.length === 1 ? drops[0] : null;
