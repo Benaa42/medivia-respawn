@@ -3272,6 +3272,51 @@ function getWorker() {
   return workerP;
 }
 
+// Assinatura da figura de um item, para comparar a casa do saque com a figura da tabela: a parte desenhada (mais
+// clara que o fundo; na figura da tabela, também a que não é transparente) é recortada e reduzida a 12 × 12 cores.
+// Assim não pesam a folga em volta da figura nem o tamanho em que o jogo a desenhou.
+const SIG = 12;
+function spriteSig(px, stride, x0, y0, w, h, alpha) {
+  const lit = i => (!alpha || px[i + 3] > 128) && Math.max(px[i], px[i + 1], px[i + 2]) > 70;
+  let l = w, t = h, r = -1, b = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (!lit(((y0 + y) * stride + x0 + x) * 4)) continue;
+    if (x < l) l = x;
+    if (x > r) r = x;
+    if (y < t) t = y;
+    if (y > b) b = y;
+  }
+  const bw = r - l + 1, bh = b - t + 1;
+  if (bw < 8 || bh < 8) return null;
+  const sig = new Float32Array(SIG * SIG * 3);
+  for (let cy = 0; cy < SIG; cy++) for (let cx = 0; cx < SIG; cx++) {
+    const xa = Math.floor(cx * bw / SIG), xb = Math.max(xa + 1, Math.ceil((cx + 1) * bw / SIG));
+    const ya = Math.floor(cy * bh / SIG), yb = Math.max(ya + 1, Math.ceil((cy + 1) * bh / SIG));
+    const k = (cy * SIG + cx) * 3;
+    for (let y = ya; y < yb; y++) for (let x = xa; x < xb; x++) {
+      const i = ((y0 + t + y) * stride + x0 + l + x) * 4;
+      if (lit(i)) for (let c = 0; c < 3; c++) sig[k + c] += px[i + c];
+    }
+    for (let c = 0; c < 3; c++) sig[k + c] /= (xb - xa) * (yb - ya);
+  }
+  return sig;
+}
+const sigGap = (a, b) => a.reduce((sum, v, i) => sum + Math.abs(v - b[i]), 0) / a.length;   // 0 = iguais
+// A figura da tabela é baixada e aberta como o print (sem passar por um <img>, que numa aba escondida não termina
+// de carregar); de um GIF animado vale o primeiro quadro.
+async function imageSig(src) {
+  const res = await fetch(src);
+  if (!res.ok) throw new Error('figura');
+  const bmp = await createImageBitmap(await res.blob());
+  const k = document.createElement('canvas');
+  k.width = bmp.width;
+  k.height = bmp.height;
+  const g = k.getContext('2d', { willReadFrequently: true });
+  g.drawImage(bmp, 0, 0);
+  bmp.close();
+  return spriteSig(g.getImageData(0, 0, k.width, k.height).data, k.width, 0, 0, k.width, k.height, true);
+}
+
 async function ocrLines(blob) {
   const bmp = await createImageBitmap(blob);
   const scale = Math.min(3, Math.max(1, Math.sqrt(12e6 / (bmp.width * bmp.height))));
@@ -3386,9 +3431,10 @@ async function ocrLines(blob) {
     return out;
   };
   // Casas de item com moldura vermelha ou amarela num trecho do print (o saque do bestiário). Uma moldura são duas
-  // linhas horizontais da mesma cor e do mesmo tamanho, uma em cima da outra à distância de um quadrado.
+  // linhas horizontais da mesma cor e do mesmo tamanho, uma em cima da outra à distância de um quadrado. De cada
+  // casa vai também a assinatura da figura que está dentro dela, para saber de qual item é a moldura.
   const frames = (x, y, wd, ht) => {
-    const found = { red: 0, yellow: 0 };
+    const found = { red: 0, yellow: 0, cells: [] };
     x = Math.max(0, Math.round(x)); y = Math.max(0, Math.round(y));
     wd = Math.min(bmp.width - x, Math.round(wd)); ht = Math.min(bmp.height - y, Math.round(ht));
     if (wd < 20 || ht < 20) return found;
@@ -3414,7 +3460,14 @@ async function ocrLines(blob) {
         xx = end;
       }
     }
-    for (const a of runs) if (runs.some(b => b.c === a.c && b.y > a.y && Math.abs(b.x - a.x) <= 3 && Math.abs(b.len - a.len) <= 4 && Math.abs(b.y - a.y - a.len) <= 5)) found[a.c]++;
+    const at = [];
+    for (const a of runs) if (runs.some(b => b.c === a.c && b.y > a.y && Math.abs(b.x - a.x) <= 3 && Math.abs(b.len - a.len) <= 4 && Math.abs(b.y - a.y - a.len) <= 5)) {
+      found[a.c]++;
+      if (at.some(k => Math.abs(k.x - a.x) <= 6 && Math.abs(k.y - a.y) <= 6)) continue;   // a mesma moldura, numa linha de 2 px
+      at.push(a);
+      const edge = Math.max(3, Math.round(a.len / 10));   // fica de fora a própria moldura
+      found.cells.push({ c: a.c, sig: spriteSig(px, wd, a.x + edge, a.y + edge, a.len - edge * 2, Math.min(a.len - edge * 2, ht - a.y - edge)) });
+    }
     return found;
   };
   return { lines, crop, digits, peek, block, frames, green, row, close: () => { c.width = c.height = 0; bmp.close(); } };
@@ -3607,7 +3660,7 @@ async function readBestiary(ocr) {
   // Moldura do item lendário no saque, à direita dos quadros. O jogo pinta a moldura pela raridade do item, e a
   // chance de ele cair segue a cor: vermelha, 0,30% a 0,90%; amarela, 0,15% a 0,30%.
   const framed = ocr.frames(exp.x + exp.w / 2 + pitch * 0.6, 0, 1e5, hp.y + h * 18);
-  if (framed.red || framed.yellow) out.frame = framed.red ? 'red' : 'yellow';
+  if (framed.red || framed.yellow) { out.frame = framed.red ? 'red' : 'yellow'; out.cells = framed.cells; }
   // Dica de um item do saque (o mouse sobre ele), em três linhas: o nome, a raridade do item e a faixa de chance,
   // por exemplo "Heliodor Ring / (very rare) / (0.30% to 0.90%)". A leitura da página costuma pegar só a faixa;
   // o bloco em volta dela é relido de perto cinco vezes, e o nome e a faixa valem, cada um, quando é o valor que
@@ -5340,6 +5393,18 @@ async function readImage(blob) {
       // A aba Lendário pode mostrar a criatura com outro nome (Ancient Dragon vira Solflare): acha a dona desse nome.
       const legendOwner = k => [...all].find(id => { const t = (creatureOf(id).tiers || {}).legendary; return t && t.name && slug(t.name) === k; });
       const itemsOf = id => LEGEND_ITEMS.filter(i => i.from.some(f => slug(legendCreature(f)) === id));
+      // Saque com molduras das duas cores (o Fractal Devourer tem duas vermelhas e uma amarela): a do item lendário é
+      // a da casa cuja figura mais parece a do item da tabela, desde que ganhe com folga das casas da outra cor.
+      // Sem item único na tabela, ou sem figura para comparar, fica a leitura de antes.
+      const itemFrame = async id => {
+        const cells = (p.cells || []).filter(k => k.sig), items = itemsOf(id);
+        if (!p.frame || items.length !== 1 || new Set(cells.map(k => k.c)).size < 2) return p.frame;
+        const sig = await imageSig(legendImg(items[0].name)).catch(() => null);
+        if (!sig) return p.frame;
+        const ranked = cells.map(k => ({ c: k.c, gap: sigGap(sig, k.sig) })).sort((a, b) => a.gap - b.gap);
+        const other = ranked.find(k => k.c !== ranked[0].c);
+        return ranked[0].gap <= other.gap * 0.8 ? ranked[0].c : p.frame;
+      };
       // Chance do item lendário pela cor da moldura dele no saque; o nome vem da tabela quando a criatura só tem um.
       const frameOdds = id => {
         if (!p.frame) return null;
@@ -5360,6 +5425,7 @@ async function readImage(blob) {
         // quando a leitura das abas não disse outra coisa. Só aí valem a moldura do item e os números da ficha.
         const base = known ? known.exp : null;
         const onLegend = p.odds.tier === 'legendary' && p.exp != null && (base == null ? p.tab == null || p.tab === 3 : Math.abs(p.exp - base * 8.8) <= 2);
+        if (onLegend) p.frame = await itemFrame(id);
         const legend = p.odds.tier === 'legendary', drop = onLegend ? frameOdds(id) : null;
         const odds = { [{ common: 'c', rare: 'r', legendary: 'l' }[p.odds.tier]]: p.odds.n, ...(drop || {}) };
         const sure = legend && onLegend && !!drop;   // com item de moldura colorida no saque, os números da ficha entram
@@ -5390,6 +5456,7 @@ async function readImage(blob) {
         name = (creatureOf(id) || creatureRows().find(c => c.id === id) || { name: p.name }).name;
       }
       // Na aba Lendário: a dica do item (mouse sobre ele) traz nome e faixa de chance; sem ela, vale a cor da moldura.
+      if (tier === 'legendary' && !p.drop) p.frame = await itemFrame(id);
       const drop = tier === 'legendary' ? p.drop || frameOdds(id) : null;
       const where = await saveXp(id, name, tier, data, drop);
       if (pageNow === 'creatures' || creatureId) { creatureTier = tier; showCreature(id); }   // a ficha abre já na raridade lida
@@ -6139,6 +6206,16 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-13 11:05',
+    pt: ['Itens lendários: o Malformis entra como origem do Voidreaver e o Witness como origem do Scepter of Shattered Skies; as fichas deles passam a mostrar o item com figura e efeito.',
+      'Print do bestiário: quando o saque tem molduras de mais de uma cor, o site acha a do item lendário comparando a figura, e usa a chance dessa moldura.'],
+    en: ['Legendary items: Malformis is now a source of Voidreaver and Witness a source of Scepter of Shattered Skies; their sheets now show the item with picture and effect.',
+      'Bestiary screenshot: when the loot has frames of more than one colour, the site finds the legendary item by comparing the picture and uses the chance of that frame.'],
+    es: ['Items legendarios: Malformis entra como origen del Voidreaver y Witness como origen del Scepter of Shattered Skies; sus fichas ahora muestran el item con imagen y efecto.',
+      'Captura del bestiario: cuando el botín tiene marcos de más de un color, el sitio encuentra el del item legendario comparando la imagen y usa la probabilidad de ese marco.'],
+    pl: ['Przedmioty legendarne: Malformis jest teraz źródłem Voidreavera, a Witness źródłem Scepter of Shattered Skies; ich karty pokazują przedmiot z obrazkiem i efektem.',
+      'Zrzut bestiariusza: gdy w łupie są ramki w więcej niż jednym kolorze, strona znajduje przedmiot legendarny, porównując obrazek, i używa szansy tej ramki.'],
+  },
   { at: '2026-10-12 21:10',
     pt: ['Ficha da criatura: a linha de quanto em quanto vem a raridade ficou curta ("Lendário: 1 a cada 195") e saiu o título "Item especial: item lendário", que aparecia quando o item não tinha nome.'],
     en: ['Creature sheet: the line on how often the rarity comes is now short ("Legendary: 1 in every 195") and the heading "Special item: legendary item", shown when the item had no name, was removed.'],
@@ -6725,8 +6802,8 @@ Cobra Boots|Boots|400|The wearer can dodge a physical melee attack up to 1000 da
 Bulwark of Twin Flames|Shield|400|Has a chance to deliver fire and ice attacks to enemies that melee attack you.|Frostclaw, Blazeclaw
 Wicked Gaze Mask|Helmet|400|Use to summon 5 lightning orbs that deal thunder damage to your current target.|Deranger, Ancient Watcher
 Scourge of Sheol|Weapon|400|Spend 500 mana to unleash massive primordial fire attack to all targets around you.|Dreadlord
-Voidreaver|Weapon|450|Has a chance to release a massive ammount of damage to your target.|Dread Knight, Warp Serpent, Darkwing, Abysmor, Abysslurker, Shadow Guard, Abyssbinder, Nightmaw, Abyssworm, Spiralmaw, Chaosmaw, Chaos Sentry, Netherhorn, Voidscale
-Scepter of Shattered Skies|Weapon|450|Use to summon call down massive chaotic energy from above, striking 4 times.|Abyssal Sorceress, Runeguard, Havoc Apostle, Shadow Knight, Ritualist, Voidflayer, Dark Apprentice, Wrathling, Abyss Reaper, Rift Soldier, Voidling
+Voidreaver|Weapon|450|Has a chance to release a massive ammount of damage to your target.|Dread Knight, Warp Serpent, Darkwing, Abysmor, Abysslurker, Shadow Guard, Abyssbinder, Nightmaw, Abyssworm, Spiralmaw, Chaosmaw, Chaos Sentry, Netherhorn, Voidscale, Malformis
+Scepter of Shattered Skies|Weapon|450|Use to summon call down massive chaotic energy from above, striking 4 times.|Abyssal Sorceress, Runeguard, Havoc Apostle, Shadow Knight, Ritualist, Voidflayer, Dark Apprentice, Wrathling, Abyss Reaper, Rift Soldier, Voidling, Witness
 Scaled Aegis of Ka'zerel|Armor|600|While using a bow or crossbow has 3% chance to transform you into a Sea Dragon, increasing your attack speed for 5 seconds.|Sea Dragon, Bloodscale Naga, Sea Dragonet, Duskfin Dragonet
 Serpent Vestments|Armor|600|Use to draw the cold of the underwater depths to cast Frozen Coil on a targeted creature.|Tidesinger Naga, Coralblade Naga, Mistweaver Naga
 Tidepiercer|Weapon|600|UNKNOWN|Tidebreaker Naga
