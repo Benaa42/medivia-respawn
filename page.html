@@ -3247,7 +3247,8 @@ function parsePrint(lines) {
     const title = other
       .filter(l => l.conf >= 75 && l.y < pctLine.y - pctLine.h && /[A-Za-z]{3,}/.test(l.text) && l.text.length <= 40)
       .sort((a, b) => b.y - a.y)[0];
-    if (title) name = title.text.replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ');
+    // O nome da área começa sempre com maiúscula no jogo; o leitor às vezes devolve a primeira letra minúscula ("old Church").
+    if (title) name = title.text.replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ').replace(/^[a-z]/, c => c.toUpperCase());
   }
   return { name, pct, dur, cost, costBox, discount, monsters, unread, orphans };
 }
@@ -6203,6 +6204,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-13 13:20',
+    pt: ['Print da janela de bônus: o nome da área não sai mais com a primeira letra minúscula quando o leitor erra (ex.: "old Church of White Light").'],
+    en: ['Bonus window screenshot: the area name no longer comes out with a lowercase first letter when the reader slips (e.g. "old Church of White Light").'],
+    es: ['Captura de la ventana de bonus: el nombre del área ya no sale con la primera letra minúscula cuando el lector falla (ej.: "old Church of White Light").'],
+    pl: ['Zrzut okna bonusu: nazwa obszaru nie zaczyna się już małą literą, gdy czytnik się pomyli (np. „old Church of White Light”).'],
+  },
   { at: '2026-10-13 13:05',
     pt: ['O site agora se chama Medivia Tools. O endereço continua o mesmo e nada do que você guardou muda.'],
     en: ['The site is now called Medivia Tools. The address stays the same and nothing you saved changes.'],
