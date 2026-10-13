@@ -1243,7 +1243,6 @@ const I18N = {
     'creature.exclusive': 'Só o lendário deixa:',
     'float.game': 'Nas cores do jogo',
     'float.gameTip': 'Troca o fundo esverdeado da janela flutuante pelo preto neutro do chat do jogo, para ela se misturar à tela',
-    'creature.specialAny': 'item lendário (o de moldura colorida no saque)',
     'read.frame': 'Item lendário de moldura {c}: cai em {v} das vezes.',
     'frame.red': 'vermelha',
     'frame.yellow': 'amarela',
@@ -1257,7 +1256,7 @@ const I18N = {
     'legend.col.from': 'Criaturas que deixam',
     'legend.real': '(1 a cada {v} criaturas mortas, cerca de {w} lendários)',
     'err.bestOdds': 'Li a chance da raridade, mas não sei de qual criatura é. Abra a ficha da criatura na página Criaturas e cole o print com ela aberta.',
-    'creature.appear': 'Uma criatura vem {t} cerca de 1 vez em',
+    'creature.appear': '{t}: 1 a cada',
     'creature.special': 'Item especial:',
     'creature.dropWhen': 'Com o lendário morto, a chance de o item cair é de',
     'creature.dropPer': 'ou seja, 1 item a cada {a} a {b} lendários mortos',
@@ -1735,7 +1734,6 @@ const I18N = {
     'creature.exclusive': 'Only the legendary drops:',
     'float.game': 'In the game colours',
     'float.gameTip': 'Swaps the greenish background of the floating window for the neutral black of the game chat, so it blends into the screen',
-    'creature.specialAny': 'legendary item (the one with the coloured frame in the loot)',
     'read.frame': 'Legendary item with a {c} frame: it drops {v} of the time.',
     'frame.red': 'red',
     'frame.yellow': 'yellow',
@@ -1749,7 +1747,7 @@ const I18N = {
     'legend.col.from': 'Dropped by',
     'legend.real': '(1 in {v} creatures killed, about {w} legendaries)',
     'err.bestOdds': 'The rarity chance was read, but not which creature it belongs to. Open the creature sheet on the Creatures page and paste the screenshot with it open.',
-    'creature.appear': 'A creature comes as {t} about 1 time in',
+    'creature.appear': '{t}: 1 in every',
     'creature.special': 'Special item:',
     'creature.dropWhen': 'With the legendary dead, the chance of the item dropping is',
     'creature.dropPer': 'that is, 1 item every {a} to {b} legendaries killed',
@@ -2227,7 +2225,6 @@ const I18N = {
     'creature.exclusive': 'Solo lo suelta el legendario:',
     'float.game': 'Con los colores del juego',
     'float.gameTip': 'Cambia el fondo verdoso de la ventana flotante por el negro neutro del chat del juego, para que se mezcle con la pantalla',
-    'creature.specialAny': 'item legendario (el del marco de color en el botín)',
     'read.frame': 'Item legendario de marco {c}: cae el {v} de las veces.',
     'frame.red': 'rojo',
     'frame.yellow': 'amarillo',
@@ -2241,7 +2238,7 @@ const I18N = {
     'legend.col.from': 'Criaturas que lo sueltan',
     'legend.real': '(1 cada {v} criaturas muertas, unos {w} legendarios)',
     'err.bestOdds': 'Se leyó la probabilidad de la rareza, pero no de qué criatura es. Abre la ficha de la criatura en la página Criaturas y pega la captura con ella abierta.',
-    'creature.appear': 'Una criatura viene {t} cerca de 1 vez en',
+    'creature.appear': '{t}: 1 de cada',
     'creature.special': 'Item especial:',
     'creature.dropWhen': 'Con el legendario muerto, la probabilidad de que caiga el item es de',
     'creature.dropPer': 'es decir, 1 item cada {a} a {b} legendarios muertos',
@@ -2719,7 +2716,6 @@ const I18N = {
     'creature.exclusive': 'Wypada tylko z legendarnego:',
     'float.game': 'W kolorach gry',
     'float.gameTip': 'Zamienia zielonkawe tło pływającego okna na neutralną czerń czatu gry, aby wtapiało się w ekran',
-    'creature.specialAny': 'przedmiot legendarny (ten z kolorową ramką w łupie)',
     'read.frame': 'Przedmiot legendarny z ramką {c}: wypada w {v} przypadków.',
     'frame.red': 'czerwoną',
     'frame.yellow': 'żółtą',
@@ -2733,7 +2729,7 @@ const I18N = {
     'legend.col.from': 'Wypada z',
     'legend.real': '(1 na {v} zabitych stworzeń, około {w} legendarnych)',
     'err.bestOdds': 'Odczytano szansę rzadkości, ale nie wiadomo, którego stworzenia dotyczy. Otwórz kartę stworzenia na stronie Stworzenia i wklej zrzut przy otwartej karcie.',
-    'creature.appear': 'Stworzenie pojawia się jako {t} mniej więcej 1 raz na',
+    'creature.appear': '{t}: 1 na',
     'creature.special': 'Przedmiot specjalny:',
     'creature.dropWhen': 'Po zabiciu legendarnego szansa na wypadnięcie przedmiotu to',
     'creature.dropPer': 'czyli 1 przedmiot na {a}–{b} zabitych legendarnych',
@@ -6143,6 +6139,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-12 21:10',
+    pt: ['Ficha da criatura: a linha de quanto em quanto vem a raridade ficou curta ("Lendário: 1 a cada 195") e saiu o título "Item especial: item lendário", que aparecia quando o item não tinha nome.'],
+    en: ['Creature sheet: the line on how often the rarity comes is now short ("Legendary: 1 in every 195") and the heading "Special item: legendary item", shown when the item had no name, was removed.'],
+    es: ['Ficha de la criatura: la línea de cada cuánto viene la rareza quedó corta ("Legendario: 1 de cada 195") y se quitó el título "Item especial: item legendario", que aparecía cuando el item no tenía nombre.'],
+    pl: ['Karta stworzenia: wiersz o tym, jak często trafia się rzadkość, jest teraz krótki („Legendarny: 1 na 195”), a nagłówek „Przedmiot specjalny: przedmiot legendarny”, widoczny gdy przedmiot nie miał nazwy, został usunięty.'],
+  },
   { at: '2026-10-12 21:02',
     pt: ['Chance real do item lendário: ao lado do total de criaturas mortas, agora aparece também quantos lendários isso dá, na ficha da criatura e na tabela de itens lendários.'],
     en: ['Real chance of the legendary item: next to the total of creatures killed, it now also shows how many legendaries that is, on the creature sheet and in the legendary items table.'],
@@ -6860,12 +6862,12 @@ function renderCreature() {
   const drops = LEGEND_ITEMS.filter(i => i.from.some(f => slug(legendCreature(f)) === c.id)).map(i => ({ ...i, listed: true }));
   if (odds.item && !drops.some(i => slug(i.name) === slug(odds.item))) drops.push({ name: odds.item });
   // A faixa de chance é do item que o print nomeou. Sem nome (a chance veio da cor da moldura), é do único item da
-  // criatura; se ela tem mais de um ou nenhum na tabela, vai numa linha à parte.
+  // criatura; se ela tem mais de um ou nenhum na tabela, as chances vão sozinhas, sem título de item.
   let owner = odds.hi == null ? null : odds.item ? drops.find(i => slug(i.name) === slug(odds.item)) : drops.length === 1 ? drops[0] : null;
-  if (odds.hi != null && !owner) { owner = { name: tr('creature.specialAny') }; drops.push(owner); }
+  if (odds.hi != null && !owner) { owner = { unnamed: true }; drops.push(owner); }
   const hasChance = i => i === owner;
   const special = tier !== 'legendary' ? [] : drops.flatMap(i => [
-    el('h3', {}, i.listed ? itemSlot(legendImg(i.name)) : null,
+    i.unnamed ? null : el('h3', {}, i.listed ? itemSlot(legendImg(i.name)) : null,
       el('span', {}, tr('creature.special') + ' ', el('b', { text: i.name }),
         i.slot ? el('small', { text: ' ' + i.slot + (i.rank ? ' · rank ' + i.rank : '') }) : null,
         hasChance(i) && odds.tag ? el('small', { text: ' (' + odds.tag + ')' }) : null)),
@@ -6898,7 +6900,7 @@ function renderCreature() {
       stat('ratio', v.exp != null && v.hp ? (v.exp / v.hp).toLocaleString(loc, { maximumFractionDigits: 2 }) : null, 'main'),
       stat('arm', range(v.armLo, v.armHi)), stat('def', range(v.defLo, v.defHi)), stat('spd', num(v.spd)), stat('mana', num(v.mana))),
     appear || special.length ? el('section', { class: 'creature-odds' },
-      appear ? el('p', {}, tr('creature.appear', { t: tierName }) + ' ', el('b', { text: fmtInt(appear) }), '.') : null,
+      appear ? el('p', {}, tr('creature.appear', { t: tierName }) + ' ', el('b', { text: fmtInt(appear) })) : null,
       special) : null,
     el('section', { class: 'creature-where' },
       el('h3', { text: tr('creature.where') }),
