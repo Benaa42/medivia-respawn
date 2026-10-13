@@ -3909,11 +3909,14 @@ async function cloudFetch(path, opts) {
 }
 
 // Documento do banco -> respawn no formato da página. Os monstros voltam na ordem em que foram incluídos.
+// No jogo o nome de uma área começa sempre com maiúscula; um nome que entrou no banco com a primeira letra
+// minúscula (erro de leitura do print) é mostrado do jeito certo.
+const capName = n => (typeof n === 'string' ? n.replace(/^[a-z]/, c => c.toUpperCase()) : n);
 function rawToRespawn(raw) {
   const monsters = Object.values(raw.monsters && typeof raw.monsters === 'object' ? raw.monsters : {})
     .filter(m => m && typeof m === 'object')
     .sort((a, b) => (a.i || 0) - (b.i || 0));
-  return normalize({ name: raw.name, monsters, cost10: raw.cost10, duration: raw.duration, readAt: raw.readAt, updatedAt: raw.at });
+  return normalize({ name: capName(raw.name), monsters, cost10: raw.cost10, duration: raw.duration, readAt: raw.readAt, updatedAt: raw.at });
 }
 // Respawn da página -> documento do banco. Com "prev" parte do que já está lá e acrescenta o que falta;
 // com "update", além disso troca os números (custo, duração, quantidade e tempo de cada criatura) pelos da leitura
@@ -5506,7 +5509,7 @@ async function readImage(blob) {
       if (ghost) { store.local.delete(ghost.id); persistLocal(); gone = ghost.name; }
     }
     const where = await saveRespawn(id, {
-      name: prev ? prev.name : name,
+      name: capName(prev ? prev.name : name),
       monsters,
       cost10: cost10 || (prev && prev.cost10) || null,
       duration: base60 ? 60 : cost10 ? p.dur : (prev && prev.duration) || p.dur || null,
@@ -5518,7 +5521,7 @@ async function readImage(blob) {
     if (cost10 && !mapper) discSet(id, p.discount || 0);   // print sem a faixa de desconto: o desconto acabou
     select(id, mapper ? undefined : p.pct);
     goTo('timer');   // print de respawn lido em outra página: abre o cronômetro dele
-    let msg = tr((mapper ? 'read.mapper' : 'read.ok') + (p.monsters.length === 1 ? '1' : 'N'), { x: prev ? prev.name : name, p: p.pct, n: p.monsters.length }) + ' ' +
+    let msg = tr((mapper ? 'read.mapper' : 'read.ok') + (p.monsters.length === 1 ? '1' : 'N'), { x: capName(prev ? prev.name : name), p: p.pct, n: p.monsters.length }) + ' ' +
       (added.length ? tr('read.grew', { y: added.join(', '), n: monsters.length }) + ' ' : '') +
       tr(where === 'cloud' ? 'read.cloud' : where === 'shared' ? 'read.shared' : 'read.local') + ' ' + tr('read.discarded');
     if (cost10 && p.discount) msg += ' ' + tr('read.disc', { v: fmtInt(p.discount) });
@@ -6204,6 +6207,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-13 13:25',
+    pt: ['Respawn que já estava no banco com o nome começando em minúscula (ex.: "old Church of White Light") agora aparece com a maiúscula certa.'],
+    en: ['A respawn already in the bank with a name starting in lowercase (e.g. "old Church of White Light") now shows with the right capital letter.'],
+    es: ['Un respawn que ya estaba en el banco con el nombre empezando en minúscula (ej.: "old Church of White Light") ahora aparece con la mayúscula correcta.'],
+    pl: ['Respawn, który był już w banku z nazwą zaczynającą się małą literą (np. „old Church of White Light”), jest teraz pokazywany z właściwą wielką literą.'],
+  },
   { at: '2026-10-13 13:20',
     pt: ['Print da janela de bônus: o nome da área não sai mais com a primeira letra minúscula quando o leitor erra (ex.: "old Church of White Light").'],
     en: ['Bonus window screenshot: the area name no longer comes out with a lowercase first letter when the reader slips (e.g. "old Church of White Light").'],
