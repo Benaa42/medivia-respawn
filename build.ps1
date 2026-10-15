@@ -3,6 +3,8 @@
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $page = Get-Content -Raw -Encoding UTF8 (Join-Path $here 'page.html')
 $head = '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" href="favicon.png?v=3" sizes="48x48" type="image/png"><link rel="icon" href="favicon.svg?v=3" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png?v=3"><style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body>'
-$html = $head + "`n" + $page + "`n</body></html>`n"
+# Contagem de visitas anônima (Cloudflare Web Analytics, sem cookies); os números ficam só no painel da Cloudflare
+$beacon = '<!-- Cloudflare Web Analytics --><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon=''{"token": "8a670203755347cfb6c887e0112018b1"}''></script><!-- End Cloudflare Web Analytics -->'
+$html = $head + "`n" + $page + "`n" + $beacon + "`n</body></html>`n"
 [System.IO.File]::WriteAllText((Join-Path $here 'index.html'), $html, (New-Object System.Text.UTF8Encoding($false)))
 "index.html gerado"
