@@ -78,6 +78,18 @@ kbd {
 .masthead h1 b { font-weight: inherit; color: var(--amber); }   /* "Labs" no dourado da marca */
 .brand-mark { flex: none; width: 44px; height: 44px; }
 .masthead p { max-width: 60ch; margin-top: 6px; }
+.goals { flex: 0 1 300px; min-width: 0; display: grid; gap: 10px; padding: 12px 14px; background: var(--box); border: 1px solid var(--edge); border-radius: var(--r-md); }
+.goals h2 { font: 700 13px/1.2 var(--font-ui); color: var(--label); }
+.goal { display: grid; gap: 5px; }
+.goal-line { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13.5px; color: var(--title); }
+.goal-line b { font-variant-numeric: tabular-nums; }
+.goal-line small { color: var(--faint); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.goal-track { height: 8px; background: var(--card); border-radius: 4px; overflow: hidden; }
+.goal-fill { height: 100%; min-width: 3px; background: var(--value); border-radius: 4px; transition: width .6s ease; }
+.goal-left { color: var(--faint); font-size: 12px; font-variant-numeric: tabular-nums; }
+.goals-hint { color: var(--faint); font-size: 12px; line-height: 1.35; }
+@media (max-width: 640px) { .goals { flex-basis: 100%; } }
+@media (prefers-reduced-motion: reduce) { .goal-fill { transition: none; } }
 
 /* O selo de quem fez o site fica no fim da página, pequeno e apagado; acende quando o mouse passa */
 .maker { display: flex; flex: 1 0 100%; justify-content: center; margin-top: 14px; opacity: 0.45; transition: opacity 0.15s; }
@@ -768,6 +780,11 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       <p data-i18n="tagline">Ferramentas para as suas caçadas no Medivia: cronômetro de respawn, analisador de hunt, criaturas, calculadora e sorteio.</p>
       <p class="nav-links"><a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a></p>
     </div>
+    <aside class="goals" id="goals" aria-labelledby="goals-title" hidden>
+      <h2 id="goals-title" data-i18n="goals.title">Metas da comunidade</h2>
+      <div id="goals-list"></div>
+      <p class="goals-hint" data-i18n="goals.hint">Mande prints da janela de bônus e do bestiário: cada um conta.</p>
+    </aside>
   </header>
 
   <div class="toolbar">
@@ -1123,6 +1140,13 @@ const I18N = {
   pt: {
     'html.lang': 'pt-BR',
     'tagline': 'Ferramentas para as suas caçadas no Medivia: cronômetro de respawn, analisador de hunt, criaturas, calculadora e sorteio.',
+    'goals.title': 'Metas da comunidade',
+    'goals.respawns': 'Respawns',
+    'goals.creatures': 'Criaturas',
+    'goals.of': '{v} de {m}',
+    'goals.left': 'faltam {n}',
+    'goals.leftOne': 'falta 1',
+    'goals.hint': 'Mande prints da janela de bônus e do bestiário: cada um conta.',
     'mapper': 'Mapper da wiki',
     'maker.alt': 'Vibeforge',
     'lang.label': 'Idioma',
@@ -1614,6 +1638,13 @@ const I18N = {
   en: {
     'html.lang': 'en',
     'tagline': 'Tools for your Medivia hunts: respawn timer, hunt analyzer, creatures, calculator and raffle.',
+    'goals.title': 'Community goals',
+    'goals.respawns': 'Respawns',
+    'goals.creatures': 'Creatures',
+    'goals.of': '{v} of {m}',
+    'goals.left': '{n} to go',
+    'goals.leftOne': '1 to go',
+    'goals.hint': 'Send screenshots of the bonus window and the bestiary: every one counts.',
     'mapper': 'Wiki mapper',
     'maker.alt': 'Vibeforge',
     'lang.label': 'Language',
@@ -2105,6 +2136,13 @@ const I18N = {
   es: {
     'html.lang': 'es',
     'tagline': 'Herramientas para tus cacerías en Medivia: cronómetro de respawn, analizador de hunt, criaturas, calculadora y sorteo.',
+    'goals.title': 'Metas de la comunidad',
+    'goals.respawns': 'Respawns',
+    'goals.creatures': 'Criaturas',
+    'goals.of': '{v} de {m}',
+    'goals.left': 'faltan {n}',
+    'goals.leftOne': 'falta 1',
+    'goals.hint': 'Manda capturas de la ventana de bonus y del bestiario: cada una cuenta.',
     'mapper': 'Mapper de la wiki',
     'maker.alt': 'Vibeforge',
     'lang.label': 'Idioma',
@@ -2596,6 +2634,13 @@ const I18N = {
   pl: {
     'html.lang': 'pl',
     'tagline': 'Narzędzia na twoje polowania w Medivii: licznik respawnu, analizator polowań, stworzenia, kalkulator i losowanie.',
+    'goals.title': 'Cele społeczności',
+    'goals.respawns': 'Respawny',
+    'goals.creatures': 'Stworzenia',
+    'goals.of': '{v} z {m}',
+    'goals.left': 'brakuje {n}',
+    'goals.leftOne': 'brakuje 1',
+    'goals.hint': 'Wysyłaj zrzuty okna bonusu i bestiariusza: każdy się liczy.',
     'mapper': 'Mapper z wiki',
     'maker.alt': 'Vibeforge',
     'lang.label': 'Język',
@@ -5366,6 +5411,30 @@ async function rename(id, input) {
   saveRespawn(nid, { ...r, name }, share);
 }
 
+// Metas da comunidade: quantos respawns e criaturas o banco compartilhado já tem e o próximo marco (ao chegar em
+// 50, a meta passa a 100). Só aparece com o banco ligado e com algum dado já recebido.
+const GOAL_STEPS = [25, 50, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000, 3000, 5000, 10000];
+function renderGoals() {
+  const box = $('#goals');
+  if (!box) return;
+  const totals = [['goals.respawns', cloud.raw.size], ['goals.creatures', xp.cloud.size]];
+  box.hidden = !cloud.on || totals.every(([, v]) => !v);
+  if (box.hidden) return;
+  const loc = ui.lang === 'pt' ? 'pt-BR' : ui.lang, num = v => v.toLocaleString(loc);
+  const list = $('#goals-list');
+  list.replaceChildren(...totals.map(([key, v]) => {
+    const m = GOAL_STEPS.find(x => x > v) || Math.ceil((v + 1) / 5000) * 5000;
+    const fill = el('div', { class: 'goal-fill' });
+    fill.style.width = Math.min(100, (v / m) * 100) + '%';
+    const track = el('div', { class: 'goal-track', role: 'progressbar', 'aria-label': tr(key), 'aria-valuemin': '0', 'aria-valuemax': String(m), 'aria-valuenow': String(v) }, fill);
+    const of = tr('goals.of', { v: '\u0000', m: num(m) }).split('\u0000');
+    return el('div', { class: 'goal' },
+      el('div', { class: 'goal-line' }, el('span', { text: tr(key) }), el('span', {}, of[0], el('b', { text: num(v) }), el('small', { text: of[1] || '' }))),
+      track,
+      el('div', { class: 'goal-left', text: m - v === 1 ? tr('goals.leftOne') : tr('goals.left', { n: num(m - v) }) }));
+  }));
+}
+
 function renderAll() {
   // A seleção só muda depois que o banco terminou de carregar: antes disso o respawn salvo pode não ter chegado.
   if (!pending.seed && !pending.db && !pending.cloud && !getRespawn(ui.id)) {
@@ -5381,6 +5450,7 @@ function renderAll() {
   renderSheet();
   if ($('#backup').open && document.activeElement !== $('#backup-text')) fillBackup();
   if (pageNow === 'creatures') renderCreatures();   // respawns ou XP mudaram: a lista de criaturas acompanha
+  renderGoals();
 }
 
 /* ---------- Entrada do print ---------- */
@@ -6211,6 +6281,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-19 16:15',
+    pt: ['No alto da página, as metas da comunidade: quantos respawns e criaturas o banco compartilhado já tem e quanto falta para o próximo marco. Cada print da janela de bônus ou do bestiário ajuda a chegar lá.'],
+    en: ['At the top of the page, the community goals: how many respawns and creatures the shared bank already has and how many are left to the next milestone. Every screenshot of the bonus window or the bestiary helps get there.'],
+    es: ['Arriba de la página, las metas de la comunidad: cuántos respawns y criaturas tiene ya el banco compartido y cuánto falta para el próximo hito. Cada captura de la ventana de bonus o del bestiario ayuda a llegar.'],
+    pl: ['Na górze strony cele społeczności: ile respawnów i stworzeń ma już wspólna baza i ile brakuje do następnego progu. Każdy zrzut okna bonusu lub bestiariusza pomaga tam dojść.'],
+  },
   { at: '2026-10-14 21:20',
     pt: ['O site passou a contar visitas de forma anônima, pelo Cloudflare Web Analytics: sem cookies e sem guardar dados pessoais. Serve só para sabermos quantas pessoas usam as ferramentas.'],
     en: ['The site now counts visits anonymously, with Cloudflare Web Analytics: no cookies and no personal data kept. It only tells us how many people use the tools.'],
