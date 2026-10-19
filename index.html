@@ -282,6 +282,15 @@ dialog.support[open] { display: flex; flex-direction: column; gap: 14px; }
 .paste small { display: block; margin-top: 5px; font-size: 13px; font-weight: 400; color: var(--label); }
 /* Tutorial em vídeo: o "?" ao lado da explicação, a prévia ao passar o mouse e a janela com som */
 .tut-btn { display: inline-grid; place-items: center; width: 24px; height: 24px; margin-left: 6px; padding: 0; vertical-align: 1px; border: 1px solid var(--gold-edge); border-radius: 50%; background: var(--gold-wash); color: var(--amber); font: 700 13px/1 var(--font-ui); cursor: pointer; }
+/* na caixa de explicação, o "?" fica no canto de baixo, um pouco para dentro, na altura da linha menor; no celular, na borda direita */
+.paste.has-tut { position: relative; }
+.paste.has-tut small { padding-right: 112px; }
+.paste.has-tut > .tut-btn { position: absolute; right: 80px; bottom: 9px; width: 32px; height: 32px; margin: 0; font-size: 17px; }
+@media (max-width: 640px) {
+  .paste.has-tut { padding-right: 60px; }
+  .paste.has-tut small { padding-right: 0; }
+  .paste.has-tut > .tut-btn { right: 14px; bottom: auto; top: 50%; transform: translateY(-50%); }
+}
 .tut-btn:hover, .tut-btn:focus-visible { border-color: var(--amber); background: rgba(240, 173, 77, 0.16); }
 .tut-pop { position: fixed; z-index: 60; width: 200px; padding: 6px; background: var(--box); border: 1px solid var(--gold-edge); border-radius: var(--r-md); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55); pointer-events: none; }
 .tut-pop video { display: block; width: 100%; aspect-ratio: 9 / 16; border-radius: var(--r-sm); background: var(--ground); }
@@ -817,7 +826,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </div>
 
   <section class="page" id="page-timer">
-  <p class="paste"><span data-i18n="paste.a">Com o print da janela de bônus copiado, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="paste.b">em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</span><button class="tut-btn" type="button" data-tut="print" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button>
+  <p class="paste has-tut"><span data-i18n="paste.a">Com o print da janela de bônus copiado, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="paste.b">em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</span><button class="tut-btn" type="button" data-tut="print" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button>
     <small data-i18n="paste.best">O print da ficha de uma criatura no bestiário também vale: ele guarda ou atualiza o XP e os atributos dela.</small></p>
 
   <div class="desk">
@@ -6926,10 +6935,17 @@ function tutPreview(btn) {
   if (!TUTORIAIS[id]) return;
   if (video.dataset.src !== tutSrc(id, 'mp4')) { video.poster = tutSrc(id, 'jpg'); video.src = video.dataset.src = tutSrc(id, 'mp4'); }
   pop.hidden = false;
-  // ao lado do botão, sem sair da tela: abaixo e à direita, ou para cima e para a esquerda quando não cabe
+  // perto do botão sem cobri-lo: embaixo; se não couber, em cima; numa tela baixa, ao lado (à esquerda, ou à direita)
   const r = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight, m = 12;
-  pop.style.left = Math.max(m, Math.min(r.left, innerWidth - w - m)) + 'px';
-  pop.style.top = (r.bottom + 8 + h <= innerHeight - m ? r.bottom + 8 : Math.max(m, r.top - 8 - h)) + 'px';
+  let left = Math.max(m, Math.min(r.left + r.width / 2 - w / 2, innerWidth - w - m)), top;
+  if (r.bottom + 8 + h <= innerHeight - m) top = r.bottom + 8;
+  else if (r.top - 8 - h >= m) top = r.top - 8 - h;
+  else {
+    top = Math.max(m, Math.min(r.top + r.height / 2 - h / 2, innerHeight - h - m));
+    left = r.left - 10 - w >= m ? r.left - 10 - w : Math.min(r.right + 10, innerWidth - w - m);
+  }
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
   video.currentTime = 0;
   video.play().catch(() => {});
 }
