@@ -279,6 +279,15 @@ dialog.support[open] { display: flex; flex-direction: column; gap: 14px; }
 }
 .paste kbd { margin-inline: 2px; }
 .paste small { display: block; margin-top: 5px; font-size: 13px; font-weight: 400; color: var(--label); }
+/* Tutorial em vídeo: o "?" ao lado da explicação, a prévia ao passar o mouse e a janela com som */
+.tut-btn { display: inline-grid; place-items: center; width: 24px; height: 24px; margin-left: 6px; padding: 0; vertical-align: 1px; border: 1px solid var(--gold-edge); border-radius: 50%; background: var(--gold-wash); color: var(--amber); font: 700 13px/1 var(--font-ui); cursor: pointer; }
+.tut-btn:hover, .tut-btn:focus-visible { border-color: var(--amber); background: rgba(240, 173, 77, 0.16); }
+.tut-pop { position: fixed; z-index: 60; width: 200px; padding: 6px; background: var(--box); border: 1px solid var(--gold-edge); border-radius: var(--r-md); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55); pointer-events: none; }
+.tut-pop video { display: block; width: 100%; aspect-ratio: 9 / 16; border-radius: var(--r-sm); background: var(--ground); }
+.tut-pop span { display: block; padding: 6px 2px 2px; font-size: 12px; color: var(--label); text-align: center; }
+dialog.tut-dlg { width: fit-content; max-width: calc(100vw - 32px); padding: 16px; }
+.tut-dlg video { display: block; align-self: center; width: auto; height: min(72vh, 640px); aspect-ratio: 9 / 16; max-width: calc(100vw - 64px); border-radius: var(--r-sm); background: var(--ground); }
+.tut-dlg .tut-yt { font-size: 13px; color: var(--label); }
 
 .desk { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; align-items: start; }
 .win { display: flex; flex-direction: column; min-width: 0; }
@@ -807,7 +816,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </div>
 
   <section class="page" id="page-timer">
-  <p class="paste"><span data-i18n="paste.a">Com o print da janela de bônus copiado, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="paste.b">em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</span>
+  <p class="paste"><span data-i18n="paste.a">Com o print da janela de bônus copiado, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="paste.b">em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</span><button class="tut-btn" type="button" data-tut="print" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button>
     <small data-i18n="paste.best">O print da ficha de uma criatura no bestiário também vale: ele guarda ou atualiza o XP e os atributos dela.</small></p>
 
   <div class="desk">
@@ -1060,6 +1069,16 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
     </div>
     <p class="support-note" id="room-msg" role="status"></p>
   </div>
+</dialog>
+
+<div class="tut-pop" id="tut-pop" hidden aria-hidden="true"><video muted playsinline loop preload="none"></video><span data-i18n="tut.sound">Clique para ver com som</span></div>
+<dialog class="support tut-dlg" id="tut-dlg" aria-labelledby="tut-title">
+  <div class="support-end">
+    <h2 id="tut-title"></h2>
+    <button class="dlg stop" type="button" id="tut-close" data-i18n="support.close" autofocus>Fechar</button>
+  </div>
+  <video id="tut-video" controls playsinline preload="none"></video>
+  <a class="tut-yt" id="tut-yt" href="#" target="_blank" rel="noopener" data-i18n="tut.youtube">Ver no YouTube</a>
 </dialog>
 
 <dialog class="support" id="changes" aria-labelledby="changes-title">
@@ -1430,6 +1449,10 @@ const I18N = {
     'read.grew': 'Criaturas novas neste respawn: {y}. Agora são {n}.',
     'read.more': 'Se a lista do jogo tiver mais criaturas, role a lista e mande outro print: elas são somadas a este respawn.',
     'voice.help': 'Ver os comandos de voz',
+    'tut.open': 'Ver o tutorial em vídeo',
+    'tut.sound': 'Clique para ver com som',
+    'tut.youtube': 'Ver no YouTube',
+    'tut.print': 'Respawn novo com um print',
     'voice.h.startAll': '"iniciar" · "iniciar todos"',
     'voice.h.startAllD': 'Inicia todos os cronômetros',
     'voice.h.startOne': '"iniciar um" · "iniciar dois"…',
@@ -1928,6 +1951,10 @@ const I18N = {
     'read.grew': 'New creatures in this respawn: {y}. It now has {n}.',
     'read.more': 'If the list in the game has more creatures, scroll it and send another screenshot: they are added to this respawn.',
     'voice.help': 'Show the voice commands',
+    'tut.open': 'Watch the video tutorial',
+    'tut.sound': 'Click to watch with sound',
+    'tut.youtube': 'Watch on YouTube',
+    'tut.print': 'Add a new respawn with one screenshot',
     'voice.h.startAll': '"start" · "start all"',
     'voice.h.startAllD': 'Starts every timer',
     'voice.h.startOne': '"start one" · "start two"…',
@@ -2426,6 +2453,10 @@ const I18N = {
     'read.grew': 'Criaturas nuevas en este respawn: {y}. Ahora son {n}.',
     'read.more': 'Si la lista del juego tiene más criaturas, desplázala y envía otra captura: se suman a este respawn.',
     'voice.help': 'Ver los comandos de voz',
+    'tut.open': 'Ver el tutorial en vídeo',
+    'tut.sound': 'Haz clic para verlo con sonido',
+    'tut.youtube': 'Ver en YouTube',
+    'tut.print': 'Respawn nuevo con una captura',
     'voice.h.startAll': '"iniciar" · "iniciar todos"',
     'voice.h.startAllD': 'Inicia todos los cronómetros',
     'voice.h.startOne': '"iniciar uno" · "iniciar dos"…',
@@ -2924,6 +2955,10 @@ const I18N = {
     'read.grew': 'Nowe stworzenia w tym respawnie: {y}. Teraz jest ich {n}.',
     'read.more': 'Jeśli lista w grze ma więcej stworzeń, przewiń ją i wyślij kolejny zrzut: zostaną dodane do tego respawnu.',
     'voice.help': 'Pokaż polecenia głosowe',
+    'tut.open': 'Obejrzyj poradnik wideo',
+    'tut.sound': 'Kliknij, aby obejrzeć z dźwiękiem',
+    'tut.youtube': 'Obejrzyj na YouTube',
+    'tut.print': 'Nowy respawn z jednego zrzutu',
     'voice.h.startAll': '„start” · „start wszystkie”',
     'voice.h.startAllD': 'Uruchamia wszystkie liczniki',
     'voice.h.startOne': '„start jeden” · „start dwa”…',
@@ -6876,6 +6911,60 @@ function openChanges() {
 // Dois caminhos para a mesma lista: o link no topo, abaixo do mapper, e o do rodapé.
 for (const b of [$('#changes-top'), $('#changes-btn')]) b.addEventListener('click', openChanges);
 $('#changes-close').addEventListener('click', () => { const dlg = $('#changes'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+
+/* ---------- Tutoriais em vídeo ----------
+   Cada botão com data-tut aponta para um vídeo curto da pasta tutoriais/ (o mesmo Short do canal, sem o fecho). A narração
+   existe em português e em inglês; espanhol e polonês veem a versão em inglês, que tem a legenda na imagem. */
+const TUTORIAIS = { print: { title: 'tut.print', yt: { pt: '5MwKEntnW1k', en: '7BA-B8r86WQ' } } };
+const tutLang = () => (ui.lang === 'pt' ? 'pt' : 'en');
+const tutSrc = (id, ext) => 'tutoriais/' + id + '-' + tutLang() + '.' + ext + '?v=1';
+const canHover = window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
+let tutTimer = 0;
+function tutPreview(btn) {
+  const pop = $('#tut-pop'), video = pop.querySelector('video'), id = btn.dataset.tut;
+  if (!TUTORIAIS[id]) return;
+  if (video.dataset.src !== tutSrc(id, 'mp4')) { video.poster = tutSrc(id, 'jpg'); video.src = video.dataset.src = tutSrc(id, 'mp4'); }
+  pop.hidden = false;
+  // ao lado do botão, sem sair da tela: abaixo e à direita, ou para cima e para a esquerda quando não cabe
+  const r = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight, m = 12;
+  pop.style.left = Math.max(m, Math.min(r.left, innerWidth - w - m)) + 'px';
+  pop.style.top = (r.bottom + 8 + h <= innerHeight - m ? r.bottom + 8 : Math.max(m, r.top - 8 - h)) + 'px';
+  video.currentTime = 0;
+  video.play().catch(() => {});
+}
+function tutHide() {
+  clearTimeout(tutTimer);
+  const pop = $('#tut-pop');
+  if (pop.hidden) return;
+  pop.hidden = true;
+  pop.querySelector('video').pause();
+}
+function tutOpen(id) {
+  const t = TUTORIAIS[id];
+  if (!t) return;
+  tutHide();
+  const dlg = $('#tut-dlg'), video = $('#tut-video');
+  setText($('#tut-title'), tr(t.title));
+  video.poster = tutSrc(id, 'jpg');
+  video.src = tutSrc(id, 'mp4');
+  $('#tut-yt').href = 'https://youtube.com/shorts/' + t.yt[tutLang()];
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  video.play().catch(() => {});
+}
+function tutClose() {
+  const dlg = $('#tut-dlg'), video = $('#tut-video');
+  video.pause();
+  video.removeAttribute('src'); video.load();   // solta o arquivo: não fica baixando nem tocando escondido
+  if (dlg.open) { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
+}
+$('#tut-close').addEventListener('click', tutClose);
+$('#tut-dlg').addEventListener('close', tutClose);
+document.addEventListener('click', e => { const b = e.target.closest('.tut-btn'); if (b) tutOpen(b.dataset.tut); });
+if (canHover) {
+  document.addEventListener('mouseover', e => { const b = e.target.closest('.tut-btn'); if (!b) return; clearTimeout(tutTimer); tutTimer = setTimeout(() => tutPreview(b), 250); });
+  document.addEventListener('mouseout', e => { const b = e.target.closest('.tut-btn'); if (b && !b.contains(e.relatedTarget)) tutHide(); });
+  addEventListener('scroll', tutHide, { passive: true });
+}
 $('#changes').addEventListener('click', e => { if (e.target === e.currentTarget && e.currentTarget.close) e.currentTarget.close(); });
 
 /* ---------- Tela de criaturas ----------
