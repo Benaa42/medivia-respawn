@@ -291,6 +291,12 @@ dialog.support[open] { display: flex; flex-direction: column; gap: 14px; }
   .paste.has-tut small { padding-right: 0; }
   .paste.has-tut > .tut-btn { right: 14px; bottom: auto; top: 50%; transform: translateY(-50%); }
 }
+.paste.has-tut.solo { padding-bottom: 13px; padding-right: 58px; }
+.paste.has-tut.solo > .tut-btn { top: 50%; bottom: auto; transform: translateY(-50%); }
+.bonus { position: relative; }
+.tut-btn.tut-corner { position: absolute; top: 4px; right: 0; margin: 0; }
+.bonus #sheet .win-name { padding-right: 36px; }   /* o nome do respawn não passa por baixo do "?" do canto */
+.win-name .tut-btn, .calc h2 .tut-btn { margin-left: 10px; vertical-align: 5px; }
 .tut-btn:hover, .tut-btn:focus-visible { border-color: var(--amber); background: rgba(240, 173, 77, 0.16); }
 .tut-pop { position: fixed; z-index: 60; width: 200px; padding: 6px; background: var(--box); border: 1px solid var(--gold-edge); border-radius: var(--r-md); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55); pointer-events: none; }
 .tut-pop video { display: block; width: 100%; aspect-ratio: 9 / 16; border-radius: var(--r-sm); background: var(--ground); }
@@ -852,7 +858,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       </footer>
     </aside>
     <aside class="win hunt" id="hunt-side" aria-labelledby="hunt-side-title">
-      <h2 class="win-name" id="hunt-side-title" data-i18n="hunt.title">Hunts</h2>
+      <h2 class="win-name" id="hunt-side-title"><span data-i18n="hunt.title">Hunts</span><button class="tut-btn" type="button" data-tut="hunt" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></h2>
       <div id="hunt-side-body"></div>
       <div class="hunt-foot">
         <button class="dlg" type="button" data-go="raffle" data-i18n="raffle.open">Sortear itens</button>
@@ -862,10 +868,11 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
     </div>
 
     <main class="win bonus" id="drop">
+      <button class="tut-btn tut-corner" type="button" data-tut="cronometro" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button>
       <div id="sheet"></div>
       <footer class="win-foot" id="win-opts">
         <div class="opts">
-          <label class="toggle"><input type="checkbox" id="opt-loop"> <span data-i18n="loop">Repetir ao zerar</span></label>
+          <span class="opt-set"><label class="toggle"><input type="checkbox" id="opt-loop"> <span data-i18n="loop">Repetir ao zerar</span></label><button class="tut-btn" type="button" data-tut="truques" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></span>
           <label class="toggle pause" id="opt-pause-wrap" title="Segundos de espera depois de zerar, antes de a próxima volta começar sozinha" data-i18n-attr="title:pause.tip" hidden><span data-i18n="pause.label">Pausa entre voltas</span> <input type="number" id="opt-pause" min="0" max="600" step="5" inputmode="numeric"> <span data-i18n="pause.unit">s</span></label>
           <span class="opt-set">
           <label class="toggle"><input type="checkbox" id="opt-sound"> <span data-i18n="sound">Som</span></label>
@@ -888,6 +895,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
             <option value="vivien" data-i18n="tone.vivien">Voz da Vivien</option>
             <option value="aghata" data-i18n="tone.aghata">Voz da Aghata</option>
           </select>
+          <button class="tut-btn" type="button" data-tut="sons" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button>
           </span>
           <span class="opt-set">
           <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <svg class="ico mic" aria-hidden="true"><use href="#i-mic"/></svg><span data-i18n="voice.label">Ativar comando de voz</span></label>
@@ -901,6 +909,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
           <div class="float-set">
             <button class="dlg go float-cta" type="button" id="float-btn" title="Abre os cronômetros numa janelinha que fica por cima do jogo" data-i18n-attr="title:float.tip"><svg class="ico" aria-hidden="true"><use href="#i-pip"/></svg><span data-i18n="float">Janela flutuante</span></button>
             <label class="toggle float-game" title="Troca o fundo esverdeado da janela flutuante pelo preto neutro do chat do jogo, para ela se misturar à tela" data-i18n-attr="title:float.gameTip"><input type="checkbox" id="opt-float-game"> <span data-i18n="float.game">Nas cores do jogo</span></label>
+            <button class="tut-btn" type="button" data-tut="flutuante" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button>
           </div>
           <button class="dlg go" type="button" id="read-btn" data-i18n="read">Ler print</button>
         </div>
@@ -913,7 +922,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 
   <section class="page" id="page-hunt" hidden>
     <section class="win hunt" id="hunt" aria-labelledby="hunt-title">
-      <h2 class="win-name" id="hunt-title" data-i18n="hunt.title">Hunts</h2>
+      <h2 class="win-name" id="hunt-title"><span data-i18n="hunt.title">Hunts</span><button class="tut-btn" type="button" data-tut="hunt" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></h2>
       <div id="hunt-body"></div>
       <div class="hunt-foot"><button class="dlg" type="button" id="raffle-btn" data-i18n="raffle.open">Sortear itens</button></div>
       <input class="sr" type="file" id="hunt-file" accept=".txt,text/plain" tabindex="-1" aria-hidden="true">
@@ -922,7 +931,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 
   <section class="page" id="page-calc" hidden>
     <div class="tool calc" id="calc" aria-labelledby="calc-title">
-      <h2 id="calc-title" data-i18n="calc.title">Comprar pronto ou montar?</h2>
+      <h2 id="calc-title"><span data-i18n="calc.title">Comprar pronto ou montar?</span><button class="tut-btn" type="button" data-tut="calculadora" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></h2>
       <p class="support-note" data-i18n="calc.intro">Compare o preço de um item pronto no mercado com o custo de comprar os ingredientes e montar. Os preços em Medivia Coin viram gold pela cotação que você informar.</p>
       <div class="calc-top">
         <label class="calc-field"><span data-i18n="calc.item">Item (opcional)</span><input type="text" id="calc-name" maxlength="60" autocomplete="off" placeholder="Cursed Soulheart"></label>
@@ -947,7 +956,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </section>
 
   <section class="page" id="page-creatures" hidden>
-  <p class="paste"><span data-i18n="creatures.paste.a">Com o print da ficha de uma criatura no bestiário copiado, em qualquer aba de raridade, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="creatures.paste.b">nesta página. O XP e os atributos dela são atualizados para todos; um print mais novo corrige o que já estava.</span></p>
+  <p class="paste has-tut solo"><span data-i18n="creatures.paste.a">Com o print da ficha de uma criatura no bestiário copiado, em qualquer aba de raridade, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="creatures.paste.b">nesta página. O XP e os atributos dela são atualizados para todos; um print mais novo corrige o que já estava.</span><button class="tut-btn" type="button" data-tut="bestiario" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></p>
 <div class="support tool" id="creatures" aria-labelledby="creatures-title">
   <div class="support-end">
     <h2 id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
@@ -974,7 +983,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   <div class="creatures-wrap"><table class="creatures-table" id="creatures-table"></table></div>
   </div>
   <div class="creatures-pane" id="legend-list" hidden>
-  <p class="support-note" data-i18n="legend.intro">Itens lendários do jogo e as criaturas que os deixam, pela wiki do Medivia. Eles caem da versão lendária da criatura. Clique numa criatura para abrir a ficha dela; a chance real aparece quando os prints do bestiário já a trouxeram.</p>
+  <p class="support-note"><span data-i18n="legend.intro">Itens lendários do jogo e as criaturas que os deixam, pela wiki do Medivia. Eles caem da versão lendária da criatura. Clique numa criatura para abrir a ficha dela; a chance real aparece quando os prints do bestiário já a trouxeram.</span><button class="tut-btn" type="button" data-tut="lendarios" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></p>
   <div class="creatures-wrap"><table class="creatures-table legend-table" id="legend-table"></table></div>
   <h3 class="legend-title" data-i18n="legend.exclusive">Exclusivos dos lendários</h3>
   <p class="support-note" data-i18n="legend.exclusiveNote">Itens especiais que só a versão lendária da criatura deixa, mas que não contam como item lendário.</p>
@@ -1463,6 +1472,14 @@ const I18N = {
     'tut.sound': 'Clique para ver com som',
     'tut.youtube': 'Ver no YouTube',
     'tut.print': 'Respawn novo com um print',
+    'tut.cronometro': 'Cronômetro: grupo, bônus e contagem',
+    'tut.truques': '3 truques do cronômetro',
+    'tut.sons': 'Bipes e comando de voz',
+    'tut.flutuante': 'Janela flutuante por cima do jogo',
+    'tut.hunt': 'Dividir loot, tokens e skins da hunt',
+    'tut.lendarios': 'A chance real de um item lendário',
+    'tut.bestiario': 'Enviar uma criatura para o bestiário',
+    'tut.calculadora': 'Comprar pronto ou montar?',
     'voice.h.startAll': '"iniciar" · "iniciar todos"',
     'voice.h.startAllD': 'Inicia todos os cronômetros',
     'voice.h.startOne': '"iniciar um" · "iniciar dois"…',
@@ -1965,6 +1982,14 @@ const I18N = {
     'tut.sound': 'Click to watch with sound',
     'tut.youtube': 'Watch on YouTube',
     'tut.print': 'Add a new respawn with one screenshot',
+    'tut.cronometro': 'Timer: party, boost and countdown',
+    'tut.truques': '3 timer tricks',
+    'tut.sons': 'Beeps and voice commands',
+    'tut.flutuante': 'Floating window on top of the game',
+    'tut.hunt': 'Splitting hunt loot, tokens and skins',
+    'tut.lendarios': 'The real chance of a legendary item',
+    'tut.bestiario': 'Send a creature to the bestiary',
+    'tut.calculadora': 'Buy it ready or craft it?',
     'voice.h.startAll': '"start" · "start all"',
     'voice.h.startAllD': 'Starts every timer',
     'voice.h.startOne': '"start one" · "start two"…',
@@ -2467,6 +2492,14 @@ const I18N = {
     'tut.sound': 'Haz clic para verlo con sonido',
     'tut.youtube': 'Ver en YouTube',
     'tut.print': 'Respawn nuevo con una captura',
+    'tut.cronometro': 'Cronómetro: grupo, bonus y cuenta atrás',
+    'tut.truques': '3 trucos del cronómetro',
+    'tut.sons': 'Pitidos y comandos de voz',
+    'tut.flutuante': 'Ventana flotante sobre el juego',
+    'tut.hunt': 'Repartir loot, tokens y skins de la hunt',
+    'tut.lendarios': 'La probabilidad real de un objeto legendario',
+    'tut.bestiario': 'Enviar una criatura al bestiario',
+    'tut.calculadora': '¿Comprar hecho o fabricar?',
     'voice.h.startAll': '"iniciar" · "iniciar todos"',
     'voice.h.startAllD': 'Inicia todos los cronómetros',
     'voice.h.startOne': '"iniciar uno" · "iniciar dos"…',
@@ -2969,6 +3002,14 @@ const I18N = {
     'tut.sound': 'Kliknij, aby obejrzeć z dźwiękiem',
     'tut.youtube': 'Obejrzyj na YouTube',
     'tut.print': 'Nowy respawn z jednego zrzutu',
+    'tut.cronometro': 'Licznik: drużyna, bonus i odliczanie',
+    'tut.truques': '3 sztuczki licznika',
+    'tut.sons': 'Sygnały i polecenia głosowe',
+    'tut.flutuante': 'Pływające okno nad grą',
+    'tut.hunt': 'Podział łupu, tokenów i skinów z polowania',
+    'tut.lendarios': 'Prawdziwa szansa na przedmiot legendarny',
+    'tut.bestiario': 'Wysyłanie stworzenia do bestiariusza',
+    'tut.calculadora': 'Kupić gotowe czy złożyć?',
     'voice.h.startAll': '„start” · „start wszystkie”',
     'voice.h.startAllD': 'Uruchamia wszystkie liczniki',
     'voice.h.startOne': '„start jeden” · „start dwa”…',
@@ -6325,6 +6366,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-19 18:59',
+    pt: ['Tutoriais em vídeo em todo o site: o "?" dourado ao lado do cronômetro, das opções de repetir, som e janela flutuante, das hunts, das criaturas, dos itens lendários e da calculadora mostra um vídeo curto de como usar. Com o mouse em cima ele toca sem som; com um clique abre com som.'],
+    en: ['Video tutorials across the site: the golden "?" next to the timer, the repeat, sound and floating window options, the hunts, the creatures, the legendary items and the calculator shows a short video on how to use it. Hover to play it muted; click to open it with sound.'],
+    es: ['Tutoriales en vídeo en todo el sitio: el "?" dorado junto al cronómetro, las opciones de repetir, sonido y ventana flotante, las hunts, las criaturas, los objetos legendarios y la calculadora muestra un vídeo corto de cómo usarlo. Con el ratón encima se reproduce sin sonido; con un clic se abre con sonido.'],
+    pl: ['Poradniki wideo na całej stronie: złoty "?" przy liczniku, opcjach powtarzania, dźwięku i pływającego okna, polowaniach, stworzeniach, przedmiotach legendarnych i kalkulatorze pokazuje krótki film o tym, jak tego używać. Po najechaniu myszą gra bez dźwięku; kliknięcie otwiera go z dźwiękiem.'],
+  },
   { at: '2026-10-19 17:23',
     pt: ['Tutorial em vídeo: o "?" dourado na explicação do print, na tela de respawn, mostra um vídeo curto de como adicionar um respawn novo. Com o mouse em cima ele toca sem som; com um clique abre com som.'],
     en: ['Video tutorial: the golden "?" in the screenshot explanation, on the respawn screen, shows a short video on how to add a new respawn. Hover to play it muted; click to open it with sound.'],
@@ -6931,7 +6978,17 @@ $('#changes-close').addEventListener('click', () => { const dlg = $('#changes');
 /* ---------- Tutoriais em vídeo ----------
    Cada botão com data-tut aponta para um vídeo curto da pasta tutoriais/ (o mesmo Short do canal, sem o fecho). A narração
    existe em português e em inglês; espanhol e polonês veem a versão em inglês, que tem a legenda na imagem. */
-const TUTORIAIS = { print: { title: 'tut.print', yt: { pt: '5MwKEntnW1k', en: '7BA-B8r86WQ' } } };
+const TUTORIAIS = {
+  print: { title: 'tut.print', yt: { pt: '5MwKEntnW1k', en: '7BA-B8r86WQ' } },
+  cronometro: { title: 'tut.cronometro', yt: { pt: 'RKNdNmalzB4', en: 'b8UyY3cMO0s' } },
+  truques: { title: 'tut.truques', yt: { pt: 'epY8mCHSfec', en: 'lsf5fquUBb8' } },
+  sons: { title: 'tut.sons', yt: { pt: '7irs28eElGM', en: 'rM0UJvmLz9M' } },
+  flutuante: { title: 'tut.flutuante', yt: { pt: 'wZkveSRbaSc', en: '-N6G55QNt74' } },
+  hunt: { title: 'tut.hunt', yt: { pt: 'Y5svgyL2YB4', en: '5JD36ej3jzk' } },
+  lendarios: { title: 'tut.lendarios', yt: { pt: 'OUnD2RzlcBU', en: 'X2PKTSqeyv4' } },
+  bestiario: { title: 'tut.bestiario', yt: { pt: 'DtfX2j4DEFY', en: 'fLgopffzSYU' } },
+  calculadora: { title: 'tut.calculadora', yt: { pt: 'uVVyT4WkP4o', en: 'Y7XuVb84dv0' } },
+};
 const tutLang = () => (ui.lang === 'pt' ? 'pt' : 'en');
 const tutSrc = (id, ext) => 'tutoriais/' + id + '-' + tutLang() + '.' + ext + '?v=1';
 const canHover = window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
