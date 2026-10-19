@@ -281,10 +281,10 @@ dialog.support[open] { display: flex; flex-direction: column; gap: 14px; }
 .paste small { display: block; margin-top: 5px; font-size: 13px; font-weight: 400; color: var(--label); }
 /* Tutorial em vídeo: o "?" ao lado da explicação, a prévia ao passar o mouse e a janela com som */
 .tut-btn { display: inline-grid; place-items: center; width: 24px; height: 24px; margin-left: 6px; padding: 0; vertical-align: 1px; border: 1px solid var(--gold-edge); border-radius: 50%; background: var(--gold-wash); color: var(--amber); font: 700 13px/1 var(--font-ui); cursor: pointer; }
-/* na caixa de explicação, o "?" fica no canto de baixo, um pouco para dentro, na altura da linha menor; no celular, na borda direita */
-.paste.has-tut { position: relative; }
-.paste.has-tut small { padding-right: 112px; }
-.paste.has-tut > .tut-btn { position: absolute; right: 80px; bottom: 9px; width: 32px; height: 32px; margin: 0; font-size: 17px; }
+/* na caixa de explicação, o "?" fica no canto de baixo à direita, na altura da linha menor, com folga da linha de cima; no celular, na borda direita */
+.paste.has-tut { position: relative; padding-bottom: 16px; }
+.paste.has-tut small { margin-top: 10px; padding-right: 52px; }
+.paste.has-tut > .tut-btn { position: absolute; right: 18px; bottom: 8px; width: 28px; height: 28px; margin: 0; font-size: 15px; }
 @media (max-width: 640px) {
   .paste.has-tut { padding-right: 60px; }
   .paste.has-tut small { padding-right: 0; }
