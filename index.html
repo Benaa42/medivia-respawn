@@ -4202,8 +4202,14 @@ async function readBestiary(ocr) {
   // Abas de raridade: uma fileira de traços acima do nome, um por aba; o da aba escolhida é o mais claro.
   // Só valem traços lisos (o texto das abas também forma trechos claros, mas com o brilho variando mais de 100).
   // O traço dourado da aba Lendário aberta clareia no meio: varia até uns 25, então o limite é 32.
+  // Algumas criaturas (Soulflare, Thundrites) só têm Normal e Lendário: dois traços com quase o dobro da largura,
+  // e o da aba fechada às vezes é tão escuro que nem aparece inteiro. Aí vale o traço largo mais claro, pelo lado:
+  // o da esquerda é a Normal, o da direita a Lendário. O leitor não lê as palavras das abas, só os traços.
   const x0 = Math.max(0, hp.x - pitch * 2.6), wide = exp.x + exp.w / 2 + pitch * 0.6 - x0;
-  for (let y = Math.round(exp.y - h * 6); y < exp.y - h * 1.5 && out.tab == null; y++) {
+  // A busca começa abaixo do título RARIDADE, quando ele é lido: a faixa dele também forma um traço largo.
+  const rar = L.find(l => l.y < hp.y && /^(RARIDADE|RARITY|RAREZA|RZADKO\S*)$/i.test(l.text.trim()));
+  const yTop = Math.max(exp.y - h * 6, rar ? rar.y + rar.h + 2 : 0);
+  for (let y = Math.round(yTop); y < exp.y - h * 1.5 && out.tab == null; y++) {
     const px = ocr.row(x0, y, wide);
     if (!px.length) continue;
     const ground = [...px].sort((a, b) => a - b)[Math.floor(px.length / 10)], runs = [];   // o fundo é o que há de mais escuro na linha
@@ -4212,12 +4218,22 @@ async function readBestiary(ocr) {
       let j = i;
       while (j < px.length && px[j] > ground + 8) j++;
       const mid = px.slice(i + 2, j - 2);
-      if (j - i >= h * 3 && j - i <= pitch * 1.2 && Math.max(...mid) - Math.min(...mid) <= 32) runs.push(mid.reduce((a, b) => a + b, 0) / mid.length);
+      if (j - i >= h * 3 && j - i <= pitch * 2.2 && Math.max(...mid) - Math.min(...mid) <= 32)
+        runs.push({ v: mid.reduce((a, b) => a + b, 0) / mid.length, w: j - i, c: Math.round(x0) + (i + j) / 2 });
       i = j;
     }
-    if (runs.length < 3 || runs.length > 6) continue;
-    const top = Math.max(...runs), rest = runs.filter(v => v !== top);
-    if (runs.length - rest.length === 1 && top - Math.max(...rest) >= 10) out.tab = runs.indexOf(top);   // 0 = Normal
+    const two = runs.filter(r => r.w >= pitch * 1.4);
+    if (two.length) {
+      if (two.length > 2 || (two.length === 2 && Math.abs(two[0].v - two[1].v) < 10)) continue;
+      const lit = two.reduce((a, b) => (b.v > a.v ? b : a));
+      out.tab = lit.c < hp.x - pitch * 0.6 ? 0 : 3;   // 3 = Lendário, na ordem das quatro
+      out.twoTier = true;
+      continue;
+    }
+    const thin = runs.filter(r => r.w <= pitch * 1.2).map(r => r.v);
+    if (thin.length < 3 || thin.length > 6) continue;
+    const top = Math.max(...thin), rest = thin.filter(v => v !== top);
+    if (thin.length - rest.length === 1 && top - Math.max(...rest) >= 10) out.tab = thin.indexOf(top);   // 0 = Normal
   }
   // Dica de uma aba de raridade (o mouse parado sobre ela): "Chance: aproximadamente 1 em 303", com o nome da
   // raridade logo acima. Vale para a raridade da dica, que pode não ser a da aba aberta.
@@ -4722,6 +4738,7 @@ function xpDoc(raw) {
   const odds = oddsOf(raw.odds);
   if (odds) d.odds = odds;
   if (raw.single === true) d.single = true;   // criatura sem raridades (como as Phoenix)
+  if (raw.twoTier === true) d.twoTier = true;   // só Normal e Lendário (como a Soulflare)
   return d;
 }
 // Junta dois registros da mesma criatura: o segundo corrige o que traz, e o que ele não traz fica como estava.
@@ -4742,7 +4759,7 @@ function xpMerge(a, b) {
 const creatureOf = id => xpMerge(xp.cloud.get(id), xp.mine.get(id));
 const xpSig = d => JSON.stringify([d.exp ?? null, ...Object.keys(XP_STATS).map(k => d[k] ?? null),
   XP_TIERS.map(t => { const o = (d.tiers || {})[t]; return o ? [o.name ?? null, o.exp ?? null, ...Object.keys(XP_STATS).map(k => o[k] ?? null)] : null; }),
-  ['c', 'r', 'l', 'item', 'tag', 'lo', 'hi'].map(k => (d.odds || {})[k] ?? null), d.single === true]);
+  ['c', 'r', 'l', 'item', 'tag', 'lo', 'hi'].map(k => (d.odds || {})[k] ?? null), d.single === true, d.twoTier === true]);
 {
   const cache = lsGet(LS_XP, null);
   for (const [id, raw] of Object.entries(cache && cache.docs && typeof cache.docs === 'object' ? cache.docs : {})) {
@@ -4825,6 +4842,7 @@ async function pushXp(id) {
     const raw = { name: cur ? cur.name : mine.name, ...xpNumbers(next), owner: cur && cur.owner ? cur.owner : uid };
     if (next.tiers) raw.tiers = next.tiers;
     if (next.single === true) raw.single = true;
+    if (next.twoTier === true) raw.twoTier = true;
     if (next.odds) raw.odds = JSON.stringify(next.odds);
     const send = () => cloudCommit({
       update: { name: cloud.root + '/creatures/' + id, fields: toFs(raw).mapValue.fields },
@@ -4860,6 +4878,7 @@ async function saveXp(id, name, tier, data, odds) {
   const cur = xp.mine.get(id) || {}, known = creatureOf(id);
   const next = { ...cur, name: known ? known.name : name };
   if (odds) next.odds = { ...(cur.odds || {}), ...odds };
+  if (data && data.twoTier) { next.twoTier = true; data = { ...data }; delete data.twoTier; }   // só Normal e Lendário: vale para a criatura toda
   if (tier === 'normal') Object.assign(next, data, { name });   // o print da aba Normal é quem dá o nome da criatura
   else if (tier) next.tiers = { ...(cur.tiers || {}), [tier]: { ...((cur.tiers || {})[tier] || {}), ...data } };   // sem raridade, só as chances entram
   xp.mine.set(id, next);
@@ -6188,7 +6207,7 @@ async function readImage(blob) {
       // Só a raridade Normal entra na conta do respawn.
       if (!key) throw new UserError(tr('err.bestName'));
       if (p.exp == null) throw new UserError(tr('err.bestExp', { x: p.name }));
-      const tier = TIER_NAMES[p.tab] || 'normal', data = { exp: p.exp, ...(p.stats || {}), ...(p.single ? { single: true } : {}) };
+      const tier = TIER_NAMES[p.tab] || 'normal', data = { exp: p.exp, ...(p.stats || {}), ...(p.single ? { single: true } : {}), ...(p.twoTier ? { twoTier: true } : {}) };
       let id = key, name = p.name;
       if (tier === 'legendary') {
         // O print da aba Lendário entra: na criatura que já tem esse nome lendário, na que tem esse mesmo nome (ou
@@ -6201,9 +6220,17 @@ async function readImage(blob) {
           return creatureRows().filter(c => c.id !== key && !c.single && c.name.length >= 4 && txt.includes(' ' + c.name.toLowerCase() + ' '))
             .sort((a, b) => b.name.length - a.name.length).map(c => c.id)[0] || null;
         };
+        // A regra do jogo: o XP da lendária é 8,8 vezes o da Normal, e a velocidade é a mesma. Vale quando uma só criatura bate.
+        const byRule = () => {
+          const hits = creatureRows().filter(c => c.id !== key && !c.single && c.exp != null && Math.abs(c.exp * 8.8 - p.exp) <= 2
+            && (c.spd == null || p.stats.spd == null || c.spd === p.stats.spd));
+          return hits.length === 1 ? hits[0].id : null;
+        };
+        const rule = p.twoTier ? byRule() : null;   // nas de duas abas a lendária costuma ter nome próprio
         if (owner) id = owner;
+        else if (rule) id = rule;
         else if (!exists(key) && !itemsOf(key).length) {
-          const from = cited() || creatureId;
+          const from = cited() || byRule() || creatureId;
           if (!from) throw new UserError(tr('err.bestLegend', { x: p.name }));
           id = from;
         }
@@ -6961,6 +6988,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 12:34',
+    pt: ['Criaturas com só Normal e Lendário no bestiário (como Soulflare e Thundrites): o print da aba Lendário agora vai para a raridade Lendário da criatura, em vez de criar outra, e a ficha mostra só essas duas abas.'],
+    en: ['Creatures with only Normal and Legendary in the bestiary (like Soulflare and Thundrites): the Legendary tab screenshot now goes to the Legendary rarity of the creature instead of creating another one, and the page shows only those two tabs.'],
+    es: ['Criaturas con solo Normal y Legendario en el bestiario (como Soulflare y Thundrites): la captura de la pestaña Legendario ahora va a la rareza Legendaria de la criatura, en vez de crear otra, y la ficha muestra solo esas dos pestañas.'],
+    pl: ['Stworzenia z samymi zakładkami Normalny i Legendarny w bestiariuszu (jak Soulflare i Thundrites): zrzut zakładki Legendarny trafia teraz do rzadkości Legendarnej stworzenia zamiast tworzyć nowe, a karta pokazuje tylko te dwie zakładki.'],
+  },
   { at: '2026-10-20 11:54',
     pt: ['Soma das duas hunts: com "Abrir dois respawns", embaixo do XP do primeiro aparece o XP somado dos dois, cada um no seu percentual de bônus e com as quantidades de criaturas escolhidas.'],
     en: ['Both hunts added up: with "Open two respawns", below the XP of the first one you see the XP of both together, each at its own bonus percentage and with the chosen creature numbers.'],
@@ -8090,12 +8123,13 @@ function renderCreature() {
   const num = v => v == null ? null : fmtInt(v);
   const range = (lo, hi) => lo == null ? null : lo === hi ? fmtInt(lo) : fmtInt(lo) + ' – ' + fmtInt(hi);
   // Os números mostrados são os da aba de raridade aberta; "Onde aparece" usa sempre a Normal, como a conta do respawn.
-  const tier = !c.single && TIER_NAMES.includes(creatureTier) ? creatureTier : 'normal', tierName = tr('tier.' + tier);
+  const shown = c.twoTier ? ['normal', 'legendary'] : TIER_NAMES;   // as de duas abas: só Normal e Lendário
+  const tier = !c.single && shown.includes(creatureTier) ? creatureTier : 'normal', tierName = tr('tier.' + tier);
   const v = tier === 'normal' ? c : (c.tiers || {})[tier] || {};
   const stat = (key, value, cls) => el('div', { class: 'creature-stat' + (cls ? ' ' + cls : '') + (value == null ? ' none' : '') },
     el('span', { text: tr('creature.s.' + key) }), el('b', { text: value == null ? '?' : value }), el('small', { text: c.single && key === 'xp' ? tr('creature.s.xpDSingle') : tr('creature.s.' + key + 'D', { t: tierName }) }));
   const tabs = c.single ? el('p', { class: 'creature-single' }, el('span', { class: 'win-tag', text: tr('creature.single') }), ' ', el('small', { class: 'support-note', text: tr('creature.singleNote') }))
-    : el('div', { class: 'unit-toggle creature-tiers', role: 'group', 'aria-label': tr('tier.label') }, TIER_NAMES.map(t => {
+    : el('div', { class: 'unit-toggle creature-tiers', role: 'group', 'aria-label': tr('tier.label') }, shown.map(t => {
     const has = t === 'normal' ? c.exp != null : !!(c.tiers || {})[t];
     return el('button', { class: 'tier-' + t + (has ? '' : ' empty'), type: 'button', id: 'tier-' + t, 'aria-pressed': String(t === tier), text: tr('tier.' + t),
       title: has ? null : tr('tier.empty'), onclick: () => { creatureTier = t; renderCreature(); } });
