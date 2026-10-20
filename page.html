@@ -575,6 +575,11 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .toggle input { width: 16px; height: 16px; margin: 0; accent-color: var(--value); }
 .toggle.float-game { font-size: 13px; color: var(--label); }
 .volume { width: 110px; accent-color: var(--value); cursor: pointer; }
+/* Som, comando de voz e Repetir ao zerar numa linha só (quebra só em tela estreita) */
+#win-opts .opts { column-gap: 12px; }
+#win-opts .opt-set { column-gap: 6px; }
+#win-opts .volume { width: 72px; }
+#win-opts .tone { max-width: 136px; text-overflow: ellipsis; }
 .toggle.pause { cursor: default; }
 .pause input { width: 62px; padding: 4px 8px; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); color: var(--title); font: 600 13px/1.2 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; }
 .clock[data-state="pause"] .ring-arc { stroke: var(--faint); }
@@ -932,8 +937,6 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       <div id="sheet"></div>
       <footer class="win-foot" id="win-opts">
         <div class="opts">
-          <span class="opt-set"><label class="toggle"><input type="checkbox" id="opt-loop"> <span data-i18n="loop">Repetir ao zerar</span></label><button class="tut-btn" type="button" data-tut="truques" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></span>
-          <label class="toggle pause" id="opt-pause-wrap" title="Segundos de espera depois de zerar, antes de a próxima volta começar sozinha" data-i18n-attr="title:pause.tip" hidden><span data-i18n="pause.label">Pausa entre voltas</span> <input type="number" id="opt-pause" min="0" max="600" step="5" inputmode="numeric"> <span data-i18n="pause.unit">s</span></label>
           <span class="opt-set">
           <label class="toggle"><input type="checkbox" id="opt-sound"> <span data-i18n="sound">Som</span></label>
           <input type="range" class="volume" id="opt-volume" min="0" max="100" step="5" aria-label="Volume do som" title="Volume do som" data-i18n-attr="aria-label:volume;title:volume">
@@ -961,6 +964,8 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
           <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <svg class="ico mic" aria-hidden="true"><use href="#i-mic"/></svg><span data-i18n="voice.label">Ativar comando de voz</span></label>
           <button class="voice-help-btn" type="button" id="voice-help-btn" aria-expanded="false" aria-controls="voice-help" title="Ver os comandos de voz" aria-label="Ver os comandos de voz" data-i18n-attr="title:voice.help;aria-label:voice.help">?</button>
           </span>
+          <span class="opt-set"><label class="toggle"><input type="checkbox" id="opt-loop"> <span data-i18n="loop">Repetir ao zerar</span></label><button class="tut-btn" type="button" data-tut="truques" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></span>
+          <label class="toggle pause" id="opt-pause-wrap" title="Segundos de espera depois de zerar, antes de a próxima volta começar sozinha" data-i18n-attr="title:pause.tip" hidden><span data-i18n="pause.label">Pausa entre voltas</span> <input type="number" id="opt-pause" min="0" max="600" step="5" inputmode="numeric"> <span data-i18n="pause.unit">s</span></label>
         </div>
         <p class="voice-note" id="voice-note" role="status" hidden></p>
         <p class="voice-note voice-heard" id="voice-heard" hidden></p>
@@ -1582,7 +1587,6 @@ const I18N = {
     'qty.of': '{n} de {t}',
     'qty.less': 'Menos {x}',
     'qty.more': 'Mais {x}',
-    'qty.hint': 'Só muda a sua conta de XP, neste navegador; o respawn continua igual para todos.',
     'qty.reset': 'Voltar às quantidades do respawn',
     'qty.note': 'Com as quantidades que você escolheu.',
     'qty.zero': 'Nenhuma criatura escolhida: aumente a quantidade de alguma para estimar o XP.',
@@ -2151,7 +2155,6 @@ const I18N = {
     'qty.of': '{n} of {t}',
     'qty.less': 'Fewer {x}',
     'qty.more': 'More {x}',
-    'qty.hint': 'Only changes your XP estimate, in this browser; the respawn stays the same for everyone.',
     'qty.reset': 'Back to the respawn numbers',
     'qty.note': 'With the numbers you chose.',
     'qty.zero': 'No creature chosen: raise the number of one to estimate the XP.',
@@ -2201,7 +2204,7 @@ const I18N = {
     'nudge.more': 'Add {s} seconds to the timer',
     'voice.nomic': 'No microphone found. Connect a microphone and turn voice command on again.',
     'voice.network': 'Voice: the browser\'s recognition service did not answer. It only works in Chrome and Edge, with an internet connection.',
-    'voice.label': 'Turn on voice command',
+    'voice.label': 'Voice command',
     'voice.info': 'Voice command on. It only works in Chrome and Edge, and with an internet connection: speech is recognised by the browser\'s service. Press "?" to see the commands.',
     'voice.unsupported': 'Voice command only works in Chrome and Edge. This browser has no speech recognition.',
     'voice.denied': 'The browser did not allow the microphone. Allow the microphone for this site and turn voice command on again. It only works in Chrome and Edge.',
@@ -2439,7 +2442,7 @@ const I18N = {
     'backup.imported1': '1 respawn importado.',
     'backup.importedN': '{n} respawns importados.',
     'backup.none': 'No encontré ningún respawn en ese texto.',
-    'loop': 'Repetir al llegar a cero',
+    'loop': 'Repetir en cero',
     'sound': 'Sonido',
     'volume': 'Volumen del sonido',
     'tone.label': 'Tipo de alerta',
@@ -2720,7 +2723,6 @@ const I18N = {
     'qty.of': '{n} de {t}',
     'qty.less': 'Menos {x}',
     'qty.more': 'Más {x}',
-    'qty.hint': 'Solo cambia tu cálculo de XP, en este navegador; el respawn sigue igual para todos.',
     'qty.reset': 'Volver a las cantidades del respawn',
     'qty.note': 'Con las cantidades que elegiste.',
     'qty.zero': 'Ninguna criatura elegida: sube la cantidad de alguna para estimar el XP.',
@@ -2770,7 +2772,7 @@ const I18N = {
     'nudge.more': 'Añadir {s} segundos al cronómetro',
     'voice.nomic': 'No se encontró ningún micrófono. Conecta un micrófono y activa de nuevo el comando de voz.',
     'voice.network': 'Voz: el servicio de reconocimiento del navegador no respondió. Solo funciona en Chrome y Edge, con internet.',
-    'voice.label': 'Activar comando de voz',
+    'voice.label': 'Comando de voz',
     'voice.info': 'Comando de voz activado. Solo funciona en Chrome y Edge, y con internet: el habla la reconoce el servicio del navegador. Pulsa "?" para ver los comandos.',
     'voice.unsupported': 'El comando de voz solo funciona en Chrome y Edge. Este navegador no tiene reconocimiento de voz.',
     'voice.denied': 'El navegador no permitió el micrófono. Permite el micrófono para este sitio y activa de nuevo el comando de voz. Solo funciona en Chrome y Edge.',
@@ -3008,7 +3010,7 @@ const I18N = {
     'backup.imported1': 'Zaimportowano 1 respawn.',
     'backup.importedN': 'Zaimportowane respawny: {n}.',
     'backup.none': 'W tym tekście nie znaleziono żadnego respawnu.',
-    'loop': 'Powtarzaj po wyzerowaniu',
+    'loop': 'Powtarzaj od zera',
     'sound': 'Dźwięk',
     'volume': 'Głośność dźwięku',
     'tone.label': 'Dźwięk alarmu',
@@ -3289,7 +3291,6 @@ const I18N = {
     'qty.of': '{n} z {t}',
     'qty.less': 'Mniej: {x}',
     'qty.more': 'Więcej: {x}',
-    'qty.hint': 'Zmienia tylko twoje szacowanie XP w tej przeglądarce; respawn zostaje taki sam dla wszystkich.',
     'qty.reset': 'Przywróć liczby z respawnu',
     'qty.note': 'Z wybranymi przez ciebie liczbami.',
     'qty.zero': 'Nie wybrano stworzeń: zwiększ liczbę któregoś, aby oszacować XP.',
@@ -3339,7 +3340,7 @@ const I18N = {
     'nudge.more': 'Dodaj {s} sekund do licznika',
     'voice.nomic': 'Nie znaleziono mikrofonu. Podłącz mikrofon i włącz polecenia głosowe ponownie.',
     'voice.network': 'Głos: usługa rozpoznawania mowy przeglądarki nie odpowiedziała. Działa tylko w Chrome i Edge, z internetem.',
-    'voice.label': 'Włącz polecenia głosowe',
+    'voice.label': 'Polecenia głosowe',
     'voice.info': 'Polecenia głosowe włączone. Działają tylko w Chrome i Edge, i z internetem: mowę rozpoznaje usługa przeglądarki. Naciśnij „?”, aby zobaczyć polecenia.',
     'voice.unsupported': 'Polecenia głosowe działają tylko w Chrome i Edge. Ta przeglądarka nie ma rozpoznawania mowy.',
     'voice.denied': 'Przeglądarka nie zezwoliła na mikrofon. Zezwól tej stronie na mikrofon i włącz polecenia głosowe ponownie. Działają tylko w Chrome i Edge.',
@@ -5767,8 +5768,7 @@ function paintQty(node, id, r, tag) {
   });
   const changed = r.monsters.some(m => qtyCount(q, m) !== m.count);
   node.replaceChildren(box, el('div', { class: 'qty-list' }, rows),
-    el('p', { class: 'qty-foot' }, tr('qty.hint') + ' ',
-      changed ? el('button', { class: 'hunt-link', type: 'button', id: 'qty-reset' + tag, text: tr('qty.reset'), onclick: () => { q.n = {}; save(); } }) : null));
+    changed ? el('p', { class: 'qty-foot' }, el('button', { class: 'hunt-link', type: 'button', id: 'qty-reset' + tag, text: tr('qty.reset'), onclick: () => { q.n = {}; save(); } })) : null);
 }
 const sheetHint = r => (r.src === 'mapper' ? tr('hint.mapper') : r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest') + ' ' + tr('task.tip');
 // Desconto das tasks diárias ou semanais. É de quem joga, não do respawn: fica só neste navegador, por respawn,
@@ -6921,6 +6921,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 11:38',
+    pt: ['Cronômetro mais arrumado: a caixa de quantidade de criaturas fica logo abaixo do cronômetro, e Som, Comando de voz e Repetir ao zerar ficam numa linha só.'],
+    en: ['Tidier timer: the creature quantity box sits right below the timer, and Sound, Voice command and Repeat at zero share a single line.'],
+    es: ['Cronómetro más ordenado: la casilla de cantidad de criaturas queda justo debajo del cronómetro, y Sonido, Comando de voz y Repetir en cero quedan en una sola línea.'],
+    pl: ['Schludniejszy minutnik: pole liczby stworzeń jest tuż pod minutnikiem, a Dźwięk, Polecenia głosowe i Powtarzaj od zera są w jednej linii.'],
+  },
   { at: '2026-10-20 11:14',
     pt: ['Quantidade de criaturas na conta de XP: marque "Personalizar a quantidade de criaturas", embaixo do XP estimado, e use − e + em cada criatura (0 tira ela da conta), para a volta que você faz de verdade. Fica só no seu navegador.'],
     en: ['Number of creatures in the XP estimate: tick "Customize the number of creatures", below the estimated XP, and use − and + on each creature (0 leaves it out), for the route you really do. It stays only in your browser.'],
