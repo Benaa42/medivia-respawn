@@ -551,6 +551,8 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 /* Estimativa de XP do respawn, e a criatura que ainda está sem XP no banco */
 .xp-line { max-width: 78ch; font-size: 13px; color: var(--label); }
 .xp-line b { font-size: 15px; font-weight: 700; color: var(--value); }
+.xp-sum { padding-left: 12px; border-left: 3px solid color-mix(in srgb, var(--amber) 60%, transparent); }
+.xp-sum .xp-sum-tag { font-weight: 700; color: var(--amber); }
 /* Quantidade personalizada: uma linha por criatura, com − e + (de 0 até o que o respawn tem) */
 .qty { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--label); }
 .qty-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 12px; align-self: stretch; }
@@ -1584,6 +1586,10 @@ const I18N = {
     'xp.line': 'XP estimada por jogador: {h} por hora, {t} em {d} minutos.',
     'xp.missing': 'Sem contar {x}: falta o print do bestiário.',
     'xp.note': 'Conta com tudo morto assim que nasce, na raridade Normal e sem bônus de experiência.',
+    'xp.sum': 'XP somada dos dois respawns:',
+    'xp.sumLine': '{h} por hora, {t} em {d} minutos.',
+    'xp.sumNote': '{a} com {b}, cada um no seu percentual de bônus e com as quantidades escolhidas, contando os dois ao mesmo tempo.',
+    'xp.sumMissing': 'Sem contar {x}: ainda não tem o XP das criaturas.',
     'qty.label': 'Personalizar a quantidade de criaturas',
     'qty.of': '{n} de {t}',
     'qty.less': 'Menos {x}',
@@ -2152,6 +2158,10 @@ const I18N = {
     'xp.line': 'Estimated XP per player: {h} per hour, {t} in {d} minutes.',
     'xp.missing': 'Not counting {x}: the bestiary screenshot is missing.',
     'xp.note': 'It assumes everything is killed as soon as it spawns, Normal rarity and no experience bonus.',
+    'xp.sum': 'XP of both respawns together:',
+    'xp.sumLine': '{h} per hour, {t} in {d} minutes.',
+    'xp.sumNote': '{a} with {b}, each at its own bonus percentage and with the chosen numbers, counting both at the same time.',
+    'xp.sumMissing': 'Not counting {x}: the creature XP is not there yet.',
     'qty.label': 'Customize the number of creatures',
     'qty.of': '{n} of {t}',
     'qty.less': 'Fewer {x}',
@@ -2720,6 +2730,10 @@ const I18N = {
     'xp.line': 'XP estimada por jugador: {h} por hora, {t} en {d} minutos.',
     'xp.missing': 'Sin contar {x}: falta la captura del bestiario.',
     'xp.note': 'Cuenta con todo muerto en cuanto nace, en rareza Normal y sin bonus de experiencia.',
+    'xp.sum': 'XP sumada de los dos respawns:',
+    'xp.sumLine': '{h} por hora, {t} en {d} minutos.',
+    'xp.sumNote': '{a} con {b}, cada uno en su porcentaje de bonus y con las cantidades elegidas, contando los dos al mismo tiempo.',
+    'xp.sumMissing': 'Sin contar {x}: aún no tiene el XP de las criaturas.',
     'qty.label': 'Personalizar la cantidad de criaturas',
     'qty.of': '{n} de {t}',
     'qty.less': 'Menos {x}',
@@ -3288,6 +3302,10 @@ const I18N = {
     'xp.line': 'Szacowane XP na gracza: {h} na godzinę, {t} w {d} minut.',
     'xp.missing': 'Bez {x}: brakuje zrzutu z bestiariusza.',
     'xp.note': 'Zakłada zabijanie wszystkiego od razu po odrodzeniu, rzadkość Normalna i brak bonusu doświadczenia.',
+    'xp.sum': 'Łączne XP obu respawnów:',
+    'xp.sumLine': '{h} na godzinę, {t} w {d} minut.',
+    'xp.sumNote': '{a} z {b}, każdy z własnym procentem bonusu i wybranymi liczbami, liczone razem w tym samym czasie.',
+    'xp.sumMissing': 'Bez {x}: brakuje jeszcze XP stworzeń.',
     'qty.label': 'Dostosuj liczbę stworzeń',
     'qty.of': '{n} z {t}',
     'qty.less': 'Mniej: {x}',
@@ -5733,23 +5751,38 @@ function mobCards(id, r) {
 // Com a quantidade personalizada ligada, cada criatura conta com o número escolhido (0 tira ela da conta).
 const qtyOf = id => { const q = ui.qty[id]; return q && q.on ? q : null; };
 const qtyCount = (q, m) => q ? Math.max(0, Math.min(m.count, q.n[m.name] ?? m.count)) : m.count;
-function paintXp(node, id, r) {
+// XP por hora de cada jogador num respawn; each é null quando nenhuma criatura contada tem XP.
+function xpCalc(id, r) {
   const pct = pctOf(id), missing = [], q = qtyOf(id);
   const used = r.monsters.filter(m => qtyCount(q, m) > 0);
-  if (!used.length) { node.replaceChildren(tr(r.monsters.length ? 'qty.zero' : 'xp.none')); return; }
   let hour = 0;
   for (const m of used) {
     const exp = expOf(m.name);
     if (exp == null) missing.push(m.name);
     else hour += killsPerHour(respawnAt(m.base, pct, ui.party), qtyCount(q, m)) * exp;
   }
-  if (missing.length === used.length) { node.replaceChildren(tr('xp.none')); return; }
-  const mine = q && r.monsters.some(m => qtyCount(q, m) !== m.count);
-  const each = hour * 100 / ui.party;
+  const mine = !!q && r.monsters.some(m => qtyCount(q, m) !== m.count);
+  return { used, missing, mine, each: used.length && missing.length < used.length ? hour * 100 / ui.party : null };
+}
+function paintXp(node, id, r) {
+  const { used, missing, mine, each } = xpCalc(id, r);
+  if (!used.length) { node.replaceChildren(tr(r.monsters.length ? 'qty.zero' : 'xp.none')); return; }
+  if (each == null) { node.replaceChildren(tr('xp.none')); return; }
   node.replaceChildren(
     el('b', { text: tr('xp.line', { h: fmtXp(each), t: fmtXp(each * ui.dur / 60), d: ui.dur }) }),
     ' ' + (mine ? tr('qty.note') + ' ' : '') + (missing.length ? tr('xp.missing', { x: missing.join(', ') }) + ' ' : '') + tr('xp.note') +
     (ui.party > 100 ? ' ' + tr('xp.share', { f: (ui.party / 100).toLocaleString(document.documentElement.lang || 'en') }) : ''));
+}
+// Com dois respawns abertos: o XP dos dois juntos, cada um com o seu bônus e as suas quantidades.
+function paintXpSum(node, open) {
+  const parts = open.map(o => ({ ...o, x: xpCalc(o.id, o.r) })), got = parts.filter(o => o.x.each != null);
+  node.hidden = !got.length;
+  if (!got.length) return;
+  const total = got.reduce((a, o) => a + o.x.each, 0), out = parts.filter(o => o.x.each == null);
+  node.replaceChildren(
+    el('span', { class: 'xp-sum-tag', text: tr('xp.sum') }), ' ',
+    el('b', { text: tr('xp.sumLine', { h: fmtXp(total), t: fmtXp(total * ui.dur / 60), d: ui.dur }) }),
+    ' ' + tr('xp.sumNote', { a: parts[0].r.name, b: parts[1].r.name }) + (out.length ? ' ' + tr('xp.sumMissing', { x: out.map(o => o.r.name).join(', ') }) : ''));
 }
 // Caixa "Personalizar a quantidade de criaturas": desmarcada, a conta é a de sempre; marcada, cada criatura ganha − e +.
 function paintQty(node, id, r, tag) {
@@ -5864,6 +5897,7 @@ function buildSheet(id, fixed, id2) {
       DURS.map(d => ({ value: d, text: tr('dur.value', { n: d }), short: d % 30 === 0 ? String(d) : null })), setDur),
     cost: costCard(id, ''),
     xp: el('p', { class: 'xp-line' }),
+    xpSum: el('p', { class: 'xp-line xp-sum', hidden: true }),
     qty: el('div', { class: 'qty' }),
     mobs: el('div', { class: 'mobs' }),
     hint: el('p', { class: 'hint' }),
@@ -5895,6 +5929,7 @@ function buildSheet(id, fixed, id2) {
       statusEl,
       el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root, p.cost.root),
       p.xp,
+      p.xpSum,
       el('h3', { class: 'band', text: tr('band') }),
       p.mobs,
       second,
@@ -6000,7 +6035,9 @@ function renderSheet() {
     parts.mobs2.replaceChildren(...mobCards(id2, r2));
     paintXp(parts.xp2, id2, r2);
     paintQty(parts.qty2, id2, r2, '2');
+    paintXpSum(parts.xpSum, [{ id, r }, { id: id2, r: r2 }]);
   }
+  if (parts.xpSum && !(r2 && parts.name2)) parts.xpSum.hidden = true;   // sem o segundo respawn, nada a somar
   if (!parts.custom) setText(parts.hint, sheetHint(r));
 
   if (focusId && document.activeElement.id !== focusId) { const f = document.getElementById(focusId); if (f) f.focus(); }
@@ -6922,6 +6959,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 11:54',
+    pt: ['Soma das duas hunts: com "Abrir dois respawns", embaixo do XP do primeiro aparece o XP somado dos dois, cada um no seu percentual de bônus e com as quantidades de criaturas escolhidas.'],
+    en: ['Both hunts added up: with "Open two respawns", below the XP of the first one you see the XP of both together, each at its own bonus percentage and with the chosen creature numbers.'],
+    es: ['Suma de las dos hunts: con "Abrir dos respawns", debajo del XP del primero aparece el XP sumado de los dos, cada uno en su porcentaje de bonus y con las cantidades de criaturas elegidas.'],
+    pl: ['Suma dwóch huntów: przy "Otwórz dwa respawny" pod XP pierwszego widać łączne XP obu, każdy z własnym procentem bonusu i wybranymi liczbami stworzeń.'],
+  },
   { at: '2026-10-20 11:44',
     pt: ['A opção "Ativar comando de voz" passou a se chamar "Comando de voz".'],
     en: ['The voice option is now called "Voice command" in every language.'],
