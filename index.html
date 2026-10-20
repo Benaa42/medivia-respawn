@@ -386,6 +386,11 @@ dialog.tut-dlg { width: fit-content; max-width: calc(100vw - 32px); padding: 16p
 .custom-time input { width: 96px; text-align: center; font-variant-numeric: tabular-nums; }
 .custom-time .unit-toggle { margin-left: 0; }
 .custom-add { align-self: flex-start; margin-top: 4px; }
+/* Opção com o "?" do tutorial ao lado */
+.tut-row { display: inline-flex; flex-wrap: wrap; align-items: center; align-self: flex-start; gap: 4px; }
+.tut-row[hidden] { display: none; }
+.tut-row .custom-add { margin-top: 0; }
+.ctl-head h3 .tut-btn { vertical-align: 1px; }
 .creature-single { align-self: flex-start; }
 @media (max-width: 640px) { .custom-ctl { grid-template-columns: 1fr; } }
 .win-name { font: 800 28px/1.15 var(--font-display); letter-spacing: -0.01em; color: var(--title); }
@@ -932,10 +937,10 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       <div class="win-body">
         <p class="support-note" id="custom-hint" data-i18n="custom.hint" hidden>Cronômetro seu, sem janela de bônus: o tempo é o que você escolher. Fica salvo só neste navegador.</p>
         <input type="search" id="search" placeholder="Buscar área ou criatura" aria-label="Buscar área ou criatura" autocomplete="off" data-i18n-attr="placeholder:search;aria-label:search">
-        <label class="toggle duo"><input type="checkbox" id="opt-duo"> <span data-i18n="duo.label">Abrir dois respawns</span></label>
+        <span class="tut-row"><label class="toggle duo"><input type="checkbox" id="opt-duo"> <span data-i18n="duo.label">Abrir dois respawns</span></label><button class="tut-btn" type="button" data-tut="duas-hunts" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></span>
         <p class="bank-empty" id="duo-hint" data-i18n="duo.hint" hidden>Clique em dois respawns da lista. Clique de novo em um deles para fechar.</p>
         <ul class="bank-list" id="bank-list"></ul>
-        <button class="hunt-link custom-add" type="button" id="custom-add" data-i18n="custom.add" hidden>+ Cronômetro personalizado</button>
+        <span class="tut-row" id="custom-add-row" hidden><button class="hunt-link custom-add" type="button" id="custom-add" data-i18n="custom.add">+ Cronômetro personalizado</button><button class="tut-btn" type="button" data-tut="personalizado" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></span>
       </div>
       <footer class="win-foot bank-foot">
         <p class="sync" id="sync"></p>
@@ -1117,7 +1122,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 
 <dialog class="support" id="raffle" aria-labelledby="raffle-title">
   <div class="support-end">
-    <h2 id="raffle-title" data-i18n="raffle.title">Sorteio de itens</h2>
+    <h2 id="raffle-title"><span data-i18n="raffle.title">Sorteio de itens</span><button class="tut-btn" type="button" data-tut="sorteio" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></h2>
     <button class="dlg stop" type="button" id="raffle-close" data-i18n="support.close" autofocus>Fechar</button>
   </div>
   <span class="unit-toggle raffle-mode" role="group" aria-label="Sorteio de itens" data-i18n-attr="aria-label:raffle.title">
@@ -1673,6 +1678,11 @@ const I18N = {
     'tut.lendarios': 'A chance real de um item lendário',
     'tut.bestiario': 'Enviar uma criatura para o bestiário',
     'tut.calculadora': 'Comprar pronto ou montar?',
+    'tut.sorteio': 'Sorteio de itens com D100',
+    'tut.personalizado': 'Cronômetro personalizado',
+    'tut.quantidade': 'Quantidade de criaturas',
+    'tut.duas': 'Duas hunts juntas',
+    'tut.bonusxp': 'Bônus de XP',
     'voice.h.startAll': '"iniciar" · "iniciar todos"',
     'voice.h.startAllD': 'Inicia todos os cronômetros',
     'voice.h.startOne': '"iniciar um" · "iniciar dois"…',
@@ -2267,6 +2277,11 @@ const I18N = {
     'tut.lendarios': 'The real chance of a legendary item',
     'tut.bestiario': 'Send a creature to the bestiary',
     'tut.calculadora': 'Buy it ready or craft it?',
+    'tut.sorteio': 'Item raffle with a D100',
+    'tut.personalizado': 'Custom timer',
+    'tut.quantidade': 'Number of creatures',
+    'tut.duas': 'Two hunts together',
+    'tut.bonusxp': 'XP bonus',
     'voice.h.startAll': '"start" · "start all"',
     'voice.h.startAllD': 'Starts every timer',
     'voice.h.startOne': '"start one" · "start two"…',
@@ -2861,6 +2876,11 @@ const I18N = {
     'tut.lendarios': 'La probabilidad real de un objeto legendario',
     'tut.bestiario': 'Enviar una criatura al bestiario',
     'tut.calculadora': '¿Comprar hecho o fabricar?',
+    'tut.sorteio': 'Sorteo de objetos con D100',
+    'tut.personalizado': 'Cronómetro personalizado',
+    'tut.quantidade': 'Cantidad de criaturas',
+    'tut.duas': 'Dos hunts juntas',
+    'tut.bonusxp': 'Bonus de XP',
     'voice.h.startAll': '"iniciar" · "iniciar todos"',
     'voice.h.startAllD': 'Inicia todos los cronómetros',
     'voice.h.startOne': '"iniciar uno" · "iniciar dos"…',
@@ -3455,6 +3475,11 @@ const I18N = {
     'tut.lendarios': 'Prawdziwa szansa na przedmiot legendarny',
     'tut.bestiario': 'Wysyłanie stworzenia do bestiariusza',
     'tut.calculadora': 'Kupić gotowe czy złożyć?',
+    'tut.sorteio': 'Losowanie przedmiotów z D100',
+    'tut.personalizado': 'Własny minutnik',
+    'tut.quantidade': 'Liczba stworzeń',
+    'tut.duas': 'Dwa hunty razem',
+    'tut.bonusxp': 'Bonus XP',
     'voice.h.startAll': '„start” · „start wszystkie”',
     'voice.h.startAllD': 'Uruchamia wszystkie liczniki',
     'voice.h.startOne': '„start jeden” · „start dwa”…',
@@ -5124,7 +5149,7 @@ function renderBank() {
   $('#btab-respawns').setAttribute('aria-selected', String(!custom));
   $('#btab-custom').setAttribute('aria-selected', String(custom));
   $('#search').hidden = custom;
-  $('#custom-hint').hidden = $('#custom-add').hidden = !custom;
+  $('#custom-hint').hidden = $('#custom-add-row').hidden = !custom;
   const q = custom ? '' : $('#search').value.trim().toLowerCase();
   const all = allRespawns().filter(r => !!r.custom === custom);
   const hits = custom ? [...all].sort((a, b) => a.name.localeCompare(b.name, 'pt'))
@@ -5947,13 +5972,14 @@ function paintXpSum(node, open) {
     el('b', { text: tr('xp.sumLine', { h: fmtXp(g.hour), t: fmtXp(g.total), d: ui.dur }) }),
     ' ' + tr('xp.sumNote', { a: parts[0].r.name, b: parts[1].r.name }) + (out.length ? ' ' + tr('xp.sumMissing', { x: out.map(o => o.r.name).join(', ') }) : ''));
 }
+const tutBtn = id => el('button', { class: 'tut-btn', type: 'button', 'data-tut': id, 'aria-haspopup': 'dialog', title: tr('tut.open'), 'aria-label': tr('tut.open'), text: '?' });
 // Caixa "Personalizar a quantidade de criaturas": desmarcada, a conta é a de sempre; marcada, cada criatura ganha − e +.
 function paintQty(node, id, r, tag) {
   const q = ui.qty[id] || { on: false, n: {} };
   const save = () => { ui.qty[id] = q; saveUi(); renderSheet(); };
-  const box = el('label', { class: 'toggle' },
+  const box = el('span', { class: 'tut-row' }, el('label', { class: 'toggle' },
     el('input', { type: 'checkbox', id: 'qty-on' + tag, checked: !!q.on, onchange: e => { q.on = e.target.checked; save(); } }),
-    el('span', { text: tr('qty.label') }));
+    el('span', { text: tr('qty.label') })), tutBtn('quantidade'));
   if (!q.on || !r.monsters.length) { node.replaceChildren(box); return; }
   const rows = r.monsters.map((m, i) => {
     const n = qtyCount(q, m), set = v => { q.n[m.name] = Math.max(0, Math.min(m.count, v)); save(); };
@@ -6059,7 +6085,7 @@ function xpbCard() {
   const extra = el('input', { type: 'text', id: 'xpb-extra', inputmode: 'decimal', maxlength: 6, autocomplete: 'off', placeholder: '0', title: tr('xpb.extraTip'),
     oninput: e => { const v = Number(String(e.target.value).replace(',', '.')); ui.xpb.extra = Number.isFinite(v) && v > 0 ? Math.min(1000, Math.round(v * 100) / 100) : 0; save(); } });
   return {
-    root: el('div', { class: 'ctl wide' }, ctlHead(tr('xpb.title'), val),
+    root: el('div', { class: 'ctl wide' }, el('div', { class: 'ctl-head' }, el('h3', {}, tr('xpb.title'), tutBtn('bonus-xp')), val),
       el('div', { class: 'xpb-row' }, label, el('div', { class: 'seg', role: 'group', 'aria-label': tr('xpb.title') }, buttons)),
       el('div', { class: 'xpb-row' },
         el('label', { class: 'toggle' }, gold, el('span', { text: tr('xpb.gold') })),
@@ -7162,6 +7188,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 18:37',
+    pt: ['Tutoriais em vídeo novos, no "?" dourado: sorteio com D100, cronômetro personalizado, quantidade de criaturas, duas hunts juntas e bônus de XP.'],
+    en: ['New video tutorials behind the golden "?": raffle with a D100, custom timer, number of creatures, two hunts together and XP bonus.'],
+    es: ['Nuevos tutoriales en vídeo en el "?" dorado: sorteo con D100, cronómetro personalizado, cantidad de criaturas, dos hunts juntas y bonus de XP.'],
+    pl: ['Nowe poradniki wideo pod złotym "?": losowanie z D100, własny minutnik, liczba stworzeń, dwa hunty razem i bonus XP.'],
+  },
   { at: '2026-10-20 14:19',
     pt: ['XP em grupo corrigido pela regra oficial da party: cada jogador a mais dá +15% de XP e o total é dividido entre todos (dupla 57,5% do XP do abate para cada um, trio 43,3%, squad de 4 36,3%). Antes o site dividia pelo fator da velocidade do respawn, como o mapper, e mostrava XP alto demais em grupo.'],
     en: ['Group XP fixed with the official party rule: each extra player gives +15% XP and the total is split among everyone (duo 57.5% of the kill XP each, trio 43.3%, squad of 4 36.3%). The site used to divide by the respawn speed factor, like the mapper, and showed too much XP in a group.'],
@@ -7948,6 +7980,11 @@ const TUTORIAIS = {
   lendarios: { title: 'tut.lendarios', yt: { pt: 'OUnD2RzlcBU', en: 'X2PKTSqeyv4' } },
   bestiario: { title: 'tut.bestiario', yt: { pt: 'DtfX2j4DEFY', en: 'fLgopffzSYU' } },
   calculadora: { title: 'tut.calculadora', yt: { pt: 'uVVyT4WkP4o', en: 'Y7XuVb84dv0' } },
+  sorteio: { title: 'tut.sorteio', yt: { pt: 'dMm7bqJmKQ0', en: 'EbO7IGkwTGg' } },
+  personalizado: { title: 'tut.personalizado', yt: { pt: 'kg-aCRo2vM0', en: 'pWIhc3jMfEY' } },
+  quantidade: { title: 'tut.quantidade', yt: { pt: 'CtZ3QNnXfyU', en: '25LXrosV3is' } },
+  'duas-hunts': { title: 'tut.duas', yt: { pt: 'ZAWKsXp5NGs', en: 'M9-JuywBiFY' } },
+  'bonus-xp': { title: 'tut.bonusxp', yt: { pt: 'gCxlwOrWu5E', en: 'mV9OoQcZ2NM' } },
 };
 const tutLang = () => (ui.lang === 'pt' ? 'pt' : 'en');
 const tutSrc = (id, ext) => 'tutoriais/' + id + '-' + tutLang() + '.' + ext + '?v=1';
