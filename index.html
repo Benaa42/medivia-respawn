@@ -149,6 +149,14 @@ kbd {
 #room-note:empty { display: none; }
 #room-pane .dlg:disabled { opacity: 0.45; cursor: default; }
 dialog#changes { width: min(560px, calc(100vw - 32px)); }
+dialog#feedback { width: min(480px, calc(100vw - 32px)); }
+.fb-form { display: flex; flex-direction: column; gap: 12px; }
+.fb-form .unit-toggle { align-self: flex-start; margin-left: 0; }
+.fb-form textarea, .fb-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 400 14px/1.45 var(--font-ui); }
+.fb-form textarea { min-height: 120px; resize: vertical; }
+.fb-form textarea:focus, .fb-form input:focus { outline: 2px solid var(--value); outline-offset: -1px; border-color: transparent; }
+.fb-count { align-self: flex-end; font-variant-numeric: tabular-nums; }
+.fb-form .dlgs { margin-left: 0; }
 /* Tela de criaturas: uma tabela; em tela estreita ela rola de lado dentro da própria moldura */
 #creatures-status:empty { display: none; }
 .creatures-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
@@ -823,6 +831,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
     </nav>
     <div class="toolbar-end">
       <button class="nav-link" type="button" id="changes-top" data-i18n="changes.open">Novidades</button>
+      <button class="nav-link" type="button" id="feedback-top" data-i18n="fb.open">Sugestões e problemas</button>
       <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
         <button type="button" data-lang="en" lang="en" title="English" aria-label="English"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><path fill="#b22234" d="M0 0h20v2H0zM0 4h20v2H0zM0 8h20v2H0zM0 12h20v2H0z"/><rect width="9" height="8" fill="#3c3b6e"/></svg></button>
         <button type="button" data-lang="pl" lang="pl" title="Polski" aria-label="Polski"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg></button>
@@ -1000,6 +1009,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
     <p data-i18n="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</p>
     <div class="colophon-links">
       <button class="support-btn" type="button" id="changes-btn" data-i18n="changes.open">Novidades</button>
+      <button class="support-btn" type="button" id="feedback-btn" data-i18n="fb.open">Sugestões e problemas</button>
       <button class="support-btn" type="button" id="support-btn" data-i18n="support.open" hidden>Apoiar o projeto</button>
     </div>
     <a class="maker" href="https://github.com/Benaa42" target="_blank" rel="noopener"><img src="vibeforge.svg?v=2" width="288" height="72" alt="Vibeforge" data-i18n-attr="alt:maker.alt"></a>
@@ -1099,6 +1109,25 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </div>
   <video id="tut-video" controls playsinline preload="none"></video>
   <a class="tut-yt" id="tut-yt" href="#" target="_blank" rel="noopener" data-i18n="tut.youtube">Ver no YouTube</a>
+</dialog>
+
+<dialog class="support" id="feedback" aria-labelledby="feedback-title">
+  <div class="support-end">
+    <h2 id="feedback-title" data-i18n="fb.open">Sugestões e problemas</h2>
+    <button class="dlg stop" type="button" id="feedback-close" data-i18n="support.close">Fechar</button>
+  </div>
+  <form class="fb-form" id="feedback-form" novalidate>
+    <p class="support-note" data-i18n="fb.intro">Conte o que poderia melhorar ou o que não funcionou. A mensagem vai só para quem mantém o site.</p>
+    <span class="unit-toggle" role="group" aria-label="Tipo" data-i18n-attr="aria-label:fb.kind">
+      <button type="button" id="fb-kind-suggestion" data-kind="suggestion" aria-pressed="true" data-i18n="fb.suggestion">Sugestão</button>
+      <button type="button" id="fb-kind-problem" data-kind="problem" aria-pressed="false" data-i18n="fb.problem">Problema</button>
+    </span>
+    <label class="calc-field"><span data-i18n="fb.text">Mensagem</span><textarea id="fb-text" maxlength="1000" rows="5"></textarea><small class="fb-count" id="fb-count">0/1000</small></label>
+    <label class="calc-field"><span data-i18n="fb.contact">Contato (opcional)</span><input type="text" id="fb-contact" maxlength="60" autocomplete="off" placeholder="Nick no Discord ou no jogo" data-i18n-attr="placeholder:fb.contactPh"></label>
+    <p class="support-note" data-i18n="fb.extra">Junto vão, sem dados pessoais, a tela em que você está, o idioma, o navegador e a versão do site, para ajudar a achar o problema.</p>
+    <div class="dlgs"><button class="dlg go" type="submit" id="fb-send" data-i18n="fb.send">Enviar</button></div>
+    <p class="status" id="fb-status" role="status"></p>
+  </form>
 </dialog>
 
 <dialog class="support" id="changes" aria-labelledby="changes-title">
@@ -1607,6 +1636,23 @@ const I18N = {
     'raffle.copy': 'Copiar resultado',
     'raffle.copied': 'Resultado do sorteio copiado.',
     'changes.open': 'Novidades',
+    'fb.open': 'Sugestões e problemas',
+    'fb.intro': 'Conte o que poderia melhorar ou o que não funcionou. A mensagem vai só para quem mantém o site.',
+    'fb.kind': 'Tipo',
+    'fb.suggestion': 'Sugestão',
+    'fb.problem': 'Problema',
+    'fb.text': 'Mensagem',
+    'fb.ph.suggestion': 'O que você gostaria de ver no site?',
+    'fb.ph.problem': 'O que aconteceu e o que você esperava?',
+    'fb.contact': 'Contato (opcional)',
+    'fb.contactPh': 'Nick no Discord ou no jogo',
+    'fb.extra': 'Junto vão, sem dados pessoais, a tela em que você está, o idioma, o navegador e a versão do site, para ajudar a achar o problema.',
+    'fb.send': 'Enviar',
+    'fb.sending': 'Enviando…',
+    'fb.sent': 'Recebido, obrigado! Cada mensagem é lida.',
+    'fb.short': 'Escreva pelo menos algumas palavras.',
+    'fb.wait': 'Mensagem enviada há pouco. Espere um minuto para mandar outra.',
+    'fb.fail': 'Não foi possível enviar agora. Confira a internet e tente de novo.',
     'changes.title': 'Novidades do site',
     'pause.label': 'Pausa entre voltas',
     'pause.unit': 's',
@@ -2117,6 +2163,23 @@ const I18N = {
     'raffle.copy': 'Copy result',
     'raffle.copied': 'Raffle result copied.',
     'changes.open': 'What is new',
+    'fb.open': 'Suggestions and problems',
+    'fb.intro': 'Tell us what could be better or what did not work. The message only goes to whoever runs the site.',
+    'fb.kind': 'Type',
+    'fb.suggestion': 'Suggestion',
+    'fb.problem': 'Problem',
+    'fb.text': 'Message',
+    'fb.ph.suggestion': 'What would you like to see on the site?',
+    'fb.ph.problem': 'What happened, and what did you expect?',
+    'fb.contact': 'Contact (optional)',
+    'fb.contactPh': 'Discord or in-game name',
+    'fb.extra': 'Along with it go, with no personal data, the screen you are on, the language, the browser and the site version, to help track down problems.',
+    'fb.send': 'Send',
+    'fb.sending': 'Sending…',
+    'fb.sent': 'Received, thank you! Every message is read.',
+    'fb.short': 'Write at least a few words.',
+    'fb.wait': 'You just sent a message. Wait a minute to send another.',
+    'fb.fail': 'Could not send it right now. Check your connection and try again.',
     'changes.title': 'What is new on the site',
     'pause.label': 'Pause between laps',
     'pause.unit': 's',
@@ -2627,6 +2690,23 @@ const I18N = {
     'raffle.copy': 'Copiar resultado',
     'raffle.copied': 'Resultado del sorteo copiado.',
     'changes.open': 'Novedades',
+    'fb.open': 'Sugerencias y problemas',
+    'fb.intro': 'Cuenta qué podría mejorar o qué no funcionó. El mensaje solo llega a quien mantiene el sitio.',
+    'fb.kind': 'Tipo',
+    'fb.suggestion': 'Sugerencia',
+    'fb.problem': 'Problema',
+    'fb.text': 'Mensaje',
+    'fb.ph.suggestion': '¿Qué te gustaría ver en el sitio?',
+    'fb.ph.problem': '¿Qué pasó y qué esperabas?',
+    'fb.contact': 'Contacto (opcional)',
+    'fb.contactPh': 'Nick en Discord o en el juego',
+    'fb.extra': 'Junto van, sin datos personales, la pantalla en la que estás, el idioma, el navegador y la versión del sitio, para ayudar a encontrar el problema.',
+    'fb.send': 'Enviar',
+    'fb.sending': 'Enviando…',
+    'fb.sent': '¡Recibido, gracias! Cada mensaje se lee.',
+    'fb.short': 'Escribe al menos unas palabras.',
+    'fb.wait': 'Acabas de enviar un mensaje. Espera un minuto para mandar otro.',
+    'fb.fail': 'No se pudo enviar ahora. Revisa la conexión e inténtalo de nuevo.',
     'changes.title': 'Novedades del sitio',
     'pause.label': 'Pausa entre vueltas',
     'pause.unit': 's',
@@ -3137,6 +3217,23 @@ const I18N = {
     'raffle.copy': 'Kopiuj wynik',
     'raffle.copied': 'Wynik losowania skopiowany.',
     'changes.open': 'Nowości',
+    'fb.open': 'Sugestie i problemy',
+    'fb.intro': 'Napisz, co można poprawić albo co nie działało. Wiadomość trafia tylko do osoby, która prowadzi stronę.',
+    'fb.kind': 'Rodzaj',
+    'fb.suggestion': 'Sugestia',
+    'fb.problem': 'Problem',
+    'fb.text': 'Wiadomość',
+    'fb.ph.suggestion': 'Czego brakuje na stronie?',
+    'fb.ph.problem': 'Co się stało i czego oczekiwano?',
+    'fb.contact': 'Kontakt (opcjonalnie)',
+    'fb.contactPh': 'Nick na Discordzie lub w grze',
+    'fb.extra': 'Razem z nią, bez danych osobowych, trafiają: ekran, na którym jesteś, język, przeglądarka i wersja strony, żeby łatwiej znaleźć problem.',
+    'fb.send': 'Wyślij',
+    'fb.sending': 'Wysyłanie…',
+    'fb.sent': 'Otrzymano, dziękujemy! Każda wiadomość jest czytana.',
+    'fb.short': 'Napisz przynajmniej kilka słów.',
+    'fb.wait': 'Wiadomość została właśnie wysłana. Odczekaj minutę, aby wysłać kolejną.',
+    'fb.fail': 'Nie udało się teraz wysłać. Sprawdź połączenie i spróbuj ponownie.',
     'changes.title': 'Nowości na stronie',
     'pause.label': 'Przerwa między okrążeniami',
     'pause.unit': 's',
@@ -6369,6 +6466,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-19 23:10',
+    pt: ['Sugestões e problemas: ao lado de Novidades, no topo e no fim da página, um botão abre um campo para mandar ideias ou contar o que não funcionou.'],
+    en: ['Suggestions and problems: next to What is new, at the top and at the end of the page, a button opens a form to send ideas or report what did not work.'],
+    es: ['Sugerencias y problemas: junto a Novedades, arriba y al final de la página, un botón abre un campo para mandar ideas o contar lo que no funcionó.'],
+    pl: ['Sugestie i problemy: obok Nowości, na górze i na dole strony, przycisk otwiera formularz do wysyłania pomysłów lub zgłaszania tego, co nie działało.'],
+  },
   { at: '2026-10-19 21:20',
     pt: ['O nome do respawn agora fica numa aba presa ao cronômetro, com o "?" do tutorial ao lado.'],
     en: ['The respawn name now sits in a tab attached to the timer, with the tutorial "?" next to it.'],
@@ -6983,6 +7086,64 @@ function openChanges() {
 // Dois caminhos para a mesma lista: o link no topo, abaixo do mapper, e o do rodapé.
 for (const b of [$('#changes-top'), $('#changes-btn')]) b.addEventListener('click', openChanges);
 $('#changes-close').addEventListener('click', () => { const dlg = $('#changes'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+
+/* ---------- Sugestões e problemas ----------
+   A mensagem vai para a coleção "feedback" do banco, que só aceita gravar: ninguém lê pelo site. Junto vão a tela, o
+   idioma, o navegador (só o nome e o sistema) e a versão do site; nada que identifique a pessoa. */
+const LS_FB = 'medivia-respawn.sugestao.v1';   // hora do último envio, para segurar envios repetidos
+let fbKind = 'suggestion';
+function fbAgent() {
+  const u = navigator.userAgent;
+  const nav = /Edg\//.test(u) ? 'Edge' : /OPR\//.test(u) ? 'Opera' : /Firefox\//.test(u) ? 'Firefox' : /Chrome\//.test(u) ? 'Chrome' : /Safari\//.test(u) ? 'Safari' : 'outro';
+  const so = /Android/.test(u) ? 'Android' : /iPhone|iPad/.test(u) ? 'iOS' : /Windows/.test(u) ? 'Windows' : /Mac OS/.test(u) ? 'macOS' : /Linux/.test(u) ? 'Linux' : 'outro';
+  return nav + ' · ' + so + ' · ' + innerWidth + 'x' + innerHeight;
+}
+function fbSetKind(kind) {
+  fbKind = kind;
+  for (const b of document.querySelectorAll('#feedback-form [data-kind]')) b.setAttribute('aria-pressed', String(b.dataset.kind === kind));
+  $('#fb-text').placeholder = tr('fb.ph.' + kind);
+}
+function fbStatus(key, kind) { const st = $('#fb-status'); st.dataset.kind = kind || 'info'; setText(st, key ? tr(key) : ''); }
+function openFeedback() {
+  fbSetKind(fbKind);
+  fbStatus('');
+  const dlg = $('#feedback');
+  if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  $('#fb-text').focus();
+}
+for (const b of [$('#feedback-top'), $('#feedback-btn')]) b.addEventListener('click', openFeedback);
+$('#feedback-close').addEventListener('click', () => { const dlg = $('#feedback'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+for (const b of document.querySelectorAll('#feedback-form [data-kind]')) b.addEventListener('click', () => fbSetKind(b.dataset.kind));
+$('#fb-text').addEventListener('input', e => setText($('#fb-count'), e.target.value.length + '/1000'));
+$('#feedback-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const text = $('#fb-text').value.trim(), contact = $('#fb-contact').value.trim();
+  if (text.length < 5) { fbStatus('fb.short', 'err'); $('#fb-text').focus(); return; }
+  const last = lsGet(LS_FB, 0);
+  if (Date.now() - last < 60000) { fbStatus('fb.wait', 'err'); return; }
+  const send = $('#fb-send');
+  send.disabled = true;
+  fbStatus('fb.sending', 'busy');
+  try {
+    if (!cloud.on) throw new Error('sem banco');
+    const uid = await cloudAuth();
+    const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const id = Array.from(crypto.getRandomValues(new Uint8Array(20)), x => abc[x % abc.length]).join('');
+    const raw = { kind: fbKind, text: text.slice(0, 1000), page: String(pageNow || 'timer').slice(0, 20), lang: ui.lang,
+      agent: fbAgent().slice(0, 120), version: CHANGES[0].at, owner: uid };
+    if (contact) raw.contact = contact.slice(0, 60);
+    const res = await cloudCommit({
+      update: { name: cloud.root + '/feedback/' + id, fields: toFs(raw).mapValue.fields },
+      currentDocument: { exists: false },
+      updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
+    });
+    if (!res.ok) throw new Error('banco ' + res.status);
+    lsSet(LS_FB, Date.now());
+    $('#fb-text').value = ''; $('#fb-contact').value = ''; setText($('#fb-count'), '0/1000');
+    fbStatus('fb.sent', 'ok');
+  } catch { fbStatus('fb.fail', 'err'); }
+  send.disabled = false;
+});
 
 /* ---------- Tutoriais em vídeo ----------
    Cada botão com data-tut aponta para um vídeo curto da pasta tutoriais/ (o mesmo Short do canal, sem o fecho). A narração
