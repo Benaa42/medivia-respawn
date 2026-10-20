@@ -187,6 +187,19 @@ dialog#name-dlg { width: min(480px, calc(100vw - 32px)); }
 .ctab[aria-selected="true"] { background: var(--box); color: var(--title); cursor: default; }
 .ctab:focus-visible { outline: 2px solid var(--value); outline-offset: -2px; }
 .ctabs[data-on="creatures"] + .tool { border-top-left-radius: 0; }
+/* Respawns por XP: grupo e percentual em cima, a tabela em ordem de XP por hora */
+.rank-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; font-size: 13px; }
+.rank-ctl .seg { flex: 0 1 auto; }
+.rank-ctl .seg button { flex: 0 0 auto; padding-inline: 14px; white-space: nowrap; }
+.rank-ctl .seg { flex-wrap: wrap; max-width: 100%; border-radius: 18px; }
+/* Tela estreita: as três abas e os botões cabem na largura */
+@media (max-width: 640px) { .ctab { padding: 10px 10px 8px; font-size: 15px; white-space: nowrap; } .ctabs { gap: 0; } }
+.rank-ctl > span { font-weight: 600; color: var(--title); }
+.creatures-table.rank-table td:first-child { width: 36px; font-weight: 700; color: var(--faint); text-align: right; }
+.creatures-table.rank-table th:nth-child(2), .creatures-table.rank-table td:nth-child(2) { text-align: left; }
+.creatures-table.rank-table td:nth-child(2) { font-weight: 600; }
+.creatures-table.rank-table td.part { color: var(--value); opacity: 0.75; }
+.creatures-table.rank-table .rank-miss { color: var(--faint); }
 .ctabs.small .ctab { padding: 11px 16px 9px; font: 600 16px/1.3 var(--font-ui); letter-spacing: 0; }
 .ctabs[data-on="respawns"] + .bank { border-top-left-radius: 0; }
 /* Chefes: figura da wiki, nome à esquerda; os nomes sem ficha ainda levam à wiki */
@@ -1037,6 +1050,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 <div class="ctabs" id="ctabs" data-on="creatures" role="tablist" aria-label="Criaturas" data-i18n-attr="aria-label:creatures.title">
   <button class="ctab" type="button" role="tab" id="ctab-creatures" aria-selected="true" aria-controls="creatures"><span data-i18n="creatures.title">Criaturas</span></button>
   <button class="ctab" type="button" role="tab" id="ctab-bosses" aria-selected="false" aria-controls="creatures"><span data-i18n="bosses.title">Chefes</span></button>
+  <button class="ctab" type="button" role="tab" id="ctab-ranking" aria-selected="false" aria-controls="creatures"><span data-i18n="rank.title">Respawns por XP</span></button>
 </div>
 <div class="support tool" id="creatures" role="tabpanel" aria-labelledby="creatures-title">
   <h2 class="sr" id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
@@ -1060,6 +1074,12 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </div>
   <p class="support-note" id="creatures-count" role="status"></p>
   <div class="creatures-wrap"><table class="creatures-table" id="creatures-table"></table></div>
+  </div>
+  <div class="creatures-pane" id="ranking-list" hidden>
+  <p class="support-note" data-i18n="rank.intro">Os respawns em ordem de XP por hora de cada jogador, sem bônus de XP, contando tudo morto assim que nasce, na raridade Normal. Escolha o grupo e o percentual de bônus do respawn, que mudam o ritmo. Clique num respawn para abrir no cronômetro.</p>
+  <div class="rank-ctl" id="rank-ctl"></div>
+  <p class="support-note" id="rank-count" role="status"></p>
+  <div class="creatures-wrap"><table class="creatures-table rank-table" id="rank-table"></table></div>
   </div>
   <div class="creatures-pane" id="bosses-list" hidden>
   <p class="support-note" data-i18n="bosses.intro">Chefes do jogo, pela categoria Boss Creatures do bestiário, na wiki do Medivia. A coluna Bestiário diz quantos abates completam a ficha. XP e atributos aparecem quando alguém cola o print do chefe no bestiário, como nas criaturas.</p>
@@ -1570,6 +1590,17 @@ const I18N = {
     'creatures.open': 'Criaturas',
     'creatures.title': 'Criaturas',
     'bosses.title': 'Chefes',
+    'rank.title': 'Respawns por XP',
+    'rank.intro': 'Os respawns em ordem de XP por hora de cada jogador, sem bônus de XP, contando tudo morto assim que nasce, na raridade Normal. Escolha o grupo e o percentual de bônus do respawn, que mudam o ritmo. Clique num respawn para abrir no cronômetro.',
+    'rank.party': 'Grupo',
+    'rank.pct': 'Bônus do respawn',
+    'rank.count': '{n} respawns com XP, de {t}. Os marcados com "≥" ainda não têm o XP de todas as criaturas: valem pelo menos isso.',
+    'rank.col.name': 'Respawn',
+    'rank.col.xp': 'XP por hora',
+    'rank.col.mobs': 'Criaturas',
+    'rank.miss': 'sem XP: {x}',
+    'rank.open': 'Abrir no cronômetro',
+    'rank.none': 'Nenhum respawn com XP ainda.',
     'bosses.intro': 'Chefes do jogo, pela categoria Boss Creatures do bestiário, na wiki do Medivia. A coluna Bestiário diz quantos abates completam a ficha. XP e atributos aparecem quando alguém cola o print do chefe no bestiário, como nas criaturas.',
     'bosses.search': 'Buscar chefe',
     'bosses.count': '{n} chefes, {k} com XP',
@@ -2153,6 +2184,17 @@ const I18N = {
     'creatures.open': 'Creatures',
     'creatures.title': 'Creatures',
     'bosses.title': 'Bosses',
+    'rank.title': 'Respawns by XP',
+    'rank.intro': 'Respawns in order of XP per hour for each player, without XP bonus, counting everything killed as soon as it spawns, Normal rarity. Pick the group and the respawn bonus percentage, which change the pace. Click a respawn to open it on the timer.',
+    'rank.party': 'Group',
+    'rank.pct': 'Respawn bonus',
+    'rank.count': '{n} respawns with XP, out of {t}. Those marked "≥" do not have the XP of every creature yet: they give at least that.',
+    'rank.col.name': 'Respawn',
+    'rank.col.xp': 'XP per hour',
+    'rank.col.mobs': 'Creatures',
+    'rank.miss': 'no XP: {x}',
+    'rank.open': 'Open on the timer',
+    'rank.none': 'No respawn with XP yet.',
     'bosses.intro': 'Bosses of the game, from the Boss Creatures category of the bestiary on the Medivia wiki. The Bestiary column says how many kills complete the page. XP and stats show up when someone pastes the boss screenshot from the bestiary, as with creatures.',
     'bosses.search': 'Search boss',
     'bosses.count': '{n} bosses, {k} with XP',
@@ -2736,6 +2778,17 @@ const I18N = {
     'creatures.open': 'Criaturas',
     'creatures.title': 'Criaturas',
     'bosses.title': 'Jefes',
+    'rank.title': 'Respawns por XP',
+    'rank.intro': 'Los respawns en orden de XP por hora de cada jugador, sin bonus de XP, contando todo muerto en cuanto nace, en rareza Normal. Elige el grupo y el porcentaje de bonus del respawn, que cambian el ritmo. Haz clic en un respawn para abrirlo en el cronómetro.',
+    'rank.party': 'Grupo',
+    'rank.pct': 'Bonus del respawn',
+    'rank.count': '{n} respawns con XP, de {t}. Los marcados con "≥" aún no tienen el XP de todas las criaturas: dan al menos eso.',
+    'rank.col.name': 'Respawn',
+    'rank.col.xp': 'XP por hora',
+    'rank.col.mobs': 'Criaturas',
+    'rank.miss': 'sin XP: {x}',
+    'rank.open': 'Abrir en el cronómetro',
+    'rank.none': 'Ningún respawn con XP todavía.',
     'bosses.intro': 'Jefes del juego, de la categoría Boss Creatures del bestiario, en la wiki de Medivia. La columna Bestiario dice cuántas muertes completan la ficha. XP y atributos aparecen cuando alguien pega la captura del jefe en el bestiario, como con las criaturas.',
     'bosses.search': 'Buscar jefe',
     'bosses.count': '{n} jefes, {k} con XP',
@@ -3319,6 +3372,17 @@ const I18N = {
     'creatures.open': 'Stworzenia',
     'creatures.title': 'Stworzenia',
     'bosses.title': 'Bossowie',
+    'rank.title': 'Respawny wg XP',
+    'rank.intro': 'Respawny według XP na godzinę na gracza, bez bonusu XP, przy zabijaniu wszystkiego od razu po odrodzeniu, rzadkość Normalna. Wybierz grupę i procent bonusu respawnu, które zmieniają tempo. Kliknij respawn, aby otworzyć go w minutniku.',
+    'rank.party': 'Grupa',
+    'rank.pct': 'Bonus respawnu',
+    'rank.count': '{n} respawnów z XP, z {t}. Oznaczone "≥" nie mają jeszcze XP wszystkich stworzeń: dają co najmniej tyle.',
+    'rank.col.name': 'Respawn',
+    'rank.col.xp': 'XP na godzinę',
+    'rank.col.mobs': 'Stworzenia',
+    'rank.miss': 'bez XP: {x}',
+    'rank.open': 'Otwórz w minutniku',
+    'rank.none': 'Brak respawnów z XP.',
     'bosses.intro': 'Bossowie z gry, z kategorii Boss Creatures bestiariusza na wiki Medivii. Kolumna Bestiariusz mówi, ile zabójstw kończy kartę. XP i statystyki pojawią się, gdy ktoś wklei zrzut bossa z bestiariusza, tak jak przy stworzeniach.',
     'bosses.search': 'Szukaj bossa',
     'bosses.count': '{n} bossów, {k} z XP',
@@ -7093,6 +7157,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 13:26',
+    pt: ['Respawns por XP: nova aba na tela de Criaturas com os respawns em ordem de XP por hora (sem bônus de XP), no grupo e no percentual de bônus que você escolher. Clique num respawn para abrir no cronômetro.'],
+    en: ['Respawns by XP: new tab on the Creatures page with the respawns in order of XP per hour (no XP bonus), for the group and bonus percentage you pick. Click a respawn to open it on the timer.'],
+    es: ['Respawns por XP: nueva pestaña en la pantalla de Criaturas con los respawns en orden de XP por hora (sin bonus de XP), en el grupo y el porcentaje de bonus que elijas. Haz clic en un respawn para abrirlo en el cronómetro.'],
+    pl: ['Respawny wg XP: nowa zakładka na stronie Stworzeń z respawnami według XP na godzinę (bez bonusu XP), dla wybranej grupy i procentu bonusu. Kliknij respawn, aby otworzyć go w minutniku.'],
+  },
   { at: '2026-10-20 13:15',
     pt: ['Bônus de XP na conta do respawn: escolha os minutos de XP Boost da loja (+50%, ou +55% com golden premium) e some outros bônus em %, como o de concluir um deus em Elunor. O XP estimado e a soma das duas hunts já saem com o bônus.'],
     en: ['XP bonus in the respawn estimate: pick the minutes of store XP Boost (+50%, or +55% with golden premium) and add other bonuses in %, like the one for completing a god in Elunor. The estimated XP and the sum of both hunts already include the bonus.'],
@@ -7944,6 +8014,7 @@ function creatureRows() {
 }
 function renderCreatures() {
   if (creaturesView === 'bosses') renderBosses();
+  else if (creaturesView === 'ranking') renderRanking();
   else if (creaturesView !== 'creatures') renderLegend();   // as tabelas de itens mostram chances e links que dependem das criaturas
   const text = slug($('#creatures-search').value), by = $('#creatures-sort').value, only = $('#creatures-missing').checked;
   const all = creatureRows().filter(c => !BOSS_IDS.has(c.id));   // os chefes ficam na aba deles
@@ -8147,7 +8218,7 @@ Uliax|30|webp
 Gieffrin|5|
 Uliaarthar|1|png`.split('\n').map(l => { const [name, kills, img] = l.split('|'); return { id: slug(name), name, kills: +kills || null, img: img || null }; });
 const BOSS_IDS = new Set(BOSSES.map(b => b.id));
-const CREATURE_VIEWS = { creatures: 'creatures-list', legend: 'legend-list', bosses: 'bosses-list' };
+const CREATURE_VIEWS = { creatures: 'creatures-list', legend: 'legend-list', bosses: 'bosses-list', ranking: 'ranking-list' };
 let creaturesView = 'creatures';
 function renderLegend() {
   const rows = new Map(creatureRows().map(c => [c.id, c]));
@@ -8189,16 +8260,53 @@ function setCreaturesView(view) {
     const b = $('#view-' + v);
     if (b) b.setAttribute('aria-pressed', String(v === creaturesView));
   }
-  // As abas do alto: Chefes, ou Criaturas (com a lista e os itens lendários dentro)
-  const boss = creaturesView === 'bosses';
-  $('#ctabs').dataset.on = boss ? 'bosses' : 'creatures';
-  $('#ctab-creatures').setAttribute('aria-selected', String(!boss));
-  $('#ctab-bosses').setAttribute('aria-selected', String(boss));
-  $('.creatures-view').hidden = boss;
-  if (boss) renderBosses();
+  // As abas do alto: Criaturas (com a lista e os itens lendários dentro), Chefes e Respawns por XP
+  const top = creaturesView === 'bosses' || creaturesView === 'ranking' ? creaturesView : 'creatures';
+  $('#ctabs').dataset.on = top;
+  for (const t of ['creatures', 'bosses', 'ranking']) $('#ctab-' + t).setAttribute('aria-selected', String(t === top));
+  $('.creatures-view').hidden = top !== 'creatures';
+  if (top === 'bosses') renderBosses();
+  else if (top === 'ranking') renderRanking();
   else if (creaturesView !== 'creatures') renderLegend();
 }
-$('#ctab-creatures').addEventListener('click', () => { if (creaturesView === 'bosses') { setCreaturesView('creatures'); history.replaceState(null, '', '#creatures'); } });
+$('#ctab-creatures').addEventListener('click', () => { if (creaturesView === 'bosses' || creaturesView === 'ranking') { setCreaturesView('creatures'); history.replaceState(null, '', '#creatures'); } });
+$('#ctab-ranking').addEventListener('click', () => { setCreaturesView('ranking'); history.replaceState(null, '', '#creatures/respawns'); });
+// Respawns por XP: XP por hora de cada jogador sem bônus de XP, com todas as criaturas do respawn. Grupo e percentual
+// começam como os do cronômetro e mudam só aqui.
+let rankParty = null, rankPct = null;
+function rankXp(r, pct, party) {
+  let hour = 0, got = 0;
+  const miss = [];
+  for (const m of r.monsters) {
+    const exp = expOf(m.name);
+    if (exp == null) { miss.push(m.name); continue; }
+    hour += killsPerHour(respawnAt(m.base, pct, party), m.count) * exp;
+    got++;
+  }
+  return { each: got ? hour * 100 / party : null, miss };
+}
+function renderRanking() {
+  if (rankParty == null) rankParty = ui.party;
+  if (rankPct == null) rankPct = ui.pct;
+  const seg = (label, list, now, pick) => [el('span', { text: label }), el('div', { class: 'seg', role: 'group', 'aria-label': label },
+    list.map(o => el('button', { type: 'button', text: o.text, 'aria-pressed': String(o.value === now), onclick: () => { pick(o.value); renderRanking(); } })))];
+  $('#rank-ctl').replaceChildren(
+    ...seg(tr('rank.party'), PARTIES.map(x => ({ value: x.mult, text: tr('party.' + x.mult) })), rankParty, v => { rankParty = v; }),
+    ...seg(tr('rank.pct'), PCTS.map(p => ({ value: p, text: p ? p + '%' : tr('xpb.off') })), rankPct, v => { rankPct = v; }));
+  const all = allRespawns().filter(r => !r.custom && r.monsters.length);
+  const list = all.map(r => ({ r, ...rankXp(r, rankPct, rankParty) })).filter(o => o.each != null).sort((a, b) => b.each - a.each);
+  setText($('#rank-count'), tr('rank.count', { n: list.length, t: all.length }));
+  const open = id => { select(id); goTo('timer'); };
+  $('#rank-table').replaceChildren(
+    el('thead', {}, el('tr', {}, ['', tr('rank.col.name'), tr('rank.col.xp'), tr('rank.col.mobs')].map(t => el('th', { scope: 'col', text: t })))),
+    el('tbody', {}, list.length ? list.map((o, i) => el('tr', {},
+      el('td', { text: i + 1 }),
+      el('td', {}, el('button', { class: 'creature-link', type: 'button', text: o.r.name, title: tr('rank.open'), onclick: () => open(o.r.id) })),
+      el('td', { class: o.miss.length ? 'xp part' : 'xp', text: (o.miss.length ? '≥ ' : '') + fmtXp(o.each) }),
+      el('td', {}, o.r.monsters.map(m => m.name + ' (' + m.count + 'x)').join(', '),
+        o.miss.length ? el('span', { class: 'rank-miss', text: ' · ' + tr('rank.miss', { x: o.miss.join(', ') }) }) : null)))
+      : el('tr', {}, el('td', { class: 'none', colSpan: 4, text: tr('rank.none') }))));
+}
 $('#ctab-bosses').addEventListener('click', () => { setCreaturesView('bosses'); history.replaceState(null, '', '#creatures/chefes'); });
 $('#bosses-search').addEventListener('input', () => renderBosses());
 // Lista de chefes: figura, nome (abre a ficha quando já há print do bestiário; senão a wiki), abates do bestiário, números.
@@ -9387,7 +9495,7 @@ function goTo(route, push = true) {
   for (const b of document.querySelectorAll('[data-go]')) { if (b.dataset.go === to) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
   // #creatures/itens abre direto a aba dos itens (os endereços antigos das outras duas tabelas caem nela também);
   // outro nome é a ficha de uma criatura
-  const views = { itens: 'legend', exclusivos: 'legend', mencoes: 'legend', chefes: 'bosses', bosses: 'bosses' };
+  const views = { itens: 'legend', exclusivos: 'legend', mencoes: 'legend', chefes: 'bosses', bosses: 'bosses', respawns: 'ranking' };
   if (to === 'creatures') setCreaturesView(views[sub] || 'creatures');
   creatureWanted = to === 'creatures' && sub && !views[sub] && slug(sub) === sub ? sub : null;   // #creatures/malformis já abre a ficha
   if (to === 'creatures') renderCreatures();   // se os dados ainda não chegaram, a ficha abre quando chegarem
