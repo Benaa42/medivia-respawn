@@ -3804,6 +3804,23 @@ async function readMapper(ocr) {
 // Print do bestiário do jogo, com a ficha de uma criatura. O nome fica à esquerda dos quadros HP e EXP, na altura dos
 // títulos deles, e o valor de cada quadro logo abaixo do título. As abas de raridade (Normal, Comum, Raro, Lendário)
 // mudam os números da ficha; só a primeira, Normal, serve para a conta. Devolve null quando o print não é do bestiário.
+// O leitor confunde letras coladas: "rn" sai como "m" (ou "rmn"), "cl" como "d", "vv" como "w". A chave junta as
+// grafias que só diferem nisso; um nome lido cuja chave bate com um nome já conhecido vira o nome conhecido. Entre
+// grafias conhecidas com a mesma chave vale a com "rn" (a que o leitor estraga), nunca a com "rmn".
+const ocrKey = n => slug(n).replace(/-/g, '').replace(/rmn/g, 'm').replace(/rn/g, 'm').replace(/cl/g, 'd').replace(/vv/g, 'w');
+function knownName(n) {
+  if (!n) return n;
+  const k = ocrKey(n), seen = new Set();
+  const add = x => { if (typeof x === 'string' && x && ocrKey(x) === k) seen.add(x); };
+  for (const r of allRespawns()) for (const m of r.monsters || []) add(m.name);
+  for (const d of [...xp.cloud.values(), ...xp.mine.values()]) { add(d.name); add(((d.tiers || {}).legendary || {}).name); }
+  for (const i of LEGEND_ITEMS) for (const f of i.from) add(legendCreature(f));
+  if (!seen.size) return n;
+  const score = x => (/rmn/i.test(x) ? -2 : 0) + (/rn/i.test(x) ? 1 : 0);
+  const best = [...seen].sort((a, b) => score(b) - score(a))[0];
+  return score(best) < score(n) || (seen.has(n) && score(n) >= score(best)) ? n : best;
+}
+
 async function readBestiary(ocr) {
   const L = ocr.lines, find = re => L.find(l => re.test(l.text));
   const hp = find(/^HP$/);
@@ -4327,7 +4344,7 @@ async function cloudDelete(id) {
    O XP que cada criatura dá por abate vem do print da ficha dela no bestiário do jogo e fica no banco de todos, na
    coleção "creatures", um documento por criatura. Qualquer pessoa pode enviar; um print mais novo corrige o valor.
    Como os respawns, a lista fica copiada no navegador e depois só as novidades são buscadas. */
-const LS_XP = 'medivia-respawn.criaturas.v1';             // cópia local do XP do banco de todos
+const LS_XP = 'medivia-respawn.criaturas.v2';             // cópia local do XP do banco de todos (v2: baixa de novo sem o Emberbom lido errado)
 const LS_XP_MINE = 'medivia-respawn.criaturas-meu.v1';    // lidos aqui que ainda não subiram
 const xp = { cloud: new Map(), mine: new Map(), fullAt: 0, loading: false, rev: 0, key: '' };
 // Atributos da ficha que vão junto com o XP, e o maior valor aceito de cada um.
@@ -5647,6 +5664,8 @@ async function readImage(blob) {
   setStatus('busy', tr(workerP ? 'read.busy' : 'read.first'));
   try {
     const p = await readPrint(blob);
+    if (p.name) p.name = knownName(p.name);   // nome da criatura (bestiário) com as confusões do leitor desfeitas
+    for (const m of p.monsters || []) m.name = knownName(m.name);   // e o de cada criatura do print da janela de bônus
     if (p.kind === 'bestiary') {
       const all = new Set([...xp.cloud.keys(), ...xp.mine.keys()]), key = slug(p.name || '');
       const exists = k => all.has(k) || creatureRows().some(c => c.id === k);
@@ -6466,6 +6485,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-19 23:33',
+    pt: ['Leitura dos prints: nomes em que o leitor confunde letras coladas ("rn" lido como "m", como Emberborn virando Emberbom) agora são corrigidos pelo nome já conhecido da criatura. Emberborn e a lendária Ashborn foram acertados no banco.'],
+    en: ['Screenshot reading: names where the reader mixes up letters that touch ("rn" read as "m", like Emberborn turning into Emberbom) are now fixed using the creature\'s known name. Emberborn and its legendary Ashborn were corrected in the bank.'],
+    es: ['Lectura de capturas: los nombres en que el lector confunde letras pegadas ("rn" leído como "m", como Emberborn que pasaba a Emberbom) ahora se corrigen con el nombre ya conocido de la criatura. Emberborn y su legendaria Ashborn se corrigieron en el banco.'],
+    pl: ['Odczyt zrzutów: nazwy, w których czytnik myli stykające się litery ("rn" odczytane jako "m", jak Emberborn zamieniony w Emberbom), są teraz poprawiane według znanej nazwy stworzenia. Emberborn i jego legendarna wersja Ashborn zostały poprawione w bazie.'],
+  },
   { at: '2026-10-19 23:10',
     pt: ['Sugestões e problemas: ao lado de Novidades, no topo e no fim da página, um botão abre um campo para mandar ideias ou contar o que não funcionou.'],
     en: ['Suggestions and problems: next to What is new, at the top and at the end of the page, a button opens a form to send ideas or report what did not work.'],
