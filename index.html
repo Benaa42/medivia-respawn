@@ -5769,8 +5769,9 @@ function paintQty(node, id, r, tag) {
       el('button', { type: 'button', id: 'qty-more' + tag + '-' + i, text: '+', disabled: n >= m.count, title: tr('qty.more', { x: m.name }), 'aria-label': tr('qty.more', { x: m.name }), onclick: () => set(n + 1) }));
   });
   const changed = r.monsters.some(m => qtyCount(q, m) !== m.count);
+  // replaceChildren escreve null como texto: o link de voltar só entra quando alguma quantidade mudou
   node.replaceChildren(box, el('div', { class: 'qty-list' }, rows),
-    changed ? el('p', { class: 'qty-foot' }, el('button', { class: 'hunt-link', type: 'button', id: 'qty-reset' + tag, text: tr('qty.reset'), onclick: () => { q.n = {}; save(); } })) : null);
+    ...(changed ? [el('p', { class: 'qty-foot' }, el('button', { class: 'hunt-link', type: 'button', id: 'qty-reset' + tag, text: tr('qty.reset'), onclick: () => { q.n = {}; save(); } }))] : []));
 }
 const sheetHint = r => (r.src === 'mapper' ? tr('hint.mapper') : r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest') + ' ' + tr('task.tip');
 // Desconto das tasks diárias ou semanais. É de quem joga, não do respawn: fica só neste navegador, por respawn,
