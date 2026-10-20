@@ -454,6 +454,15 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 
 /* Controles */
 .controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+/* Bônus de XP: a largura toda, embaixo dos outros quatro */
+.controls > .ctl.wide { grid-column: 1 / -1; }
+.xpb-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; font-size: 13px; }
+.xpb-row > .seg { flex: 1 1 340px; }
+.xpb-label { font-weight: 600; color: var(--title); }
+.xpb-extra { display: inline-flex; align-items: center; gap: 8px; }
+.xpb-extra input { width: 76px; padding: 6px 10px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 600 13px/1.2 var(--font-ui); text-align: right; }
+.xpb-extra input:focus { outline: 2px solid var(--value); outline-offset: -1px; border-color: transparent; }
+@media (max-width: 640px) { .controls > .ctl.wide { grid-column: auto; } }
 .ctl { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px 16px 16px; border-radius: var(--r-md); background: var(--box); }
 .ctl-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; }
 .ctl h3 { font: 600 14px/1.3 var(--font-ui); color: var(--title); }
@@ -1586,6 +1595,17 @@ const I18N = {
     'xp.line': 'XP estimada por jogador: {h} por hora, {t} em {d} minutos.',
     'xp.missing': 'Sem contar {x}: falta o print do bestiário.',
     'xp.note': 'Conta com tudo morto assim que nasce, na raridade Normal e sem bônus de experiência.',
+    'xpb.title': 'Bônus de XP',
+    'xpb.none': 'sem bônus',
+    'xpb.store': 'XP Boost da loja (+{p}%)',
+    'xpb.off': 'Sem',
+    'xpb.gold': 'Golden premium (+5% no XP Boost)',
+    'xpb.extra': 'Outros bônus',
+    'xpb.extraTip': 'Bônus que valem a hunt inteira, como o de concluir um deus em Elunor. Some os percentuais; aceita decimais, como 1,5.',
+    'xpb.boostOn': 'XP Boost de {p}% em {b} de {d} minutos',
+    'xpb.extraOn': '{e}% de outros bônus',
+    'xp.noteB': 'Conta com tudo morto assim que nasce, na raridade Normal, com {x}.',
+    'xpb.and': ' e ',
     'xp.sum': 'XP somada dos dois respawns:',
     'xp.sumLine': '{h} por hora, {t} em {d} minutos.',
     'xp.sumNote': '{a} com {b}, cada um no seu percentual de bônus e com as quantidades escolhidas, contando os dois ao mesmo tempo.',
@@ -2158,6 +2178,17 @@ const I18N = {
     'xp.line': 'Estimated XP per player: {h} per hour, {t} in {d} minutes.',
     'xp.missing': 'Not counting {x}: the bestiary screenshot is missing.',
     'xp.note': 'It assumes everything is killed as soon as it spawns, Normal rarity and no experience bonus.',
+    'xpb.title': 'XP bonus',
+    'xpb.none': 'no bonus',
+    'xpb.store': 'Store XP Boost (+{p}%)',
+    'xpb.off': 'None',
+    'xpb.gold': 'Golden premium (+5% on XP Boost)',
+    'xpb.extra': 'Other bonuses',
+    'xpb.extraTip': 'Bonuses that last the whole hunt, like the one for completing a god in Elunor. Add the percentages up; decimals are fine, like 1.5.',
+    'xpb.boostOn': 'XP Boost of {p}% in {b} of {d} minutes',
+    'xpb.extraOn': '{e}% of other bonuses',
+    'xp.noteB': 'It assumes everything is killed as soon as it spawns, Normal rarity, with {x}.',
+    'xpb.and': ' and ',
     'xp.sum': 'XP of both respawns together:',
     'xp.sumLine': '{h} per hour, {t} in {d} minutes.',
     'xp.sumNote': '{a} with {b}, each at its own bonus percentage and with the chosen numbers, counting both at the same time.',
@@ -2730,6 +2761,17 @@ const I18N = {
     'xp.line': 'XP estimada por jugador: {h} por hora, {t} en {d} minutos.',
     'xp.missing': 'Sin contar {x}: falta la captura del bestiario.',
     'xp.note': 'Cuenta con todo muerto en cuanto nace, en rareza Normal y sin bonus de experiencia.',
+    'xpb.title': 'Bonus de XP',
+    'xpb.none': 'sin bonus',
+    'xpb.store': 'XP Boost de la tienda (+{p}%)',
+    'xpb.off': 'Sin',
+    'xpb.gold': 'Golden premium (+5% en el XP Boost)',
+    'xpb.extra': 'Otros bonus',
+    'xpb.extraTip': 'Bonus que valen toda la hunt, como el de completar un dios en Elunor. Suma los porcentajes; acepta decimales, como 1,5.',
+    'xpb.boostOn': 'XP Boost de {p}% en {b} de {d} minutos',
+    'xpb.extraOn': '{e}% de otros bonus',
+    'xp.noteB': 'Cuenta con todo muerto en cuanto nace, en rareza Normal, con {x}.',
+    'xpb.and': ' y ',
     'xp.sum': 'XP sumada de los dos respawns:',
     'xp.sumLine': '{h} por hora, {t} en {d} minutos.',
     'xp.sumNote': '{a} con {b}, cada uno en su porcentaje de bonus y con las cantidades elegidas, contando los dos al mismo tiempo.',
@@ -3302,6 +3344,17 @@ const I18N = {
     'xp.line': 'Szacowane XP na gracza: {h} na godzinę, {t} w {d} minut.',
     'xp.missing': 'Bez {x}: brakuje zrzutu z bestiariusza.',
     'xp.note': 'Zakłada zabijanie wszystkiego od razu po odrodzeniu, rzadkość Normalna i brak bonusu doświadczenia.',
+    'xpb.title': 'Bonus XP',
+    'xpb.none': 'bez bonusu',
+    'xpb.store': 'XP Boost ze sklepu (+{p}%)',
+    'xpb.off': 'Brak',
+    'xpb.gold': 'Golden premium (+5% do XP Boost)',
+    'xpb.extra': 'Inne bonusy',
+    'xpb.extraTip': 'Bonusy na cały hunt, jak ten za ukończenie boga w Elunor. Zsumuj procenty; można ułamki, np. 1,5.',
+    'xpb.boostOn': 'XP Boost {p}% przez {b} z {d} minut',
+    'xpb.extraOn': '{e}% innych bonusów',
+    'xp.noteB': 'Zakłada zabijanie wszystkiego od razu po odrodzeniu, rzadkość Normalna, z {x}.',
+    'xpb.and': ' i ',
     'xp.sum': 'Łączne XP obu respawnów:',
     'xp.sumLine': '{h} na godzinę, {t} w {d} minut.',
     'xp.sumNote': '{a} z {b}, każdy z własnym procentem bonusu i wybranymi liczbami, liczone razem w tym samym czasie.',
@@ -4923,7 +4976,14 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {} }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {} }, lsGet(LS_UI, {}));
+// Bônus de XP: minutos de XP Boost da loja, golden premium (+5% no boost) e outros bônus em %, para a hunt inteira
+const XPB_MINS = [0, 30, 60, 90, 120, 180];
+{
+  const b = ui.xpb && typeof ui.xpb === 'object' && !Array.isArray(ui.xpb) ? ui.xpb : {};
+  const extra = Number(b.extra);
+  ui.xpb = { boost: XPB_MINS.includes(b.boost) ? b.boost : 0, gold: b.gold === true, extra: Number.isFinite(extra) && extra > 0 ? Math.min(1000, Math.round(extra * 100) / 100) : 0 };
+}
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PCTS.includes(ui.pct2)) ui.pct2 = ui.pct;
 ui.duo = ui.duo === true;
@@ -5792,20 +5852,30 @@ function paintXp(node, id, r) {
   const { used, missing, mine, each } = xpCalc(id, r);
   if (!used.length) { node.replaceChildren(tr(r.monsters.length ? 'qty.zero' : 'xp.none')); return; }
   if (each == null) { node.replaceChildren(tr('xp.none')); return; }
+  const g = xpBonus(each);
   node.replaceChildren(
-    el('b', { text: tr('xp.line', { h: fmtXp(each), t: fmtXp(each * ui.dur / 60), d: ui.dur }) }),
-    ' ' + (mine ? tr('qty.note') + ' ' : '') + (missing.length ? tr('xp.missing', { x: missing.join(', ') }) + ' ' : '') + tr('xp.note') +
+    el('b', { text: tr('xp.line', { h: fmtXp(g.hour), t: fmtXp(g.total), d: ui.dur }) }),
+    ' ' + (mine ? tr('qty.note') + ' ' : '') + (missing.length ? tr('xp.missing', { x: missing.join(', ') }) + ' ' : '') + (g.on ? tr('xp.noteB', { x: xpBonusText(g) }) : tr('xp.note')) +
     (ui.party > 100 ? ' ' + tr('xp.share', { f: (ui.party / 100).toLocaleString(document.documentElement.lang || 'en') }) : ''));
 }
+// Bônus de XP sobre o XP por hora sem bônus. O XP Boost (+50%, +55% com golden premium) vale só pelos minutos comprados
+// dentro da duração; os outros bônus valem a hunt inteira. Os percentuais somam (o jogo não diz se multiplicam).
+function xpBonus(each) {
+  const d = ui.dur, b = Math.min(ui.xpb.boost, d), p = ui.xpb.gold ? 55 : 50, e = ui.xpb.extra;
+  const total = each * (d * (1 + e / 100) + b * p / 100) / 60;
+  return { total, hour: total * 60 / d, on: b > 0 || e > 0, b, p, e, d };
+}
+const pctNum = v => v.toLocaleString(document.documentElement.lang || 'en', { maximumFractionDigits: 2 });
+const xpBonusText = g => [g.b ? tr('xpb.boostOn', { p: g.p, b: g.b, d: g.d }) : null, g.e ? tr('xpb.extraOn', { e: pctNum(g.e) }) : null].filter(Boolean).join(tr('xpb.and'));
 // Com dois respawns abertos: o XP dos dois juntos, cada um com o seu bônus e as suas quantidades.
 function paintXpSum(node, open) {
   const parts = open.map(o => ({ ...o, x: xpCalc(o.id, o.r) })), got = parts.filter(o => o.x.each != null);
   node.hidden = !got.length;
   if (!got.length) return;
-  const total = got.reduce((a, o) => a + o.x.each, 0), out = parts.filter(o => o.x.each == null);
+  const total = got.reduce((a, o) => a + o.x.each, 0), out = parts.filter(o => o.x.each == null), g = xpBonus(total);
   node.replaceChildren(
     el('span', { class: 'xp-sum-tag', text: tr('xp.sum') }), ' ',
-    el('b', { text: tr('xp.sumLine', { h: fmtXp(total), t: fmtXp(total * ui.dur / 60), d: ui.dur }) }),
+    el('b', { text: tr('xp.sumLine', { h: fmtXp(g.hour), t: fmtXp(g.total), d: ui.dur }) }),
     ' ' + tr('xp.sumNote', { a: parts[0].r.name, b: parts[1].r.name }) + (out.length ? ' ' + tr('xp.sumMissing', { x: out.map(o => o.r.name).join(', ') }) : ''));
 }
 // Caixa "Personalizar a quantidade de criaturas": desmarcada, a conta é a de sempre; marcada, cada criatura ganha − e +.
@@ -5909,6 +5979,33 @@ function costCard(id, tag) {
   };
 }
 
+// Quadro "Bônus de XP": minutos de XP Boost, golden premium e outros bônus. Vale para todos os respawns.
+function xpbCard() {
+  const val = el('span', { class: 'ctl-val' });
+  const save = () => { saveUi(); renderSheet(); };
+  const short = m => m === 0 ? tr('xpb.off') : m < 60 ? m + ' min' : m % 60 ? Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0') : m / 60 + ' h';
+  const buttons = XPB_MINS.map((m, i) => el('button', { type: 'button', id: 'xpb-boost-' + i, text: short(m), onclick: () => { ui.xpb.boost = m; save(); } }));
+  const label = el('span', { class: 'xpb-label' });
+  const gold = el('input', { type: 'checkbox', id: 'xpb-gold', onchange: e => { ui.xpb.gold = e.target.checked; save(); } });
+  const extra = el('input', { type: 'text', id: 'xpb-extra', inputmode: 'decimal', maxlength: 6, autocomplete: 'off', placeholder: '0', title: tr('xpb.extraTip'),
+    oninput: e => { const v = Number(String(e.target.value).replace(',', '.')); ui.xpb.extra = Number.isFinite(v) && v > 0 ? Math.min(1000, Math.round(v * 100) / 100) : 0; save(); } });
+  return {
+    root: el('div', { class: 'ctl wide' }, ctlHead(tr('xpb.title'), val),
+      el('div', { class: 'xpb-row' }, label, el('div', { class: 'seg', role: 'group', 'aria-label': tr('xpb.title') }, buttons)),
+      el('div', { class: 'xpb-row' },
+        el('label', { class: 'toggle' }, gold, el('span', { text: tr('xpb.gold') })),
+        el('label', { class: 'xpb-extra', title: tr('xpb.extraTip') }, el('span', { text: tr('xpb.extra') }), extra, el('span', { text: '%' })))),
+    set() {
+      const g = xpBonus(1);
+      setText(val, g.on ? xpBonusText(g) : tr('xpb.none'));
+      setText(label, tr('xpb.store', { p: g.p }));
+      buttons.forEach((b, i) => b.setAttribute('aria-pressed', String(XPB_MINS[i] === ui.xpb.boost)));
+      gold.checked = ui.xpb.gold;
+      if (document.activeElement !== extra) extra.value = ui.xpb.extra ? pctNum(ui.xpb.extra) : '';
+    },
+  };
+}
+
 function buildSheet(id, fixed, id2) {
   if ((getRespawn(id) || {}).custom) return buildCustomSheet(id, id2);
   const { nameInput, head } = sheetHead(id, fixed);
@@ -5921,6 +6018,7 @@ function buildSheet(id, fixed, id2) {
     dur: slider('ctl-dur', tr('ctl.dur'),
       DURS.map(d => ({ value: d, text: tr('dur.value', { n: d }), short: d % 30 === 0 ? String(d) : null })), setDur),
     cost: costCard(id, ''),
+    xpb: xpbCard(),
     xp: el('p', { class: 'xp-line' }),
     xpSum: el('p', { class: 'xp-line xp-sum', hidden: true }),
     qty: el('div', { class: 'qty' }),
@@ -5952,7 +6050,7 @@ function buildSheet(id, fixed, id2) {
       p.stage,
       optsBar,
       statusEl,
-      el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root, p.cost.root),
+      el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root, p.cost.root, p.xpb.root),
       p.xp,
       p.xpSum,
       el('h3', { class: 'band', text: tr('band') }),
@@ -5972,7 +6070,7 @@ function renderSheet() {
   const loading = pending.seed || pending.db || !!pending.cloud;
   const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id) && !owns(ui.id);
   const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r, ui.disc[ui.id] || null,
-    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null], ui.floatHide[ui.id] || null, id2 && ui.floatHide[id2] || null, ui.voice, xp.rev, ui.qty[ui.id] || null, id2 && ui.qty[id2] || null]);
+    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null], ui.floatHide[ui.id] || null, id2 && ui.floatHide[id2] || null, ui.voice, xp.rev, ui.qty[ui.id] || null, id2 && ui.qty[id2] || null, ui.xpb]);
   if (sig === sheetSig) return;
   sheetSig = sig;
   timerEls = new Map();
@@ -6049,6 +6147,7 @@ function renderSheet() {
   parts.bonus.set(PCTS.indexOf(ui.pct));
   parts.dur.set(DURS.indexOf(ui.dur));
   parts.cost.set(r);
+  parts.xpb.set();
   parts.mobs.replaceChildren(...mobCards(id, r));
   paintXp(parts.xp, id, r);
   paintQty(parts.qty, id, r, '');
@@ -6994,6 +7093,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 13:15',
+    pt: ['Bônus de XP na conta do respawn: escolha os minutos de XP Boost da loja (+50%, ou +55% com golden premium) e some outros bônus em %, como o de concluir um deus em Elunor. O XP estimado e a soma das duas hunts já saem com o bônus.'],
+    en: ['XP bonus in the respawn estimate: pick the minutes of store XP Boost (+50%, or +55% with golden premium) and add other bonuses in %, like the one for completing a god in Elunor. The estimated XP and the sum of both hunts already include the bonus.'],
+    es: ['Bonus de XP en el cálculo del respawn: elige los minutos de XP Boost de la tienda (+50%, o +55% con golden premium) y suma otros bonus en %, como el de completar un dios en Elunor. El XP estimado y la suma de las dos hunts ya salen con el bonus.'],
+    pl: ['Bonus XP w szacowaniu respawnu: wybierz minuty XP Boost ze sklepu (+50% lub +55% z golden premium) i dodaj inne bonusy w %, jak ten za ukończenie boga w Elunor. Szacowane XP i suma dwóch huntów już uwzględniają bonus.'],
+  },
   { at: '2026-10-20 12:59',
     pt: ['O respawn das Thundrites, que aparecia como "Thu", agora tem o nome certo: Thundering Spires.'],
     en: ['The Thundrites respawn, shown as "Thu", now has its right name: Thundering Spires.'],
