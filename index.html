@@ -578,6 +578,7 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .volume { width: 110px; accent-color: var(--value); cursor: pointer; }
 /* Som, comando de voz e Repetir ao zerar numa linha só (quebra só em tela estreita) */
 #win-opts .opts { column-gap: 12px; }
+#win-opts .opts > * { flex-shrink: 0; }
 #win-opts .opt-set { column-gap: 6px; }
 #win-opts .volume { width: 72px; }
 #win-opts .tone { max-width: 136px; text-overflow: ellipsis; }
@@ -962,7 +963,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
           <button class="tut-btn" type="button" data-tut="sons" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button>
           </span>
           <span class="opt-set">
-          <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <svg class="ico mic" aria-hidden="true"><use href="#i-mic"/></svg><span data-i18n="voice.label">Ativar comando de voz</span></label>
+          <label class="toggle voice" id="opt-voice-wrap"><input type="checkbox" id="opt-voice"> <svg class="ico mic" aria-hidden="true"><use href="#i-mic"/></svg><span data-i18n="voice.label">Comando de voz</span></label>
           <button class="voice-help-btn" type="button" id="voice-help-btn" aria-expanded="false" aria-controls="voice-help" title="Ver os comandos de voz" aria-label="Ver os comandos de voz" data-i18n-attr="title:voice.help;aria-label:voice.help">?</button>
           </span>
           <span class="opt-set"><label class="toggle"><input type="checkbox" id="opt-loop"> <span data-i18n="loop">Repetir ao zerar</span></label><button class="tut-btn" type="button" data-tut="truques" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></span>
@@ -1637,7 +1638,7 @@ const I18N = {
     'nudge.more': 'Somar {s} segundos ao cronômetro',
     'voice.nomic': 'Nenhum microfone encontrado. Ligue um microfone e marque o comando de voz de novo.',
     'voice.network': 'Voz: o serviço de reconhecimento do navegador não respondeu. Só funciona no Chrome e no Edge, com internet.',
-    'voice.label': 'Ativar comando de voz',
+    'voice.label': 'Comando de voz',
     'voice.info': 'Comando de voz ligado. Só funciona no Chrome e no Edge, e com internet: a fala é reconhecida pelo serviço do navegador. Toque no "?" para ver os comandos.',
     'voice.unsupported': 'O comando de voz só funciona no Chrome e no Edge. Este navegador não tem reconhecimento de voz.',
     'voice.denied': 'O navegador não liberou o microfone. Libere o microfone para este site e ligue o comando de voz de novo. Ele só funciona no Chrome e no Edge.',
@@ -6922,6 +6923,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 11:44',
+    pt: ['A opção "Ativar comando de voz" passou a se chamar "Comando de voz".'],
+    en: ['The voice option is now called "Voice command" in every language.'],
+    es: ['La opción de voz ahora se llama "Comando de voz" en todos los idiomas.'],
+    pl: ['Opcja głosowa nazywa się teraz "Polecenia głosowe" we wszystkich językach.'],
+  },
   { at: '2026-10-20 11:38',
     pt: ['Cronômetro mais arrumado: a caixa de quantidade de criaturas fica logo abaixo do cronômetro, e Som, Comando de voz e Repetir ao zerar ficam numa linha só.'],
     en: ['Tidier timer: the creature quantity box sits right below the timer, and Sound, Voice command and Repeat at zero share a single line.'],
