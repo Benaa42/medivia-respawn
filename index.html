@@ -3947,7 +3947,8 @@ async function readBestiary(ocr) {
     }
   }
   // Abas de raridade: uma fileira de traços acima do nome, um por aba; o da aba escolhida é o mais claro.
-  // Só valem traços lisos (o texto das abas também forma trechos claros, mas com o brilho variando).
+  // Só valem traços lisos (o texto das abas também forma trechos claros, mas com o brilho variando mais de 100).
+  // O traço dourado da aba Lendário aberta clareia no meio: varia até uns 25, então o limite é 32.
   const x0 = Math.max(0, hp.x - pitch * 2.6), wide = exp.x + exp.w / 2 + pitch * 0.6 - x0;
   for (let y = Math.round(exp.y - h * 6); y < exp.y - h * 1.5 && out.tab == null; y++) {
     const px = ocr.row(x0, y, wide);
@@ -3958,7 +3959,7 @@ async function readBestiary(ocr) {
       let j = i;
       while (j < px.length && px[j] > ground + 8) j++;
       const mid = px.slice(i + 2, j - 2);
-      if (j - i >= h * 3 && j - i <= pitch * 1.2 && Math.max(...mid) - Math.min(...mid) <= 12) runs.push(mid.reduce((a, b) => a + b, 0) / mid.length);
+      if (j - i >= h * 3 && j - i <= pitch * 1.2 && Math.max(...mid) - Math.min(...mid) <= 32) runs.push(mid.reduce((a, b) => a + b, 0) / mid.length);
       i = j;
     }
     if (runs.length < 3 || runs.length > 6) continue;
@@ -4000,6 +4001,7 @@ async function readBestiary(ocr) {
       out.drop = { item: item.slice(0, 60), lo, hi, ...(tag ? { tag } : {}) };
     }
   }
+  out.text = L.map(l => l.text).join(' ').slice(0, 4000);   // o resto da página: ajuda a achar a criatura de uma lendária
   return out;
 }
 
@@ -5869,10 +5871,18 @@ async function readImage(blob) {
         // O print da aba Lendário entra: na criatura que já tem esse nome lendário, na que tem esse mesmo nome (ou
         // está na tabela de itens lendários), ou na que está com a ficha aberta. Sem nenhuma, não dá para saber.
         const owner = legendOwner(key);
+        // A página cita a criatura de quem é a lendária: "The Emberborn are..." na descrição, "Emberborn Skin" no Esfolar.
+        // Vale a criatura conhecida mais comprida cujo nome aparece no texto (sem contar o nome da própria lendária).
+        const cited = () => {
+          const txt = ' ' + String(p.text || '').toLowerCase().replace(/[^a-z' ]+/g, ' ').replace(/\s+/g, ' ') + ' ';
+          return creatureRows().filter(c => c.id !== key && !c.single && c.name.length >= 4 && txt.includes(' ' + c.name.toLowerCase() + ' '))
+            .sort((a, b) => b.name.length - a.name.length).map(c => c.id)[0] || null;
+        };
         if (owner) id = owner;
         else if (!exists(key) && !itemsOf(key).length) {
-          if (!creatureId) throw new UserError(tr('err.bestLegend', { x: p.name }));
-          id = creatureId;
+          const from = cited() || creatureId;
+          if (!from) throw new UserError(tr('err.bestLegend', { x: p.name }));
+          id = from;
         }
         if (key !== id) data.name = p.name;   // só quando a lendária tem nome próprio
         name = (creatureOf(id) || creatureRows().find(c => c.id === id) || { name: p.name }).name;
@@ -6628,6 +6638,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 09:02',
+    pt: ['Print da aba Lendário do bestiário: agora é reconhecido também quando recortado em volta da ficha, e vai para a criatura certa mesmo quando o nome da lendária ainda não é conhecido (o site acha a criatura pela descrição e pelo couro do Esfolar).'],
+    en: ['Screenshot of the bestiary Legendary tab: now recognised also when cropped around the page, and it goes to the right creature even when the legendary name is not known yet (the site finds the creature from the description and the Skinning hide).'],
+    es: ['Captura de la pestaña Legendario del bestiario: ahora se reconoce también recortada alrededor de la ficha, y va a la criatura correcta aunque el nombre de la legendaria aún no se conozca (el sitio encuentra la criatura por la descripción y la piel de Desollar).'],
+    pl: ['Zrzut zakładki Legendarny w bestiariuszu: teraz rozpoznawany także po przycięciu wokół karty i trafia do właściwego stworzenia nawet wtedy, gdy nazwa legendarnej wersji nie jest jeszcze znana (strona rozpoznaje stworzenie po opisie i skórze z oskórowania).'],
+  },
   { at: '2026-10-19 23:57',
     pt: ['Cronômetro personalizado: no fim da lista de respawns, "+ Cronômetro personalizado" cria um cronômetro com a criatura e o tempo que você escolher, para o que não tem janela de bônus (como as Phoenix, de 30 minutos). Fica salvo só no seu navegador.', 'Criaturas sem raridades: a ficha das que não têm Comum, Raro e Lendário (como as Phoenix) não mostra essas abas. As cinco Enraged Phoenix já estão no bestiário.'],
     en: ['Custom timer: at the end of the respawn list, "+ Custom timer" creates a timer with the creature and the time you choose, for what has no bonus window (like the 30-minute Phoenixes). Saved only in your browser.', 'Creatures with no rarities: the sheet of creatures with no Common, Rare and Legendary (like the Phoenixes) no longer shows those tabs. The five Enraged Phoenixes are already in the bestiary.'],
