@@ -552,6 +552,16 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 /* Estimativa de XP do respawn, e a criatura que ainda está sem XP no banco */
 .xp-line { max-width: 78ch; font-size: 13px; color: var(--label); }
 .xp-line b { font-size: 15px; font-weight: 700; color: var(--value); }
+/* Quantidade personalizada: uma linha por criatura, com − e + (de 0 até o que o respawn tem) */
+.qty { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--label); }
+.qty-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 12px; align-self: stretch; }
+.qty-row { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 6px 10px; border-radius: var(--r-sm); background: var(--card); }
+.qty-name { flex: 1; min-width: 0; font-weight: 600; color: var(--title); overflow-wrap: anywhere; }
+.qty-row.off .qty-name { color: var(--faint); text-decoration: line-through; }
+.qty-row button { flex: none; width: 24px; height: 24px; padding: 0 0 2px; border: 0; border-radius: 50%; background: var(--box); color: var(--title); font: 600 15px/1 var(--font-ui); cursor: pointer; }
+.qty-row button:disabled { opacity: 0.35; cursor: default; }
+.qty-n { min-width: 48px; font-weight: 600; text-align: center; color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
+.qty-foot { margin: 0; color: var(--faint); }
 .mob p.mob-noxp b { color: var(--faint); }
 .howto { display: flex; flex-direction: column; gap: 10px; max-width: 54ch; padding: 24px; border-radius: var(--r-lg); background: var(--box); }
 .howto ol { display: flex; flex-direction: column; gap: 4px; padding-left: 1.3em; color: var(--title); }
@@ -1568,6 +1578,14 @@ const I18N = {
     'xp.line': 'XP estimada por jogador: {h} por hora, {t} em {d} minutos.',
     'xp.missing': 'Sem contar {x}: falta o print do bestiário.',
     'xp.note': 'Conta com tudo morto assim que nasce, na raridade Normal e sem bônus de experiência.',
+    'qty.label': 'Personalizar a quantidade de criaturas',
+    'qty.of': '{n} de {t}',
+    'qty.less': 'Menos {x}',
+    'qty.more': 'Mais {x}',
+    'qty.hint': 'Só muda a sua conta de XP, neste navegador; o respawn continua igual para todos.',
+    'qty.reset': 'Voltar às quantidades do respawn',
+    'qty.note': 'Com as quantidades que você escolheu.',
+    'qty.zero': 'Nenhuma criatura escolhida: aumente a quantidade de alguma para estimar o XP.',
     'xp.none': 'Para estimar o XP deste respawn, cole o print da ficha de cada criatura no bestiário do jogo (aba Normal). O XP fica guardado para todos.',
     'read.best': '{x}: {v} de XP por abate.',
     'read.bestLocal': 'Guardado neste navegador; vai para o banco de todos assim que der.',
@@ -2129,6 +2147,14 @@ const I18N = {
     'xp.line': 'Estimated XP per player: {h} per hour, {t} in {d} minutes.',
     'xp.missing': 'Not counting {x}: the bestiary screenshot is missing.',
     'xp.note': 'It assumes everything is killed as soon as it spawns, Normal rarity and no experience bonus.',
+    'qty.label': 'Customize the number of creatures',
+    'qty.of': '{n} of {t}',
+    'qty.less': 'Fewer {x}',
+    'qty.more': 'More {x}',
+    'qty.hint': 'Only changes your XP estimate, in this browser; the respawn stays the same for everyone.',
+    'qty.reset': 'Back to the respawn numbers',
+    'qty.note': 'With the numbers you chose.',
+    'qty.zero': 'No creature chosen: raise the number of one to estimate the XP.',
     'xp.none': 'To estimate the XP of this respawn, paste a screenshot of each creature\'s page in the game bestiary (Normal tab). The XP is saved for everyone.',
     'read.best': '{x}: {v} XP per kill.',
     'read.bestLocal': 'Saved in this browser; it goes to the shared bank as soon as possible.',
@@ -2690,6 +2716,14 @@ const I18N = {
     'xp.line': 'XP estimada por jugador: {h} por hora, {t} en {d} minutos.',
     'xp.missing': 'Sin contar {x}: falta la captura del bestiario.',
     'xp.note': 'Cuenta con todo muerto en cuanto nace, en rareza Normal y sin bonus de experiencia.',
+    'qty.label': 'Personalizar la cantidad de criaturas',
+    'qty.of': '{n} de {t}',
+    'qty.less': 'Menos {x}',
+    'qty.more': 'Más {x}',
+    'qty.hint': 'Solo cambia tu cálculo de XP, en este navegador; el respawn sigue igual para todos.',
+    'qty.reset': 'Volver a las cantidades del respawn',
+    'qty.note': 'Con las cantidades que elegiste.',
+    'qty.zero': 'Ninguna criatura elegida: sube la cantidad de alguna para estimar el XP.',
     'xp.none': 'Para estimar el XP de este respawn, pega la captura de la ficha de cada criatura en el bestiario del juego (pestaña Normal). El XP queda guardado para todos.',
     'read.best': '{x}: {v} de XP por muerte.',
     'read.bestLocal': 'Guardado en este navegador; irá al banco de todos en cuanto se pueda.',
@@ -3251,6 +3285,14 @@ const I18N = {
     'xp.line': 'Szacowane XP na gracza: {h} na godzinę, {t} w {d} minut.',
     'xp.missing': 'Bez {x}: brakuje zrzutu z bestiariusza.',
     'xp.note': 'Zakłada zabijanie wszystkiego od razu po odrodzeniu, rzadkość Normalna i brak bonusu doświadczenia.',
+    'qty.label': 'Dostosuj liczbę stworzeń',
+    'qty.of': '{n} z {t}',
+    'qty.less': 'Mniej: {x}',
+    'qty.more': 'Więcej: {x}',
+    'qty.hint': 'Zmienia tylko twoje szacowanie XP w tej przeglądarce; respawn zostaje taki sam dla wszystkich.',
+    'qty.reset': 'Przywróć liczby z respawnu',
+    'qty.note': 'Z wybranymi przez ciebie liczbami.',
+    'qty.zero': 'Nie wybrano stworzeń: zwiększ liczbę któregoś, aby oszacować XP.',
     'xp.none': 'Aby oszacować XP tego respawnu, wklej zrzut karty każdego stworzenia z bestiariusza gry (zakładka Normalny). XP zostaje zapisane dla wszystkich.',
     'read.best': '{x}: {v} XP za zabicie.',
     'read.bestLocal': 'Zapisano w tej przeglądarce; trafi do wspólnej bazy, gdy tylko będzie to możliwe.',
@@ -4837,7 +4879,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns' }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {} }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PCTS.includes(ui.pct2)) ui.pct2 = ui.pct;
 ui.duo = ui.duo === true;
@@ -5686,20 +5728,47 @@ function mobCards(id, r) {
 // rápido, mas cada jogador recebe o XP do abate dividido pelo mesmo fator do grupo (1,34, 1,6 ou 1,78): é a conta
 // da tabela "Team Size" do mapper da wiki (2 jogadores = solo ÷ 1,34, 3 = ÷ 1,6, 4 = ÷ 1,78).
 // Quem ainda não tem o XP no banco fica de fora da soma e é citada, para a pessoa mandar o print do bestiário.
+// Com a quantidade personalizada ligada, cada criatura conta com o número escolhido (0 tira ela da conta).
+const qtyOf = id => { const q = ui.qty[id]; return q && q.on ? q : null; };
+const qtyCount = (q, m) => q ? Math.max(0, Math.min(m.count, q.n[m.name] ?? m.count)) : m.count;
 function paintXp(node, id, r) {
-  const pct = pctOf(id), missing = [];
+  const pct = pctOf(id), missing = [], q = qtyOf(id);
+  const used = r.monsters.filter(m => qtyCount(q, m) > 0);
+  if (!used.length) { node.replaceChildren(tr(r.monsters.length ? 'qty.zero' : 'xp.none')); return; }
   let hour = 0;
-  for (const m of r.monsters) {
+  for (const m of used) {
     const exp = expOf(m.name);
     if (exp == null) missing.push(m.name);
-    else hour += killsPerHour(respawnAt(m.base, pct, ui.party), m.count) * exp;
+    else hour += killsPerHour(respawnAt(m.base, pct, ui.party), qtyCount(q, m)) * exp;
   }
-  if (missing.length === r.monsters.length) { node.replaceChildren(tr('xp.none')); return; }
+  if (missing.length === used.length) { node.replaceChildren(tr('xp.none')); return; }
+  const mine = q && r.monsters.some(m => qtyCount(q, m) !== m.count);
   const each = hour * 100 / ui.party;
   node.replaceChildren(
     el('b', { text: tr('xp.line', { h: fmtXp(each), t: fmtXp(each * ui.dur / 60), d: ui.dur }) }),
-    ' ' + (missing.length ? tr('xp.missing', { x: missing.join(', ') }) + ' ' : '') + tr('xp.note') +
+    ' ' + (mine ? tr('qty.note') + ' ' : '') + (missing.length ? tr('xp.missing', { x: missing.join(', ') }) + ' ' : '') + tr('xp.note') +
     (ui.party > 100 ? ' ' + tr('xp.share', { f: (ui.party / 100).toLocaleString(document.documentElement.lang || 'en') }) : ''));
+}
+// Caixa "Personalizar a quantidade de criaturas": desmarcada, a conta é a de sempre; marcada, cada criatura ganha − e +.
+function paintQty(node, id, r, tag) {
+  const q = ui.qty[id] || { on: false, n: {} };
+  const save = () => { ui.qty[id] = q; saveUi(); renderSheet(); };
+  const box = el('label', { class: 'toggle' },
+    el('input', { type: 'checkbox', id: 'qty-on' + tag, checked: !!q.on, onchange: e => { q.on = e.target.checked; save(); } }),
+    el('span', { text: tr('qty.label') }));
+  if (!q.on || !r.monsters.length) { node.replaceChildren(box); return; }
+  const rows = r.monsters.map((m, i) => {
+    const n = qtyCount(q, m), set = v => { q.n[m.name] = Math.max(0, Math.min(m.count, v)); save(); };
+    return el('div', { class: 'qty-row' + (n ? '' : ' off') },
+      el('span', { class: 'qty-name', text: m.name }),
+      el('button', { type: 'button', id: 'qty-less' + tag + '-' + i, text: '−', disabled: n <= 0, title: tr('qty.less', { x: m.name }), 'aria-label': tr('qty.less', { x: m.name }), onclick: () => set(n - 1) }),
+      el('b', { class: 'qty-n', text: tr('qty.of', { n, t: m.count }) }),
+      el('button', { type: 'button', id: 'qty-more' + tag + '-' + i, text: '+', disabled: n >= m.count, title: tr('qty.more', { x: m.name }), 'aria-label': tr('qty.more', { x: m.name }), onclick: () => set(n + 1) }));
+  });
+  const changed = r.monsters.some(m => qtyCount(q, m) !== m.count);
+  node.replaceChildren(box, el('div', { class: 'qty-list' }, rows),
+    el('p', { class: 'qty-foot' }, tr('qty.hint') + ' ',
+      changed ? el('button', { class: 'hunt-link', type: 'button', id: 'qty-reset' + tag, text: tr('qty.reset'), onclick: () => { q.n = {}; save(); } }) : null));
 }
 const sheetHint = r => (r.src === 'mapper' ? tr('hint.mapper') : r.readAt != null ? tr('hint.read', { p: r.readAt }) : '') + tr('hint.rest') + ' ' + tr('task.tip');
 // Desconto das tasks diárias ou semanais. É de quem joga, não do respawn: fica só neste navegador, por respawn,
@@ -5794,6 +5863,7 @@ function buildSheet(id, fixed, id2) {
       DURS.map(d => ({ value: d, text: tr('dur.value', { n: d }), short: d % 30 === 0 ? String(d) : null })), setDur),
     cost: costCard(id, ''),
     xp: el('p', { class: 'xp-line' }),
+    qty: el('div', { class: 'qty' }),
     mobs: el('div', { class: 'mobs' }),
     hint: el('p', { class: 'hint' }),
   };
@@ -5804,12 +5874,14 @@ function buildSheet(id, fixed, id2) {
     p.bonus2 = slider('ctl-bonus2', tr('ctl.bonus'), bonusStops(), v => select(id2, v));
     p.cost2 = costCard(id2, '2');
     p.xp2 = el('p', { class: 'xp-line' });
+    p.qty2 = el('div', { class: 'qty' });
     p.mobs2 = el('div', { class: 'mobs' });
     second = el('section', { class: 'second' },
       el('header', { class: 'second-head' }, p.name2,
         el('button', { class: 'hunt-link', type: 'button', id: 'second-close', text: tr('duo.close'), onclick: () => pick(id2) })),
       el('div', { class: 'controls' }, p.bonus2.root, p.cost2.root),
       p.xp2,
+      p.qty2,
       el('h3', { class: 'band', text: tr('band') }),
       p.mobs2);
   }
@@ -5822,6 +5894,7 @@ function buildSheet(id, fixed, id2) {
       statusEl,
       el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root, p.cost.root),
       p.xp,
+      p.qty,
       el('h3', { class: 'band', text: tr('band') }),
       p.mobs,
       second,
@@ -5839,7 +5912,7 @@ function renderSheet() {
   const loading = pending.seed || pending.db || !!pending.cloud;
   const fixed = !!ui.id && !store.local.has(ui.id) && !store.shared.has(ui.id) && !owns(ui.id);
   const sig = JSON.stringify([ui.id, ui.pct, ui.party, ui.dur, ui.unit, ui.lang, fixed, loading, r, ui.disc[ui.id] || null,
-    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null], ui.floatHide[ui.id] || null, id2 && ui.floatHide[id2] || null, ui.voice, xp.rev]);
+    id2, id2 && [ui.pct2, r2, ui.disc[id2] || null], ui.floatHide[ui.id] || null, id2 && ui.floatHide[id2] || null, ui.voice, xp.rev, ui.qty[ui.id] || null, id2 && ui.qty[id2] || null]);
   if (sig === sheetSig) return;
   sheetSig = sig;
   timerEls = new Map();
@@ -5918,6 +5991,7 @@ function renderSheet() {
   parts.cost.set(r);
   parts.mobs.replaceChildren(...mobCards(id, r));
   paintXp(parts.xp, id, r);
+  paintQty(parts.qty, id, r, '');
   }
   if (r2 && parts.name2) {
     setText(parts.name2, tr('duo.second', { x: r2.name }));
@@ -5925,6 +5999,7 @@ function renderSheet() {
     parts.cost2.set(r2);
     parts.mobs2.replaceChildren(...mobCards(id2, r2));
     paintXp(parts.xp2, id2, r2);
+    paintQty(parts.qty2, id2, r2, '2');
   }
   if (!parts.custom) setText(parts.hint, sheetHint(r));
 
@@ -6847,6 +6922,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 11:14',
+    pt: ['Quantidade de criaturas na conta de XP: marque "Personalizar a quantidade de criaturas", embaixo do XP estimado, e use − e + em cada criatura (0 tira ela da conta), para a volta que você faz de verdade. Fica só no seu navegador.'],
+    en: ['Number of creatures in the XP estimate: tick "Customize the number of creatures", below the estimated XP, and use − and + on each creature (0 leaves it out), for the route you really do. It stays only in your browser.'],
+    es: ['Cantidad de criaturas en el cálculo de XP: marca "Personalizar la cantidad de criaturas", debajo del XP estimado, y usa − y + en cada criatura (0 la saca del cálculo), para la vuelta que haces de verdad. Queda solo en tu navegador.'],
+    pl: ['Liczba stworzeń w szacowaniu XP: zaznacz "Dostosuj liczbę stworzeń" pod szacowanym XP i użyj − oraz + przy każdym stworzeniu (0 pomija je), dla trasy, którą naprawdę robisz. Zostaje tylko w twojej przeglądarce.'],
+  },
   { at: '2026-10-20 10:24',
     pt: ['Nome duvidoso no print: quando o nome lido é novo e tem letras que o leitor costuma confundir (rn e m, vv e w, cl e d), o site mostra as grafias possíveis e pergunta a certa antes de guardar.'],
     en: ['Doubtful name in a screenshot: when the name read is new and has letters the reader often mixes up (rn and m, vv and w, cl and d), the site shows the possible spellings and asks for the right one before saving.'],
