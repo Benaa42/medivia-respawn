@@ -1620,7 +1620,7 @@ const I18N = {
     'creatures.none': 'Nenhuma criatura encontrada.',
     'creatures.col.name': 'Criatura',
     'creatures.col.where': 'Respawns',
-    'xp.share': 'Em grupo, cada jogador recebe o XP do abate dividido por {f}, como no mapper.',
+    'xp.share': 'Em grupo, com XP compartilhado, cada jogador recebe {s}% do XP do abate: o XP do abate mais {b}% de bônus da party, dividido entre os {n} jogadores (regra da party na wiki).',
     'mob.xp': 'XP por abate: ',
     'mob.xpTip': 'Ainda sem o XP desta criatura: cole o print da ficha dela no bestiário do jogo, na aba Normal',
     'xp.line': 'XP estimada por jogador: {h} por hora, {t} em {d} minutos.',
@@ -2214,7 +2214,7 @@ const I18N = {
     'creatures.none': 'No creature found.',
     'creatures.col.name': 'Creature',
     'creatures.col.where': 'Respawns',
-    'xp.share': 'In a group, each player gets the kill XP divided by {f}, as on the mapper.',
+    'xp.share': 'In a group with shared experience, each player gets {s}% of the kill XP: the kill XP plus {b}% party bonus, split among the {n} players (party rule on the wiki).',
     'mob.xp': 'XP per kill: ',
     'mob.xpTip': 'No XP for this creature yet: paste a screenshot of its page in the game bestiary, on the Normal tab',
     'xp.line': 'Estimated XP per player: {h} per hour, {t} in {d} minutes.',
@@ -2808,7 +2808,7 @@ const I18N = {
     'creatures.none': 'No se encontró ninguna criatura.',
     'creatures.col.name': 'Criatura',
     'creatures.col.where': 'Respawns',
-    'xp.share': 'En grupo, cada jugador recibe el XP de la muerte dividido por {f}, como en el mapper.',
+    'xp.share': 'En grupo, con experiencia compartida, cada jugador recibe el {s}% del XP de la muerte: el XP de la muerte más {b}% de bonus de party, dividido entre los {n} jugadores (regla de party en la wiki).',
     'mob.xp': 'XP por muerte: ',
     'mob.xpTip': 'Aún sin el XP de esta criatura: pega la captura de su ficha en el bestiario del juego, en la pestaña Normal',
     'xp.line': 'XP estimada por jugador: {h} por hora, {t} en {d} minutos.',
@@ -3402,7 +3402,7 @@ const I18N = {
     'creatures.none': 'Nie znaleziono żadnego stworzenia.',
     'creatures.col.name': 'Stworzenie',
     'creatures.col.where': 'Respawny',
-    'xp.share': 'W grupie każdy gracz dostaje XP za zabicie podzielone przez {f}, jak w mapperze.',
+    'xp.share': 'W grupie ze wspólnym doświadczeniem każdy gracz dostaje {s}% XP za zabicie: XP za zabicie plus {b}% bonusu drużyny, podzielone między {n} graczy (zasada drużyny na wiki).',
     'mob.xp': 'XP za zabicie: ',
     'mob.xpTip': 'Brak XP tego stworzenia: wklej zrzut jego karty z bestiariusza gry, na zakładce Normalny',
     'xp.line': 'Szacowane XP na gracza: {h} na godzinę, {t} w {d} minut.',
@@ -3737,11 +3737,14 @@ for (const [name, takes] of Object.entries(VOICES)) {
    abates por hora = piso(3600 × quantidade / respawn).
    O grupo de caça acelera o respawn antes do bônus: base ÷ grupo ÷ (1 + bônus), com um só arredondamento no fim. */
 const PARTIES = [
-  { mult: 100, label: 'Solo' },
-  { mult: 134, label: 'Dupla' },
-  { mult: 160, label: 'Trio' },
-  { mult: 178, label: 'Squad 4+' },
+  { mult: 100, label: 'Solo', n: 1 },
+  { mult: 134, label: 'Dupla', n: 2 },
+  { mult: 160, label: 'Trio', n: 3 },
+  { mult: 178, label: 'Squad 4+', n: 4 },
 ];
+// Parte do XP do abate que cada jogador recebe na party com XP compartilhado (página Party da wiki): cada jogador a
+// mais dá +15% (até +60% com 5) e o total é dividido igualmente. Dupla 115% ÷ 2, trio 130% ÷ 3, squad de 4 145% ÷ 4.
+const partyShare = mult => { const n = (PARTIES.find(p => p.mult === mult) || { n: 1 }).n; return (1 + 0.15 * (n - 1)) / n; };
 function baseRange(sec, pct, party = 100) {
   const lo = Math.ceil(sec * (100 + pct) * party / 10000);
   const hi = Math.ceil((sec + 1) * (100 + pct) * party / 10000) - 1;
@@ -3756,6 +3759,7 @@ function pickBase([lo, hi]) {
 }
 const respawnAt = (base, pct, party = 100) => Math.floor(base * 10000 / ((100 + pct) * party));
 const killsPerHour = (sec, count) => Math.floor(3600 * count / sec);
+const killsExact = (sec, count) => 3600 * count / sec;   // na conta do XP, sem arredondar (como o mapper)
 const fmtInt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const fmtClock = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 // Tempos em segundos (272) ou em minutos (4:32), conforme a escolha de quem usa.
@@ -5893,8 +5897,8 @@ function mobCards(id, r) {
   });
 }
 // Estimativa de XP por jogador: abates por hora de cada criatura vezes o XP por abate dela. Em grupo o respawn é mais
-// rápido, mas cada jogador recebe o XP do abate dividido pelo mesmo fator do grupo (1,34, 1,6 ou 1,78): é a conta
-// da tabela "Team Size" do mapper da wiki (2 jogadores = solo ÷ 1,34, 3 = ÷ 1,6, 4 = ÷ 1,78).
+// rápido (134%, 160% ou 178%) e cada jogador recebe a parte dele do XP da party (partyShare): o XP do abate mais 15%
+// por jogador a mais, dividido entre todos. O mapper da wiki dividia pelo fator da velocidade, o que não é a regra.
 // Quem ainda não tem o XP no banco fica de fora da soma e é citada, para a pessoa mandar o print do bestiário.
 // Com a quantidade personalizada ligada, cada criatura conta com o número escolhido (0 tira ela da conta).
 const qtyOf = id => { const q = ui.qty[id]; return q && q.on ? q : null; };
@@ -5907,10 +5911,10 @@ function xpCalc(id, r) {
   for (const m of used) {
     const exp = expOf(m.name);
     if (exp == null) missing.push(m.name);
-    else hour += killsPerHour(respawnAt(m.base, pct, ui.party), qtyCount(q, m)) * exp;
+    else hour += killsExact(respawnAt(m.base, pct, ui.party), qtyCount(q, m)) * exp;
   }
   const mine = !!q && r.monsters.some(m => qtyCount(q, m) !== m.count);
-  return { used, missing, mine, each: used.length && missing.length < used.length ? hour * 100 / ui.party : null };
+  return { used, missing, mine, each: used.length && missing.length < used.length ? hour * partyShare(ui.party) : null };
 }
 function paintXp(node, id, r) {
   const { used, missing, mine, each } = xpCalc(id, r);
@@ -5920,7 +5924,7 @@ function paintXp(node, id, r) {
   node.replaceChildren(
     el('b', { text: tr('xp.line', { h: fmtXp(g.hour), t: fmtXp(g.total), d: ui.dur }) }),
     ' ' + (mine ? tr('qty.note') + ' ' : '') + (missing.length ? tr('xp.missing', { x: missing.join(', ') }) + ' ' : '') + (g.on ? tr('xp.noteB', { x: xpBonusText(g) }) : tr('xp.note')) +
-    (ui.party > 100 ? ' ' + tr('xp.share', { f: (ui.party / 100).toLocaleString(document.documentElement.lang || 'en') }) : ''));
+    (ui.party > 100 ? ' ' + tr('xp.share', { n: (PARTIES.find(p => p.mult === ui.party) || {}).n, b: Math.round(((PARTIES.find(p => p.mult === ui.party) || {}).n - 1) * 15), s: pctNum(Math.round(partyShare(ui.party) * 1000) / 10) }) : ''));
 }
 // Bônus de XP sobre o XP por hora sem bônus. O XP Boost (+50%, +55% com golden premium) vale só pelos minutos comprados
 // dentro da duração; os outros bônus valem a hunt inteira. Os percentuais somam (o jogo não diz se multiplicam).
@@ -7157,6 +7161,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 14:19',
+    pt: ['XP em grupo corrigido pela regra oficial da party: cada jogador a mais dá +15% de XP e o total é dividido entre todos (dupla 57,5% do XP do abate para cada um, trio 43,3%, squad de 4 36,3%). Antes o site dividia pelo fator da velocidade do respawn, como o mapper, e mostrava XP alto demais em grupo.'],
+    en: ['Group XP fixed with the official party rule: each extra player gives +15% XP and the total is split among everyone (duo 57.5% of the kill XP each, trio 43.3%, squad of 4 36.3%). The site used to divide by the respawn speed factor, like the mapper, and showed too much XP in a group.'],
+    es: ['XP en grupo corregido con la regla oficial de party: cada jugador extra da +15% de XP y el total se divide entre todos (dúo 57,5% del XP de la muerte para cada uno, trío 43,3%, squad de 4 36,3%). Antes el sitio dividía por el factor de velocidad del respawn, como el mapper, y mostraba XP de más en grupo.'],
+    pl: ['XP w grupie poprawione według oficjalnej zasady drużyny: każdy dodatkowy gracz daje +15% XP, a całość dzieli się na wszystkich (duet 57,5% XP za zabicie na osobę, trio 43,3%, squad 4 osób 36,3%). Wcześniej strona dzieliła przez współczynnik szybkości respawnu, jak mapper, i pokazywała za dużo XP w grupie.'],
+  },
   { at: '2026-10-20 13:26',
     pt: ['Respawns por XP: nova aba na tela de Criaturas com os respawns em ordem de XP por hora (sem bônus de XP), no grupo e no percentual de bônus que você escolher. Clique num respawn para abrir no cronômetro.'],
     en: ['Respawns by XP: new tab on the Creatures page with the respawns in order of XP per hour (no XP bonus), for the group and bonus percentage you pick. Click a respawn to open it on the timer.'],
@@ -8280,10 +8290,10 @@ function rankXp(r, pct, party) {
   for (const m of r.monsters) {
     const exp = expOf(m.name);
     if (exp == null) { miss.push(m.name); continue; }
-    hour += killsPerHour(respawnAt(m.base, pct, party), m.count) * exp;
+    hour += killsExact(respawnAt(m.base, pct, party), m.count) * exp;
     got++;
   }
-  return { each: got ? hour * 100 / party : null, miss };
+  return { each: got ? hour * partyShare(party) : null, miss };
 }
 function renderRanking() {
   if (rankParty == null) rankParty = ui.party;
@@ -8363,7 +8373,7 @@ function renderCreature() {
     const r = getRespawn(w.id), m = r && r.monsters.find(x => slug(x.name) === c.id);
     if (!m) return null;
     const sec = r.custom ? m.base : respawnAt(m.base, ui.pct, ui.party), kills = killsPerHour(sec, m.count);
-    return { ...w, sec, kills, xp: c.exp == null ? null : kills * c.exp * 100 / ui.party };
+    return { ...w, sec, kills, xp: c.exp == null ? null : killsExact(sec, m.count) * c.exp * partyShare(ui.party) };
   }).filter(Boolean);
   const open = id => { showCreature(null); select(id); goTo('timer'); };
   // Chances: de quanto em quanto a raridade aberta aparece e, na Lendário, o item especial. A chance real de pegar
