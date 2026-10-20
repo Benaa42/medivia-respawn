@@ -189,5 +189,26 @@ service cloud.firestore {
       allow delete: if request.auth != null
         && (resource.data.owner == request.auth.uid || resource.data.at < request.time - duration.value(24, 'h'));
     }
+
+    // Sugestões e problemas mandados pelo site.
+    // - Ninguém lê pelo site: as mensagens só aparecem no console do Firebase e no painel de quem mantém o site.
+    // - Quem tem a identidade anônima do site cria uma mensagem nova; ninguém altera nem apaga.
+    // - Tipo (sugestão ou problema), texto de 5 a 1.000 letras, contato opcional e, para ajudar a achar problemas,
+    //   a tela, o idioma, o navegador e a versão do site. Nada além disso.
+    match /feedback/{id} {
+      allow read, update, delete: if false;
+      allow create: if request.auth != null
+        && id.matches('^[A-Za-z0-9]{20}$')
+        && request.resource.data.keys().hasOnly(['kind', 'text', 'contact', 'page', 'lang', 'agent', 'version', 'owner', 'at'])
+        && request.resource.data.kind in ['suggestion', 'problem']
+        && request.resource.data.text is string && request.resource.data.text.size() >= 5 && request.resource.data.text.size() <= 1000
+        && (!('contact' in request.resource.data) || (request.resource.data.contact is string && request.resource.data.contact.size() <= 60))
+        && request.resource.data.page is string && request.resource.data.page.size() <= 20
+        && request.resource.data.lang is string && request.resource.data.lang.size() <= 5
+        && request.resource.data.agent is string && request.resource.data.agent.size() <= 120
+        && request.resource.data.version is string && request.resource.data.version.size() <= 20
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.at == request.time;
+    }
   }
 }
