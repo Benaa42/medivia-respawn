@@ -182,6 +182,8 @@ dialog#feedback { width: min(480px, calc(100vw - 32px)); }
 .ctab[aria-selected="true"] { background: var(--box); color: var(--title); cursor: default; }
 .ctab:focus-visible { outline: 2px solid var(--value); outline-offset: -2px; }
 .ctabs[data-on="creatures"] + .tool { border-top-left-radius: 0; }
+.ctabs.small .ctab { padding: 11px 16px 9px; font: 600 16px/1.3 var(--font-ui); letter-spacing: 0; }
+.ctabs[data-on="respawns"] + .bank { border-top-left-radius: 0; }
 /* Chefes: figura da wiki, nome à esquerda; os nomes sem ficha ainda levam à wiki */
 .boss-fig { display: block; width: 36px; height: 36px; object-fit: contain; image-rendering: pixelated; }
 .boss-fig.none { border-radius: 8px; background: var(--card); }
@@ -874,14 +876,19 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 
   <div class="desk">
     <div class="side">
-    <aside class="win bank" aria-labelledby="bank-title">
-      <header class="win-title"><h2 class="win-name" id="bank-title">Respawns</h2></header>
+    <div class="ctabs small" id="bank-tabs" data-on="respawns" role="tablist" aria-label="Respawns">
+      <button class="ctab" type="button" role="tab" id="btab-respawns" aria-selected="true" aria-controls="bank-box">Respawns</button>
+      <button class="ctab" type="button" role="tab" id="btab-custom" aria-selected="false" aria-controls="bank-box"><span data-i18n="custom.tag">Personalizado</span></button>
+    </div>
+    <aside class="win bank" id="bank-box" role="tabpanel" aria-labelledby="bank-title">
+      <h2 class="sr" id="bank-title">Respawns</h2>
       <div class="win-body">
+        <p class="support-note" id="custom-hint" data-i18n="custom.hint" hidden>Cronômetro seu, sem janela de bônus: o tempo é o que você escolher. Fica salvo só neste navegador.</p>
         <input type="search" id="search" placeholder="Buscar área ou criatura" aria-label="Buscar área ou criatura" autocomplete="off" data-i18n-attr="placeholder:search;aria-label:search">
         <label class="toggle duo"><input type="checkbox" id="opt-duo"> <span data-i18n="duo.label">Abrir dois respawns</span></label>
         <p class="bank-empty" id="duo-hint" data-i18n="duo.hint" hidden>Clique em dois respawns da lista. Clique de novo em um deles para fechar.</p>
         <ul class="bank-list" id="bank-list"></ul>
-        <button class="hunt-link custom-add" type="button" id="custom-add" data-i18n="custom.add">+ Cronômetro personalizado</button>
+        <button class="hunt-link custom-add" type="button" id="custom-add" data-i18n="custom.add" hidden>+ Cronômetro personalizado</button>
       </div>
       <footer class="win-foot bank-foot">
         <p class="sync" id="sync"></p>
@@ -1688,6 +1695,7 @@ const I18N = {
     'changes.open': 'Novidades',
     'custom.add': '+ Cronômetro personalizado',
     'custom.tag': 'Personalizado',
+    'custom.empty': 'Nenhum cronômetro personalizado ainda.',
     'custom.new': 'Novo cronômetro',
     'custom.creature': 'Criatura',
     'custom.creaturePh': 'Nome da criatura ou do chefe',
@@ -2240,6 +2248,7 @@ const I18N = {
     'changes.open': 'What is new',
     'custom.add': '+ Custom timer',
     'custom.tag': 'Custom',
+    'custom.empty': 'No custom timer yet.',
     'custom.new': 'New timer',
     'custom.creature': 'Creature',
     'custom.creaturePh': 'Creature or boss name',
@@ -2792,6 +2801,7 @@ const I18N = {
     'changes.open': 'Novedades',
     'custom.add': '+ Cronómetro personalizado',
     'custom.tag': 'Personalizado',
+    'custom.empty': 'Ningún cronómetro personalizado todavía.',
     'custom.new': 'Nuevo cronómetro',
     'custom.creature': 'Criatura',
     'custom.creaturePh': 'Nombre de la criatura o del jefe',
@@ -3344,6 +3354,7 @@ const I18N = {
     'changes.open': 'Nowości',
     'custom.add': '+ Własny licznik',
     'custom.tag': 'Własny',
+    'custom.empty': 'Brak własnych minutników.',
     'custom.new': 'Nowy licznik',
     'custom.creature': 'Stworzenie',
     'custom.creaturePh': 'Nazwa stworzenia lub bossa',
@@ -4717,7 +4728,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns' }, lsGet(LS_UI, {}));
 if (!PCTS.includes(ui.pct)) ui.pct = 10;
 if (!PCTS.includes(ui.pct2)) ui.pct2 = ui.pct;
 ui.duo = ui.duo === true;
@@ -4783,10 +4794,17 @@ function bankShort(all) {
 }
 
 function renderBank() {
-  const q = $('#search').value.trim().toLowerCase();
-  const all = allRespawns();
-  const hits = q
-    ? all.filter(r => r.name.toLowerCase().includes(q) || r.monsters.some(m => m.name.toLowerCase().includes(q)))
+  // Duas abas: os respawns do jogo (com a busca) e os cronômetros personalizados (todos, com o botão de criar)
+  const custom = ui.bankTab === 'custom';
+  $('#bank-tabs').dataset.on = custom ? 'custom' : 'respawns';
+  $('#btab-respawns').setAttribute('aria-selected', String(!custom));
+  $('#btab-custom').setAttribute('aria-selected', String(custom));
+  $('#search').hidden = custom;
+  $('#custom-hint').hidden = $('#custom-add').hidden = !custom;
+  const q = custom ? '' : $('#search').value.trim().toLowerCase();
+  const all = allRespawns().filter(r => !!r.custom === custom);
+  const hits = custom ? [...all].sort((a, b) => a.name.localeCompare(b.name, 'pt'))
+    : q ? all.filter(r => r.name.toLowerCase().includes(q) || r.monsters.some(m => m.name.toLowerCase().includes(q)))
     : bankShort(all);
   const list = $('#bank-list');
   const second = secondId();
@@ -4801,7 +4819,7 @@ function renderBank() {
         n ? el('i', { class: 'bank-n', text: n }) : null));
   }));
   if (!hits.length) {
-    list.append(el('li', { class: 'bank-empty', text: tr(all.length ? 'bank.nohit' : 'bank.empty') }));
+    list.append(el('li', { class: 'bank-empty', text: tr(custom ? 'custom.empty' : all.length ? 'bank.nohit' : 'bank.empty') }));
   } else if (!q && all.length > hits.length) {
     list.append(el('li', { class: 'bank-empty', text: tr('bank.more', { n: hits.length, t: all.length }) }));
   }
@@ -5450,6 +5468,7 @@ function createCustom() {
   const name = tr('custom.new');
   store.local.set(id, { name, monsters: [{ name, count: 1, base: 1800 }], custom: true, updatedAt: new Date().toISOString() });
   persistLocal();
+  ui.bankTab = 'custom';
   select(id);
   goTo('timer');
   setTimeout(() => { const f = $('#custom-creature'); if (f) { f.focus(); f.select(); } }, 50);
@@ -6708,6 +6727,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 10:14',
+    pt: ['A lista de respawns do cronômetro ganhou abas: Respawns e Personalizado. Os cronômetros personalizados e o botão de criar um novo ficam na segunda aba.'],
+    en: ['The respawn list on the timer now has tabs: Respawns and Custom. Custom timers and the button to create a new one are in the second tab.'],
+    es: ['La lista de respawns del cronómetro ahora tiene pestañas: Respawns y Personalizado. Los cronómetros personalizados y el botón para crear uno nuevo están en la segunda pestaña.'],
+    pl: ['Lista respawnów przy minutniku ma teraz zakładki: Respawns i Własny. Własne minutniki i przycisk tworzenia nowego są w drugiej zakładce.'],
+  },
   { at: '2026-10-20 09:29',
     pt: ['Criaturas ganhou abas: Criaturas e Chefes. Na aba Chefes estão os 95 chefes da wiki, com figura, quantos abates completam o bestiário e link para a wiki; XP e atributos aparecem quando alguém cola o print do chefe no bestiário.'],
     en: ['Creatures now has tabs: Creatures and Bosses. The Bosses tab has the 95 bosses from the wiki, with picture, how many kills complete the bestiary and a link to the wiki; XP and stats show up when someone pastes the boss screenshot from the bestiary.'],
@@ -7352,6 +7377,9 @@ function openChanges() {
 // Dois caminhos para a mesma lista: o link no topo, abaixo do mapper, e o do rodapé.
 for (const b of [$('#changes-top'), $('#changes-btn')]) b.addEventListener('click', openChanges);
 $('#custom-add').addEventListener('click', createCustom);
+const setBankTab = tab => { ui.bankTab = tab; saveUi(); renderBank(); };
+$('#btab-respawns').addEventListener('click', () => setBankTab('respawns'));
+$('#btab-custom').addEventListener('click', () => setBankTab('custom'));
 $('#changes-close').addEventListener('click', () => { const dlg = $('#changes'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
 
 /* ---------- Sugestões e problemas ----------
