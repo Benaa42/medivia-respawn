@@ -149,6 +149,11 @@ kbd {
 #room-pane .dlg:disabled { opacity: 0.45; cursor: default; }
 dialog#changes { width: min(560px, calc(100vw - 32px)); }
 dialog#feedback { width: min(480px, calc(100vw - 32px)); }
+dialog#name-dlg { width: min(480px, calc(100vw - 32px)); }
+.name-list { display: flex; flex-direction: column; gap: 18px; }
+.name-row { display: flex; flex-direction: column; gap: 8px; }
+.name-row .support-note b { color: var(--title); }
+.unit-toggle.name-opts { flex-wrap: wrap; align-self: flex-start; margin-left: 0; border-radius: 16px; }
 .fb-form { display: flex; flex-direction: column; gap: 12px; }
 .fb-form .unit-toggle { align-self: flex-start; margin-left: 0; }
 .fb-form textarea, .fb-form input { width: 100%; padding: 10px 12px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 400 14px/1.45 var(--font-ui); }
@@ -1174,6 +1179,17 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </form>
 </dialog>
 
+<dialog class="support" id="name-dlg" aria-labelledby="name-title">
+  <div class="support-end">
+    <h2 id="name-title" data-i18n="name.title">Confira o nome</h2>
+  </div>
+  <form class="fb-form" id="name-form" novalidate>
+    <p class="support-note" data-i18n="name.intro">Este nome ainda não está no site, e o leitor pode confundir letras coladas no print: rn com m, vv com w, cl com d. Escolha a grafia certa ou digite o nome como aparece no jogo.</p>
+    <div class="name-list" id="name-list"></div>
+    <div class="dlgs"><button class="dlg go" type="submit" data-i18n="name.ok">Guardar com este nome</button><button class="dlg stop" type="button" id="name-cancel" data-i18n="name.cancel">Cancelar</button></div>
+  </form>
+</dialog>
+
 <dialog class="support" id="changes" aria-labelledby="changes-title">
   <div class="support-end">
     <h2 id="changes-title" data-i18n="changes.title">Novidades do site</h2>
@@ -1368,6 +1384,14 @@ const I18N = {
     'read.shared': 'Salvo no banco compartilhado.',
     'read.local': 'Salvo no banco deste navegador.',
     'read.discarded': 'Imagem descartada.',
+    'name.title': 'Confira o nome',
+    'name.intro': 'Este nome ainda não está no site, e o leitor pode confundir letras coladas no print: rn com m, vv com w, cl com d. Escolha a grafia certa ou digite o nome como aparece no jogo.',
+    'name.read': 'Lido no print:',
+    'name.field': 'Nome certo',
+    'name.ok': 'Guardar com este nome',
+    'name.cancel': 'Cancelar',
+    'name.wait': 'Confira o nome na janela aberta.',
+    'name.stop': 'Leitura cancelada. Nada foi guardado.',
     'read.noname': 'Não li o nome da área: digite no título.',
     'read.doubt': 'Confira {x}: os números não bateram com os abates por hora do print.',
     'noname': 'Respawn sem nome',
@@ -1921,6 +1945,14 @@ const I18N = {
     'read.shared': 'Saved to the shared bank.',
     'read.local': 'Saved to the bank in this browser.',
     'read.discarded': 'Image discarded.',
+    'name.title': 'Check the name',
+    'name.intro': 'This name is not on the site yet, and the reader can mix up letters that touch in the screenshot: rn with m, vv with w, cl with d. Pick the right spelling or type the name as it shows in the game.',
+    'name.read': 'Read from the screenshot:',
+    'name.field': 'Right name',
+    'name.ok': 'Save with this name',
+    'name.cancel': 'Cancel',
+    'name.wait': 'Check the name in the open window.',
+    'name.stop': 'Reading cancelled. Nothing was saved.',
     'read.noname': 'The area name could not be read: type it in the title.',
     'read.doubt': 'Check {x}: the numbers did not match the kills per hour in the screenshot.',
     'noname': 'Unnamed respawn',
@@ -2474,6 +2506,14 @@ const I18N = {
     'read.shared': 'Guardado en el banco compartido.',
     'read.local': 'Guardado en el banco de este navegador.',
     'read.discarded': 'Imagen descartada.',
+    'name.title': 'Revisa el nombre',
+    'name.intro': 'Este nombre aún no está en el sitio, y el lector puede confundir letras pegadas en la captura: rn con m, vv con w, cl con d. Elige la grafía correcta o escribe el nombre como aparece en el juego.',
+    'name.read': 'Leído en la captura:',
+    'name.field': 'Nombre correcto',
+    'name.ok': 'Guardar con este nombre',
+    'name.cancel': 'Cancelar',
+    'name.wait': 'Revisa el nombre en la ventana abierta.',
+    'name.stop': 'Lectura cancelada. No se guardó nada.',
     'read.noname': 'No leí el nombre del área: escríbelo en el título.',
     'read.doubt': 'Revisa {x}: los números no coincidieron con las muertes por hora de la captura.',
     'noname': 'Respawn sin nombre',
@@ -3027,6 +3067,14 @@ const I18N = {
     'read.shared': 'Zapisano we wspólnej bazie.',
     'read.local': 'Zapisano w bazie tej przeglądarki.',
     'read.discarded': 'Obraz usunięty.',
+    'name.title': 'Sprawdź nazwę',
+    'name.intro': 'Tej nazwy nie ma jeszcze na stronie, a czytnik może pomylić stykające się litery na zrzucie: rn z m, vv z w, cl z d. Wybierz właściwą pisownię albo wpisz nazwę tak, jak wygląda w grze.',
+    'name.read': 'Odczytano ze zrzutu:',
+    'name.field': 'Poprawna nazwa',
+    'name.ok': 'Zapisz z tą nazwą',
+    'name.cancel': 'Anuluj',
+    'name.wait': 'Sprawdź nazwę w otwartym oknie.',
+    'name.stop': 'Odczyt anulowany. Nic nie zapisano.',
     'read.noname': 'Nie udało się odczytać nazwy obszaru: wpisz ją w tytule.',
     'read.doubt': 'Sprawdź: {x}. Liczby nie zgadzają się z zabiciami na godzinę ze zrzutu.',
     'noname': 'Respawn bez nazwy',
@@ -3956,17 +4004,77 @@ async function readMapper(ocr) {
 // grafias que só diferem nisso; um nome lido cuja chave bate com um nome já conhecido vira o nome conhecido. Entre
 // grafias conhecidas com a mesma chave vale a com "rn" (a que o leitor estraga), nunca a com "rmn".
 const ocrKey = n => slug(n).replace(/-/g, '').replace(/rmn/g, 'm').replace(/rn/g, 'm').replace(/cl/g, 'd').replace(/vv/g, 'w');
+// Todos os nomes que o site já conhece: respawns, criaturas deles, fichas do bestiário (e nomes lendários), donos dos
+// itens lendários e chefes da wiki.
+function nameBook() {
+  const out = [];
+  for (const r of allRespawns()) { out.push(r.name); for (const m of r.monsters || []) out.push(m.name); }
+  for (const d of [...xp.cloud.values(), ...xp.mine.values()]) out.push(d.name, ((d.tiers || {}).legendary || {}).name);
+  for (const i of LEGEND_ITEMS) for (const f of i.from) out.push(legendCreature(f));
+  for (const b of BOSSES) out.push(b.name);
+  return out.filter(x => typeof x === 'string' && x);
+}
 function knownName(n) {
   if (!n) return n;
   const k = ocrKey(n), seen = new Set();
-  const add = x => { if (typeof x === 'string' && x && ocrKey(x) === k) seen.add(x); };
-  for (const r of allRespawns()) for (const m of r.monsters || []) add(m.name);
-  for (const d of [...xp.cloud.values(), ...xp.mine.values()]) { add(d.name); add(((d.tiers || {}).legendary || {}).name); }
-  for (const i of LEGEND_ITEMS) for (const f of i.from) add(legendCreature(f));
+  for (const x of nameBook()) if (ocrKey(x) === k) seen.add(x);
   if (!seen.size) return n;
   const score = x => (/rmn/i.test(x) ? -2 : 0) + (/rn/i.test(x) ? 1 : 0);
   const best = [...seen].sort((a, b) => score(b) - score(a))[0];
   return score(best) < score(n) || (seen.has(n) && score(n) >= score(best)) ? n : best;
+}
+
+// Grafias que o leitor pode ter confundido: cada "m" pode ser "rn" (e o contrário), "w" pode ser "vv", "d" pode ser
+// "cl". Só letras minúsculas fora do começo do nome. Até três pontos de dúvida, todas as combinações; mais que isso,
+// uma troca de cada vez. As de menos trocas vêm primeiro.
+const OCR_SWAPS = [['rn', 'm'], ['m', 'rn'], ['vv', 'w'], ['w', 'vv'], ['cl', 'd'], ['d', 'cl']];
+function nameVariants(n) {
+  const spots = [];
+  for (let i = 1; i < n.length; i++) {
+    const last = spots[spots.length - 1];
+    if (last && i < last.i + last.a.length) continue;
+    const hit = OCR_SWAPS.find(([a]) => n.startsWith(a, i));
+    if (hit) spots.push({ i, a: hit[0], b: hit[1] });
+  }
+  const apply = set => set.reduceRight((t, p) => t.slice(0, p.i) + p.b + t.slice(p.i + p.a.length), n);
+  const sets = spots.length <= 3 ? [...Array(2 ** spots.length).keys()].slice(1).map(m => spots.filter((_, j) => m >> j & 1)) : spots.map(p => [p]);
+  return [...new Set(sets.sort((a, b) => a.length - b.length).map(apply))].filter(x => x !== n).slice(0, 7);
+}
+// Nome duvidoso: o site ainda não conhece e tem letra que o leitor confunde
+function nameDoubt(n, book) {
+  const low = n.toLowerCase();
+  return !book.some(x => x.toLowerCase() === low) && nameVariants(n).length > 0;
+}
+// Pergunta a grafia certa de cada nome duvidoso. Devolve os nomes escolhidos, na mesma ordem, ou null se cancelou.
+function askNames(names) {
+  const dlg = $('#name-dlg');
+  const rows = names.map(n => {
+    const input = el('input', { type: 'text', value: n, maxlength: 60, autocomplete: 'off', spellcheck: false });
+    const chips = el('span', { class: 'unit-toggle name-opts', role: 'group', 'aria-label': tr('name.field') },
+      [n, ...nameVariants(n)].map(o => el('button', { type: 'button', text: o, onclick: () => { input.value = o; mark(); } })));
+    const mark = () => { for (const b of chips.children) b.setAttribute('aria-pressed', String(b.textContent === input.value.trim())); };
+    input.addEventListener('input', mark);
+    mark();
+    return { input, node: el('div', { class: 'name-row' },
+      el('p', { class: 'support-note' }, tr('name.read') + ' ', el('b', { text: n })), chips,
+      el('label', { class: 'calc-field' }, el('span', { text: tr('name.field') }), input)) };
+  });
+  $('#name-list').replaceChildren(...rows.map(r => r.node));
+  return new Promise(done => {
+    const form = $('#name-form');
+    const finish = v => { form.onsubmit = null; $('#name-cancel').onclick = null; dlg.oncancel = null; if (dlg.open) dlg.close(); done(v); };
+    form.onsubmit = e => {
+      e.preventDefault();
+      const v = rows.map(r => r.input.value.trim().replace(/\s+/g, ' '));
+      const empty = rows.find((r, i) => !v[i]);
+      if (empty) { empty.input.focus(); return; }
+      finish(v);
+    };
+    $('#name-cancel').onclick = () => finish(null);
+    dlg.oncancel = e => { e.preventDefault(); finish(null); };
+    dlg.showModal();
+    rows[0].input.focus();
+  });
 }
 
 async function readBestiary(ocr) {
@@ -5900,6 +6008,17 @@ async function readImage(blob) {
     const p = await readPrint(blob);
     if (p.name) p.name = knownName(p.name);   // nome da criatura (bestiário) com as confusões do leitor desfeitas
     for (const m of p.monsters || []) m.name = knownName(m.name);   // e o de cada criatura do print da janela de bônus
+    // Nome novo com letra que o leitor confunde: a pessoa confirma a grafia antes de qualquer coisa ser guardada
+    const book = nameBook();
+    const unsure = [p.name, ...(p.monsters || []).map(m => m.name)].filter((n, i, a) => n && a.indexOf(n) === i && nameDoubt(n, book));
+    if (unsure.length) {
+      setStatus('busy', tr('name.wait'));
+      const fixed = await askNames(unsure);
+      if (!fixed) throw new UserError(tr('name.stop'));
+      const to = new Map(unsure.map((n, i) => [n, fixed[i]]));
+      if (p.name) p.name = to.get(p.name) || p.name;
+      for (const m of p.monsters || []) m.name = to.get(m.name) || m.name;
+    }
     if (p.kind === 'bestiary') {
       const all = new Set([...xp.cloud.keys(), ...xp.mine.keys()]), key = slug(p.name || '');
       const exists = k => all.has(k) || creatureRows().some(c => c.id === k);
@@ -6727,6 +6846,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 10:24',
+    pt: ['Nome duvidoso no print: quando o nome lido é novo e tem letras que o leitor costuma confundir (rn e m, vv e w, cl e d), o site mostra as grafias possíveis e pergunta a certa antes de guardar.'],
+    en: ['Doubtful name in a screenshot: when the name read is new and has letters the reader often mixes up (rn and m, vv and w, cl and d), the site shows the possible spellings and asks for the right one before saving.'],
+    es: ['Nombre dudoso en la captura: cuando el nombre leído es nuevo y tiene letras que el lector suele confundir (rn y m, vv y w, cl y d), el sitio muestra las grafías posibles y pregunta la correcta antes de guardar.'],
+    pl: ['Wątpliwa nazwa na zrzucie: gdy odczytana nazwa jest nowa i ma litery, które czytnik często myli (rn i m, vv i w, cl i d), strona pokazuje możliwe pisownie i pyta o właściwą przed zapisem.'],
+  },
   { at: '2026-10-20 10:14',
     pt: ['A lista de respawns do cronômetro ganhou abas: Respawns e Personalizado. Os cronômetros personalizados e o botão de criar um novo ficam na segunda aba.'],
     en: ['The respawn list on the timer now has tabs: Respawns and Custom. Custom timers and the button to create a new one are in the second tab.'],
