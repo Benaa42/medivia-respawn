@@ -50,6 +50,7 @@ service cloud.firestore {
     //   e o item especial da lendária. Vai num campo só, em texto, para não gastar o limite de verificações de uma
     //   gravação; o site confere o conteúdo ao ler.
     // - Qualquer pessoa com identidade corrige o XP com um print mais novo; o nome e quem enviou primeiro não mudam.
+    // - "single" marca a criatura sem raridades (como as Phoenix): o jogo não mostra as abas Comum, Raro e Lendário.
     // - Só quem enviou primeiro apaga.
     match /creatures/{id} {
       // Os números da ficha, todos opcionais: XP, HP e Mana de 0 a 100.000.000; SPD, ARM e DEF de 0 a 1.000.000.
@@ -83,10 +84,11 @@ service cloud.firestore {
         );
       }
       function shape(d) {
-        return d.keys().hasOnly(['name', 'exp', 'hp', 'armLo', 'armHi', 'defLo', 'defHi', 'spd', 'mana', 'tiers', 'odds', 'owner', 'at'])
+        return d.keys().hasOnly(['name', 'exp', 'hp', 'armLo', 'armHi', 'defLo', 'defHi', 'spd', 'mana', 'tiers', 'odds', 'single', 'owner', 'at'])
           && d.name is string && d.name.size() >= 1 && d.name.size() <= 60
           && nums(d) && tiers(d)
           && (!('odds' in d) || (d.odds is string && d.odds.size() <= 200))
+          && (!('single' in d) || d.single is bool)
           && d.owner is string
           && d.at == request.time;
       }
