@@ -292,9 +292,6 @@ dialog.support[open] { display: flex; flex-direction: column; gap: 14px; }
 }
 .paste.has-tut.solo { padding-bottom: 13px; padding-right: 58px; }
 .paste.has-tut.solo > .tut-btn { top: 50%; bottom: auto; transform: translateY(-50%); }
-.bonus { position: relative; }
-.tut-btn.tut-corner { position: absolute; top: 4px; right: 0; margin: 0; }
-.bonus #sheet .win-name { padding-right: 36px; }   /* o nome do respawn não passa por baixo do "?" do canto */
 .win-name .tut-btn, .calc h2 .tut-btn { margin-left: 10px; vertical-align: 5px; }
 .tut-btn:hover, .tut-btn:focus-visible { border-color: var(--amber); background: rgba(240, 173, 77, 0.16); }
 .tut-pop { position: fixed; z-index: 60; width: 200px; padding: 6px; background: var(--box); border: 1px solid var(--gold-edge); border-radius: var(--r-md); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55); pointer-events: none; }
@@ -330,6 +327,11 @@ dialog.tut-dlg { width: fit-content; max-width: calc(100vw - 32px); padding: 16p
 /* Respawn aberto: nome e cronômetros */
 .bonus { gap: 16px; }
 .bonus .win-title { display: flex; align-items: center; gap: 12px; }
+.bonus .win-title.tab { position: relative; align-self: flex-start; max-width: calc(100% - 18px); margin-bottom: -16px; padding: 14px 18px 6px 24px; border-radius: var(--r-lg) var(--r-lg) 0 0; background: var(--box); }
+.bonus .win-title.tab::after { content: ""; position: absolute; right: -18px; bottom: 0; width: 18px; height: 18px; background: radial-gradient(circle at 100% 0, transparent 17.5px, var(--box) 18px); }
+.bonus .win-title.tab .win-name { min-width: 3ch; max-width: 100%; field-sizing: content; font-size: 26px; text-overflow: ellipsis; }
+.bonus .win-title.tab .tut-btn { flex: none; margin: 0; }
+.bonus .win-title.tab + .win-body > .stage:first-child { border-top-left-radius: 0; }
 .win-name { font: 800 28px/1.15 var(--font-display); letter-spacing: -0.01em; color: var(--title); }
 input.win-name {
   flex: 1;
@@ -867,7 +869,6 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
     </div>
 
     <main class="win bonus" id="drop">
-      <button class="tut-btn tut-corner" type="button" data-tut="cronometro" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button>
       <div id="sheet"></div>
       <footer class="win-foot" id="win-opts">
         <div class="opts">
@@ -5143,7 +5144,8 @@ function sheetHead(id, fixed) {
     del.classList.add('sure'); del.textContent = tr('delete.sure');
     setTimeout(() => { del.classList.remove('sure'); del.textContent = tr('delete'); }, 4000);
   } });
-  return { nameInput, head: el('header', { class: 'win-title' }, nameInput, fixed ? null : del) };
+  const help = el('button', { class: 'tut-btn', type: 'button', 'data-tut': 'cronometro', 'aria-haspopup': 'dialog', title: tr('tut.open'), 'aria-label': tr('tut.open'), 'data-i18n-attr': 'title:tut.open;aria-label:tut.open', text: '?' });
+  return { nameInput, head: el('header', { class: 'win-title tab' }, nameInput, help, fixed ? null : del) };
 }
 
 function emptySheet(loading) {
@@ -5404,6 +5406,7 @@ function renderSheet() {
   if (!parts || parts.id !== id || parts.fixed !== fixed || parts.id2 !== id2) parts = buildSheet(id, fixed, id2);
   const focusId = sheet.contains(document.activeElement) ? document.activeElement.id : '';
   if (document.activeElement !== parts.nameInput) parts.nameInput.value = r.name;
+  parts.nameInput.size = Math.max(3, parts.nameInput.value.length + 1);
 
   // Cronômetros: um anel por respawn aberto e por tempo de respawn diferente; o anel vai se fechando até a criatura nascer
   const open = r2 ? [{ id, r }, { id: id2, r: r2 }] : [{ id, r }];
@@ -6365,6 +6368,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-19 21:20',
+    pt: ['O nome do respawn agora fica numa aba presa ao cronômetro, com o "?" do tutorial ao lado.'],
+    en: ['The respawn name now sits in a tab attached to the timer, with the tutorial "?" next to it.'],
+    es: ['El nombre del respawn ahora está en una pestaña unida al cronómetro, con el "?" del tutorial al lado.'],
+    pl: ['Nazwa respawnu jest teraz w karcie przyczepionej do licznika, z "?" poradnika obok.'],
+  },
   { at: '2026-10-19 18:59',
     pt: ['Tutoriais em vídeo em todo o site: o "?" dourado ao lado do cronômetro, das opções de repetir, som e janela flutuante, das hunts, das criaturas, dos itens lendários e da calculadora mostra um vídeo curto de como usar. Com o mouse em cima ele toca sem som; com um clique abre com som.'],
     en: ['Video tutorials across the site: the golden "?" next to the timer, the repeat, sound and floating window options, the hunts, the creatures, the legendary items and the calculator shows a short video on how to use it. Hover to play it muted; click to open it with sound.'],
