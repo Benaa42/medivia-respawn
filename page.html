@@ -159,9 +159,9 @@ dialog#feedback { width: min(480px, calc(100vw - 32px)); }
 /* Tela de criaturas: uma tabela; em tela estreita ela rola de lado dentro da própria moldura */
 #creatures-status:empty { display: none; }
 .creatures-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
-#creatures-search { flex: 1 1 220px; min-width: 0; padding: 9px 12px; border: 1px solid transparent; border-radius: var(--r-sm); background: var(--card); color: var(--title); }
-#creatures-search::placeholder { color: var(--faint); }
-#creatures-search:focus { border-color: var(--edge); }
+#creatures-search, #bosses-search { flex: 1 1 220px; min-width: 0; padding: 9px 12px; border: 1px solid transparent; border-radius: var(--r-sm); background: var(--card); color: var(--title); }
+#creatures-search::placeholder, #bosses-search::placeholder { color: var(--faint); }
+#creatures-search:focus, #bosses-search:focus { border-color: var(--edge); }
 .creatures-sort { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
 /* A lista rola dentro da moldura (para os lados e para baixo); a busca e o cabeçalho ficam à vista */
 .creatures-wrap { flex: 1 1 auto; min-height: 160px; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--edge) transparent; }
@@ -175,6 +175,22 @@ dialog#feedback { width: min(480px, calc(100vw - 32px)); }
 .creatures-table td.none { font-weight: 400; color: var(--faint); }
 .creatures-table .hunt-link { color: var(--label); text-align: left; }
 .creatures-table .hunt-link:hover { color: var(--title); }
+/* Abas no alto do painel de criaturas: a aberta tem a cor do painel e encosta nele */
+.ctabs { display: flex; align-items: flex-end; gap: 4px; margin-bottom: -20px; }
+.ctab { padding: 13px 24px 10px; border: 0; border-radius: var(--r-lg) var(--r-lg) 0 0; background: none; color: var(--faint); font: 800 24px/1.15 var(--font-display); letter-spacing: -0.01em; cursor: pointer; }
+.ctab:hover { color: var(--title); }
+.ctab[aria-selected="true"] { background: var(--box); color: var(--title); cursor: default; }
+.ctab:focus-visible { outline: 2px solid var(--value); outline-offset: -2px; }
+.ctabs[data-on="creatures"] + .tool { border-top-left-radius: 0; }
+/* Chefes: figura da wiki, nome à esquerda; os nomes sem ficha ainda levam à wiki */
+.boss-fig { display: block; width: 36px; height: 36px; object-fit: contain; image-rendering: pixelated; }
+.boss-fig.none { border-radius: 8px; background: var(--card); }
+.creatures-table.bosses-table td { vertical-align: middle; }
+.creatures-table.bosses-table td:first-child { width: 36px; padding-block: 4px; }
+.creatures-table.bosses-table th:nth-child(2), .creatures-table.bosses-table td:nth-child(2) { width: 100%; text-align: left; }
+.creatures-table.bosses-table a.creature-link { text-decoration: none; }
+.creatures-table.bosses-table a.creature-link:hover { text-decoration: underline; }
+.creatures-table.bosses-table td.kills { color: var(--label); }
 /* A lista e a ficha ocupam o mesmo espaço da moldura, uma de cada vez */
 .creatures-pane { display: flex; flex: 1 1 auto; flex-direction: column; gap: 14px; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--edge) transparent; }
 .creatures-pane[hidden] { display: none; }
@@ -210,6 +226,7 @@ dialog#creature-dlg { width: min(880px, calc(100vw - 32px)); scrollbar-width: th
 .creature-stat.none b { color: var(--faint); }
 /* Página Criaturas: troca entre a lista de criaturas e a tabela de itens lendários */
 .unit-toggle.creatures-view { align-self: flex-start; margin-left: 0; }
+.unit-toggle.creatures-view[hidden] { display: none; }
 .creatures-table.legend-table { min-width: 900px; }
 .creatures-table.legend-table td { vertical-align: middle; }
 .creatures-table.legend-table td:first-child { white-space: nowrap; }
@@ -977,10 +994,12 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 
   <section class="page" id="page-creatures" hidden>
   <p class="paste has-tut solo"><span data-i18n="creatures.paste.a">Com o print da ficha de uma criatura no bestiário copiado, em qualquer aba de raridade, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="creatures.paste.b">nesta página. O XP e os atributos dela são atualizados para todos; um print mais novo corrige o que já estava.</span><button class="tut-btn" type="button" data-tut="bestiario" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></p>
-<div class="support tool" id="creatures" aria-labelledby="creatures-title">
-  <div class="support-end">
-    <h2 id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
-  </div>
+<div class="ctabs" id="ctabs" data-on="creatures" role="tablist" aria-label="Criaturas" data-i18n-attr="aria-label:creatures.title">
+  <button class="ctab" type="button" role="tab" id="ctab-creatures" aria-selected="true" aria-controls="creatures"><span data-i18n="creatures.title">Criaturas</span></button>
+  <button class="ctab" type="button" role="tab" id="ctab-bosses" aria-selected="false" aria-controls="creatures"><span data-i18n="bosses.title">Chefes</span></button>
+</div>
+<div class="support tool" id="creatures" role="tabpanel" aria-labelledby="creatures-title">
+  <h2 class="sr" id="creatures-title" data-i18n="creatures.title">Criaturas</h2>
   <p class="status" id="creatures-status" role="status" hidden></p>
   <div class="unit-toggle creatures-view" role="group" aria-label="Criaturas" data-i18n-attr="aria-label:creatures.title">
     <button type="button" id="view-creatures" aria-pressed="true" data-i18n="legend.view.creatures">Criaturas</button>
@@ -1001,6 +1020,14 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </div>
   <p class="support-note" id="creatures-count" role="status"></p>
   <div class="creatures-wrap"><table class="creatures-table" id="creatures-table"></table></div>
+  </div>
+  <div class="creatures-pane" id="bosses-list" hidden>
+  <p class="support-note" data-i18n="bosses.intro">Chefes do jogo, pela categoria Boss Creatures do bestiário, na wiki do Medivia. A coluna Bestiário diz quantos abates completam a ficha. XP e atributos aparecem quando alguém cola o print do chefe no bestiário, como nas criaturas.</p>
+  <div class="creatures-bar">
+    <input type="search" id="bosses-search" placeholder="Buscar chefe" aria-label="Buscar chefe" autocomplete="off" data-i18n-attr="placeholder:bosses.search;aria-label:bosses.search">
+  </div>
+  <p class="support-note" id="bosses-count" role="status"></p>
+  <div class="creatures-wrap"><table class="creatures-table bosses-table" id="bosses-table"></table></div>
   </div>
   <div class="creatures-pane" id="legend-list" hidden>
   <p class="support-note"><span data-i18n="legend.intro">Itens lendários do jogo e as criaturas que os deixam, pela wiki do Medivia. Eles caem da versão lendária da criatura. Clique numa criatura para abrir a ficha dela; a chance real aparece quando os prints do bestiário já a trouxeram.</span><button class="tut-btn" type="button" data-tut="lendarios" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button></p>
@@ -1483,6 +1510,17 @@ const I18N = {
     'creature.s.manaD': 'mana da criatura',
     'creatures.open': 'Criaturas',
     'creatures.title': 'Criaturas',
+    'bosses.title': 'Chefes',
+    'bosses.intro': 'Chefes do jogo, pela categoria Boss Creatures do bestiário, na wiki do Medivia. A coluna Bestiário diz quantos abates completam a ficha. XP e atributos aparecem quando alguém cola o print do chefe no bestiário, como nas criaturas.',
+    'bosses.search': 'Buscar chefe',
+    'bosses.count': '{n} chefes, {k} com XP',
+    'bosses.col.name': 'Chefe',
+    'bosses.col.kills': 'Bestiário',
+    'bosses.kills': '{n} abates',
+    'bosses.kill': '1 abate',
+    'bosses.col.wiki': 'Wiki',
+    'bosses.wikiTip': 'Abrir a página deste chefe na wiki do Medivia',
+    'bosses.none': 'Nenhum chefe encontrado.',
     'creatures.intro': 'XP e atributos vêm dos prints do bestiário; os respawns, dos prints da janela de bônus. Clique numa criatura para abrir a ficha dela.',
     'creatures.search': 'Buscar criatura ou respawn',
     'creatures.sort': 'Ordenar por',
@@ -2024,6 +2062,17 @@ const I18N = {
     'creature.s.manaD': 'mana of the creature',
     'creatures.open': 'Creatures',
     'creatures.title': 'Creatures',
+    'bosses.title': 'Bosses',
+    'bosses.intro': 'Bosses of the game, from the Boss Creatures category of the bestiary on the Medivia wiki. The Bestiary column says how many kills complete the page. XP and stats show up when someone pastes the boss screenshot from the bestiary, as with creatures.',
+    'bosses.search': 'Search boss',
+    'bosses.count': '{n} bosses, {k} with XP',
+    'bosses.col.name': 'Boss',
+    'bosses.col.kills': 'Bestiary',
+    'bosses.kills': '{n} kills',
+    'bosses.kill': '1 kill',
+    'bosses.col.wiki': 'Wiki',
+    'bosses.wikiTip': 'Open the page of this boss on the Medivia wiki',
+    'bosses.none': 'No boss found.',
     'creatures.intro': 'XP and stats come from bestiary screenshots; the respawns, from screenshots of the bonus window. Click a creature to open its sheet.',
     'creatures.search': 'Search creature or respawn',
     'creatures.sort': 'Sort by',
@@ -2565,6 +2614,17 @@ const I18N = {
     'creature.s.manaD': 'maná de la criatura',
     'creatures.open': 'Criaturas',
     'creatures.title': 'Criaturas',
+    'bosses.title': 'Jefes',
+    'bosses.intro': 'Jefes del juego, de la categoría Boss Creatures del bestiario, en la wiki de Medivia. La columna Bestiario dice cuántas muertes completan la ficha. XP y atributos aparecen cuando alguien pega la captura del jefe en el bestiario, como con las criaturas.',
+    'bosses.search': 'Buscar jefe',
+    'bosses.count': '{n} jefes, {k} con XP',
+    'bosses.col.name': 'Jefe',
+    'bosses.col.kills': 'Bestiario',
+    'bosses.kills': '{n} muertes',
+    'bosses.kill': '1 muerte',
+    'bosses.col.wiki': 'Wiki',
+    'bosses.wikiTip': 'Abrir la página de este jefe en la wiki de Medivia',
+    'bosses.none': 'Ningún jefe encontrado.',
     'creatures.intro': 'El XP y los atributos vienen de las capturas del bestiario; los respawns, de las capturas de la ventana de bonus. Haz clic en una criatura para abrir su ficha.',
     'creatures.search': 'Buscar criatura o respawn',
     'creatures.sort': 'Ordenar por',
@@ -3106,6 +3166,17 @@ const I18N = {
     'creature.s.manaD': 'mana stworzenia',
     'creatures.open': 'Stworzenia',
     'creatures.title': 'Stworzenia',
+    'bosses.title': 'Bossowie',
+    'bosses.intro': 'Bossowie z gry, z kategorii Boss Creatures bestiariusza na wiki Medivii. Kolumna Bestiariusz mówi, ile zabójstw kończy kartę. XP i statystyki pojawią się, gdy ktoś wklei zrzut bossa z bestiariusza, tak jak przy stworzeniach.',
+    'bosses.search': 'Szukaj bossa',
+    'bosses.count': '{n} bossów, {k} z XP',
+    'bosses.col.name': 'Boss',
+    'bosses.col.kills': 'Bestiariusz',
+    'bosses.kills': '{n} zabójstw',
+    'bosses.kill': '1 zabójstwo',
+    'bosses.col.wiki': 'Wiki',
+    'bosses.wikiTip': 'Otwórz stronę tego bossa na wiki Medivii',
+    'bosses.none': 'Nie znaleziono bossa.',
     'creatures.intro': 'XP i statystyki pochodzą ze zrzutów bestiariusza, a respawny ze zrzutów okna bonusu. Kliknij stworzenie, aby otworzyć jego kartę.',
     'creatures.search': 'Szukaj stworzenia lub respawnu',
     'creatures.sort': 'Sortuj według',
@@ -6637,6 +6708,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 09:29',
+    pt: ['Criaturas ganhou abas: Criaturas e Chefes. Na aba Chefes estão os 95 chefes da wiki, com figura, quantos abates completam o bestiário e link para a wiki; XP e atributos aparecem quando alguém cola o print do chefe no bestiário.'],
+    en: ['Creatures now has tabs: Creatures and Bosses. The Bosses tab has the 95 bosses from the wiki, with picture, how many kills complete the bestiary and a link to the wiki; XP and stats show up when someone pastes the boss screenshot from the bestiary.'],
+    es: ['Criaturas ahora tiene pestañas: Criaturas y Jefes. En la pestaña Jefes están los 95 jefes de la wiki, con imagen, cuántas muertes completan el bestiario y enlace a la wiki; XP y atributos aparecen cuando alguien pega la captura del jefe en el bestiario.'],
+    pl: ['Stworzenia mają teraz zakładki: Stworzenia i Bossowie. W zakładce Bossowie jest 95 bossów z wiki, z obrazkiem, liczbą zabójstw kończących bestiariusz i linkiem do wiki; XP i statystyki pojawią się, gdy ktoś wklei zrzut bossa z bestiariusza.'],
+  },
   { at: '2026-10-20 09:02',
     pt: ['Print da aba Lendário do bestiário: agora é reconhecido também quando recortado em volta da ficha, e vai para a criatura certa mesmo quando o nome da lendária ainda não é conhecido (o site acha a criatura pela descrição e pelo couro do Esfolar).'],
     en: ['Screenshot of the bestiary Legendary tab: now recognised also when cropped around the page, and it goes to the right creature even when the legendary name is not known yet (the site finds the creature from the description and the Skinning hide).'],
@@ -7424,9 +7501,10 @@ function creatureRows() {
   return [...rows.values()];
 }
 function renderCreatures() {
-  if (creaturesView !== 'creatures') renderLegend();   // as tabelas de itens mostram chances e links que dependem das criaturas
+  if (creaturesView === 'bosses') renderBosses();
+  else if (creaturesView !== 'creatures') renderLegend();   // as tabelas de itens mostram chances e links que dependem das criaturas
   const text = slug($('#creatures-search').value), by = $('#creatures-sort').value, only = $('#creatures-missing').checked;
-  const all = creatureRows();
+  const all = creatureRows().filter(c => !BOSS_IDS.has(c.id));   // os chefes ficam na aba deles
   const list = all
     .filter(c => (!only || c.exp == null) && (!text || slug(c.name).includes(text) || c.where.some(w => slug(w.name).includes(text))))
     .sort((a, b) => (by === 'name' ? 0 : (b[by] ?? -1) - (a[by] ?? -1)) || a.name.localeCompare(b.name, 'pt'));   // sem valor vai para o fim
@@ -7527,7 +7605,107 @@ function legendOdds(o, item, single) {
 }
 // As abas da página Criaturas e a parte da página de cada uma: a lista de criaturas e os itens (as três tabelas da
 // wiki, uma abaixo da outra: itens lendários, exclusivos dos lendários e menções honrosas).
-const CREATURE_VIEWS = { creatures: 'creatures-list', legend: 'legend-list' };
+/* ---------- Chefes ----------
+   Categoria "Boss Creatures" do bestiário, na wiki do jogo (wiki.medivia.online), copiada em 2026-10-20. Cada linha:
+   nome | abates que completam a ficha no bestiário | formato da figura em img/bosses/ (vazio: a wiki não tem). O jogo
+   conta 107 chefes; a wiki lista estes 95. XP e atributos vêm dos prints do bestiário, como nas criaturas. */
+const BOSSES = `Tenebraex|1|webp
+Merga|3|webp
+Grimmorc Ironfist|1|
+Blighted Dwarf Champion|60|webp
+Captain Edward|3|webp
+Ignis|30|webp
+Archbishop Zorbar|1|
+Master Mitrik|1|
+Plagoran|30|webp
+Dodruk|30|webp
+Archiona|3|
+Suffocent|30|webp
+Selta|3|webp
+Sulphira|3|
+Balremaach|1|webp
+Master Ecthrois|1|
+Harenam|30|webp
+Thousand Eyes|3|
+Hobin Rood|1|
+Isagrim Deathbloom|5|
+Captain Ice Eye|3|
+Mortem|30|webp
+Zundram|1|
+Moerius|15|webp
+Captain Sharktooth|3|
+Uruk Twinblade|1|
+Master Zegrath|1|
+Trollum|3|
+Broodmother|3|webp
+Baalerun|30|webp
+Vruhag the Slaughterer|1|
+Tetraodona|15|
+Dumbuk Thunderspear|1|
+Zilrazath|1|
+Goshnir|1|webp
+Sasquatch|5|webp
+Azeran|30|webp
+Terraemotus|30|webp
+Mictlantecuhtli|30|webp
+Medusa|3|webp
+Xago the Snake Charmer|25|
+Jaffr|3|webp
+Captain Jony Daves|3|
+Nille the Devourer|1|webp
+Boggle Leader|25|
+Thor'garak|1|webp
+Tarathiel|3|
+Hadrian the Crusher|1|
+Gromm|5|webp
+Ice Colossus|3|webp
+Maltherion|15|
+Captain Bigtoe|1|
+General Manos|1|
+Dwarf Renegade|1|
+Zildur|30|webp
+Azgath|1|
+Captain Silvertongue|3|
+Xhodryn|25|
+Hirnus Bloodhoof|1|
+Urzuk The Great|1|
+Delora Sanguis|1|
+Mazzgaron|30|webp
+Sraxx|3|
+Rel'tir|30|png
+Laphis|30|webp
+Zurishatoz|30|
+Tempestas|30|webp
+Tainted Protector|25|webp
+Norae|30|webp
+Winter Beast Yeti|5|
+Chief Eichelberbog|1|
+Groma|3|webp
+Honou|1|
+White Wing|1|
+Erebus|3|
+Mons|30|webp
+Saequr|1|
+Walius|5|webp
+Agaltha|1|webp
+Ulag Silverarrow|1|
+Orc Commander|1|
+Kraken|10|webp
+Troll Chieftain|25|
+Necromantica|1|
+Rogue Fonia|3|
+Daevok|1|webp
+Spawn of Agavan|1|
+Rashed|30|webp
+Holibar|30|webp
+Arcestar|5|
+General Raine|3|png
+Kruzgog|30|webp
+Uliax|30|webp
+Gieffrin|5|
+Uliaarthar|1|png`.split('\n').map(l => { const [name, kills, img] = l.split('|'); return { id: slug(name), name, kills: +kills || null, img: img || null }; });
+const BOSS_IDS = new Set(BOSSES.map(b => b.id));
+const CREATURE_VIEWS = { creatures: 'creatures-list', legend: 'legend-list', bosses: 'bosses-list' };
 let creaturesView = 'creatures';
 function renderLegend() {
   const rows = new Map(creatureRows().map(c => [c.id, c]));
@@ -7566,11 +7744,46 @@ function setCreaturesView(view) {
   creaturesView = CREATURE_VIEWS[view] ? view : 'creatures';
   for (const [v, pane] of Object.entries(CREATURE_VIEWS)) {
     $('#' + pane).hidden = v !== creaturesView;
-    $('#view-' + v).setAttribute('aria-pressed', String(v === creaturesView));
+    const b = $('#view-' + v);
+    if (b) b.setAttribute('aria-pressed', String(v === creaturesView));
   }
-  if (creaturesView !== 'creatures') renderLegend();
+  // As abas do alto: Chefes, ou Criaturas (com a lista e os itens lendários dentro)
+  const boss = creaturesView === 'bosses';
+  $('#ctabs').dataset.on = boss ? 'bosses' : 'creatures';
+  $('#ctab-creatures').setAttribute('aria-selected', String(!boss));
+  $('#ctab-bosses').setAttribute('aria-selected', String(boss));
+  $('.creatures-view').hidden = boss;
+  if (boss) renderBosses();
+  else if (creaturesView !== 'creatures') renderLegend();
 }
-for (const v of Object.keys(CREATURE_VIEWS)) $('#view-' + v).addEventListener('click', () => setCreaturesView(v));
+$('#ctab-creatures').addEventListener('click', () => { if (creaturesView === 'bosses') { setCreaturesView('creatures'); history.replaceState(null, '', '#creatures'); } });
+$('#ctab-bosses').addEventListener('click', () => { setCreaturesView('bosses'); history.replaceState(null, '', '#creatures/chefes'); });
+$('#bosses-search').addEventListener('input', () => renderBosses());
+// Lista de chefes: figura, nome (abre a ficha quando já há print do bestiário; senão a wiki), abates do bestiário, números.
+function renderBosses() {
+  const text = slug($('#bosses-search').value);
+  const rows = new Map(creatureRows().map(c => [c.id, c]));
+  const all = BOSSES.map(b => ({ ...b, c: rows.get(b.id) || null }));
+  const list = all.filter(b => !text || b.id.includes(text)).sort((a, b) => a.name.localeCompare(b.name, 'pt'));
+  setText($('#bosses-count'), tr('bosses.count', { n: all.length, k: all.filter(b => b.c && b.c.exp != null).length }));
+  const num = v => v == null ? null : fmtInt(v);
+  const range = (lo, hi) => lo == null ? null : lo === hi ? fmtInt(lo) : fmtInt(lo) + ' – ' + fmtInt(hi);
+  const cell = v => el('td', { class: v == null ? 'none' : null, text: v == null ? '–' : v });
+  const wiki = b => 'https://wiki.medivia.online/' + encodeURIComponent(b.name.replace(/ /g, '_'));
+  $('#bosses-table').replaceChildren(
+    el('thead', {}, el('tr', {}, ['', tr('bosses.col.name'), tr('bosses.col.kills'), 'XP', 'HP', 'ARM', 'DEF', 'SPD', tr('bosses.col.wiki')].map(t => el('th', { scope: 'col', text: t })))),
+    el('tbody', {}, list.length ? list.map(b => { const c = b.c || {};
+      return el('tr', {},
+        el('td', {}, b.img ? el('img', { class: 'boss-fig', src: 'img/bosses/' + b.id + '.' + b.img + '?v=1', alt: '', loading: 'lazy', width: 40, height: 40 }) : el('span', { class: 'boss-fig none' })),
+        el('td', {}, b.c ? el('button', { class: 'creature-link', type: 'button', text: b.name, title: tr('creature.open'), onclick: () => { creatureTier = 'normal'; showCreature(b.id); } })
+          : el('a', { class: 'creature-link', href: wiki(b), target: '_blank', rel: 'noopener', text: b.name, title: tr('bosses.wikiTip') })),
+        el('td', { class: 'kills', text: b.kills == null ? '–' : b.kills === 1 ? tr('bosses.kill') : tr('bosses.kills', { n: b.kills }) }),
+        el('td', { class: c.exp == null ? 'none' : 'xp', text: c.exp == null ? '?' : fmtInt(c.exp) }),
+        cell(num(c.hp)), cell(range(c.armLo, c.armHi)), cell(range(c.defLo, c.defHi)), cell(num(c.spd)),
+        el('td', {}, el('a', { class: 'hunt-link', href: wiki(b), target: '_blank', rel: 'noopener', text: tr('bosses.col.wiki'), title: tr('bosses.wikiTip') })));
+    }) : el('tr', {}, el('td', { class: 'none', colSpan: 9, text: tr('bosses.none') }))));
+}
+for (const v of Object.keys(CREATURE_VIEWS)) $('#view-' + v)?.addEventListener('click', () => setCreaturesView(v));
 function showCreature(id) {
   const dlg = $('#creature-dlg');
   creatureId = id;
@@ -8731,7 +8944,7 @@ function goTo(route, push = true) {
   for (const b of document.querySelectorAll('[data-go]')) { if (b.dataset.go === to) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
   // #creatures/itens abre direto a aba dos itens (os endereços antigos das outras duas tabelas caem nela também);
   // outro nome é a ficha de uma criatura
-  const views = { itens: 'legend', exclusivos: 'legend', mencoes: 'legend' };
+  const views = { itens: 'legend', exclusivos: 'legend', mencoes: 'legend', chefes: 'bosses', bosses: 'bosses' };
   if (to === 'creatures') setCreaturesView(views[sub] || 'creatures');
   creatureWanted = to === 'creatures' && sub && !views[sub] && slug(sub) === sub ? sub : null;   // #creatures/malformis já abre a ficha
   if (to === 'creatures') renderCreatures();   // se os dados ainda não chegaram, a ficha abre quando chegarem
