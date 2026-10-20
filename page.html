@@ -561,6 +561,7 @@ input.win-name:not([readonly]):hover, input.win-name:not([readonly]):focus { bor
 .qty-row button:disabled { opacity: 0.35; cursor: default; }
 .qty-n { min-width: 48px; font-weight: 600; text-align: center; color: var(--title); font-variant-numeric: lining-nums tabular-nums; }
 .qty-foot { margin: 0; color: var(--faint); }
+.stage > .qty { padding-top: 16px; border-top: 1px solid var(--edge); }
 .mob p.mob-noxp b { color: var(--faint); }
 .howto { display: flex; flex-direction: column; gap: 10px; max-width: 54ch; padding: 24px; border-radius: var(--r-lg); background: var(--box); }
 .howto ol { display: flex; flex-direction: column; gap: 4px; padding-left: 1.3em; color: var(--title); }
@@ -5893,7 +5894,6 @@ function buildSheet(id, fixed, id2) {
       statusEl,
       el('div', { class: 'controls' }, p.party.root, p.bonus.root, p.dur.root, p.cost.root),
       p.xp,
-      p.qty,
       el('h3', { class: 'band', text: tr('band') }),
       p.mobs,
       second,
@@ -5973,7 +5973,7 @@ function renderSheet() {
     return root;
   });
   // Cada cronômetro tem uma linha a mais com dois respawns ("two") e outra com a caixa da janela flutuante ("pick").
-  (parts.clockBox || parts.stage).replaceChildren(el('div', { class: 'clocks' + (r2 ? ' two' : '') + (many ? ' pick' : '') }, clocks), stageAll(clocks.length > 1));
+  (parts.clockBox || parts.stage).replaceChildren(el('div', { class: 'clocks' + (r2 ? ' two' : '') + (many ? ' pick' : '') }, clocks), stageAll(clocks.length > 1), ...(parts.qty ? [parts.qty] : []));   // a quantidade personalizada fica logo abaixo do cronômetro
 
   if (parts.custom) {
     // Personalizado: os campos acompanham o que está salvo, sem atropelar quem está digitando
