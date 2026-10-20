@@ -341,6 +341,16 @@ dialog.tut-dlg { width: fit-content; max-width: calc(100vw - 32px); padding: 16p
 .bonus .win-title.tab .win-name { min-width: 3ch; max-width: 100%; field-sizing: content; font-size: 26px; text-overflow: ellipsis; }
 .bonus .win-title.tab .tut-btn { flex: none; margin: 0; }
 .bonus .win-title.tab + .win-body > .stage:first-child { border-top-left-radius: 0; }
+.win-tag { flex: none; padding: 3px 10px; border: 1px solid var(--gold-edge); border-radius: 999px; color: var(--amber); font: 600 12px/1.2 var(--font-ui); }
+.custom-ctl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 14px 18px; padding-bottom: 18px; border-bottom: 1px solid var(--edge); }
+.custom-ctl input { width: 100%; padding: 9px 12px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 15px/1.3 var(--font-ui); }
+.custom-ctl input:focus { outline: 2px solid var(--value); outline-offset: -1px; border-color: transparent; }
+.custom-time { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.custom-time input { width: 96px; text-align: center; font-variant-numeric: tabular-nums; }
+.custom-time .unit-toggle { margin-left: 0; }
+.custom-add { align-self: flex-start; margin-top: 4px; }
+.creature-single { align-self: flex-start; }
+@media (max-width: 640px) { .custom-ctl { grid-template-columns: 1fr; } }
 .win-name { font: 800 28px/1.15 var(--font-display); letter-spacing: -0.01em; color: var(--title); }
 input.win-name {
   flex: 1;
@@ -855,6 +865,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
         <label class="toggle duo"><input type="checkbox" id="opt-duo"> <span data-i18n="duo.label">Abrir dois respawns</span></label>
         <p class="bank-empty" id="duo-hint" data-i18n="duo.hint" hidden>Clique em dois respawns da lista. Clique de novo em um deles para fechar.</p>
         <ul class="bank-list" id="bank-list"></ul>
+        <button class="hunt-link custom-add" type="button" id="custom-add" data-i18n="custom.add">+ Cronômetro personalizado</button>
       </div>
       <footer class="win-foot bank-foot">
         <p class="sync" id="sync"></p>
@@ -1457,6 +1468,8 @@ const I18N = {
     'creature.col.xp': 'XP por hora',
     'creature.s.xp': 'XP por abate',
     'creature.s.xpD': 'raridade {t}, sem bônus',
+    'creature.s.xpDSingle': 'sem bônus',
+    'creature.updateSingle': 'Os números mudaram no jogo? Cole um print novo da ficha desta criatura no bestiário e eles são atualizados.',
     'creature.s.hp': 'HP',
     'creature.s.hpD': 'pontos de vida',
     'creature.s.ratio': 'XP por HP',
@@ -1636,6 +1649,18 @@ const I18N = {
     'raffle.copy': 'Copiar resultado',
     'raffle.copied': 'Resultado do sorteio copiado.',
     'changes.open': 'Novidades',
+    'custom.add': '+ Cronômetro personalizado',
+    'custom.tag': 'Personalizado',
+    'custom.new': 'Novo cronômetro',
+    'custom.creature': 'Criatura',
+    'custom.creaturePh': 'Nome da criatura ou do chefe',
+    'custom.time': 'Tempo de respawn',
+    'custom.min': '{n} min',
+    'custom.hour': '{n} h',
+    'custom.hint': 'Cronômetro seu, sem janela de bônus: o tempo é o que você escolher. Fica salvo só neste navegador.',
+    'custom.badTime': 'Use minutos e segundos, como 30:00 (de 10 segundos a 24 horas).',
+    'creature.single': 'Sem raridades',
+    'creature.singleNote': 'Esta criatura não tem as raridades Comum, Raro e Lendário: aparece sempre igual.',
     'fb.open': 'Sugestões e problemas',
     'fb.intro': 'Conte o que poderia melhorar ou o que não funcionou. A mensagem vai só para quem mantém o site.',
     'fb.kind': 'Tipo',
@@ -1984,6 +2009,8 @@ const I18N = {
     'creature.col.xp': 'XP per hour',
     'creature.s.xp': 'XP per kill',
     'creature.s.xpD': '{t} rarity, no bonus',
+    'creature.s.xpDSingle': 'no bonus',
+    'creature.updateSingle': 'Did the numbers change in the game? Paste a new screenshot of the bestiary page of this creature and they are updated.',
     'creature.s.hp': 'HP',
     'creature.s.hpD': 'hit points',
     'creature.s.ratio': 'XP per HP',
@@ -2163,6 +2190,18 @@ const I18N = {
     'raffle.copy': 'Copy result',
     'raffle.copied': 'Raffle result copied.',
     'changes.open': 'What is new',
+    'custom.add': '+ Custom timer',
+    'custom.tag': 'Custom',
+    'custom.new': 'New timer',
+    'custom.creature': 'Creature',
+    'custom.creaturePh': 'Creature or boss name',
+    'custom.time': 'Respawn time',
+    'custom.min': '{n} min',
+    'custom.hour': '{n} h',
+    'custom.hint': 'Your own timer, with no bonus window: the time is whatever you choose. Saved only in this browser.',
+    'custom.badTime': 'Use minutes and seconds, like 30:00 (from 10 seconds to 24 hours).',
+    'creature.single': 'No rarities',
+    'creature.singleNote': 'This creature has no Common, Rare or Legendary rarities: it always appears the same.',
     'fb.open': 'Suggestions and problems',
     'fb.intro': 'Tell us what could be better or what did not work. The message only goes to whoever runs the site.',
     'fb.kind': 'Type',
@@ -2511,6 +2550,8 @@ const I18N = {
     'creature.col.xp': 'XP por hora',
     'creature.s.xp': 'XP por muerte',
     'creature.s.xpD': 'rareza {t}, sin bonus',
+    'creature.s.xpDSingle': 'sin bonus',
+    'creature.updateSingle': '¿Cambiaron los números en el juego? Pega una captura nueva de la ficha de esta criatura en el bestiario y se actualizan.',
     'creature.s.hp': 'HP',
     'creature.s.hpD': 'puntos de vida',
     'creature.s.ratio': 'XP por HP',
@@ -2690,6 +2731,18 @@ const I18N = {
     'raffle.copy': 'Copiar resultado',
     'raffle.copied': 'Resultado del sorteo copiado.',
     'changes.open': 'Novedades',
+    'custom.add': '+ Cronómetro personalizado',
+    'custom.tag': 'Personalizado',
+    'custom.new': 'Nuevo cronómetro',
+    'custom.creature': 'Criatura',
+    'custom.creaturePh': 'Nombre de la criatura o del jefe',
+    'custom.time': 'Tiempo de respawn',
+    'custom.min': '{n} min',
+    'custom.hour': '{n} h',
+    'custom.hint': 'Tu propio cronómetro, sin ventana de bonus: el tiempo es el que elijas. Se guarda solo en este navegador.',
+    'custom.badTime': 'Usa minutos y segundos, como 30:00 (de 10 segundos a 24 horas).',
+    'creature.single': 'Sin rarezas',
+    'creature.singleNote': 'Esta criatura no tiene las rarezas Común, Rara y Legendaria: aparece siempre igual.',
     'fb.open': 'Sugerencias y problemas',
     'fb.intro': 'Cuenta qué podría mejorar o qué no funcionó. El mensaje solo llega a quien mantiene el sitio.',
     'fb.kind': 'Tipo',
@@ -3038,6 +3091,8 @@ const I18N = {
     'creature.col.xp': 'XP na godzinę',
     'creature.s.xp': 'XP za zabicie',
     'creature.s.xpD': 'rzadkość: {t}, bez bonusu',
+    'creature.s.xpDSingle': 'bez bonusu',
+    'creature.updateSingle': 'Liczby zmieniły się w grze? Wklej nowy zrzut karty tego stworzenia z bestiariusza, a zostaną zaktualizowane.',
     'creature.s.hp': 'HP',
     'creature.s.hpD': 'punkty życia',
     'creature.s.ratio': 'XP na HP',
@@ -3217,6 +3272,18 @@ const I18N = {
     'raffle.copy': 'Kopiuj wynik',
     'raffle.copied': 'Wynik losowania skopiowany.',
     'changes.open': 'Nowości',
+    'custom.add': '+ Własny licznik',
+    'custom.tag': 'Własny',
+    'custom.new': 'Nowy licznik',
+    'custom.creature': 'Stworzenie',
+    'custom.creaturePh': 'Nazwa stworzenia lub bossa',
+    'custom.time': 'Czas respawnu',
+    'custom.min': '{n} min',
+    'custom.hour': '{n} h',
+    'custom.hint': 'Własny licznik, bez okna bonusu: czas jest taki, jaki wybierzesz. Zapisany tylko w tej przeglądarce.',
+    'custom.badTime': 'Użyj minut i sekund, np. 30:00 (od 10 sekund do 24 godzin).',
+    'creature.single': 'Bez rzadkości',
+    'creature.singleNote': 'To stworzenie nie ma rzadkości Pospolita, Rzadka i Legendarna: zawsze wygląda tak samo.',
     'fb.open': 'Sugestie i problemy',
     'fb.intro': 'Napisz, co można poprawić albo co nie działało. Wiadomość trafia tylko do osoby, która prowadzi stronę.',
     'fb.kind': 'Rodzaj',
@@ -3834,6 +3901,9 @@ async function readBestiary(ocr) {
   }
   if (!exp || !find(/^(ARM|DEF|SPD|MANA)$/)) return null;
   const out = { kind: 'bestiary', name: null, exp: null, tab: null, stats: {} };
+  // Algumas criaturas (as Phoenix) não têm as abas Normal, Comum, Raro e Lendário: nenhum desses textos aparece no print.
+  const tierWords = /^(RARIDADE|RARITY|RAREZA|RZADKO\S*|Normal|Comum|Common|Com[uú]n|Raro|Rare|Rara|Lend[aá]rio|Legendary|Legendaria|Zwyk\S*|Pospolit\S*|Rzadk\S*|Legendarn\S*)$/i;
+  out.single = !L.some(l => l.y < hp.y && l.text.split(/\s+/).some(w => tierWords.test(w)));
   const h = exp.h, pitch = Math.abs(exp.x + exp.w / 2 - hp.x - hp.w / 2);   // distância entre os quadros
   const nameLine = L.filter(l => l.x + l.w < hp.x && Math.abs(l.y - hp.y) < h * 2 && l.conf >= 60 && /[A-Za-z]{2}/.test(l.text)).sort((a, b) => a.x - b.x)[0];
   const tidy = t => String(t).replace(/^[^A-Za-z]+|[^A-Za-z')]+$/g, '').replace(/\s+/g, ' ').slice(0, 60);
@@ -3855,6 +3925,7 @@ async function readBestiary(ocr) {
   const reads = (await ocr.peek(box.x, box.y, box.w, box.h, '0123456789 ')).map(num);
   out.exp = vote([below ? num(below.text) : null, ...reads]);
   if (out.exp != null && out.exp > 1e8) out.exp = null;
+  if (out.single && out.tab != null) out.single = false;   // achou os traços das abas: tem raridades
   // Os outros quadros (HP, ARM, DEF, SPD, MANA): o valor fica logo abaixo do título e é relido de perto, como o EXP.
   // ARM e DEF são faixas ("38 - 113"); sem o traço lido, só vale um número sozinho.
   const spanOf = t => {
@@ -3992,6 +4063,7 @@ function normalize(d) {
     readAt: int(d.readAt, 0, 100),
     updatedAt: typeof d.updatedAt === 'string' ? d.updatedAt.slice(0, 40) : null,
     src: d.src === 'mapper' ? 'mapper' : null,   // veio do print do mapper: fica só neste navegador
+    ...(d.custom === true ? { custom: true } : {}),   // cronômetro personalizado: tempo fixo, escolhido aqui, sem bônus
   };
 }
 
@@ -4137,10 +4209,12 @@ const cloud = {
 
 // A API do Firestore escreve cada valor com o tipo ao lado: { stringValue: "x" }, { integerValue: "3" }...
 const toFs = v => typeof v === 'string' ? { stringValue: v }
+  : typeof v === 'boolean' ? { booleanValue: v }
   : Number.isInteger(v) ? { integerValue: String(v) }
   : { mapValue: { fields: Object.fromEntries(Object.entries(v).map(([k, x]) => [k, toFs(x)])) } };
 const fromFs = v => v == null ? null
   : 'stringValue' in v ? v.stringValue
+  : 'booleanValue' in v ? v.booleanValue
   : 'integerValue' in v ? Number(v.integerValue)
   : 'doubleValue' in v ? v.doubleValue
   : 'timestampValue' in v ? v.timestampValue
@@ -4392,6 +4466,7 @@ function xpDoc(raw) {
   if (Object.keys(tiers).length) d.tiers = tiers;
   const odds = oddsOf(raw.odds);
   if (odds) d.odds = odds;
+  if (raw.single === true) d.single = true;   // criatura sem raridades (como as Phoenix)
   return d;
 }
 // Junta dois registros da mesma criatura: o segundo corrige o que traz, e o que ele não traz fica como estava.
@@ -4412,7 +4487,7 @@ function xpMerge(a, b) {
 const creatureOf = id => xpMerge(xp.cloud.get(id), xp.mine.get(id));
 const xpSig = d => JSON.stringify([d.exp ?? null, ...Object.keys(XP_STATS).map(k => d[k] ?? null),
   XP_TIERS.map(t => { const o = (d.tiers || {})[t]; return o ? [o.name ?? null, o.exp ?? null, ...Object.keys(XP_STATS).map(k => o[k] ?? null)] : null; }),
-  ['c', 'r', 'l', 'item', 'tag', 'lo', 'hi'].map(k => (d.odds || {})[k] ?? null)]);
+  ['c', 'r', 'l', 'item', 'tag', 'lo', 'hi'].map(k => (d.odds || {})[k] ?? null), d.single === true]);
 {
   const cache = lsGet(LS_XP, null);
   for (const [id, raw] of Object.entries(cache && cache.docs && typeof cache.docs === 'object' ? cache.docs : {})) {
@@ -4494,6 +4569,7 @@ async function pushXp(id) {
     // O nome e quem enviou primeiro ficam; os valores são os do print mais novo.
     const raw = { name: cur ? cur.name : mine.name, ...xpNumbers(next), owner: cur && cur.owner ? cur.owner : uid };
     if (next.tiers) raw.tiers = next.tiers;
+    if (next.single === true) raw.single = true;
     if (next.odds) raw.odds = JSON.stringify(next.odds);
     const send = () => cloudCommit({
       update: { name: cloud.root + '/creatures/' + id, fields: toFs(raw).mapValue.fields },
@@ -4648,7 +4724,8 @@ function renderBank() {
       el('button', {
         class: n ? 'bank-item picked' : 'bank-item', type: 'button', 'aria-current': r.id === ui.id || r.id === second ? 'true' : null,
         onclick: () => pick(r.id),
-      }, el('b', { text: r.name }), el('small', { text: (r.src === 'mapper' ? tr('bank.mapper') + ': ' : '') + (r.monsters.map(m => m.name).join(', ') || tr('bank.nomobs')) }),
+      }, el('b', { text: r.name }), el('small', { text: r.custom ? tr('custom.tag') + ' · ' + fmtClock((r.monsters[0] || {}).base || 0)
+        : (r.src === 'mapper' ? tr('bank.mapper') + ': ' : '') + (r.monsters.map(m => m.name).join(', ') || tr('bank.nomobs')) }),
         n ? el('i', { class: 'bank-n', text: n }) : null));
   }));
   if (!hits.length) {
@@ -5247,7 +5324,7 @@ function unitToggle() {
     el('button', { type: 'button', id: 'unit-m', 'aria-pressed': String(ui.unit === 'm'), text: tr('unit.m'), onclick: () => setUnit('m') }));
 }
 
-function sheetHead(id, fixed) {
+function sheetHead(id, fixed, custom) {
   const nameInput = el('input', {
     class: 'win-name', id: 'area-name', maxLength: 60, readOnly: fixed,
     'aria-label': tr('name.aria'), title: fixed ? null : tr('name.title'),
@@ -5260,8 +5337,64 @@ function sheetHead(id, fixed) {
     setTimeout(() => { del.classList.remove('sure'); del.textContent = tr('delete'); }, 4000);
   } });
   const help = el('button', { class: 'tut-btn', type: 'button', 'data-tut': 'cronometro', 'aria-haspopup': 'dialog', title: tr('tut.open'), 'aria-label': tr('tut.open'), 'data-i18n-attr': 'title:tut.open;aria-label:tut.open', text: '?' });
-  return { nameInput, head: el('header', { class: 'win-title tab' }, nameInput, help, fixed ? null : del) };
+  if (custom) nameInput.readOnly = true;   // o nome do personalizado é o da criatura, escolhida no campo abaixo
+  const tag = custom ? el('span', { class: 'win-tag', text: tr('custom.tag'), 'data-i18n': 'custom.tag' }) : null;
+  return { nameInput, head: el('header', { class: 'win-title tab' }, nameInput, tag, help, fixed ? null : del) };
 }
+
+// Cronômetro personalizado: em vez de grupo, bônus e custo, a criatura e o tempo, escolhidos aqui. O relógio é o mesmo.
+function buildCustomSheet(id, id2) {
+  const { nameInput, head } = sheetHead(id, false, true);
+  const names = [...new Set(creatureRows().map(c => c.name))].sort((a, b) => a.localeCompare(b, 'pt'));
+  const creature = el('input', { type: 'text', id: 'custom-creature', maxLength: 60, autocomplete: 'off', spellcheck: false,
+    placeholder: tr('custom.creaturePh'), onchange: e => setCustom(id, { name: e.target.value }) });
+  creature.setAttribute('list', 'custom-creatures');   // "list" só existe como atributo (a propriedade é só de leitura)
+  const time = el('input', { type: 'text', id: 'custom-time', inputmode: 'numeric', maxLength: 8, autocomplete: 'off', placeholder: '30:00',
+    onchange: e => { const sec = parseClock(e.target.value); if (sec) setCustom(id, { base: sec }); else { setStatus('err', tr('custom.badTime')); renderSheetNow(); } } });
+  const chips = [300, 600, 1800, 3600].map(sec => el('button', { type: 'button', id: 'custom-chip-' + sec, 'aria-pressed': 'false',
+    text: sec < 3600 ? tr('custom.min', { n: sec / 60 }) : tr('custom.hour', { n: sec / 3600 }), onclick: () => setCustom(id, { base: sec }) }));
+  const ctl = el('div', { class: 'custom-ctl' },
+    el('label', { class: 'calc-field' }, el('span', { text: tr('custom.creature') }), creature,
+      el('datalist', { id: 'custom-creatures' }, names.map(n => el('option', { value: n })))),
+    el('div', { class: 'calc-field' }, el('span', { text: tr('custom.time') }),
+      el('div', { class: 'custom-time' }, time, el('span', { class: 'unit-toggle', role: 'group', 'aria-label': tr('custom.time') }, chips))));
+  const clockBox = el('div', { class: 'custom-clocks' });
+  const p = { id, fixed: false, id2, nameInput, custom: { creature, time, chips }, clockBox,
+    stage: el('section', { class: 'stage', 'aria-label': tr('stage.aria') }, ctl, clockBox), hint: el('p', { class: 'hint' }) };
+  $('#sheet').replaceChildren(head, el('div', { class: 'win-body' }, p.stage, optsBar, statusEl, p.hint));
+  return p;
+}
+// "30" = 30 minutos; "30:00" = minutos e segundos; "1:00:00" = horas, minutos e segundos. Fora de 10 s a 24 h não vale.
+function parseClock(t) {
+  const parts = String(t).trim().split(':').map(x => x.trim());
+  if (!parts.length || parts.length > 3 || parts.some(x => !/^\d{1,4}$/.test(x))) return null;
+  const n = parts.map(Number), sec = n.length === 1 ? n[0] * 60 : n.length === 2 ? n[0] * 60 + n[1] : n[0] * 3600 + n[1] * 60 + n[2];
+  return sec >= 10 && sec <= 86400 ? sec : null;
+}
+// Cria um cronômetro personalizado (30 minutos, até a criatura ser escolhida) e o abre.
+function createCustom() {
+  const abc = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const id = 'personalizado-' + Array.from(crypto.getRandomValues(new Uint8Array(6)), x => abc[x % abc.length]).join('');
+  const name = tr('custom.new');
+  store.local.set(id, { name, monsters: [{ name, count: 1, base: 1800 }], custom: true, updatedAt: new Date().toISOString() });
+  persistLocal();
+  select(id);
+  goTo('timer');
+  setTimeout(() => { const f = $('#custom-creature'); if (f) { f.focus(); f.select(); } }, 50);
+}
+// Muda a criatura (que também dá o nome) ou o tempo de um personalizado. Fica só neste navegador.
+function setCustom(id, patch) {
+  const r = getRespawn(id);
+  if (!r || !r.custom) return;
+  const m = { ...(r.monsters[0] || { count: 1, base: 1800 }) };
+  let name = r.name;
+  if (patch.name != null) { name = knownName(String(patch.name).trim().replace(/\s+/g, ' ').slice(0, 60)) || r.name; m.name = name; }
+  if (patch.base != null && patch.base !== m.base) { m.base = Math.max(10, Math.min(86400, patch.base)); clearTimers(id); }
+  store.local.set(id, { ...r, name, monsters: [m], updatedAt: new Date().toISOString() });
+  persistLocal();
+  renderAll();
+}
+const renderSheetNow = () => { sheetSig = ''; renderSheet(); };
 
 function emptySheet(loading) {
   return [
@@ -5403,7 +5536,7 @@ function clockGroups(open) {
     const pct = pctOf(o.id);
     const groups = new Map();
     for (const m of o.r.monsters) {
-      const sec = respawnAt(m.base, pct, ui.party);
+      const sec = o.r.custom ? m.base : respawnAt(m.base, pct, ui.party);
       if (!groups.has(sec)) groups.set(sec, { who: [], base: m.base });
       const g = groups.get(sec);
       g.who.push(m.name);
@@ -5449,6 +5582,7 @@ function costCard(id, tag) {
 }
 
 function buildSheet(id, fixed, id2) {
+  if ((getRespawn(id) || {}).custom) return buildCustomSheet(id, id2);
   const { nameInput, head } = sheetHead(id, fixed);
   const p = {
     id, fixed, id2, nameInput,
@@ -5465,7 +5599,7 @@ function buildSheet(id, fixed, id2) {
   };
   // Segundo respawn: o nome, o percentual de bônus dele, o custo e as criaturas.
   let second = null;
-  if (id2) {
+  if (id2 && !(getRespawn(id2) || {}).custom) {
     p.name2 = el('h3', { class: 'second-name' });
     p.bonus2 = slider('ctl-bonus2', tr('ctl.bonus'), bonusStops(), v => select(id2, v));
     p.cost2 = costCard(id2, '2');
@@ -5567,8 +5701,16 @@ function renderSheet() {
     return root;
   });
   // Cada cronômetro tem uma linha a mais com dois respawns ("two") e outra com a caixa da janela flutuante ("pick").
-  parts.stage.replaceChildren(el('div', { class: 'clocks' + (r2 ? ' two' : '') + (many ? ' pick' : '') }, clocks), stageAll(clocks.length > 1));
+  (parts.clockBox || parts.stage).replaceChildren(el('div', { class: 'clocks' + (r2 ? ' two' : '') + (many ? ' pick' : '') }, clocks), stageAll(clocks.length > 1));
 
+  if (parts.custom) {
+    // Personalizado: os campos acompanham o que está salvo, sem atropelar quem está digitando
+    const m = r.monsters[0] || {}, c = parts.custom;
+    if (document.activeElement !== c.creature) c.creature.value = r.name === tr('custom.new') ? '' : r.name;
+    if (document.activeElement !== c.time) c.time.value = fmtClock(m.base || 0);
+    for (const b of c.chips) b.setAttribute('aria-pressed', String(b.id === 'custom-chip-' + m.base));
+    setText(parts.hint, tr('custom.hint'));
+  } else {
   // Controles: atualizados no lugar
   parts.party.set(PARTIES.findIndex(p => p.mult === ui.party));
   parts.bonus.set(PCTS.indexOf(ui.pct));
@@ -5576,14 +5718,15 @@ function renderSheet() {
   parts.cost.set(r);
   parts.mobs.replaceChildren(...mobCards(id, r));
   paintXp(parts.xp, id, r);
-  if (r2) {
+  }
+  if (r2 && parts.name2) {
     setText(parts.name2, tr('duo.second', { x: r2.name }));
     parts.bonus2.set(PCTS.indexOf(ui.pct2));
     parts.cost2.set(r2);
     parts.mobs2.replaceChildren(...mobCards(id2, r2));
     paintXp(parts.xp2, id2, r2);
   }
-  setText(parts.hint, sheetHint(r));
+  if (!parts.custom) setText(parts.hint, sheetHint(r));
 
   if (focusId && document.activeElement.id !== focusId) { const f = document.getElementById(focusId); if (f) f.focus(); }
   paintLaps();
@@ -5720,7 +5863,7 @@ async function readImage(blob) {
       // Só a raridade Normal entra na conta do respawn.
       if (!key) throw new UserError(tr('err.bestName'));
       if (p.exp == null) throw new UserError(tr('err.bestExp', { x: p.name }));
-      const tier = TIER_NAMES[p.tab] || 'normal', data = { exp: p.exp, ...(p.stats || {}) };
+      const tier = TIER_NAMES[p.tab] || 'normal', data = { exp: p.exp, ...(p.stats || {}), ...(p.single ? { single: true } : {}) };
       let id = key, name = p.name;
       if (tier === 'legendary') {
         // O print da aba Lendário entra: na criatura que já tem esse nome lendário, na que tem esse mesmo nome (ou
@@ -6485,6 +6628,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-19 23:57',
+    pt: ['Cronômetro personalizado: no fim da lista de respawns, "+ Cronômetro personalizado" cria um cronômetro com a criatura e o tempo que você escolher, para o que não tem janela de bônus (como as Phoenix, de 30 minutos). Fica salvo só no seu navegador.', 'Criaturas sem raridades: a ficha das que não têm Comum, Raro e Lendário (como as Phoenix) não mostra essas abas. As cinco Enraged Phoenix já estão no bestiário.'],
+    en: ['Custom timer: at the end of the respawn list, "+ Custom timer" creates a timer with the creature and the time you choose, for what has no bonus window (like the 30-minute Phoenixes). Saved only in your browser.', 'Creatures with no rarities: the sheet of creatures with no Common, Rare and Legendary (like the Phoenixes) no longer shows those tabs. The five Enraged Phoenixes are already in the bestiary.'],
+    es: ['Cronómetro personalizado: al final de la lista de respawns, "+ Cronómetro personalizado" crea un cronómetro con la criatura y el tiempo que elijas, para lo que no tiene ventana de bonus (como las Phoenix, de 30 minutos). Se guarda solo en tu navegador.', 'Criaturas sin rarezas: la ficha de las que no tienen Común, Rara y Legendaria (como las Phoenix) ya no muestra esas pestañas. Las cinco Enraged Phoenix ya están en el bestiario.'],
+    pl: ['Własny licznik: na końcu listy respawnów "+ Własny licznik" tworzy licznik z wybranym stworzeniem i czasem, dla tego, co nie ma okna bonusu (jak 30-minutowe Phoenixy). Zapisany tylko w twojej przeglądarce.', 'Stworzenia bez rzadkości: karta stworzeń bez Pospolitej, Rzadkiej i Legendarnej (jak Phoenixy) nie pokazuje już tych zakładek. Pięć Enraged Phoenix jest już w bestiariuszu.'],
+  },
   { at: '2026-10-19 23:33',
     pt: ['Leitura dos prints: nomes em que o leitor confunde letras coladas ("rn" lido como "m", como Emberborn virando Emberbom) agora são corrigidos pelo nome já conhecido da criatura. Emberborn e a lendária Ashborn foram acertados no banco.'],
     en: ['Screenshot reading: names where the reader mixes up letters that touch ("rn" read as "m", like Emberborn turning into Emberbom) are now fixed using the creature\'s known name. Emberborn and its legendary Ashborn were corrected in the bank.'],
@@ -7110,6 +7259,7 @@ function openChanges() {
 }
 // Dois caminhos para a mesma lista: o link no topo, abaixo do mapper, e o do rodapé.
 for (const b of [$('#changes-top'), $('#changes-btn')]) b.addEventListener('click', openChanges);
+$('#custom-add').addEventListener('click', createCustom);
 $('#changes-close').addEventListener('click', () => { const dlg = $('#changes'); if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
 
 /* ---------- Sugestões e problemas ----------
@@ -7249,6 +7399,7 @@ function creatureRows() {
   const rows = new Map();
   const row = (id, name) => { if (!rows.has(id)) rows.set(id, { id, name, where: [] }); return rows.get(id); };
   for (const r of allRespawns()) {
+    if (r.custom) continue;   // cronômetro personalizado: é de quem usa, não é um lugar do jogo
     for (const m of r.monsters) { const id = slug(m.name); if (id) row(id, m.name).where.push({ id: r.id, name: r.name, count: m.count }); }
   }
   for (const id of new Set([...xp.cloud.keys(), ...xp.mine.keys()])) {
@@ -7419,11 +7570,12 @@ function renderCreature() {
   const num = v => v == null ? null : fmtInt(v);
   const range = (lo, hi) => lo == null ? null : lo === hi ? fmtInt(lo) : fmtInt(lo) + ' – ' + fmtInt(hi);
   // Os números mostrados são os da aba de raridade aberta; "Onde aparece" usa sempre a Normal, como a conta do respawn.
-  const tier = TIER_NAMES.includes(creatureTier) ? creatureTier : 'normal', tierName = tr('tier.' + tier);
+  const tier = !c.single && TIER_NAMES.includes(creatureTier) ? creatureTier : 'normal', tierName = tr('tier.' + tier);
   const v = tier === 'normal' ? c : (c.tiers || {})[tier] || {};
   const stat = (key, value, cls) => el('div', { class: 'creature-stat' + (cls ? ' ' + cls : '') + (value == null ? ' none' : '') },
-    el('span', { text: tr('creature.s.' + key) }), el('b', { text: value == null ? '?' : value }), el('small', { text: tr('creature.s.' + key + 'D', { t: tierName }) }));
-  const tabs = el('div', { class: 'unit-toggle creature-tiers', role: 'group', 'aria-label': tr('tier.label') }, TIER_NAMES.map(t => {
+    el('span', { text: tr('creature.s.' + key) }), el('b', { text: value == null ? '?' : value }), el('small', { text: c.single && key === 'xp' ? tr('creature.s.xpDSingle') : tr('creature.s.' + key + 'D', { t: tierName }) }));
+  const tabs = c.single ? el('p', { class: 'creature-single' }, el('span', { class: 'win-tag', text: tr('creature.single') }), ' ', el('small', { class: 'support-note', text: tr('creature.singleNote') }))
+    : el('div', { class: 'unit-toggle creature-tiers', role: 'group', 'aria-label': tr('tier.label') }, TIER_NAMES.map(t => {
     const has = t === 'normal' ? c.exp != null : !!(c.tiers || {})[t];
     return el('button', { class: 'tier-' + t + (has ? '' : ' empty'), type: 'button', id: 'tier-' + t, 'aria-pressed': String(t === tier), text: tr('tier.' + t),
       title: has ? null : tr('tier.empty'), onclick: () => { creatureTier = t; renderCreature(); } });
@@ -7431,7 +7583,7 @@ function renderCreature() {
   const where = c.where.map(w => {
     const r = getRespawn(w.id), m = r && r.monsters.find(x => slug(x.name) === c.id);
     if (!m) return null;
-    const sec = respawnAt(m.base, ui.pct, ui.party), kills = killsPerHour(sec, m.count);
+    const sec = r.custom ? m.base : respawnAt(m.base, ui.pct, ui.party), kills = killsPerHour(sec, m.count);
     return { ...w, sec, kills, xp: c.exp == null ? null : kills * c.exp * 100 / ui.party };
   }).filter(Boolean);
   const open = id => { showCreature(null); select(id); goTo('timer'); };
@@ -7505,7 +7657,7 @@ function renderCreature() {
             el('td', { text: fmtInt(w.kills) }),
             el('td', { class: w.xp == null ? 'none' : null, text: w.xp == null ? '?' : fmtXp(w.xp) })))))),
       ] : el('p', { class: 'support-note', text: tr('creature.whereNone') })),
-    need ? null : el('p', { class: 'support-note', text: tr('creature.update') })].filter(Boolean));   // com dado faltando, o aviso de cima já diz o que colar
+    need ? null : el('p', { class: 'support-note', text: tr(c.single ? 'creature.updateSingle' : 'creature.update') })].filter(Boolean));   // com dado faltando, o aviso de cima já diz o que colar
 }
 $('#creature-close').addEventListener('click', () => showCreature(null));
 $('#creature-dlg').addEventListener('close', () => { creatureId = null; });
