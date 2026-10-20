@@ -4692,6 +4692,9 @@ async function cloudDelete(id) {
 const LS_XP = 'medivia-respawn.criaturas.v2';             // cópia local do XP do banco de todos (v2: baixa de novo sem o Emberbom lido errado)
 const LS_XP_MINE = 'medivia-respawn.criaturas-meu.v1';    // lidos aqui que ainda não subiram
 const xp = { cloud: new Map(), mine: new Map(), fullAt: 0, loading: false, rev: 0, key: '' };
+// O banco é baixado inteiro uma vez por dia; no meio disso só vem o que mudou, e o que foi apagado continua na cópia
+// local. Cópia feita antes deste momento é baixada de novo inteira (depois de apagar ou renomear algo no banco).
+const BANK_RESET = Date.parse('2026-10-20T16:05:00Z');
 // Atributos da ficha que vão junto com o XP, e o maior valor aceito de cada um.
 const XP_STATS = { hp: 1e8, armLo: 1e6, armHi: 1e6, defLo: 1e6, defHi: 1e6, spd: 1e6, mana: 1e8 };
 // As raridades além da Normal. Cada uma guarda os mesmos números da ficha; a Lendária tem também nome próprio
@@ -4767,6 +4770,7 @@ const xpSig = d => JSON.stringify([d.exp ?? null, ...Object.keys(XP_STATS).map(k
     if (d && slug(id) === id) xp.cloud.set(id, d);
   }
   xp.fullAt = Number(cache && cache.fullAt) || 0;
+  if (xp.fullAt < BANK_RESET) xp.fullAt = 0;
   for (const [id, raw] of Object.entries(lsGet(LS_XP_MINE, {}) || {})) {
     const d = xpDoc(raw);
     if (!d || slug(id) !== id) continue;
@@ -4902,6 +4906,7 @@ function initCloud() {
   if (cache && cache.docs && typeof cache.docs === 'object') {
     for (const [id, raw] of Object.entries(cache.docs)) if (raw && slug(id) === id) setCloudDoc(id, raw);
     cloud.fullAt = Number(cache.fullAt) || 0;
+    if (cloud.fullAt < BANK_RESET) cloud.fullAt = 0;
   } else pending.cloud = true;
   // Quem já tinha respawns lidos antes de existir o banco de todos: eles sobem uma vez, na primeira visita.
   if (!lsGet(LS_MOVED, false)) {
@@ -6251,7 +6256,9 @@ async function readImage(blob) {
     if (!p.monsters.length) throw new UserError(tr('err.nomobs'));
     const mapper = p.kind === 'mapper';
     if (p.pct == null) throw new UserError(tr(mapper ? 'err.mapperPct' : 'err.nopct'));
-    const name = p.name || tr('noname');
+    // Respawns que um print já leu com o nome cortado: o nome certo vem da localização do bestiário
+    const RESPAWN_FIX = { thu: 'Thundering Spires' };
+    const name = RESPAWN_FIX[slug(p.name || '')] || p.name || tr('noname');
     const id = slug(name) || 'respawn';
     const found = getRespawn(id);
     const prev = !mapper && found && found.src === 'mapper' ? null : found;   // print do jogo não aproveita nada que veio do mapper
@@ -6988,6 +6995,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 12:59',
+    pt: ['O respawn das Thundrites, que aparecia como "Thu", agora tem o nome certo: Thundering Spires.'],
+    en: ['The Thundrites respawn, shown as "Thu", now has its right name: Thundering Spires.'],
+    es: ['El respawn de las Thundrites, que aparecía como "Thu", ahora tiene su nombre correcto: Thundering Spires.'],
+    pl: ['Respawn Thundrites, widoczny jako "Thu", ma teraz właściwą nazwę: Thundering Spires.'],
+  },
   { at: '2026-10-20 12:34',
     pt: ['Criaturas com só Normal e Lendário no bestiário (como Soulflare e Thundrites): o print da aba Lendário agora vai para a raridade Lendário da criatura, em vez de criar outra, e a ficha mostra só essas duas abas.'],
     en: ['Creatures with only Normal and Legendary in the bestiary (like Soulflare and Thundrites): the Legendary tab screenshot now goes to the Legendary rarity of the creature instead of creating another one, and the page shows only those two tabs.'],
