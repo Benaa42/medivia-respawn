@@ -61,22 +61,18 @@ async function preparar(db) {
   ]);
   pronto = true;
 }
-// Guarda o XP de várias fichas de uma vez, só das que mudaram desde a última vez (economiza gravações). Uma leitura
-// e um lote de gravações: no plano gratuito cada execução tem poucas consultas externas, e o banco conta nelas.
+// Guarda o XP de várias fichas de uma vez, só das que mudaram desde a última vez. No plano gratuito o D1 aceita só 50
+// consultas por execução (cada linha de um lote conta), então a lista vai inteira num texto JSON e o próprio banco a
+// desmonta (json_each): duas consultas, seja uma ficha ou cem.
 async function guardarXp(db, lista, origem) {
-  const fichas = lista.filter(p => p && p.name && Number.isFinite(Number(p.experience)));
-  if (!fichas.length) return 0;
-  const chaves = fichas.map(p => chaveNome(p.name));
-  const ult = new Map(((await db.prepare('SELECT chave, experiencia FROM ultimo_xp WHERE chave IN (' + chaves.map(() => '?').join(',') + ')').bind(...chaves).all()).results || []).map(r => [r.chave, Number(r.experiencia)]));
-  const t = agora(), ops = [];
-  for (const p of fichas) {
-    const c = chaveNome(p.name);
-    if (ult.get(c) === Number(p.experience)) continue;
-    ops.push(db.prepare('INSERT INTO xp (chave, quando, nivel, experiencia, origem) VALUES (?, ?, ?, ?, ?)').bind(c, t, p.level, p.experience, origem));
-    ops.push(db.prepare('INSERT OR REPLACE INTO ultimo_xp (chave, experiencia) VALUES (?, ?)').bind(c, p.experience));
-  }
-  if (ops.length) await db.batch(ops);
-  return ops.length / 2;
+  const fichas = lista.filter(p => p && p.name && Number.isFinite(Number(p.experience)))
+    .map(p => ({ c: chaveNome(p.name), n: Number(p.level) || 0, e: Number(p.experience) }));
+  if (!fichas.length) return;
+  const dados = JSON.stringify(fichas);
+  await db.batch([
+    db.prepare("INSERT INTO xp (chave, quando, nivel, experiencia, origem) SELECT json_extract(j.value, '$.c'), ?, json_extract(j.value, '$.n'), json_extract(j.value, '$.e'), ? FROM json_each(?) j LEFT JOIN ultimo_xp u ON u.chave = json_extract(j.value, '$.c') WHERE u.experiencia IS NULL OR u.experiencia <> json_extract(j.value, '$.e')").bind(agora(), origem, dados),
+    db.prepare("INSERT OR REPLACE INTO ultimo_xp (chave, experiencia) SELECT json_extract(value, '$.c'), json_extract(value, '$.e') FROM json_each(?)").bind(dados),
+  ]);
 }
 
 /* ---------- Coleta agendada ---------- */
@@ -89,19 +85,17 @@ async function coletar(env) {
   for (const mundo of mundos) {
     const r = await pedir(env, 'online/' + mundo);
     if (!r.ok) continue;   // 429 ou erro: tenta no próximo minuto
-    const lista = ((await r.json()).players || []).map(p => ({ chave: chaveNome(p.name), nome: p.name, entrou: p.timestamp || t, nivel: p.level }));
-    const agoraOn = new Map(lista.map(p => [p.chave, p]));
-    const antes = (await db.prepare('SELECT chave, nome, entrou, nivel FROM online_agora WHERE mundo = ?').bind(mundo).all()).results || [];
-    const antesMap = new Map(antes.map(p => [p.chave, p]));
-    const sairam = antes.filter(p => !agoraOn.has(p.chave)), entraram = lista.filter(p => !antesMap.has(p.chave));
-    const ops = [];
-    for (const p of sairam) {
-      ops.push(db.prepare('INSERT INTO sessoes (chave, mundo, entrou, saiu, nivel) VALUES (?, ?, ?, ?, ?)').bind(p.chave, mundo, p.entrou, t, p.nivel));
-      ops.push(db.prepare('DELETE FROM online_agora WHERE mundo = ? AND chave = ?').bind(mundo, p.chave));
-      ops.push(db.prepare('INSERT OR IGNORE INTO fila (chave, nome, pedido) SELECT ?, ?, ? WHERE EXISTS (SELECT 1 FROM personagens WHERE chave = ?)').bind(p.chave, p.nome, t, p.chave));
-    }
-    for (const p of entraram) ops.push(db.prepare('INSERT OR REPLACE INTO online_agora (mundo, chave, nome, entrou, nivel) VALUES (?, ?, ?, ?, ?)').bind(mundo, p.chave, p.nome, p.entrou, p.nivel));
-    for (let i = 0; i < ops.length; i += 50) await db.batch(ops.slice(i, i + 50));
+    const lista = ((await r.json()).players || []).map(p => ({ chave: chaveNome(p.name), nome: p.name, entrou: Number(p.timestamp) || 0, nivel: p.level }));
+    // A lista vai num texto JSON só. Quem não está mais nela (ou entrou de novo, com outra hora de entrada) fecha a
+    // sessão; se for acompanhado, entra na fila da ficha. Quem é novo entra em online_agora. Quatro consultas por mundo.
+    const dados = JSON.stringify(lista.map(p => ({ k: p.chave + '@' + p.entrou, c: p.chave, n: p.nome, e: p.entrou, l: p.nivel })));
+    const fora = "o.mundo = ? AND (o.chave || '@' || o.entrou) NOT IN (SELECT json_extract(value, '$.k') FROM json_each(?))";
+    await db.batch([
+      db.prepare('INSERT INTO sessoes (chave, mundo, entrou, saiu, nivel) SELECT o.chave, o.mundo, o.entrou, ?, o.nivel FROM online_agora o WHERE ' + fora).bind(t, mundo, dados),
+      db.prepare('INSERT OR IGNORE INTO fila (chave, nome, pedido) SELECT o.chave, o.nome, ? FROM online_agora o JOIN personagens p ON p.chave = o.chave WHERE ' + fora).bind(t, mundo, dados),
+      db.prepare('DELETE FROM online_agora AS o WHERE ' + fora).bind(mundo, dados),
+      db.prepare("INSERT OR IGNORE INTO online_agora (mundo, chave, nome, entrou, nivel) SELECT ?, json_extract(value, '$.c'), json_extract(value, '$.n'), json_extract(value, '$.e'), json_extract(value, '$.l') FROM json_each(?)").bind(mundo, dados),
+    ]);
   }
   // Fichas de quem deslogou (só os acompanhados), poucas por minuto
   const fila = (await db.prepare('SELECT chave, nome FROM fila ORDER BY pedido LIMIT ?').bind(FILA_POR_MINUTO).all()).results || [];
@@ -181,6 +175,11 @@ export default {
     const chave = new Request('https://api.medivialabs.com/cache/' + encodeURIComponent(rota.toLowerCase()));
     const reserva = new Request('https://api.medivialabs.com/reserva/' + encodeURIComponent(rota.toLowerCase()));
     let res = await cache.match(chave);
+    // Ficha vinda do cache: o personagem também passa a ser acompanhado (sem gravar nada se já era)
+    if (res && env.DB && rota.startsWith('player/')) {
+      const nome = rota.slice(7);
+      ctx.waitUntil(preparar(env.DB).then(() => env.DB.prepare('INSERT OR IGNORE INTO personagens (chave, nome, mundo, desde, visto) VALUES (?, ?, ?, ?, ?)').bind(chaveNome(nome), nome, '', agora(), agora()).run()).catch(() => {}));
+    }
     if (!res) {
       const r = await pedir(env, rota);
       if (!r.ok) {
