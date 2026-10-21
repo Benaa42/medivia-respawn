@@ -4839,7 +4839,7 @@ const LS_XP_MINE = 'medivia-respawn.criaturas-meu.v1';    // lidos aqui que aind
 const xp = { cloud: new Map(), mine: new Map(), fullAt: 0, loading: false, rev: 0, key: '' };
 // O banco é baixado inteiro uma vez por dia; no meio disso só vem o que mudou, e o que foi apagado continua na cópia
 // local. Cópia feita antes deste momento é baixada de novo inteira (depois de apagar ou renomear algo no banco).
-const BANK_RESET = Date.parse('2026-10-20T16:05:00Z');
+const BANK_RESET = Date.parse('2026-10-21T02:35:00Z');
 // Atributos da ficha que vão junto com o XP, e o maior valor aceito de cada um.
 const XP_STATS = { hp: 1e8, armLo: 1e6, armHi: 1e6, defLo: 1e6, defHi: 1e6, spd: 1e6, mana: 1e8 };
 // As raridades além da Normal. Cada uma guarda os mesmos números da ficha; a Lendária tem também nome próprio
@@ -6449,7 +6449,7 @@ async function readImage(blob) {
     const mapper = p.kind === 'mapper';
     if (p.pct == null) throw new UserError(tr(mapper ? 'err.mapperPct' : 'err.nopct'));
     // Respawns que um print já leu com o nome cortado: o nome certo vem da localização do bestiário
-    const RESPAWN_FIX = { thu: 'Thundering Spires' };
+    const RESPAWN_FIX = { thu: 'Thundering Spires', brary: 'Library' };
     const name = RESPAWN_FIX[slug(p.name || '')] || p.name || tr('noname');
     const id = slug(name) || 'respawn';
     const found = getRespawn(id);
@@ -7187,6 +7187,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-20 23:21',
+    pt: ['Nomes corrigidos no banco: Thornfin (Iron Fissures, Barbed Trench) e Demorc Brute (Typhon Swamp), que tinham sido lidos errado no print. O respawn \"Brary\", uma cópia cortada do Library, foi removido.'],
+    en: ['Names fixed in the shared bank: Thornfin (Iron Fissures, Barbed Trench) and Demorc Brute (Typhon Swamp), misread from screenshots. The \"Brary\" respawn, a cut-off copy of Library, was removed.'],
+    es: ['Nombres corregidos en el banco: Thornfin (Iron Fissures, Barbed Trench) y Demorc Brute (Typhon Swamp), mal leídos de la captura. Se eliminó el respawn \"Brary\", una copia cortada de Library.'],
+    pl: ['Poprawione nazwy w banku: Thornfin (Iron Fissures, Barbed Trench) i Demorc Brute (Typhon Swamp), źle odczytane ze zrzutu. Usunięto respawn \"Brary\", uciętą kopię Library.'],
+  },
   { at: '2026-10-20 18:37',
     pt: ['Tutoriais em vídeo novos, no "?" dourado: sorteio com D100, cronômetro personalizado, quantidade de criaturas, duas hunts juntas e bônus de XP.'],
     en: ['New video tutorials behind the golden "?": raffle with a D100, custom timer, number of creatures, two hunts together and XP bonus.'],
