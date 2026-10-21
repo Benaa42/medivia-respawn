@@ -784,7 +784,8 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-sp .total { font: 800 34px/1 var(--font-display); color: var(--amber); }
 .pers-sp label.toggle { flex-direction: row; padding-bottom: 10px; font-size: 13px; color: var(--label); }
 .pers-ritmo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px; }
-.pers-ritmo .seg button { white-space: nowrap; }
+.pers-ritmo .seg, .pers-pag .seg { flex-wrap: wrap; }
+.pers-ritmo .seg button, .pers-pag .seg button { flex: none; padding: 7px 11px; white-space: nowrap; }
 .pers-colunas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 22px; }
 .pers-coluna { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .pers-coluna h3 { font: 700 13px var(--font-ui); color: var(--faint); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
@@ -811,6 +812,30 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-mini { width: 110px; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
 .pers-mini i { display: block; height: 100%; background: var(--amber); }
 .pers-cart .creatures-wrap { flex: none; min-height: 0; }
+.pers-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; }
+.pers-skills div { display: flex; justify-content: space-between; gap: 10px; padding: 7px 12px; border-radius: var(--r-sm); background: var(--card); font-size: 14px; }
+.pers-skills b { color: var(--title); font-variant-numeric: tabular-nums; }
+.pers-skills b.none { color: var(--faint); font-weight: 500; }
+.pers-magias td.num, .pers-magias th.num { width: 1%; padding-left: 28px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pers-magias td:first-child { width: 100%; }
+.pers-magia { display: inline-flex; align-items: center; gap: 10px; }
+.pers-magia img { width: 24px; height: 24px; flex: none; border-radius: 4px; }
+.pers-magia small { color: var(--faint); font-weight: 500; }
+.pers-pag { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px 12px; }
+.pers-pag-n { font-size: 13px; color: var(--label); font-variant-numeric: tabular-nums; }
+.pers-pag-b { width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--card); color: var(--title); font: 700 18px/1 var(--font-ui); cursor: pointer; }
+.pers-pag-b:disabled { opacity: 0.35; cursor: default; }
+.pers-facs { display: flex; flex-direction: column; gap: 6px; }
+.pers-fac { display: flex; flex-direction: column; gap: 6px; padding: 8px 12px 10px; border-radius: var(--r-md); background: var(--card); }
+.pers-fac > button { display: flex; justify-content: space-between; gap: 10px; padding: 0; border: 0; background: none; color: var(--title); font: 600 14px var(--font-ui); cursor: pointer; text-align: left; }
+.pers-fac .n { color: var(--amber); font-variant-numeric: tabular-nums; }
+.pers-fac.feita .n { color: var(--value); }
+.pers-fac .bar { height: 5px; border-radius: 999px; background: #2c3637; overflow: hidden; }
+.pers-fac .bar i { display: block; height: 100%; background: var(--amber); }
+.pers-fac.feita .bar i { background: var(--value); }
+.pers-entregas span.feita { color: var(--value); }
+.pers-dias td, .pers-dias th { font-variant-numeric: tabular-nums; }
+.pers-dias td.g { color: var(--value); font-weight: 600; }
 .pers-cart .creatures-table { min-width: 0; }
 @media (max-width: 980px) { .pers-grade { grid-template-columns: 1fr; } .pers-cart.dois, .pers-cart.tres { grid-column: auto; } .pers-colunas { grid-template-columns: 1fr; } }
 /* Calculadora: comprar pronto ou montar */
@@ -1593,14 +1618,14 @@ const I18N = {
     'pers.media': 'Média por dia',
     'pers.onlineHoje': 'Online hoje',
     'pers.skills': 'Skills',
-    'pers.skillsNota': 'As skills chegam pela coleta dos rankings do mundo, que está em preparação. A API do Medivia não traz as skills na ficha.',
+    'pers.skillsNota': 'A API do Medivia não traz as skills na ficha: elas vêm dos rankings do mundo (os 1000 primeiros de cada skill), coletados aos poucos. Fora do ranking aparece —.',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
     'pers.int': 'Intelligence',
     'pers.dex': 'Dexterity',
     'pers.str': 'Strength',
     'pers.am': 'Arcane Marksmanship',
-    'pers.spNota': 'Pela fórmula da wiki: nível × 1,30 + magic level^1,4 × {m} + {s} × {k}. Digite o magic level e o atributo; ficam guardados neste navegador. A tabela de dano de cada magia entra quando tivermos as fórmulas da wiki.',
+    'pers.spNota': 'Pela fórmula da wiki. Magic level e {s} vêm do ranking quando o personagem está nele; o atributo é digitado e fica guardado neste navegador. Os fatores de dano de cada magia são os usados pela comunidade.',
     'pers.hunts': 'Huntsman',
     'pers.diaria': 'Diária: {x}',
     'pers.ritmo': 'Tempo calculado para',
@@ -1630,6 +1655,36 @@ const I18N = {
     'pers.col.por': 'Por',
     'pers.semMortes': 'Nenhuma morte ativa.',
     'pers.mortesNota': 'A API mostra as mortes ainda ativas.',
+    'pers.vida': 'Vida',
+    'pers.mana': 'Mana',
+    'pers.cap': 'Capacidade',
+    'pers.vidaNota': 'Vida, mana e capacidade pelo nível, como na página Level da wiki, sem contar os equipamentos.',
+    'pers.skillsQuando': 'dos rankings, {d}',
+    'pers.sk.maglevel': 'Magic level',
+    'pers.sk.distance': 'Distance',
+    'pers.sk.melee': 'Melee',
+    'pers.sk.blocking': 'Blocking',
+    'pers.sk.fishing': 'Fishing',
+    'pers.sk.mining': 'Mining',
+    'pers.sk.cooking': 'Cooking',
+    'pers.doRanking': 'ranking',
+    'pers.col.magia': 'Magia ou runa',
+    'pers.col.min': 'Mínimo',
+    'pers.col.max': 'Máximo',
+    'pers.col.media': 'Média',
+    'pers.mag.outros': '(nos outros)',
+    'pers.mag.si': '(em si)',
+    'pers.rodadas': '{n} rodadas',
+    'pers.faltaSkill': 'digite o {s}',
+    'pers.factions': 'Factions ({n})',
+    'pers.facNota': 'Cada faction conta as tasks do bestiário dela que já foram concluídas. Toque numa faction para ver as tasks.',
+    'pers.porPag': 'Por página',
+    'pers.faixa': '{a}–{b} de {t}',
+    'pers.anterior': 'Página anterior',
+    'pers.proxima': 'Próxima página',
+    'pers.col.dia': 'Dia',
+    'pers.col.ganho': 'XP ganho',
+    'pers.col.online': 'Online',
     'calc.intro': 'Compare o preço de um item pronto no mercado com o custo de comprar os ingredientes e montar. Os preços em Medivia Coin viram gold pela cotação que você informar.',
     'calc.item': 'Item (opcional)',
     'calc.rate': 'Cotação da Medivia Coin',
@@ -2262,14 +2317,14 @@ const I18N = {
     'pers.media': 'Daily average',
     'pers.onlineHoje': 'Online today',
     'pers.skills': 'Skills',
-    'pers.skillsNota': 'Skills come from collecting the world rankings, which is being prepared. The Medivia API does not include skills in the character data.',
+    'pers.skillsNota': 'The Medivia API has no skills in the character data: they come from the world rankings (top 1000 of each skill), collected little by little. Outside the rankings it shows —.',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
     'pers.int': 'Intelligence',
     'pers.dex': 'Dexterity',
     'pers.str': 'Strength',
     'pers.am': 'Arcane Marksmanship',
-    'pers.spNota': 'From the wiki formula: level × 1.30 + magic level^1.4 × {m} + {s} × {k}. Type the magic level and the stat; they are kept in this browser. The damage table for each spell comes once we have the wiki formulas.',
+    'pers.spNota': 'From the wiki formula. Magic level and {s} come from the rankings when the character is in them; the stat is typed and kept in this browser. The damage factors for each spell are the ones used by the community.',
     'pers.hunts': 'Huntsman',
     'pers.diaria': 'Daily: {x}',
     'pers.ritmo': 'Time worked out for',
@@ -2299,6 +2354,36 @@ const I18N = {
     'pers.col.por': 'By',
     'pers.semMortes': 'No active deaths.',
     'pers.mortesNota': 'The API shows the deaths still active.',
+    'pers.vida': 'Health',
+    'pers.mana': 'Mana',
+    'pers.cap': 'Capacity',
+    'pers.vidaNota': 'Health, mana and capacity from the level, as on the wiki Level page, without equipment.',
+    'pers.skillsQuando': 'from the rankings, {d}',
+    'pers.sk.maglevel': 'Magic level',
+    'pers.sk.distance': 'Distance',
+    'pers.sk.melee': 'Melee',
+    'pers.sk.blocking': 'Blocking',
+    'pers.sk.fishing': 'Fishing',
+    'pers.sk.mining': 'Mining',
+    'pers.sk.cooking': 'Cooking',
+    'pers.doRanking': 'ranking',
+    'pers.col.magia': 'Spell or rune',
+    'pers.col.min': 'Minimum',
+    'pers.col.max': 'Maximum',
+    'pers.col.media': 'Average',
+    'pers.mag.outros': '(others)',
+    'pers.mag.si': '(self)',
+    'pers.rodadas': '{n} ticks',
+    'pers.faltaSkill': 'type the {s}',
+    'pers.factions': 'Factions ({n})',
+    'pers.facNota': 'Each faction counts its completed bestiary tasks. Tap a faction to see the tasks.',
+    'pers.porPag': 'Per page',
+    'pers.faixa': '{a}–{b} of {t}',
+    'pers.anterior': 'Previous page',
+    'pers.proxima': 'Next page',
+    'pers.col.dia': 'Day',
+    'pers.col.ganho': 'XP gained',
+    'pers.col.online': 'Online',
     'calc.intro': 'Compare the price of a ready item on the market with the cost of buying the ingredients and crafting it. Prices in Medivia Coin are turned into gold at the rate you enter.',
     'calc.item': 'Item (optional)',
     'calc.rate': 'Medivia Coin rate',
@@ -2931,14 +3016,14 @@ const I18N = {
     'pers.media': 'Media por día',
     'pers.onlineHoje': 'En línea hoy',
     'pers.skills': 'Skills',
-    'pers.skillsNota': 'Las skills llegan por la recolección de los rankings del mundo, que está en preparación. La API de Medivia no trae las skills en la ficha.',
+    'pers.skillsNota': 'La API de Medivia no trae las skills en la ficha: vienen de los rankings del mundo (los 1000 primeros de cada skill), recolectados poco a poco. Fuera del ranking aparece —.',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
     'pers.int': 'Intelligence',
     'pers.dex': 'Dexterity',
     'pers.str': 'Strength',
     'pers.am': 'Arcane Marksmanship',
-    'pers.spNota': 'Por la fórmula de la wiki: nivel × 1,30 + magic level^1,4 × {m} + {s} × {k}. Escribe el magic level y el atributo; quedan guardados en este navegador. La tabla de daño de cada magia llegará cuando tengamos las fórmulas de la wiki.',
+    'pers.spNota': 'Por la fórmula de la wiki. Magic level y {s} vienen del ranking cuando el personaje está en él; el atributo se escribe y queda guardado en este navegador. Los factores de daño de cada magia son los usados por la comunidad.',
     'pers.hunts': 'Huntsman',
     'pers.diaria': 'Diaria: {x}',
     'pers.ritmo': 'Tiempo calculado para',
@@ -2968,6 +3053,36 @@ const I18N = {
     'pers.col.por': 'Por',
     'pers.semMortes': 'Ninguna muerte activa.',
     'pers.mortesNota': 'La API muestra las muertes aún activas.',
+    'pers.vida': 'Vida',
+    'pers.mana': 'Maná',
+    'pers.cap': 'Capacidad',
+    'pers.vidaNota': 'Vida, maná y capacidad por el nivel, como en la página Level de la wiki, sin contar el equipo.',
+    'pers.skillsQuando': 'de los rankings, {d}',
+    'pers.sk.maglevel': 'Magic level',
+    'pers.sk.distance': 'Distance',
+    'pers.sk.melee': 'Melee',
+    'pers.sk.blocking': 'Blocking',
+    'pers.sk.fishing': 'Fishing',
+    'pers.sk.mining': 'Mining',
+    'pers.sk.cooking': 'Cooking',
+    'pers.doRanking': 'ranking',
+    'pers.col.magia': 'Magia o runa',
+    'pers.col.min': 'Mínimo',
+    'pers.col.max': 'Máximo',
+    'pers.col.media': 'Media',
+    'pers.mag.outros': '(en otros)',
+    'pers.mag.si': '(en sí)',
+    'pers.rodadas': '{n} rondas',
+    'pers.faltaSkill': 'escribe el {s}',
+    'pers.factions': 'Facciones ({n})',
+    'pers.facNota': 'Cada facción cuenta sus tasks del bestiario completadas. Toca una facción para ver las tasks.',
+    'pers.porPag': 'Por página',
+    'pers.faixa': '{a}–{b} de {t}',
+    'pers.anterior': 'Página anterior',
+    'pers.proxima': 'Página siguiente',
+    'pers.col.dia': 'Día',
+    'pers.col.ganho': 'XP ganado',
+    'pers.col.online': 'En línea',
     'calc.intro': 'Compara el precio de un item hecho en el mercado con el coste de comprar los ingredientes y montarlo. Los precios en Medivia Coin se pasan a gold con la cotización que indiques.',
     'calc.item': 'Item (opcional)',
     'calc.rate': 'Cotización de la Medivia Coin',
@@ -3600,14 +3715,14 @@ const I18N = {
     'pers.media': 'Średnio dziennie',
     'pers.onlineHoje': 'Online dziś',
     'pers.skills': 'Umiejętności',
-    'pers.skillsNota': 'Umiejętności przyjdą z rankingów świata, które przygotowujemy. API Medivii nie podaje ich w danych postaci.',
+    'pers.skillsNota': 'API Medivii nie podaje umiejętności w danych postaci: pochodzą z rankingów świata (top 1000 każdej umiejętności), zbieranych stopniowo. Poza rankingiem widać —.',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
     'pers.int': 'Intelligence',
     'pers.dex': 'Dexterity',
     'pers.str': 'Strength',
     'pers.am': 'Arcane Marksmanship',
-    'pers.spNota': 'Według wzoru z wiki: poziom × 1,30 + magic level^1,4 × {m} + {s} × {k}. Wpisz magic level i atrybut; zostają w tej przeglądarce. Tabela obrażeń każdego czaru pojawi się, gdy będziemy mieć wzory z wiki.',
+    'pers.spNota': 'Według wzoru z wiki. Magic level i {s} pochodzą z rankingów, gdy postać w nich jest; atrybut wpisujesz i zostaje w tej przeglądarce. Współczynniki obrażeń czarów to te używane przez społeczność.',
     'pers.hunts': 'Huntsman',
     'pers.diaria': 'Dzienne: {x}',
     'pers.ritmo': 'Czas liczony dla',
@@ -3637,6 +3752,36 @@ const I18N = {
     'pers.col.por': 'Przez',
     'pers.semMortes': 'Brak aktywnych śmierci.',
     'pers.mortesNota': 'API pokazuje wciąż aktywne śmierci.',
+    'pers.vida': 'Życie',
+    'pers.mana': 'Mana',
+    'pers.cap': 'Udźwig',
+    'pers.vidaNota': 'Życie, mana i udźwig z poziomu, jak na stronie Level na wiki, bez ekwipunku.',
+    'pers.skillsQuando': 'z rankingów, {d}',
+    'pers.sk.maglevel': 'Magic level',
+    'pers.sk.distance': 'Distance',
+    'pers.sk.melee': 'Melee',
+    'pers.sk.blocking': 'Blocking',
+    'pers.sk.fishing': 'Fishing',
+    'pers.sk.mining': 'Mining',
+    'pers.sk.cooking': 'Cooking',
+    'pers.doRanking': 'ranking',
+    'pers.col.magia': 'Czar lub runa',
+    'pers.col.min': 'Minimum',
+    'pers.col.max': 'Maksimum',
+    'pers.col.media': 'Średnio',
+    'pers.mag.outros': '(inni)',
+    'pers.mag.si': '(siebie)',
+    'pers.rodadas': '{n} tur',
+    'pers.faltaSkill': 'wpisz {s}',
+    'pers.factions': 'Frakcje ({n})',
+    'pers.facNota': 'Każda frakcja liczy swoje ukończone taski bestiariusza. Dotknij frakcji, aby zobaczyć taski.',
+    'pers.porPag': 'Na stronę',
+    'pers.faixa': '{a}–{b} z {t}',
+    'pers.anterior': 'Poprzednia strona',
+    'pers.proxima': 'Następna strona',
+    'pers.col.dia': 'Dzień',
+    'pers.col.ganho': 'Zdobyte XP',
+    'pers.col.online': 'Online',
     'calc.intro': 'Porównaj cenę gotowego przedmiotu na rynku z kosztem kupna składników i złożenia go. Ceny w Medivia Coin są przeliczane na gold po kursie, który podasz.',
     'calc.item': 'Przedmiot (opcjonalnie)',
     'calc.rate': 'Kurs Medivia Coin',
@@ -5423,7 +5568,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {} }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5 }, lsGet(LS_UI, {}));
 // Bônus de XP: minutos de XP Boost da loja, golden premium (+5% no boost) e outros bônus em %, para a hunt inteira
 const XPB_MINS = [0, 30, 60, 90, 120, 180];
 {
@@ -9900,7 +10045,7 @@ $('#calc-clear').addEventListener('click', () => {
    API oficial do Medivia pelo Worker api.medivialabs.com (worker/medivia-api.js), que guarda o login da conta do
    site e as respostas; o histórico de XP e de tempo online é o que a coleta agendada do Worker guardou. */
 const API_MEDIVIA = 'https://api.medivialabs.com/';
-const pers = { nome: '', dados: null, hist: null, party: null, pct: null, aba: 'andamento', busca: '' };
+const pers = { nome: '', dados: null, hist: null, party: null, pct: null, aba: 'andamento', busca: '', pag: 0, facAberta: null };
 function persStatus(kind, text) { const e = $('#pers-status'); e.hidden = !text; e.dataset.kind = kind || ''; setText(e, text || ''); }
 async function persCarregar(nome) {
   nome = String(nome || '').trim().replace(/\s+/g, ' ').slice(0, 40);
@@ -9949,6 +10094,74 @@ function persSugestao(nome, falta) {
     el('button', { class: 'pers-abrir', type: 'button', text: tr('pers.criar'), onclick: () => createCustom(c.name) })) };
   return { horas: null, el: el('span', { class: 'pers-resp falta', text: tr('pers.semResp', { x: nome }) }) };
 }
+// Fatores de dano: dano = spell power × [mín, máx] de cada magia (a mesma tabela que o MediviaThings usa; a wiki não
+// traz esses números). voc = quem pode usar. Burst Arrows, Berserk e Decimate têm fórmula própria (persMagiaEspecial).
+const PERS_MAGIAS = [
+  { n: 'Small Explosives', min: 0.15, max: 0.35, voc: 'md' },
+  { n: 'Burst Arrows', esp: 'burst', voc: 'a' },
+  { n: 'Sudden Death', min: 1.3, max: 1.7, voc: 'mdak' },
+  { n: 'Explosion', min: 0.35, max: 0.65, voc: 'mdak' },
+  { n: 'Fire Ball', min: 0.19, max: 0.31, voc: 'mdak' },
+  { n: 'Great Fire Ball', min: 0.35, max: 0.65, voc: 'mdak' },
+  { n: 'Heavy Frozen Magic Missile', min: 0.28, max: 0.38, voc: 'mdak' },
+  { n: 'Heavy Magic Missile', min: 0.26, max: 0.34, voc: 'mdak' },
+  { n: 'Light Magic Missile', min: 0.12, max: 0.18, voc: 'mdak' },
+  { n: 'Berserk', esp: 'berserk', voc: 'k' },
+  { n: 'Decimate', esp: 'decimate', voc: 'k' },
+  { n: 'Ultimate Explosion', min: 2.3, max: 3, voc: 'm' },
+  { n: 'Energy Wave', min: 1.5, max: 1.75, voc: 'm' },
+  { n: 'Great Energy Beam', min: 1.4, max: 1.7, voc: 'm' },
+  { n: 'Energy Beam', min: 0.8, max: 1.2, voc: 'm' },
+  { n: 'Fire Wave', min: 0.4, max: 0.6, voc: 'm' },
+  { n: 'Force Strike', min: 0.2, max: 0.3, voc: 'md' },
+  { n: 'Energy Strike', min: 0.25, max: 0.55, voc: 'md' },
+  { n: 'Flame Strike', min: 0.32, max: 0.48, voc: 'md' },
+  { n: 'Ultimate Healing Rune', min: 2.4, max: 2.8, voc: 'mdak' },
+  { n: 'Intense Healing Rune', min: 0.35, max: 0.55, voc: 'mdak' },
+  { n: 'Ultimate Healing', min: 2.6, max: 3, voc: 'mda' },
+  { n: 'Intense Healing', min: 0.25, max: 0.65, voc: 'mda' },
+  { n: 'Light Healing', min: 0.15, max: 0.35, voc: 'mdak' },
+  { n: 'Heal Friend', min: 1.3, max: 1.55, voc: 'd' },
+  { n: 'Light Heal Friend', min: 0.8, max: 1.3, voc: 'd' },
+  { n: 'Purification', obs: 'outros', min: 0.648, max: 0.756, ticks: 5, voc: 'd' },
+  { n: 'Purification', obs: 'si', min: 0.5184, max: 0.6048, ticks: 5, voc: 'd' },
+  { n: 'Mass Healing', min: 1.2, max: 1.5, voc: 'd' },
+  { n: 'Primordial Wave', min: 0.17, max: 0.2, ticks: 8, voc: 'm' },
+  { n: 'Glacial Aegis', min: 0.25, max: 0.3, ticks: 6, voc: 'd' },
+];
+// Ícones das magias e runas: tirados do próprio jogo (data.wad, images/game/spells), em img/magias
+// Burst Arrows usa o distance; Berserk e Decimate usam o melee. stat = dexterity ou strength digitada.
+function persMagiaEspecial(tipo, nivel, skill, stat, sp, duplo) {
+  if (tipo === 'burst') {
+    let max = 20 + skill * skill / 1600 * 5, min = nivel / 5 + 0.2 * max;
+    if (duplo) { min *= 1.05; max *= 1.05; }
+    min += 0.8 * stat * 0.2 + 0.15 * sp * 0.2;
+    max += 1.2 * stat * 0.2 + 0.35 * sp * 0.2;
+    return [Math.round(min), Math.round(max)].sort((a, b) => a - b);
+  }
+  const o = nivel * skill * skill / 1e5;
+  return tipo === 'berserk' ? [6 * o + 1.6 * nivel + 0.5 * stat, 10 * o + 2.4 * nivel + stat] : [5 * o + 1.1 * nivel + 0.45 * stat, 7 * o + 1.7 * nivel + 0.65 * stat];
+}
+// Vida, mana e capacidade pelo nível (página Level da wiki): valores do nível 8 mais o ganho por nível de cada vocação
+const PERS_POR_NIVEL = { k: [15, 5, 25], a: [10, 15, 20], m: [5, 30, 10], d: [5, 30, 10], x: [5, 5, 5] };
+// Factions: as tasks do bestiário de cada uma. Incidamus e Venerators não têm task própria: contam com a de Demorcs.
+const PERS_FACTIONS = [
+  ['Dwarf', ['Mutated Rats', 'Minotaur Archers', 'Minotaur Guards', 'Dwarf Renegade', 'Hirnus Bloodhoof', 'Corrupted Watchers']],
+  ['Elf', ['Dwarf Guards', 'Dwarf Slayers', 'Hadrian the Crusher', 'Dwarf Dragoneaters']],
+  ['Minotaur', ['Orc Warriors', 'Orc Bowmen', 'Orc Berserkers', 'Orc Leaders', 'General Manos']],
+  ['Orc', ['Elfs', 'Elf Guardians', 'Elf Sharpshooters', 'Elf Swordmasters']],
+  ['Osaris', ['Larvas', 'Scarabs', 'Slave Hunters', 'Slave Guards', 'Shakirian Prayers', 'Honou']],
+  ['Imperial', ['Spiders', 'Zundram', 'War Wolves', 'Alpha Wolves', 'Cyclops Warriors', 'John', 'Imperial Soldiers', 'Lightbringer Knight', 'Royalist', 'Lightbringer Heroes']],
+  ['Lightbringer', ['Mummies', 'Skeleton Archers', 'Skeleton Sharpshooter', 'Commodores', 'Swashbucklers', 'Crewmen', 'Skeleton Plaguespreaders', 'Deathkiss Watchers', 'Anubis', 'Restless Skeletons', 'Wights', 'Skull Reapers', 'Goshnir', 'Wraiths', 'Abominations', 'Undead Titans', 'Shadow Drakes', 'Undead Dragons']],
+  ['Holy Rose', ['Waterblobs', 'Crystalbeasts', 'Wendigos', 'Snow Ravagers', 'Frost Drakes', 'Nether Spiders', 'Ice Golems', 'Agaltha', 'Frost Dragons', 'Azure Mercenaries']],
+  ['Grim', ['Fire Devils', 'Crystal Beetles', 'Grim Adepts', 'Master Zegrath', 'Dark Grims']],
+  ['Archini', ['Jothuns', 'Swamp Demons', 'Orc Commander', 'Zilrazath', 'Azgath', 'Nightmares', 'Ancient Watchers']],
+  ['Explorers Guild', ['Boggles', 'Centaurs', 'Bronze Fungi', 'Air Elementals', 'Storm Elementals', 'Blight Omens', 'Magma Dragons', 'Obsidian Dragons', 'Ancient Dragons']],
+  ['White Light', ['Priests of Light', 'Holy Sentinel', 'Icons of Light', 'Chaos Worshipers', 'Shadow Guards', 'Ritualists']],
+  ['Demonic', ['Blood Witches', 'Ashlords', 'Blasphemer', 'Incidamus', 'Venerators', 'Demorcs', 'Demorc Warchiefs', 'Cerberuses', 'Flamebringers', 'Typhons', 'Corruptors', 'Succubuses', 'Dreadlords']],
+  ['Chaos', ['Creatures of Hollow Expanse', 'Creatures of Crystalline Spire', 'Creatures of Shimmering Veil', 'Creatures of Warped Citadel']],
+];
+const PERS_SKILLS = ['maglevel', 'distance', 'melee', 'blocking', 'fishing', 'mining', 'cooking'];
 function renderPersonagem() {
   const g = $('#pers-grade');
   if (!g) return;
@@ -9972,13 +10185,20 @@ function renderPersonagem() {
       par(tr('pers.voc'), p.vocation), par(tr('pers.guilda'), p.guild && p.guild.name, 'a'),
       par(tr('pers.cidade'), p.town), par(tr('pers.casa'), p.house && p.house.name),
       par(tr('pers.hpontos'), hu.points != null ? tr('pers.pontos', { n: fmtInt(hu.points) }) : null),
-      par(tr('pers.tasksB'), tarefas.length ? tr('pers.deTotal', { a: feitas, b: tarefas.length }) : null)));
+      par(tr('pers.tasksB'), tarefas.length ? tr('pers.deTotal', { a: feitas, b: tarefas.length }) : null),
+      ...(() => {
+        const v = String(p.vocation || '').toLowerCase(), g = PERS_POR_NIVEL[/knight/.test(v) ? 'k' : /archer/.test(v) ? 'a' : /druid/.test(v) ? 'd' : /mage|sorcer/.test(v) ? 'm' : 'x'];
+        const n = Math.max(0, (p.level || 0) - 8);
+        return [par(tr('pers.vida'), fmtInt(185 + n * g[0]), 'g'), par(tr('pers.mana'), fmtInt(35 + n * g[1]), 'a'), par(tr('pers.cap'), fmtInt(435 + n * g[2]))];
+      })()),
+    el('p', { class: 'support-note', text: tr('pers.vidaNota') }));
   // Histórico de XP: os últimos 30 dias de Brasília; sem dados, barras listradas
   const diaBr = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
   const hojeBr = diaBr(Date.now()), dias = [];
   for (let i = 29; i >= 0; i--) dias.push(diaBr(Date.now() - i * 864e5));
   const ganho = new Map(((h && h.xp) || []).map(d => [d.dia, d.ganho || 0]));
   const onl = new Map(((h && h.online_por_dia) || []).map(d => [d.dia, d.segundos]));
+  const nivelDia = new Map(((h && h.xp) || []).map(d => [d.dia, d.nivel]));
   const maior = Math.max(1, ...dias.map(d => ganho.get(d) || 0));
   const soma = n => dias.slice(-n).reduce((a, d) => a + (ganho.get(d) || 0), 0);
   const comDados = dias.filter(d => ganho.has(d));
@@ -9994,21 +10214,64 @@ function renderPersonagem() {
       el('span', null, tr('pers.d30') + ' ', el('b', { text: comDados.length ? '+' + fmtXp(soma(30)) : '—' })),
       el('span', null, tr('pers.media') + ' ', el('b', { text: comDados.length ? '+' + fmtXp(soma(30) / comDados.length) : '—' })),
       el('span', null, tr('pers.onlineHoje') + ' ', el('b', { text: onl.has(hojeBr) ? horas(onl.get(hojeBr)) : '—' }))),
+    el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table pers-dias' },
+      el('thead', null, el('tr', null, [tr('pers.col.dia'), tr('pers.nivel'), tr('pers.col.ganho'), tr('pers.col.online')].map(c => el('th', { scope: 'col', text: c })))),
+      el('tbody', null, dias.slice(-5).reverse().map(d => el('tr', null,
+        el('td', { text: d === hojeBr ? tr('pers.hoje') : new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: 'numeric', month: 'short' }) }),
+        el('td', { text: nivelDia.has(d) ? String(nivelDia.get(d)) : '—' }),
+        el('td', { class: ganho.get(d) ? 'g' : 'none', text: ganho.has(d) ? '+' + fmtInt(ganho.get(d)) : '—' }),
+        el('td', { class: onl.has(d) ? null : 'none', text: onl.has(d) ? horas(onl.get(d)) : '—' })))))),
     el('p', { class: 'support-note', text: tr('pers.histNota') }));
-  // Skills (ainda sem fonte) e spell power pela fórmula da wiki
-  const skills = card('', el('h2', { text: tr('pers.skills') }), el('p', { class: 'support-note', text: tr('pers.skillsNota') }));
+  // Skills: dos rankings do mundo que o Worker coleta (a API não traz skills na ficha); fora do top 1000 fica "—"
+  const hs = (h && h.skills) || {};
+  const quandoSk = Math.max(0, ...Object.values(hs).map(x => x.quando || 0));
+  const skills = card('', el('h2', null, tr('pers.skills'), quandoSk ? el('small', { text: tr('pers.skillsQuando', { d: new Date(quandoSk * 1000).toLocaleString(loc, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) }) }) : null),
+    el('div', { class: 'pers-skills' }, PERS_SKILLS.map(k => el('div', null, el('span', { text: tr('pers.sk.' + k) }), el('b', { class: hs[k] ? null : 'none', text: hs[k] ? String(hs[k].valor) : '—' })))),
+    el('p', { class: 'support-note', text: tr('pers.skillsNota') }));
+  // Spell power (fórmula da wiki) e o dano de cada magia e runa da vocação
   const voc = String(p.vocation || '').toLowerCase();
-  const tipo = /knight/.test(voc) ? 'str' : /archer/.test(voc) ? 'dex' : 'int';
+  const vk = /knight/.test(voc) ? 'k' : /archer/.test(voc) ? 'a' : /druid/.test(voc) ? 'd' : /mage|sorcer/.test(voc) ? 'm' : 'x';
+  const duplo = /crusader|master|arch|supreme/.test(voc);
+  const tipo = vk === 'k' ? 'str' : vk === 'a' ? 'dex' : 'int';
   const chave = slug(p.name), sp = ui.persSp[chave] || (ui.persSp[chave] = { ml: '', at: '', am: false });
-  const mult = tipo === 'str' ? 6 : tipo === 'dex' ? (sp.am ? 3.96 : 1.8) : 0.85, k = tipo === 'str' ? 1.2 : tipo === 'dex' ? 0.75 : 1;
-  const conta = () => Math.floor((p.level || 0) * 1.3 + Math.pow(Number(sp.ml) || 0, 1.4) * mult + (Number(sp.at) || 0) * k);
-  const total = el('span', { class: 'total', text: fmtInt(conta()) });
-  const campo = (rot, prop) => el('label', null, rot, el('input', { type: 'text', inputmode: 'numeric', maxlength: 4, value: sp[prop], placeholder: '0',
-    oninput: e => { sp[prop] = e.target.value.replace(/\D/g, '').slice(0, 4); saveUi(); setText(total, fmtInt(conta())); } }));
+  const skillArma = vk === 'k' ? 'melee' : vk === 'a' ? 'distance' : null;
+  // o que a pessoa digitou vale mais que o ranking; campo vazio volta para o ranking
+  const valor = (prop, rank) => sp[prop] != null && sp[prop] !== '' ? Number(sp[prop]) : rank != null ? rank : null;
+  const conta = () => {
+    const ml = valor('ml', hs.maglevel && hs.maglevel.valor) || 0, at = Number(sp.at) || 0;
+    const mult = vk === 'k' ? 6 : vk === 'a' ? (sp.am ? 3.96 : 1.8) : 0.85, k = vk === 'k' ? 1.2 : vk === 'a' ? 0.75 : 1;
+    return { sp: Math.floor(Math.floor((p.level || 0) * 1.3 + Math.pow(ml, 1.4) * mult) + at * k), at, arma: skillArma ? valor(skillArma, hs[skillArma] && hs[skillArma].valor) : null };
+  };
+  const total = el('span', { class: 'total' });
+  const corpo = el('tbody');
+  const desenharMagias = () => {
+    const c = conta();
+    setText(total, fmtInt(c.sp));
+    corpo.replaceChildren(...PERS_MAGIAS.filter(m => m.voc.includes(vk)).map(m => {
+      let par = null;
+      if (m.esp) { if (c.arma != null) par = persMagiaEspecial(m.esp, p.level || 0, c.arma, c.at, c.sp, duplo).map(Math.floor); }
+      else par = [Math.floor(c.sp * m.min), Math.floor(c.sp * m.max)].map(v => v * (m.ticks || 1));
+      const id = slug(m.n);
+      return el('tr', null,
+        el('td', null, el('span', { class: 'pers-magia' },
+          el('img', { src: 'img/magias/' + id + '.png', width: 24, height: 24, alt: '', loading: 'lazy' }),
+          el('span', null, m.n, m.obs ? el('small', { text: ' ' + tr('pers.mag.' + m.obs) }) : null, m.ticks ? el('small', { text: ' · ' + tr('pers.rodadas', { n: m.ticks }) }) : null))),
+        ...(par ? [fmtInt(par[0]), fmtInt(par[1]), fmtInt(Math.floor((par[0] + par[1]) / 2))].map(v => el('td', { class: 'num', text: v }))
+          : [el('td', { class: 'none', colSpan: 3, text: tr('pers.faltaSkill', { s: tr('pers.sk.' + skillArma) }) })]));
+    }));
+  };
+  const campo = (rot, prop, rank) => el('label', null, rot + (rank != null && (sp[prop] == null || sp[prop] === '') ? ' · ' + tr('pers.doRanking') : ''),
+    el('input', { type: 'text', inputmode: 'numeric', maxlength: 4, value: sp[prop] != null && sp[prop] !== '' ? sp[prop] : rank != null ? String(rank) : '', placeholder: '0',
+      oninput: e => { sp[prop] = e.target.value.replace(/\D/g, '').slice(0, 4); saveUi(); desenharMagias(); } }));
+  desenharMagias();
   const poder = card('dois', el('h2', null, tr('pers.sp'), el('small', { text: tr('pers.nivel') + ' ' + p.level })),
-    el('div', { class: 'pers-sp' }, total, campo(tr('pers.ml'), 'ml'), campo(tr('pers.' + tipo), 'at'),
-      tipo === 'dex' ? el('label', { class: 'toggle' }, el('input', { type: 'checkbox', checked: !!sp.am, onchange: e => { sp.am = e.target.checked; saveUi(); renderPersonagem(); } }), el('span', { text: tr('pers.am') })) : null),
-    el('p', { class: 'support-note', text: tr('pers.spNota', { m: pctNum(mult), s: tr('pers.' + tipo), k: pctNum(k) }) }));
+    el('div', { class: 'pers-sp' }, total, campo(tr('pers.ml'), 'ml', hs.maglevel && hs.maglevel.valor),
+      skillArma ? campo(tr('pers.sk.' + skillArma), skillArma, hs[skillArma] && hs[skillArma].valor) : null,
+      campo(tr('pers.' + tipo), 'at', null),
+      vk === 'a' ? el('label', { class: 'toggle' }, el('input', { type: 'checkbox', checked: !!sp.am, onchange: e => { sp.am = e.target.checked; saveUi(); desenharMagias(); } }), el('span', { text: tr('pers.am') })) : null),
+    el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table pers-magias' },
+      el('thead', null, el('tr', null, [tr('pers.col.magia'), tr('pers.col.min'), tr('pers.col.max'), tr('pers.col.media')].map((c, i) => el('th', { scope: 'col', class: i ? 'num' : null, text: c })))), corpo)),
+    el('p', { class: 'support-note', text: tr('pers.spNota', { s: tr('pers.' + tipo) }) }));
   // Huntsman: diárias, semanais e entregas, com o melhor respawn de cada criatura
   const seg = (lista, atual, pega) => el('span', { class: 'seg' }, lista.map(o => el('button', { type: 'button', text: o.t, 'aria-pressed': String(o.v === atual), onclick: () => { pega(o.v); renderPersonagem(); } })));
   const linha = t => {
@@ -10035,16 +10298,19 @@ function renderPersonagem() {
         entregas.length ? el('div', { class: 'pers-entregas' }, entregas.map(e => el('span', { class: e.completed ? 'feita' : null }, e.name, el('b', { text: '×' + e.required })))) : null),
       el('div', { class: 'pers-coluna' }, el('h3', null, tr('pers.semanais'), abertas.length ? el('small', { text: tr('pers.faltamN', { n: abertas.length, t: persTempo(soma7) }) }) : null),
         semanais.length ? semanais.map(x => x.el) : el('p', { class: 'support-note', text: tr('pers.nenhuma') }))));
-  // Tasks do bestiário: em andamento (com o respawn) e concluídas, com busca
+  // Tasks do bestiário: em andamento (com o respawn), concluídas (em páginas) e factions
   const andamento = tarefas.filter(t => !t.completed), concluidas = tarefas.filter(t => t.completed);
-  const filtro = slug(pers.busca), lista = (pers.aba === 'andamento' ? andamento : concluidas).filter(t => !filtro || slug(t.name).includes(filtro));
+  const feitasSet = new Set(concluidas.map(t => t.name));
   const cab = pers.aba === 'andamento' ? [tr('pers.col.cri'), tr('pers.col.prog'), tr('pers.col.resp'), tr('pers.col.falta')] : [tr('pers.col.cri'), tr('pers.col.kills')];
-  const busca = el('input', { type: 'search', value: pers.busca, placeholder: tr('pers.buscar'), 'aria-label': tr('pers.buscar'), oninput: e => { pers.busca = e.target.value; desenharTasks(); } });
   const tabela = el('table', { class: 'creatures-table' });
+  const rodape = el('div', { class: 'pers-pag' });
   const desenharTasks = () => {
     const f = slug(pers.busca), itens = (pers.aba === 'andamento' ? andamento : concluidas).filter(t => !f || slug(t.name).includes(f));
+    const porPag = ui.persPorPag || 5, paginas = Math.max(1, Math.ceil(itens.length / porPag));
+    pers.pag = Math.min(Math.max(0, pers.pag || 0), paginas - 1);
+    const vis = itens.slice(pers.pag * porPag, (pers.pag + 1) * porPag);
     tabela.replaceChildren(el('thead', null, el('tr', null, cab.map(c => el('th', { scope: 'col', text: c })))),
-      el('tbody', null, itens.length ? itens.map(t => {
+      el('tbody', null, vis.length ? vis.map(t => {
         if (pers.aba !== 'andamento') return el('tr', null, el('td', { text: t.name }), el('td', { text: fmtInt(t.kills) }));
         const b = persMelhor(t.name), falta = Math.max(0, t.kills - t.progress);
         return el('tr', null, el('td', { text: t.name }),
@@ -10052,12 +10318,32 @@ function renderPersonagem() {
           el('td', null, b ? el('button', { class: 'hunt-link', type: 'button', text: b.r.name, title: tr('pers.abrir'), onclick: () => { select(b.r.id); goTo('timer'); } }) : el('span', { class: 'none', text: '—' })),
           el('td', { class: b ? 'xp' : 'none', text: b ? persTempo(falta / b.kph) : '—' }));
       }) : el('tr', null, el('td', { class: 'none', colSpan: cab.length, text: tr('pers.nenhuma') }))));
+    // páginas: 5 por padrão, ou 10 e 30; só aparece quando há mais de uma página possível
+    rodape.hidden = itens.length <= 5;
+    rodape.replaceChildren(el('span', { class: 'support-note', text: tr('pers.porPag') }),
+      el('span', { class: 'seg' }, [5, 10, 30].map(n => el('button', { type: 'button', text: String(n), 'aria-pressed': String(n === porPag), onclick: () => { ui.persPorPag = n; saveUi(); pers.pag = 0; desenharTasks(); } }))),
+      el('span', { class: 'pers-pag-n', text: tr('pers.faixa', { a: itens.length ? pers.pag * porPag + 1 : 0, b: Math.min(itens.length, (pers.pag + 1) * porPag), t: itens.length }) }),
+      el('button', { class: 'pers-pag-b', type: 'button', text: '‹', disabled: pers.pag === 0, 'aria-label': tr('pers.anterior'), onclick: () => { pers.pag--; desenharTasks(); } }),
+      el('button', { class: 'pers-pag-b', type: 'button', text: '›', disabled: pers.pag >= paginas - 1, 'aria-label': tr('pers.proxima'), onclick: () => { pers.pag++; desenharTasks(); } }));
   };
-  desenharTasks();
-  const aba = (id, n) => el('button', { type: 'button', text: tr('pers.' + id, { n }), 'aria-pressed': String(pers.aba === id), onclick: () => { pers.aba = id; renderPersonagem(); } });
+  const busca = el('input', { type: 'search', value: pers.busca, placeholder: tr('pers.buscar'), 'aria-label': tr('pers.buscar'), oninput: e => { pers.busca = e.target.value; pers.pag = 0; desenharTasks(); } });
+  const facFeita = n => feitasSet.has(n === 'Incidamus' || n === 'Venerators' ? 'Demorcs' : n);
+  const factions = () => el('div', { class: 'pers-facs' }, PERS_FACTIONS.map(([nome, lista]) => {
+    const n = lista.filter(facFeita).length, aberta = pers.facAberta === nome;
+    return el('div', { class: 'pers-fac' + (n === lista.length ? ' feita' : '') },
+      el('button', { type: 'button', 'aria-expanded': String(aberta), onclick: () => { pers.facAberta = aberta ? null : nome; renderPersonagem(); } },
+        el('span', { class: 'nome', text: nome }), el('span', { class: 'n', text: n + '/' + lista.length })),
+      el('span', { class: 'bar' }, el('i', { style: 'width:' + Math.round(100 * n / lista.length) + '%' })),
+      aberta ? el('div', { class: 'pers-entregas' }, lista.map(t => el('span', { class: facFeita(t) ? 'feita' : null, text: t }))) : null);
+  }));
+  if (pers.aba === 'andamento' || pers.aba === 'concluidas') desenharTasks();
+  const aba = (id, n) => el('button', { type: 'button', text: tr('pers.' + id, { n }), 'aria-pressed': String(pers.aba === id), onclick: () => { pers.aba = id; pers.pag = 0; renderPersonagem(); } });
+  const facsFeitas = PERS_FACTIONS.filter(([, l]) => l.every(facFeita)).length;
   const tasks = card('dois', el('h2', { text: tr('pers.tasksB') }),
-    el('div', { class: 'pers-abas' }, el('span', { class: 'unit-toggle' }, aba('andamento', andamento.length), aba('concluidas', concluidas.length)), busca),
-    el('div', { class: 'creatures-wrap' }, tabela));
+    el('div', { class: 'pers-abas' }, el('span', { class: 'unit-toggle' }, aba('andamento', andamento.length), aba('concluidas', concluidas.length), aba('factions', facsFeitas + '/' + PERS_FACTIONS.length)),
+      pers.aba === 'factions' ? null : busca),
+    pers.aba === 'factions' ? factions() : el('div', { class: 'creatures-wrap' }, tabela),
+    pers.aba === 'factions' ? el('p', { class: 'support-note', text: tr('pers.facNota') }) : rodape);
   // Mortes
   const mortes = p.deaths || [];
   const quem = d => [...new Set((d.killers || []).map(k => String(k.name || '').replace(/^(a|an) /i, '')))].join(', ');
@@ -10069,7 +10355,7 @@ function renderPersonagem() {
     el('p', { class: 'support-note', text: tr('pers.mortesNota') }));
   // a busca das tasks mantém o foco ao redesenhar só a tabela; ao redesenhar a página inteira, o foco volta para ela
   const focoBusca = document.activeElement && document.activeElement.closest && document.activeElement.closest('.pers-abas');
-  g.replaceChildren(ficha, hist, skills, poder, hunts, tasks, mort);
+  g.replaceChildren(ficha, hist, skills, poder, tasks, mort, hunts);
   if (focoBusca) busca.focus();
 }
 $('#pers-ver').addEventListener('click', () => persCarregar($('#pers-nome').value));
