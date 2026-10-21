@@ -6,6 +6,7 @@
 // Endereços (os mesmos da API, só leitura):
 //   /player/{nome}   /online/{mundo}   /highscores/{mundo}/{vocação}/{skill}/{página}   /guilds/{mundo}   /houses/{mundo}
 //   /historico/{nome}   XP e tempo online por dia (horário de Brasília), do que a coleta guardou
+//   /coleta             quando a coleta rodou pela última vez, o que fez ou o erro, e os totais do banco
 //   /teste              confere se o login da conta do site funciona (não mostra usuário nem senha)
 // Cada resposta da API diz por quanto tempo vale (cached_for). O Worker guarda a resposta por esse tempo e só volta
 // a consultar a API depois dele, como a equipe do jogo pediu ("cache on your end and avoid polling too aggressively").
@@ -58,6 +59,7 @@ async function preparar(db) {
     db.prepare('CREATE INDEX IF NOT EXISTS sessoes_por_nome ON sessoes (chave, entrou)'),
     db.prepare('CREATE TABLE IF NOT EXISTS fila (chave TEXT PRIMARY KEY, nome TEXT, pedido INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS ultimo_xp (chave TEXT PRIMARY KEY, experiencia INTEGER)'),
+    db.prepare('CREATE TABLE IF NOT EXISTS estado (chave TEXT PRIMARY KEY, valor TEXT)'),
   ]);
   pronto = true;
 }
@@ -76,14 +78,23 @@ async function guardarXp(db, lista, origem) {
 }
 
 /* ---------- Coleta agendada ---------- */
-async function coletar(env) {
+// Cada execução deixa um registro (quando, o que fez ou o erro) em estado/ultima_coleta, visto em /coleta
+async function coletarComRegistro(env) {
+  const ini = Date.now(), reg = { quando: new Date(ini).toISOString(), ok: false, passos: [] };
+  try { await coletar(env, reg); reg.ok = true; } catch (e) { reg.erro = String((e && e.message) || e).slice(0, 300); }
+  reg.ms = Date.now() - ini;
+  if (env.DB) await env.DB.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind('ultima_coleta', JSON.stringify(reg)).run().catch(() => {});
+}
+async function coletar(env, reg = { passos: [] }) {
   const db = env.DB;
-  if (!db || !env.MEDIVIA_USUARIO) return;
+  if (!db) throw new Error('banco D1 não ligado (binding DB)');
+  if (!env.MEDIVIA_USUARIO) throw new Error('falta o segredo MEDIVIA_USUARIO');
   await preparar(db);
   const mundos = String(env.MUNDOS || 'pendulum').toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
   const t = agora();
   for (const mundo of mundos) {
     const r = await pedir(env, 'online/' + mundo);
+    reg.passos.push('online/' + mundo + ': ' + r.status);
     if (!r.ok) continue;   // 429 ou erro: tenta no próximo minuto
     const lista = ((await r.json()).players || []).map(p => ({ chave: chaveNome(p.name), nome: p.name, entrou: Number(p.timestamp) || 0, nivel: p.level }));
     // A lista vai num texto JSON só. Quem não está mais nela (ou entrou de novo, com outra hora de entrada) fecha a
@@ -96,6 +107,7 @@ async function coletar(env) {
       db.prepare('DELETE FROM online_agora AS o WHERE ' + fora).bind(mundo, dados),
       db.prepare("INSERT OR IGNORE INTO online_agora (mundo, chave, nome, entrou, nivel) SELECT ?, json_extract(value, '$.c'), json_extract(value, '$.n'), json_extract(value, '$.e'), json_extract(value, '$.l') FROM json_each(?)").bind(mundo, dados),
     ]);
+    reg.passos.push(mundo + ': ' + lista.length + ' online');
   }
   // Fichas de quem deslogou (só os acompanhados), poucas por minuto
   const fila = (await db.prepare('SELECT chave, nome FROM fila ORDER BY pedido LIMIT ?').bind(FILA_POR_MINUTO).all()).results || [];
@@ -166,6 +178,13 @@ export default {
       const r = await pedir(env, 'online/pendulum');
       return json({ ok: r.ok, status: r.status, motivo: r.ok ? 'login aceito pela API' : r.status === 401 ? 'a API recusou o login (usuário ou senha)' : 'a API respondeu com erro', coleta: env.DB ? 'banco ligado' : 'banco D1 ainda não ligado' }, 200, cors);
     }
+    if (rota === 'coleta') {
+      if (!env.DB) return json({ erro: 'banco D1 não ligado' }, 200, cors);
+      await preparar(env.DB);
+      const e = await env.DB.prepare('SELECT valor FROM estado WHERE chave = ?').bind('ultima_coleta').first();
+      const n = await env.DB.prepare('SELECT (SELECT COUNT(*) FROM online_agora) AS online, (SELECT COUNT(*) FROM sessoes) AS sessoes, (SELECT COUNT(*) FROM xp) AS xp, (SELECT COUNT(*) FROM personagens) AS acompanhados, (SELECT COUNT(*) FROM fila) AS fila').first();
+      return json({ ultima: e ? JSON.parse(e.valor) : 'a coleta agendada ainda não rodou nenhuma vez', totais: n }, 200, cors);
+    }
     const hist = rota.match(/^historico\/([^/]{2,40})$/);
     if (hist) return historico(env, hist[1], cors);
     if (!ROTAS.some(r => r.test(rota))) return json({ erro: 'endereço desconhecido' }, 404, cors);
@@ -210,6 +229,6 @@ export default {
     return out;
   },
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(coletar(env));
+    ctx.waitUntil(coletarComRegistro(env));
   },
 };
