@@ -750,6 +750,69 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .page[hidden] { display: none; }
 /* Ferramenta que era janela e virou página: o mesmo bloco, agora no fluxo da página */
 .tool { display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: var(--r-lg); background: var(--box); color: var(--label); min-width: 0; }
+/* Página Personagem: busca no alto e cartões em três colunas; os de uma fileira ficam com a mesma altura */
+.pers-busca { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.pers-busca input { flex: 1 1 240px; max-width: 360px; padding: 11px 14px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 15px var(--font-ui); }
+.pers-busca input:focus { outline: 2px solid var(--value); outline-offset: -1px; border-color: transparent; }
+.pers-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+.pers-cart { min-width: 0; padding: 18px 20px 20px; border-radius: var(--r-lg); background: var(--box); display: flex; flex-direction: column; gap: 14px; }
+.pers-cart.dois { grid-column: span 2; }
+.pers-cart.tres { grid-column: 1 / -1; }
+.pers-cart h2 { font: 800 21px/1.2 var(--font-display); color: var(--title); display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.pers-cart h2 small { font: 500 13px var(--font-ui); color: var(--faint); }
+.pers-nome { font: 800 38px/1 var(--font-display); color: var(--title); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.pers-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pers-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--card); font: 600 12px var(--font-ui); color: var(--label); }
+.pers-chip.on { background: var(--band); color: var(--value); }
+.pers-chip.on::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--value); }
+.pers-chip.ouro { background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--amber); }
+.pers-dados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; }
+.pers-dados div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pers-dados span { font-size: 12px; color: var(--faint); }
+.pers-dados b { font-weight: 600; color: var(--title); overflow-wrap: anywhere; }
+.pers-dados b.g { color: var(--value); }
+.pers-dados b.a { color: var(--amber); }
+.pers-barras { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); align-items: end; gap: 4px; height: 150px; padding: 10px 12px 0; border-radius: var(--r-md); background: var(--card); }
+.pers-barras i { display: block; min-height: 2px; border-radius: 4px 4px 0 0; background: var(--value); }
+.pers-barras i.vazio { background: repeating-linear-gradient(135deg, #2c3637 0 4px, #232c2d 4px 8px); }
+.pers-barras i.hoje { background: var(--amber); }
+.pers-somas { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; }
+.pers-somas b { color: var(--title); }
+.pers-sp { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 16px; }
+.pers-sp label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--faint); }
+.pers-sp input[type=text] { width: 96px; padding: 8px 10px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 600 14px var(--font-ui); }
+.pers-sp .total { font: 800 34px/1 var(--font-display); color: var(--amber); }
+.pers-sp label.toggle { flex-direction: row; padding-bottom: 10px; font-size: 13px; color: var(--label); }
+.pers-ritmo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px; }
+.pers-ritmo .seg button { white-space: nowrap; }
+.pers-colunas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 22px; }
+.pers-coluna { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pers-coluna h3 { font: 700 13px var(--font-ui); color: var(--faint); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.pers-coluna h3 small { font-weight: 500; }
+.pers-task { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 10px 12px; border-radius: var(--r-md); background: var(--card); }
+.pers-task .cri { font-weight: 700; color: var(--amber); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; overflow-wrap: anywhere; }
+.pers-task .n { font-weight: 600; color: var(--title); text-align: right; white-space: nowrap; }
+.pers-task .bar { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; }
+.pers-task .bar i { display: block; height: 100%; background: var(--amber); border-radius: 999px; }
+.pers-task.feita .bar i { background: var(--value); }
+.pers-task.feita .cri { color: var(--value); }
+.pers-resp { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; color: var(--label); }
+.pers-resp b { color: var(--title); font-weight: 600; }
+.pers-resp .t { color: var(--value); font-weight: 700; }
+.pers-resp.falta { color: var(--faint); }
+.pers-abrir { margin-left: auto; padding: 4px 10px; border: 0; border-radius: 999px; background: var(--band); color: var(--value); font: 700 12px var(--font-ui); cursor: pointer; }
+.pers-abrir:hover { background: #22513a; }
+.pers-boost { padding: 1px 7px; border-radius: 6px; background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--amber); font: 700 11px var(--font-ui); }
+.pers-entregas { display: flex; flex-wrap: wrap; gap: 6px; }
+.pers-entregas span { padding: 5px 10px; border-radius: var(--r-sm); background: var(--card); font-size: 13px; }
+.pers-entregas b { color: var(--title); margin-left: 4px; }
+.pers-abas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.pers-abas input { flex: 0 1 220px; padding: 7px 12px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 13px var(--font-ui); }
+.pers-mini { width: 110px; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+.pers-mini i { display: block; height: 100%; background: var(--amber); }
+.pers-cart .creatures-wrap { flex: none; min-height: 0; }
+.pers-cart .creatures-table { min-width: 0; }
+@media (max-width: 980px) { .pers-grade { grid-template-columns: 1fr; } .pers-cart.dois, .pers-cart.tres { grid-column: auto; } .pers-colunas { grid-template-columns: 1fr; } }
 /* Calculadora: comprar pronto ou montar */
 .calc h2 { font: 800 22px/1.2 var(--font-display); color: var(--title); }
 .calc > .support-note { max-width: 78ch; margin-top: -8px; }
@@ -1022,6 +1085,17 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       <div class="hunt-foot"><button class="dlg" type="button" id="raffle-btn" data-i18n="raffle.open">Sortear itens</button></div>
       <input class="sr" type="file" id="hunt-file" accept=".txt,text/plain" tabindex="-1" aria-hidden="true">
     </section>
+  </section>
+
+  <section class="page" id="page-personagem" hidden>
+    <div class="pers-busca">
+      <input type="search" id="pers-nome" maxlength="40" autocomplete="off" spellcheck="false" placeholder="Nome do personagem" aria-label="Nome do personagem" data-i18n-attr="placeholder:pers.nome;aria-label:pers.nome">
+      <button class="dlg go" type="button" id="pers-ver" data-i18n="pers.ver">Ver personagem</button>
+      <button class="hunt-link" type="button" id="pers-meu" data-i18n="pers.meu">Guardar como meu personagem</button>
+      <span class="support-note" data-i18n="pers.fonte">Dados públicos da API oficial do Medivia, atualizados a cada 5 minutos.</span>
+    </div>
+    <p class="status" id="pers-status" role="status" hidden></p>
+    <div class="pers-grade" id="pers-grade"></div>
   </section>
 
   <section class="page" id="page-calc" hidden>
@@ -1486,6 +1560,76 @@ const I18N = {
     'tok.noBoost': 'ninguém gastou este booster: partes iguais',
     'calc.nav': 'Calculadora',
     'calc.title': 'Comprar pronto ou montar?',
+    'pers.nome': 'Nome do personagem',
+    'pers.ver': 'Ver personagem',
+    'pers.meu': 'Guardar como meu personagem',
+    'pers.meuOk': 'É o seu personagem: a página abre direto nele.',
+    'pers.fonte': 'Dados públicos da API oficial do Medivia, atualizados a cada 5 minutos.',
+    'pers.vazio': 'Digite o nome de um personagem para ver nível, Huntsman, tasks e mortes.',
+    'pers.carregando': 'Buscando {x}…',
+    'pers.naoAchei': 'Não achei o personagem {x}.',
+    'pers.limite': 'A API do Medivia pediu um tempo. Tente de novo em alguns segundos.',
+    'pers.erro': 'Não consegui falar com a API do Medivia agora.',
+    'pers.online': 'Online',
+    'pers.offline': 'Offline',
+    'pers.premium': 'Premium',
+    'pers.nivel': 'Nível',
+    'pers.xp': 'Experiência',
+    'pers.voc': 'Vocação',
+    'pers.guilda': 'Guilda',
+    'pers.cidade': 'Cidade',
+    'pers.casa': 'Casa',
+    'pers.hpontos': 'Huntsman',
+    'pers.pontos': '{n} pontos',
+    'pers.tasksB': 'Tasks do bestiário',
+    'pers.deTotal': '{a} de {b}',
+    'pers.hist': 'Histórico de XP',
+    'pers.histDesde': 'guardado desde {d}',
+    'pers.histComeca': 'começa a contar hoje',
+    'pers.histNota': 'O Medivia Labs guarda o XP deste personagem a cada logout, a partir da primeira vez que ele é aberto aqui. As barras listradas viram os dias de verdade conforme o histórico cresce.',
+    'pers.hoje': 'Hoje',
+    'pers.d7': '7 dias',
+    'pers.d30': '30 dias',
+    'pers.media': 'Média por dia',
+    'pers.onlineHoje': 'Online hoje',
+    'pers.skills': 'Skills',
+    'pers.skillsNota': 'As skills chegam pela coleta dos rankings do mundo, que está em preparação. A API do Medivia não traz as skills na ficha.',
+    'pers.sp': 'Spell power',
+    'pers.ml': 'Magic level',
+    'pers.int': 'Intelligence',
+    'pers.dex': 'Dexterity',
+    'pers.str': 'Strength',
+    'pers.am': 'Arcane Marksmanship',
+    'pers.spNota': 'Pela fórmula da wiki: nível × 1,30 + magic level^1,4 × {m} + {s} × {k}. Digite o magic level e o atributo; ficam guardados neste navegador. A tabela de dano de cada magia entra quando tivermos as fórmulas da wiki.',
+    'pers.hunts': 'Huntsman',
+    'pers.diaria': 'Diária: {x}',
+    'pers.ritmo': 'Tempo calculado para',
+    'pers.ritmoNota': 'o melhor respawn do banco para cada criatura, no grupo e bônus escolhidos',
+    'pers.diarias': 'DIÁRIAS',
+    'pers.semanais': 'SEMANAIS',
+    'pers.entregas': 'ENTREGAS',
+    'pers.faltamN': 'faltam {n} · cerca de {t} nos respawns do banco',
+    'pers.feita': 'Concluída',
+    'pers.porHora': '{n} por hora',
+    'pers.faltaT': 'faltam {t}',
+    'pers.abrir': 'Abrir no cronômetro',
+    'pers.semResp': 'Nenhum respawn com {x} no banco ainda. Mande o print da janela de bônus.',
+    'pers.semJanela': 'Sem janela de bônus: cronômetro personalizado',
+    'pers.criar': 'Criar cronômetro',
+    'pers.andamento': 'Em andamento ({n})',
+    'pers.concluidas': 'Concluídas ({n})',
+    'pers.buscar': 'Buscar criatura',
+    'pers.col.cri': 'Criatura',
+    'pers.col.prog': 'Progresso',
+    'pers.col.resp': 'Melhor respawn',
+    'pers.col.falta': 'Falta',
+    'pers.col.kills': 'Abates',
+    'pers.nenhuma': 'Nenhuma.',
+    'pers.mortes': 'Mortes recentes',
+    'pers.col.quando': 'Quando',
+    'pers.col.por': 'Por',
+    'pers.semMortes': 'Nenhuma morte ativa.',
+    'pers.mortesNota': 'A API mostra as mortes ainda ativas.',
     'calc.intro': 'Compare o preço de um item pronto no mercado com o custo de comprar os ingredientes e montar. Os preços em Medivia Coin viram gold pela cotação que você informar.',
     'calc.item': 'Item (opcional)',
     'calc.rate': 'Cotação da Medivia Coin',
@@ -2085,6 +2229,76 @@ const I18N = {
     'tok.noBoost': 'nobody spent this booster: equal parts',
     'calc.nav': 'Calculator',
     'calc.title': 'Buy it ready or craft it?',
+    'pers.nome': 'Character name',
+    'pers.ver': 'Show character',
+    'pers.meu': 'Save as my character',
+    'pers.meuOk': 'This is your character: the page opens on it.',
+    'pers.fonte': 'Public data from the official Medivia API, refreshed every 5 minutes.',
+    'pers.vazio': 'Type a character name to see level, Huntsman, tasks and deaths.',
+    'pers.carregando': 'Looking up {x}…',
+    'pers.naoAchei': 'Character {x} was not found.',
+    'pers.limite': 'The Medivia API asked for a pause. Try again in a few seconds.',
+    'pers.erro': 'Could not reach the Medivia API right now.',
+    'pers.online': 'Online',
+    'pers.offline': 'Offline',
+    'pers.premium': 'Premium',
+    'pers.nivel': 'Level',
+    'pers.xp': 'Experience',
+    'pers.voc': 'Vocation',
+    'pers.guilda': 'Guild',
+    'pers.cidade': 'Town',
+    'pers.casa': 'House',
+    'pers.hpontos': 'Huntsman',
+    'pers.pontos': '{n} points',
+    'pers.tasksB': 'Bestiary tasks',
+    'pers.deTotal': '{a} of {b}',
+    'pers.hist': 'XP history',
+    'pers.histDesde': 'recorded since {d}',
+    'pers.histComeca': 'starts counting today',
+    'pers.histNota': 'Medivia Labs records this character\'s XP at every logout, from the first time it is opened here. The striped bars turn into real days as the history grows.',
+    'pers.hoje': 'Today',
+    'pers.d7': '7 days',
+    'pers.d30': '30 days',
+    'pers.media': 'Daily average',
+    'pers.onlineHoje': 'Online today',
+    'pers.skills': 'Skills',
+    'pers.skillsNota': 'Skills come from collecting the world rankings, which is being prepared. The Medivia API does not include skills in the character data.',
+    'pers.sp': 'Spell power',
+    'pers.ml': 'Magic level',
+    'pers.int': 'Intelligence',
+    'pers.dex': 'Dexterity',
+    'pers.str': 'Strength',
+    'pers.am': 'Arcane Marksmanship',
+    'pers.spNota': 'From the wiki formula: level × 1.30 + magic level^1.4 × {m} + {s} × {k}. Type the magic level and the stat; they are kept in this browser. The damage table for each spell comes once we have the wiki formulas.',
+    'pers.hunts': 'Huntsman',
+    'pers.diaria': 'Daily: {x}',
+    'pers.ritmo': 'Time worked out for',
+    'pers.ritmoNota': 'the best respawn in the bank for each creature, at the chosen group and bonus',
+    'pers.diarias': 'DAILY',
+    'pers.semanais': 'WEEKLY',
+    'pers.entregas': 'DELIVERIES',
+    'pers.faltamN': '{n} left · about {t} in the bank respawns',
+    'pers.feita': 'Done',
+    'pers.porHora': '{n} per hour',
+    'pers.faltaT': '{t} left',
+    'pers.abrir': 'Open on the timer',
+    'pers.semResp': 'No respawn with {x} in the bank yet. Send the bonus window screenshot.',
+    'pers.semJanela': 'No bonus window: custom timer',
+    'pers.criar': 'Create timer',
+    'pers.andamento': 'In progress ({n})',
+    'pers.concluidas': 'Completed ({n})',
+    'pers.buscar': 'Search creature',
+    'pers.col.cri': 'Creature',
+    'pers.col.prog': 'Progress',
+    'pers.col.resp': 'Best respawn',
+    'pers.col.falta': 'Left',
+    'pers.col.kills': 'Kills',
+    'pers.nenhuma': 'None.',
+    'pers.mortes': 'Recent deaths',
+    'pers.col.quando': 'When',
+    'pers.col.por': 'By',
+    'pers.semMortes': 'No active deaths.',
+    'pers.mortesNota': 'The API shows the deaths still active.',
     'calc.intro': 'Compare the price of a ready item on the market with the cost of buying the ingredients and crafting it. Prices in Medivia Coin are turned into gold at the rate you enter.',
     'calc.item': 'Item (optional)',
     'calc.rate': 'Medivia Coin rate',
@@ -2684,6 +2898,76 @@ const I18N = {
     'tok.noBoost': 'nadie gastó este booster: partes iguales',
     'calc.nav': 'Calculadora',
     'calc.title': '¿Comprar hecho o montar?',
+    'pers.nome': 'Nombre del personaje',
+    'pers.ver': 'Ver personaje',
+    'pers.meu': 'Guardar como mi personaje',
+    'pers.meuOk': 'Es tu personaje: la página abre directo en él.',
+    'pers.fonte': 'Datos públicos de la API oficial de Medivia, actualizados cada 5 minutos.',
+    'pers.vazio': 'Escribe el nombre de un personaje para ver nivel, Huntsman, tasks y muertes.',
+    'pers.carregando': 'Buscando {x}…',
+    'pers.naoAchei': 'No encontré el personaje {x}.',
+    'pers.limite': 'La API de Medivia pidió una pausa. Intenta de nuevo en unos segundos.',
+    'pers.erro': 'No pude conectar con la API de Medivia ahora.',
+    'pers.online': 'En línea',
+    'pers.offline': 'Desconectado',
+    'pers.premium': 'Premium',
+    'pers.nivel': 'Nivel',
+    'pers.xp': 'Experiencia',
+    'pers.voc': 'Vocación',
+    'pers.guilda': 'Gremio',
+    'pers.cidade': 'Ciudad',
+    'pers.casa': 'Casa',
+    'pers.hpontos': 'Huntsman',
+    'pers.pontos': '{n} puntos',
+    'pers.tasksB': 'Tasks del bestiario',
+    'pers.deTotal': '{a} de {b}',
+    'pers.hist': 'Historial de XP',
+    'pers.histDesde': 'guardado desde {d}',
+    'pers.histComeca': 'empieza a contar hoy',
+    'pers.histNota': 'Medivia Labs guarda el XP de este personaje en cada logout, desde la primera vez que se abre aquí. Las barras rayadas se vuelven días reales a medida que crece el historial.',
+    'pers.hoje': 'Hoy',
+    'pers.d7': '7 días',
+    'pers.d30': '30 días',
+    'pers.media': 'Media por día',
+    'pers.onlineHoje': 'En línea hoy',
+    'pers.skills': 'Skills',
+    'pers.skillsNota': 'Las skills llegan por la recolección de los rankings del mundo, que está en preparación. La API de Medivia no trae las skills en la ficha.',
+    'pers.sp': 'Spell power',
+    'pers.ml': 'Magic level',
+    'pers.int': 'Intelligence',
+    'pers.dex': 'Dexterity',
+    'pers.str': 'Strength',
+    'pers.am': 'Arcane Marksmanship',
+    'pers.spNota': 'Por la fórmula de la wiki: nivel × 1,30 + magic level^1,4 × {m} + {s} × {k}. Escribe el magic level y el atributo; quedan guardados en este navegador. La tabla de daño de cada magia llegará cuando tengamos las fórmulas de la wiki.',
+    'pers.hunts': 'Huntsman',
+    'pers.diaria': 'Diaria: {x}',
+    'pers.ritmo': 'Tiempo calculado para',
+    'pers.ritmoNota': 'el mejor respawn del banco para cada criatura, en el grupo y bonus elegidos',
+    'pers.diarias': 'DIARIAS',
+    'pers.semanais': 'SEMANALES',
+    'pers.entregas': 'ENTREGAS',
+    'pers.faltamN': 'faltan {n} · cerca de {t} en los respawns del banco',
+    'pers.feita': 'Completada',
+    'pers.porHora': '{n} por hora',
+    'pers.faltaT': 'faltan {t}',
+    'pers.abrir': 'Abrir en el cronómetro',
+    'pers.semResp': 'Ningún respawn con {x} en el banco todavía. Manda la captura de la ventana de bonus.',
+    'pers.semJanela': 'Sin ventana de bonus: cronómetro personalizado',
+    'pers.criar': 'Crear cronómetro',
+    'pers.andamento': 'En curso ({n})',
+    'pers.concluidas': 'Completadas ({n})',
+    'pers.buscar': 'Buscar criatura',
+    'pers.col.cri': 'Criatura',
+    'pers.col.prog': 'Progreso',
+    'pers.col.resp': 'Mejor respawn',
+    'pers.col.falta': 'Falta',
+    'pers.col.kills': 'Muertes',
+    'pers.nenhuma': 'Ninguna.',
+    'pers.mortes': 'Muertes recientes',
+    'pers.col.quando': 'Cuándo',
+    'pers.col.por': 'Por',
+    'pers.semMortes': 'Ninguna muerte activa.',
+    'pers.mortesNota': 'La API muestra las muertes aún activas.',
     'calc.intro': 'Compara el precio de un item hecho en el mercado con el coste de comprar los ingredientes y montarlo. Los precios en Medivia Coin se pasan a gold con la cotización que indiques.',
     'calc.item': 'Item (opcional)',
     'calc.rate': 'Cotización de la Medivia Coin',
@@ -3283,6 +3567,76 @@ const I18N = {
     'tok.noBoost': 'nikt nie zużył tego boostera: po równo',
     'calc.nav': 'Kalkulator',
     'calc.title': 'Kupić gotowe czy złożyć?',
+    'pers.nome': 'Nazwa postaci',
+    'pers.ver': 'Pokaż postać',
+    'pers.meu': 'Zapisz jako moją postać',
+    'pers.meuOk': 'To twoja postać: strona otwiera się od razu na niej.',
+    'pers.fonte': 'Publiczne dane z oficjalnego API Medivii, odświeżane co 5 minut.',
+    'pers.vazio': 'Wpisz nazwę postaci, aby zobaczyć poziom, Huntsmana, taski i śmierci.',
+    'pers.carregando': 'Szukam {x}…',
+    'pers.naoAchei': 'Nie znaleziono postaci {x}.',
+    'pers.limite': 'API Medivii poprosiło o przerwę. Spróbuj za kilka sekund.',
+    'pers.erro': 'Nie udało się teraz połączyć z API Medivii.',
+    'pers.online': 'Online',
+    'pers.offline': 'Offline',
+    'pers.premium': 'Premium',
+    'pers.nivel': 'Poziom',
+    'pers.xp': 'Doświadczenie',
+    'pers.voc': 'Profesja',
+    'pers.guilda': 'Gildia',
+    'pers.cidade': 'Miasto',
+    'pers.casa': 'Dom',
+    'pers.hpontos': 'Huntsman',
+    'pers.pontos': '{n} punktów',
+    'pers.tasksB': 'Taski bestiariusza',
+    'pers.deTotal': '{a} z {b}',
+    'pers.hist': 'Historia XP',
+    'pers.histDesde': 'zapisywane od {d}',
+    'pers.histComeca': 'liczy od dziś',
+    'pers.histNota': 'Medivia Labs zapisuje XP tej postaci przy każdym wylogowaniu, od pierwszego otwarcia tutaj. Paskowane słupki zamieniają się w prawdziwe dni wraz z historią.',
+    'pers.hoje': 'Dziś',
+    'pers.d7': '7 dni',
+    'pers.d30': '30 dni',
+    'pers.media': 'Średnio dziennie',
+    'pers.onlineHoje': 'Online dziś',
+    'pers.skills': 'Umiejętności',
+    'pers.skillsNota': 'Umiejętności przyjdą z rankingów świata, które przygotowujemy. API Medivii nie podaje ich w danych postaci.',
+    'pers.sp': 'Spell power',
+    'pers.ml': 'Magic level',
+    'pers.int': 'Intelligence',
+    'pers.dex': 'Dexterity',
+    'pers.str': 'Strength',
+    'pers.am': 'Arcane Marksmanship',
+    'pers.spNota': 'Według wzoru z wiki: poziom × 1,30 + magic level^1,4 × {m} + {s} × {k}. Wpisz magic level i atrybut; zostają w tej przeglądarce. Tabela obrażeń każdego czaru pojawi się, gdy będziemy mieć wzory z wiki.',
+    'pers.hunts': 'Huntsman',
+    'pers.diaria': 'Dzienne: {x}',
+    'pers.ritmo': 'Czas liczony dla',
+    'pers.ritmoNota': 'najlepszy respawn z banku dla każdego stworzenia, przy wybranej grupie i bonusie',
+    'pers.diarias': 'DZIENNE',
+    'pers.semanais': 'TYGODNIOWE',
+    'pers.entregas': 'DOSTAWY',
+    'pers.faltamN': 'zostało {n} · około {t} w respawnach z banku',
+    'pers.feita': 'Ukończone',
+    'pers.porHora': '{n} na godzinę',
+    'pers.faltaT': 'zostało {t}',
+    'pers.abrir': 'Otwórz w minutniku',
+    'pers.semResp': 'Brak respawnu z {x} w banku. Wyślij zrzut okna bonusu.',
+    'pers.semJanela': 'Bez okna bonusu: własny minutnik',
+    'pers.criar': 'Utwórz minutnik',
+    'pers.andamento': 'W toku ({n})',
+    'pers.concluidas': 'Ukończone ({n})',
+    'pers.buscar': 'Szukaj stworzenia',
+    'pers.col.cri': 'Stworzenie',
+    'pers.col.prog': 'Postęp',
+    'pers.col.resp': 'Najlepszy respawn',
+    'pers.col.falta': 'Zostało',
+    'pers.col.kills': 'Zabójstwa',
+    'pers.nenhuma': 'Brak.',
+    'pers.mortes': 'Ostatnie śmierci',
+    'pers.col.quando': 'Kiedy',
+    'pers.col.por': 'Przez',
+    'pers.semMortes': 'Brak aktywnych śmierci.',
+    'pers.mortesNota': 'API pokazuje wciąż aktywne śmierci.',
     'calc.intro': 'Porównaj cenę gotowego przedmiotu na rynku z kosztem kupna składników i złożenia go. Ceny w Medivia Coin są przeliczane na gold po kursie, który podasz.',
     'calc.item': 'Przedmiot (opcjonalnie)',
     'calc.rate': 'Kurs Medivia Coin',
@@ -5069,7 +5423,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {} }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {} }, lsGet(LS_UI, {}));
 // Bônus de XP: minutos de XP Boost da loja, golden premium (+5% no boost) e outros bônus em %, para a hunt inteira
 const XPB_MINS = [0, 30, 60, 90, 120, 180];
 {
@@ -5256,6 +5610,7 @@ function setLang(lang) {
   renderHunt();
   renderCalc();
   renderRoom();
+  if (pageNow === 'personagem') renderPersonagem();
   voiceLang();
   if (pageNow === 'creatures') renderCreatures();
   if (pageNow === 'hunt') renderHunt();
@@ -5810,16 +6165,18 @@ function parseClock(t) {
   return sec >= 10 && sec <= 86400 ? sec : null;
 }
 // Cria um cronômetro personalizado (30 minutos, até a criatura ser escolhida) e o abre.
-function createCustom() {
+function createCustom(criatura) {
   const abc = 'abcdefghijklmnopqrstuvwxyz0123456789';
   const id = 'personalizado-' + Array.from(crypto.getRandomValues(new Uint8Array(6)), x => abc[x % abc.length]).join('');
-  const name = tr('custom.new');
+  const dada = typeof criatura === 'string' && criatura.trim();   // no clique do botão chega o evento, não um nome
+  const name = dada ? knownName(criatura.trim()) : tr('custom.new');
   store.local.set(id, { name, monsters: [{ name, count: 1, base: 1800 }], custom: true, updatedAt: new Date().toISOString() });
   persistLocal();
   ui.bankTab = 'custom';
   select(id);
   goTo('timer');
-  setTimeout(() => { const f = $('#custom-creature'); if (f) { f.focus(); f.select(); } }, 50);
+  if (!dada) setTimeout(() => { const f = $('#custom-creature'); if (f) { f.focus(); f.select(); } }, 50);
+  return id;
 }
 // Muda a criatura (que também dá o nome) ou o tempo de um personalizado. Fica só neste navegador.
 function setCustom(id, patch) {
@@ -9538,7 +9895,187 @@ $('#calc-clear').addEventListener('click', () => {
    Cada ferramenta é uma página com endereço próprio (#hunt, #creatures, #calc); o cronômetro é a página inicial, sem nada
    depois do endereço. O sorteio está no mesmo menu, mas abre por cima da página em que a pessoa está (#raffle abre
    o site já com ele). Os cronômetros continuam contando em qualquer página. */
-const PAGES = ['timer', 'hunt', 'creatures', 'calc'];
+/* ---------- Personagem ----------
+   Página ainda escondida (sem botão no menu): abre pelo endereço #personagem ou #personagem/<nome>. Os dados vêm da
+   API oficial do Medivia pelo Worker api.medivialabs.com (worker/medivia-api.js), que guarda o login da conta do
+   site e as respostas; o histórico de XP e de tempo online é o que a coleta agendada do Worker guardou. */
+const API_MEDIVIA = 'https://api.medivialabs.com/';
+const pers = { nome: '', dados: null, hist: null, party: null, pct: null, aba: 'andamento', busca: '' };
+function persStatus(kind, text) { const e = $('#pers-status'); e.hidden = !text; e.dataset.kind = kind || ''; setText(e, text || ''); }
+async function persCarregar(nome) {
+  nome = String(nome || '').trim().replace(/\s+/g, ' ').slice(0, 40);
+  if (!nome) return;
+  pers.nome = nome;
+  $('#pers-nome').value = nome;
+  persStatus('busy', tr('pers.carregando', { x: nome }));
+  try {
+    const r = await fetch(API_MEDIVIA + 'player/' + encodeURIComponent(nome));
+    if (r.status === 404) { pers.dados = null; persStatus('err', tr('pers.naoAchei', { x: nome })); renderPersonagem(); return; }
+    if (!r.ok) throw new Error(String(r.status));
+    pers.dados = (await r.json()).player;
+    // o histórico vem depois da ficha: abrir a ficha é o que faz o Worker passar a acompanhar o personagem
+    const h = await fetch(API_MEDIVIA + 'historico/' + encodeURIComponent(pers.dados.name)).catch(() => null);
+    pers.hist = h && h.ok ? await h.json() : null;
+    persStatus('', '');
+    if (pageNow === 'personagem') { try { history.replaceState(null, '', location.pathname + location.search + '#personagem/' + encodeURIComponent(pers.dados.name)); } catch { /* o endereço fica como está */ } }
+  } catch (e) { persStatus('err', tr(e.message === '429' ? 'pers.limite' : 'pers.erro')); }
+  renderPersonagem();
+}
+// Nome da task no plural ("Drake Lords", "Phoenixes") para o nome da criatura
+const persSingular = n => String(n).replace(/ies$/i, 'y').replace(/ves$/i, 'f').replace(/(x|ch|sh|ss)es$/i, '$1').replace(/s$/i, '');
+// O respawn do banco que mata a criatura mais rápido, no grupo e bônus escolhidos na página
+function persMelhor(nome) {
+  const alvo = new Set([slug(nome), slug(persSingular(nome))]);
+  let best = null;
+  for (const r of allRespawns()) {
+    if (r.custom) continue;
+    for (const m of r.monsters) {
+      if (!alvo.has(slug(m.name)) || !m.base || !m.count) continue;
+      const kph = killsExact(respawnAt(m.base, pers.pct, pers.party), m.count);
+      if (!best || kph > best.kph) best = { r, m, kph };
+    }
+  }
+  return best;
+}
+const persTempo = h => { const min = Math.max(1, Math.round(h * 60)); return min < 60 ? min + ' min' : Math.floor(min / 60) + ' h' + (min % 60 ? ' ' + (min % 60) + ' min' : ''); };
+// Linha de sugestão de uma task: o melhor respawn e o tempo que falta, ou o que fazer quando não há respawn
+function persSugestao(nome, falta) {
+  const b = persMelhor(nome);
+  if (b) return { horas: falta / b.kph, el: el('span', { class: 'pers-resp' }, el('b', { text: b.r.name }), ' ' + tr('pers.porHora', { n: Math.round(b.kph) }), ' ',
+    el('span', { class: 't', text: tr('pers.faltaT', { t: persTempo(falta / b.kph) }) }),
+    el('button', { class: 'pers-abrir', type: 'button', text: tr('pers.abrir'), onclick: () => { select(b.r.id); goTo('timer'); } })) };
+  const c = creatureRows().find(x => x.id === slug(nome) || x.id === slug(persSingular(nome)));
+  if (c && c.single) return { horas: null, el: el('span', { class: 'pers-resp' }, tr('pers.semJanela'),
+    el('button', { class: 'pers-abrir', type: 'button', text: tr('pers.criar'), onclick: () => createCustom(c.name) })) };
+  return { horas: null, el: el('span', { class: 'pers-resp falta', text: tr('pers.semResp', { x: nome }) }) };
+}
+function renderPersonagem() {
+  const g = $('#pers-grade');
+  if (!g) return;
+  const p = pers.dados, loc = document.documentElement.lang || 'en';
+  setText($('#pers-meu'), tr(p && ui.meuPers && slug(ui.meuPers) === slug(p.name) ? 'pers.meuOk' : 'pers.meu'));
+  if (!p) { g.replaceChildren(el('p', { class: 'support-note', text: tr('pers.vazio') })); return; }
+  if (pers.party == null) pers.party = ui.party;
+  if (pers.pct == null) pers.pct = ui.pct;
+  const h = pers.hist, tarefas = p.tasks || [], hu = p.huntsman || {};
+  const card = (cls, ...kids) => el('section', { class: 'pers-cart' + (cls ? ' ' + cls : '') }, ...kids);
+  const par = (rot, val, cls) => el('div', null, el('span', { text: rot }), el('b', { class: cls || null, text: val == null || val === '' ? '—' : String(val) }));
+  const feitas = tarefas.filter(t => t.completed).length;
+  // Ficha
+  const ficha = card('', el('div', { class: 'pers-nome', text: p.name }),
+    el('div', { class: 'pers-chips' },
+      h ? el('span', { class: 'pers-chip' + (h.online ? ' on' : ''), text: tr(h.online ? 'pers.online' : 'pers.offline') }) : null,
+      el('span', { class: 'pers-chip', text: p.world || '' }),
+      p.premium ? el('span', { class: 'pers-chip ouro', text: tr('pers.premium') }) : null),
+    el('div', { class: 'pers-dados' },
+      par(tr('pers.nivel'), p.level, 'g'), par(tr('pers.xp'), fmtInt(p.experience || 0)),
+      par(tr('pers.voc'), p.vocation), par(tr('pers.guilda'), p.guild && p.guild.name, 'a'),
+      par(tr('pers.cidade'), p.town), par(tr('pers.casa'), p.house && p.house.name),
+      par(tr('pers.hpontos'), hu.points != null ? tr('pers.pontos', { n: fmtInt(hu.points) }) : null),
+      par(tr('pers.tasksB'), tarefas.length ? tr('pers.deTotal', { a: feitas, b: tarefas.length }) : null)));
+  // Histórico de XP: os últimos 30 dias de Brasília; sem dados, barras listradas
+  const diaBr = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
+  const hojeBr = diaBr(Date.now()), dias = [];
+  for (let i = 29; i >= 0; i--) dias.push(diaBr(Date.now() - i * 864e5));
+  const ganho = new Map(((h && h.xp) || []).map(d => [d.dia, d.ganho || 0]));
+  const onl = new Map(((h && h.online_por_dia) || []).map(d => [d.dia, d.segundos]));
+  const maior = Math.max(1, ...dias.map(d => ganho.get(d) || 0));
+  const soma = n => dias.slice(-n).reduce((a, d) => a + (ganho.get(d) || 0), 0);
+  const comDados = dias.filter(d => ganho.has(d));
+  const horas = sec => persTempo((sec || 0) / 3600);
+  const primeiro = h && h.xp && h.xp.length ? h.xp[0].dia : null;
+  const hist = card('dois', el('h2', null, tr('pers.hist'), el('small', { text: primeiro ? tr('pers.histDesde', { d: new Date(primeiro + 'T12:00:00Z').toLocaleDateString(loc, { day: 'numeric', month: 'short' }) }) : tr('pers.histComeca') })),
+    el('div', { class: 'pers-barras', 'aria-hidden': 'true' }, dias.map((d, i) => ganho.has(d)
+      ? el('i', { class: d === hojeBr ? 'hoje' : null, style: 'height:' + Math.max(2, Math.round(100 * (ganho.get(d) || 0) / maior)) + '%', title: d + ': +' + fmtInt(ganho.get(d) || 0) })
+      : el('i', { class: 'vazio', style: 'height:' + (18 + (i * 37) % 27) + '%' }))),
+    el('div', { class: 'pers-somas' },
+      el('span', null, tr('pers.hoje') + ' ', el('b', { text: ganho.has(hojeBr) ? '+' + fmtXp(ganho.get(hojeBr)) : '—' })),
+      el('span', null, tr('pers.d7') + ' ', el('b', { text: comDados.length ? '+' + fmtXp(soma(7)) : '—' })),
+      el('span', null, tr('pers.d30') + ' ', el('b', { text: comDados.length ? '+' + fmtXp(soma(30)) : '—' })),
+      el('span', null, tr('pers.media') + ' ', el('b', { text: comDados.length ? '+' + fmtXp(soma(30) / comDados.length) : '—' })),
+      el('span', null, tr('pers.onlineHoje') + ' ', el('b', { text: onl.has(hojeBr) ? horas(onl.get(hojeBr)) : '—' }))),
+    el('p', { class: 'support-note', text: tr('pers.histNota') }));
+  // Skills (ainda sem fonte) e spell power pela fórmula da wiki
+  const skills = card('', el('h2', { text: tr('pers.skills') }), el('p', { class: 'support-note', text: tr('pers.skillsNota') }));
+  const voc = String(p.vocation || '').toLowerCase();
+  const tipo = /knight/.test(voc) ? 'str' : /archer/.test(voc) ? 'dex' : 'int';
+  const chave = slug(p.name), sp = ui.persSp[chave] || (ui.persSp[chave] = { ml: '', at: '', am: false });
+  const mult = tipo === 'str' ? 6 : tipo === 'dex' ? (sp.am ? 3.96 : 1.8) : 0.85, k = tipo === 'str' ? 1.2 : tipo === 'dex' ? 0.75 : 1;
+  const conta = () => Math.floor((p.level || 0) * 1.3 + Math.pow(Number(sp.ml) || 0, 1.4) * mult + (Number(sp.at) || 0) * k);
+  const total = el('span', { class: 'total', text: fmtInt(conta()) });
+  const campo = (rot, prop) => el('label', null, rot, el('input', { type: 'text', inputmode: 'numeric', maxlength: 4, value: sp[prop], placeholder: '0',
+    oninput: e => { sp[prop] = e.target.value.replace(/\D/g, '').slice(0, 4); saveUi(); setText(total, fmtInt(conta())); } }));
+  const poder = card('dois', el('h2', null, tr('pers.sp'), el('small', { text: tr('pers.nivel') + ' ' + p.level })),
+    el('div', { class: 'pers-sp' }, total, campo(tr('pers.ml'), 'ml'), campo(tr('pers.' + tipo), 'at'),
+      tipo === 'dex' ? el('label', { class: 'toggle' }, el('input', { type: 'checkbox', checked: !!sp.am, onchange: e => { sp.am = e.target.checked; saveUi(); renderPersonagem(); } }), el('span', { text: tr('pers.am') })) : null),
+    el('p', { class: 'support-note', text: tr('pers.spNota', { m: pctNum(mult), s: tr('pers.' + tipo), k: pctNum(k) }) }));
+  // Huntsman: diárias, semanais e entregas, com o melhor respawn de cada criatura
+  const seg = (lista, atual, pega) => el('span', { class: 'seg' }, lista.map(o => el('button', { type: 'button', text: o.t, 'aria-pressed': String(o.v === atual), onclick: () => { pega(o.v); renderPersonagem(); } })));
+  const linha = t => {
+    const req = t.required || t.kills || 0, prog = Math.min(req, t.progress || 0), feita = t.completed || (req && prog >= req);
+    const sug = feita ? null : persSugestao(t.name || '?', req - prog);
+    return { feita, horas: sug && sug.horas, el: el('div', { class: 'pers-task' + (feita ? ' feita' : '') },
+      el('span', { class: 'cri' }, t.name || '?', t.boost ? el('span', { class: 'pers-boost', text: '+' + t.boost + '%' }) : null),
+      el('span', { class: 'n', text: fmtInt(prog) + '/' + fmtInt(req) }),
+      el('span', { class: 'bar' }, el('i', { style: 'width:' + (req ? Math.round(100 * prog / req) : 0) + '%' })),
+      feita ? el('span', { class: 'pers-resp', text: tr('pers.feita') }) : sug.el) };
+  };
+  const diarias = ((hu.daily && hu.daily.tasks) || []).map(linha), semanais = ((hu.weekly && hu.weekly.tasks) || []).map(linha);
+  const abertas = semanais.filter(x => !x.feita), soma7 = abertas.reduce((a, x) => a + (x.horas || 0), 0);
+  const entregas = (hu.deliveries && hu.deliveries.tasks) || [];
+  const hunts = card('tres', el('h2', null, tr('pers.hunts'), hu.points != null ? el('span', { class: 'pers-chip ouro', text: tr('pers.pontos', { n: fmtInt(hu.points) }) }) : null,
+      hu.daily && hu.daily.difficulty ? el('small', { text: tr('pers.diaria', { x: hu.daily.difficulty.name }) }) : null),
+    el('div', { class: 'pers-ritmo' }, el('span', { text: tr('pers.ritmo') }),
+      seg(PARTIES.map(x => ({ v: x.mult, t: tr('party.' + x.mult) })), pers.party, v => { pers.party = v; }),
+      seg(PCTS.map(x => ({ v: x, t: x ? x + '%' : tr('xpb.off') })), pers.pct, v => { pers.pct = v; }),
+      el('span', { class: 'support-note', text: tr('pers.ritmoNota') })),
+    el('div', { class: 'pers-colunas' },
+      el('div', { class: 'pers-coluna' }, el('h3', { text: tr('pers.diarias') }), diarias.length ? diarias.map(x => x.el) : el('p', { class: 'support-note', text: tr('pers.nenhuma') }),
+        entregas.length ? el('h3', { text: tr('pers.entregas') }) : null,
+        entregas.length ? el('div', { class: 'pers-entregas' }, entregas.map(e => el('span', { class: e.completed ? 'feita' : null }, e.name, el('b', { text: '×' + e.required })))) : null),
+      el('div', { class: 'pers-coluna' }, el('h3', null, tr('pers.semanais'), abertas.length ? el('small', { text: tr('pers.faltamN', { n: abertas.length, t: persTempo(soma7) }) }) : null),
+        semanais.length ? semanais.map(x => x.el) : el('p', { class: 'support-note', text: tr('pers.nenhuma') }))));
+  // Tasks do bestiário: em andamento (com o respawn) e concluídas, com busca
+  const andamento = tarefas.filter(t => !t.completed), concluidas = tarefas.filter(t => t.completed);
+  const filtro = slug(pers.busca), lista = (pers.aba === 'andamento' ? andamento : concluidas).filter(t => !filtro || slug(t.name).includes(filtro));
+  const cab = pers.aba === 'andamento' ? [tr('pers.col.cri'), tr('pers.col.prog'), tr('pers.col.resp'), tr('pers.col.falta')] : [tr('pers.col.cri'), tr('pers.col.kills')];
+  const busca = el('input', { type: 'search', value: pers.busca, placeholder: tr('pers.buscar'), 'aria-label': tr('pers.buscar'), oninput: e => { pers.busca = e.target.value; desenharTasks(); } });
+  const tabela = el('table', { class: 'creatures-table' });
+  const desenharTasks = () => {
+    const f = slug(pers.busca), itens = (pers.aba === 'andamento' ? andamento : concluidas).filter(t => !f || slug(t.name).includes(f));
+    tabela.replaceChildren(el('thead', null, el('tr', null, cab.map(c => el('th', { scope: 'col', text: c })))),
+      el('tbody', null, itens.length ? itens.map(t => {
+        if (pers.aba !== 'andamento') return el('tr', null, el('td', { text: t.name }), el('td', { text: fmtInt(t.kills) }));
+        const b = persMelhor(t.name), falta = Math.max(0, t.kills - t.progress);
+        return el('tr', null, el('td', { text: t.name }),
+          el('td', null, el('span', { class: 'pers-mini' }, el('i', { style: 'width:' + Math.round(100 * t.progress / Math.max(1, t.kills)) + '%' })), fmtInt(t.progress) + '/' + fmtInt(t.kills)),
+          el('td', null, b ? el('button', { class: 'hunt-link', type: 'button', text: b.r.name, title: tr('pers.abrir'), onclick: () => { select(b.r.id); goTo('timer'); } }) : el('span', { class: 'none', text: '—' })),
+          el('td', { class: b ? 'xp' : 'none', text: b ? persTempo(falta / b.kph) : '—' }));
+      }) : el('tr', null, el('td', { class: 'none', colSpan: cab.length, text: tr('pers.nenhuma') }))));
+  };
+  desenharTasks();
+  const aba = (id, n) => el('button', { type: 'button', text: tr('pers.' + id, { n }), 'aria-pressed': String(pers.aba === id), onclick: () => { pers.aba = id; renderPersonagem(); } });
+  const tasks = card('dois', el('h2', { text: tr('pers.tasksB') }),
+    el('div', { class: 'pers-abas' }, el('span', { class: 'unit-toggle' }, aba('andamento', andamento.length), aba('concluidas', concluidas.length)), busca),
+    el('div', { class: 'creatures-wrap' }, tabela));
+  // Mortes
+  const mortes = p.deaths || [];
+  const quem = d => [...new Set((d.killers || []).map(k => String(k.name || '').replace(/^(a|an) /i, '')))].join(', ');
+  const mort = card('', el('h2', { text: tr('pers.mortes') }),
+    mortes.length ? el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table' },
+      el('thead', null, el('tr', null, [tr('pers.col.quando'), tr('pers.nivel'), tr('pers.col.por')].map(c => el('th', { scope: 'col', text: c })))),
+      el('tbody', null, mortes.map(d => el('tr', null, el('td', { text: new Date(d.timestamp * 1000).toLocaleString(loc, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }),
+        el('td', { text: d.level }), el('td', { text: quem(d) })))))) : el('p', { class: 'support-note', text: tr('pers.semMortes') }),
+    el('p', { class: 'support-note', text: tr('pers.mortesNota') }));
+  // a busca das tasks mantém o foco ao redesenhar só a tabela; ao redesenhar a página inteira, o foco volta para ela
+  const focoBusca = document.activeElement && document.activeElement.closest && document.activeElement.closest('.pers-abas');
+  g.replaceChildren(ficha, hist, skills, poder, hunts, tasks, mort);
+  if (focoBusca) busca.focus();
+}
+$('#pers-ver').addEventListener('click', () => persCarregar($('#pers-nome').value));
+$('#pers-nome').addEventListener('keydown', e => { if (e.key === 'Enter') persCarregar(e.target.value); });
+$('#pers-meu').addEventListener('click', () => { if (!pers.dados) return; ui.meuPers = pers.dados.name; saveUi(); renderPersonagem(); });
+const PAGES = ['timer', 'hunt', 'creatures', 'calc', 'personagem'];   // personagem: sem botão no menu por enquanto
 function goTo(route, push = true) {
   const [name, sub] = String(route || '').split('/');
   if (name === 'raffle') { openRaffle(); return; }
@@ -9554,7 +10091,13 @@ function goTo(route, push = true) {
   if (to === 'creatures') renderCreatures();   // se os dados ainda não chegaram, a ficha abre quando chegarem
   if (to === 'hunt') renderHunt();
   if (to === 'calc') renderCalc();
-  const hash = to === 'timer' ? '' : '#' + to;
+  if (to === 'personagem') {
+    let nome = '';
+    try { nome = sub ? decodeURIComponent(sub) : ''; } catch { nome = ''; }
+    nome = nome || pers.nome || ui.meuPers;
+    if (nome && (!pers.dados || slug(nome) !== slug(pers.dados.name))) persCarregar(nome); else renderPersonagem();
+  }
+  const hash = to === 'timer' ? '' : '#' + to + (to === 'personagem' && pers.dados ? '/' + encodeURIComponent(pers.dados.name) : '');
   if (push && location.hash !== hash) { try { history.pushState(null, '', location.pathname + location.search + hash); } catch { /* o endereço fica como está */ } }
   if (was !== to) window.scrollTo(0, 0);
 }
