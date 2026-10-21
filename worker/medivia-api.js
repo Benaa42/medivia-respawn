@@ -30,7 +30,7 @@ const ROTAS = [
   new RegExp('^guilds\\/' + MUNDO + '$'),
   new RegExp('^houses\\/' + MUNDO + '$'),
 ];
-const FILA_POR_MINUTO = 3;     // fichas buscadas por minuto na coleta, com intervalo entre elas
+const FILA_POR_MINUTO = 3;     // fichas buscadas por minuto na coleta, com intervalo entre elas (a API aceita 1 pedido por segundo)
 const INTERVALO_MS = 2500;
 const BRASILIA = -3 * 3600;    // os dias do histórico contam no horário de Brasília
 
@@ -110,7 +110,8 @@ async function coletar(env, reg = { passos: [] }) {
     reg.passos.push(mundo + ': ' + lista.length + ' online');
   }
   // Fichas de quem deslogou (só os acompanhados), poucas por minuto
-  const fila = (await db.prepare('SELECT chave, nome FROM fila ORDER BY pedido LIMIT ?').bind(FILA_POR_MINUTO).all()).results || [];
+  // A ficha só atualiza depois do logout (dito no canal da API): espera 2 minutos antes de buscar
+  const fila = (await db.prepare('SELECT chave, nome FROM fila WHERE pedido <= ? ORDER BY pedido LIMIT ?').bind(t - 120, FILA_POR_MINUTO).all()).results || [];
   for (const [i, f] of fila.entries()) {
     if (i) await dormir(INTERVALO_MS);
     const r = await pedir(env, 'player/' + f.nome);
