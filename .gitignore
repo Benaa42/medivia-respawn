@@ -6,3 +6,6 @@ Images/
 
 # Configuração local do Claude (prévia do site)
 .claude/
+
+# Respostas da API do Medivia salvas para estudo (dados do personagem do dono)
+API/
