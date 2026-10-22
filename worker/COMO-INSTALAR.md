@@ -33,3 +33,16 @@ Para coletar outros mundos além de Pendulum, adicione em **Variables and Secret
   - quando um personagem **acompanhado** desloga, guarda o XP exato dele (no máximo 3 fichas por minuto). Acompanhado é quem já foi aberto no Medivia Labs;
   - nos minutos 10 a 19 de cada hora, lê uma página do ranking de nível por minuto e guarda o XP dos 1000 primeiros, só quando mudou.
 - Pelo navegador, só libera os dados para o medivialabs.com e para os testes locais.
+
+## Apoio ao projeto (doações e painel)
+
+Dois segredos a mais no Worker (Settings → Variables and Secrets → Add, tipo **Secret**):
+
+- `PAINEL_CHAVE`: a chave que o painel pessoal usa para ler `/painel/apoio`. O valor fica também no `.env` do painel
+  (`%USERPROFILE%\.cache\medivia-visitas\.env`, linha `PAINEL_CHAVE=`), fora do OneDrive. Os dois têm de ser iguais.
+- `KOFI_TOKEN`: o código de verificação do Ko-fi. No Ko-fi: Settings → More → API → copie o **Verification Token** para
+  o segredo e, no mesmo lugar, ponha `https://api.medivialabs.com/kofi` em **Webhook URL**. O botão de teste do Ko-fi
+  manda uma doação de exemplo, que aparece no painel.
+
+O site manda ao Worker, em `/apoio`, só a ação feita na caixa de apoio (abriu, copiou o Pix, abriu o link do banco,
+foi ao Ko-fi); o Worker guarda a ação, o dia e o país. Nada de quem foi.
