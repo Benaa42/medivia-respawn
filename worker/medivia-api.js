@@ -240,7 +240,9 @@ async function historico(env, nome, cors) {
   const juntos = new Map(xpImp.map(x => [x.dia, { dia: x.dia, nivel: x.nivel, experiencia: null, ganho: x.ganho }]));
   for (const d of dias) if (d.dia > limite || !juntos.has(d.dia)) juntos.set(d.dia, d);
   dias.splice(0, dias.length, ...[...juntos.values()].sort((a, b) => (a.dia < b.dia ? -1 : 1)));
-  for (const o of onImp) if (o.dia <= limite || !tempo.has(o.dia)) tempo.set(o.dia, o.segundos);
+  // tempo online: até o último dia importado vale o de lá; nos dias seguintes, o maior dos dois (a nossa coleta começa
+  // no meio do dia em que o personagem é aberto pela primeira vez)
+  for (const o of onImp) if (o.dia <= limite || !tempo.has(o.dia) || o.segundos > tempo.get(o.dia)) tempo.set(o.dia, o.segundos);
   const sk = (await db.prepare('SELECT skill, valor, quando FROM skills WHERE chave = ?').bind(chave).all()).results || [];
   const skills = Object.fromEntries(sk.map(x => [x.skill, { valor: x.valor, quando: x.quando }]));
   return json({ nome, acompanhado, online: !!on, skills, importado: imp && imp.dias ? { de: 'MediviaGeeks', ate: imp.ate } : null, xp: dias, online_por_dia: [...tempo.entries()].sort().map(([d, s]) => ({ dia: d, segundos: s })) }, 200, cors, { 'Cache-Control': 'public, max-age=60' });
