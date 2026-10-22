@@ -766,18 +766,19 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-chip.on { background: var(--band); color: var(--value); }
 .pers-chip.on::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--value); }
 .pers-chip.ouro { background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--amber); }
-.pers-dados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 18px; }
-.pers-dados div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.pers-dados span { font-size: 12px; color: var(--faint); }
-.pers-dados b { font-weight: 600; color: var(--title); overflow-wrap: anywhere; }
-.pers-dados b.g { color: var(--value); }
-.pers-dados b.a { color: var(--amber); }
+.pers-linhas { display: flex; flex-direction: column; }
+.pers-linhas div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--edge); font-size: 14px; }
+.pers-linhas div:last-child { border-bottom: 0; }
+.pers-linhas span { color: var(--label); }
+.pers-linhas b { font-weight: 600; color: var(--title); text-align: right; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.pers-linhas b.g { color: var(--value); }
+.pers-linhas b.a { color: var(--amber); }
+.pers-linhas b small { margin-left: 6px; font-weight: 500; color: var(--faint); }
+.pers-cart h3.pers-sub { font: 700 15px var(--font-display); color: var(--title); margin-top: 4px; }
 .pers-barras { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); align-items: end; gap: 4px; height: 150px; padding: 10px 12px 0; border-radius: var(--r-md); background: var(--card); }
 .pers-barras i { display: block; min-height: 2px; border-radius: 4px 4px 0 0; background: var(--value); }
 .pers-barras i.vazio { background: repeating-linear-gradient(135deg, #2c3637 0 4px, #232c2d 4px 8px); }
 .pers-barras i.hoje { background: var(--amber); }
-.pers-somas { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; }
-.pers-somas b { color: var(--title); }
 .pers-sp { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 12px; }
 .pers-sp label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--faint); }
 .pers-sp input[type=text] { width: 64px; padding: 5px 8px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 600 14px var(--font-ui); }
@@ -1664,6 +1665,10 @@ const I18N = {
     'pers.mana': 'Mana',
     'pers.cap': 'Capacidade',
     'pers.vidaNota': 'Vida, mana e capacidade pelo nível, como na página Level da wiki, sem contar os equipamentos.',
+    'pers.proxNivel': 'Para o nível {n}',
+    'pers.share': 'Divide XP com',
+    'pers.ganhos': 'Ganho de XP',
+    'pers.ontem': 'Ontem',
     'pers.skillsQuando': 'dos rankings, {d}',
     'pers.sk.maglevel': 'Magic level',
     'pers.sk.distance': 'Distance',
@@ -2363,6 +2368,10 @@ const I18N = {
     'pers.mana': 'Mana',
     'pers.cap': 'Capacity',
     'pers.vidaNota': 'Health, mana and capacity from the level, as on the wiki Level page, without equipment.',
+    'pers.proxNivel': 'To level {n}',
+    'pers.share': 'Shares XP with',
+    'pers.ganhos': 'Experience gained',
+    'pers.ontem': 'Yesterday',
     'pers.skillsQuando': 'from the rankings, {d}',
     'pers.sk.maglevel': 'Magic level',
     'pers.sk.distance': 'Distance',
@@ -3062,6 +3071,10 @@ const I18N = {
     'pers.mana': 'Maná',
     'pers.cap': 'Capacidad',
     'pers.vidaNota': 'Vida, maná y capacidad por el nivel, como en la página Level de la wiki, sin contar el equipo.',
+    'pers.proxNivel': 'Para el nivel {n}',
+    'pers.share': 'Comparte XP con',
+    'pers.ganhos': 'XP ganado',
+    'pers.ontem': 'Ayer',
     'pers.skillsQuando': 'de los rankings, {d}',
     'pers.sk.maglevel': 'Magic level',
     'pers.sk.distance': 'Distance',
@@ -3761,6 +3774,10 @@ const I18N = {
     'pers.mana': 'Mana',
     'pers.cap': 'Udźwig',
     'pers.vidaNota': 'Życie, mana i udźwig z poziomu, jak na stronie Level na wiki, bez ekwipunku.',
+    'pers.proxNivel': 'Do poziomu {n}',
+    'pers.share': 'Dzieli XP z',
+    'pers.ganhos': 'Zdobyte doświadczenie',
+    'pers.ontem': 'Wczoraj',
     'pers.skillsQuando': 'z rankingów, {d}',
     'pers.sk.maglevel': 'Magic level',
     'pers.sk.distance': 'Distance',
@@ -10179,23 +10196,42 @@ function renderPersonagem() {
   const card = (cls, ...kids) => el('section', { class: 'pers-cart' + (cls ? ' ' + cls : '') }, ...kids);
   const par = (rot, val, cls) => el('div', null, el('span', { text: rot }), el('b', { class: cls || null, text: val == null || val === '' ? '—' : String(val) }));
   const feitas = tarefas.filter(t => t.completed).length;
-  // Ficha
+  // Ficha: linhas de rótulo e valor, e embaixo o ganho de XP (do histórico que a coleta guardou)
+  const xpNivel = n => Math.floor((275 * n ** 4 + 85e3 * n ** 3 - 1500 * n ** 2) / 1e6 * 100 + 200 * (n - 1));   // XP total do nível (tabela de experiência)
+  const linhaF = (rot, val, cls, extra) => el('div', null, el('span', { text: rot }), el('b', { class: cls || null }, val == null || val === '' ? '—' : String(val), extra ? el('small', { text: extra }) : null));
+  const vocF = String(p.vocation || '').toLowerCase(), gF = PERS_POR_NIVEL[/knight/.test(vocF) ? 'k' : /archer/.test(vocF) ? 'a' : /druid/.test(vocF) ? 'd' : /mage|sorcer/.test(vocF) ? 'm' : 'x'];
+  const nv = p.level || 0, acima = Math.max(0, nv - 8);
+  const ini = xpNivel(nv), prox = xpNivel(nv + 1), xpAtual = Number(p.experience) || 0;
+  const feitoPct = prox > ini ? Math.max(0, Math.min(99.9, Math.floor(1000 * (xpAtual - ini) / (prox - ini)) / 10)) : 0;
+  const diaF = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
+  const ganhoF = new Map(((h && h.xp) || []).map(d => [d.dia, d.ganho || 0]));
+  const somaF = n => { let a = 0, tem = false; for (let i = 0; i < n; i++) { const d = diaF(Date.now() - i * 864e5); if (ganhoF.has(d)) { a += ganhoF.get(d); tem = true; } } return tem ? '+' + fmtInt(a) : null; };
+  const ontem = diaF(Date.now() - 864e5);
   const ficha = card('', el('div', { class: 'pers-nome', text: p.name }),
     el('div', { class: 'pers-chips' },
       h ? el('span', { class: 'pers-chip' + (h.online ? ' on' : ''), text: tr(h.online ? 'pers.online' : 'pers.offline') }) : null,
       el('span', { class: 'pers-chip', text: p.world || '' }),
       p.premium ? el('span', { class: 'pers-chip ouro', text: tr('pers.premium') }) : null),
-    el('div', { class: 'pers-dados' },
-      par(tr('pers.nivel'), p.level, 'g'), par(tr('pers.xp'), fmtInt(p.experience || 0)),
-      par(tr('pers.voc'), p.vocation), par(tr('pers.guilda'), p.guild && p.guild.name, 'a'),
-      par(tr('pers.cidade'), p.town), par(tr('pers.casa'), p.house && p.house.name),
-      par(tr('pers.hpontos'), hu.points != null ? tr('pers.pontos', { n: fmtInt(hu.points) }) : null),
-      par(tr('pers.tasksB'), tarefas.length ? tr('pers.deTotal', { a: feitas, b: tarefas.length }) : null),
-      ...(() => {
-        const v = String(p.vocation || '').toLowerCase(), g = PERS_POR_NIVEL[/knight/.test(v) ? 'k' : /archer/.test(v) ? 'a' : /druid/.test(v) ? 'd' : /mage|sorcer/.test(v) ? 'm' : 'x'];
-        const n = Math.max(0, (p.level || 0) - 8);
-        return [par(tr('pers.vida'), fmtInt(185 + n * g[0]), 'g'), par(tr('pers.mana'), fmtInt(35 + n * g[1]), 'a'), par(tr('pers.cap'), fmtInt(435 + n * g[2]))];
-      })()),
+    el('div', { class: 'pers-linhas' },
+      linhaF(tr('pers.nivel'), nv, 'g'),
+      linhaF(tr('pers.xp'), fmtInt(xpAtual)),
+      linhaF(tr('pers.proxNivel', { n: nv + 1 }), fmtInt(Math.max(0, prox - xpAtual)), null, feitoPct.toLocaleString(loc, { maximumFractionDigits: 1 }) + '%'),
+      linhaF(tr('pers.share'), Math.round(nv * 2 / 3) + '–' + Math.round(nv * 1.5)),
+      linhaF(tr('pers.voc'), p.vocation),
+      linhaF(tr('pers.guilda'), p.guild && p.guild.name, 'a'),
+      linhaF(tr('pers.cidade'), p.town),
+      linhaF(tr('pers.casa'), p.house && p.house.name, 'a'),
+      linhaF(tr('pers.hpontos'), hu.points != null ? tr('pers.pontos', { n: fmtInt(hu.points) }) : null),
+      linhaF(tr('pers.tasksB'), tarefas.length ? tr('pers.deTotal', { a: feitas, b: tarefas.length }) : null),
+      linhaF(tr('pers.vida'), fmtInt(185 + acima * gF[0]), 'g'),
+      linhaF(tr('pers.mana'), fmtInt(35 + acima * gF[1]), 'a'),
+      linhaF(tr('pers.cap'), fmtInt(435 + acima * gF[2]))),
+    el('h3', { class: 'pers-sub', text: tr('pers.ganhos') }),
+    el('div', { class: 'pers-linhas' },
+      linhaF(tr('pers.hoje'), somaF(1), 'g'),
+      linhaF(tr('pers.ontem'), ganhoF.has(ontem) ? '+' + fmtInt(ganhoF.get(ontem)) : null, 'g'),
+      linhaF(tr('pers.d7'), somaF(7), 'g'),
+      linhaF(tr('pers.d30'), somaF(30), 'g')),
     el('p', { class: 'support-note', text: tr('pers.vidaNota') }));
   // Histórico de XP: os últimos 30 dias de Brasília; sem dados, barras listradas
   const diaBr = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
@@ -10213,12 +10249,6 @@ function renderPersonagem() {
     el('div', { class: 'pers-barras', 'aria-hidden': 'true' }, dias.map((d, i) => ganho.has(d)
       ? el('i', { class: d === hojeBr ? 'hoje' : null, style: 'height:' + Math.max(2, Math.round(100 * (ganho.get(d) || 0) / maior)) + '%', title: d + ': +' + fmtInt(ganho.get(d) || 0) })
       : el('i', { class: 'vazio', style: 'height:' + (18 + (i * 37) % 27) + '%' }))),
-    el('div', { class: 'pers-somas' },
-      el('span', null, tr('pers.hoje') + ' ', el('b', { text: ganho.has(hojeBr) ? '+' + fmtXp(ganho.get(hojeBr)) : '—' })),
-      el('span', null, tr('pers.d7') + ' ', el('b', { text: comDados.length ? '+' + fmtXp(soma(7)) : '—' })),
-      el('span', null, tr('pers.d30') + ' ', el('b', { text: comDados.length ? '+' + fmtXp(soma(30)) : '—' })),
-      el('span', null, tr('pers.media') + ' ', el('b', { text: comDados.length ? '+' + fmtXp(soma(30) / comDados.length) : '—' })),
-      el('span', null, tr('pers.onlineHoje') + ' ', el('b', { text: onl.has(hojeBr) ? horas(onl.get(hojeBr)) : '—' }))),
     el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table pers-dias' },
       el('thead', null, el('tr', null, [tr('pers.col.dia'), tr('pers.nivel'), tr('pers.col.ganho'), tr('pers.col.online')].map(c => el('th', { scope: 'col', text: c })))),
       el('tbody', null, dias.slice(-5).reverse().map(d => el('tr', null,
