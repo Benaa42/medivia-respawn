@@ -7753,7 +7753,16 @@ function loadQr() {
   }
   return support.qr;
 }
+// Conta no painel pessoal o que o visitante fez na caixa de apoio (abriu, copiou o Pix, abriu o link do banco, foi ao
+// Ko-fi): uma vez por ação em cada visita, só a ação e o país (que a Cloudflare informa), sem nada de quem é.
+const apoioContado = new Set();
+function contaApoio(acao) {
+  if (apoioContado.has(acao) || /^(localhost|127\.)/.test(location.hostname)) return;
+  apoioContado.add(acao);
+  try { navigator.sendBeacon('https://api.medivialabs.com/apoio', new Blob([JSON.stringify({ acao })], { type: 'text/plain' })); } catch { /* sem contagem */ }
+}
 function openSupport() {
+  contaApoio('abriu');
   const dlg = $('#support');
   // Em português o Pix vem primeiro; nos outros idiomas, o Ko-fi.
   $('#support-ways').classList.toggle('intl', ui.lang !== 'pt');
@@ -7791,7 +7800,10 @@ if (support.pix || support.kofi) {
   }
   $('#support-close').addEventListener('click', () => { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
   dlg.addEventListener('click', e => { if (e.target === dlg && dlg.close) dlg.close(); });   // clique fora da caixa fecha
+  $('#support-pix-link').addEventListener('click', () => contaApoio('pixlink'));
+  $('#support-kofi-link').addEventListener('click', () => contaApoio('kofi'));
   $('#support-pix-copy').addEventListener('click', async () => {
+    contaApoio('pix');
     const ta = $('#support-pix-code');
     let ok = true;
     try { await navigator.clipboard.writeText(ta.value); }

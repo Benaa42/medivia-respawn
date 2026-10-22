@@ -8,6 +8,11 @@
 //   /historico/{nome}   XP e tempo online por dia (horário de Brasília) e as skills dos rankings, do que a coleta guardou;
 //                       na primeira vez de cada personagem, importa o histórico que já existe (ver importar())
 //   /coleta             quando a coleta rodou pela última vez, o que fez ou o erro, e os totais do banco
+// Apoio ao projeto (POST, fora da API do jogo):
+//   /kofi               aviso do Ko-fi a cada doação (webhook); só vale com o código de verificação, no segredo KOFI_TOKEN
+//   /apoio              o site conta o que o visitante fez na caixa de apoio (abriu, copiou o Pix, foi ao Ko-fi), por
+//                       dia e país, sem guardar quem foi
+//   /painel/apoio       (GET) doações e contagens para o painel pessoal; pede a chave do segredo PAINEL_CHAVE
 //   /teste              confere se o login da conta do site funciona (não mostra usuário nem senha)
 // Cada resposta da API diz por quanto tempo vale (cached_for). O Worker guarda a resposta por esse tempo e só volta
 // a consultar a API depois dele, como a equipe do jogo pediu ("cache on your end and avoid polling too aggressively").
@@ -70,6 +75,8 @@ async function preparar(db) {
     db.prepare('CREATE TABLE IF NOT EXISTS xp_importado (chave TEXT, dia TEXT, nivel INTEGER, ganho INTEGER, PRIMARY KEY (chave, dia))'),
     db.prepare('CREATE TABLE IF NOT EXISTS online_importado (chave TEXT, dia TEXT, segundos INTEGER, PRIMARY KEY (chave, dia))'),
     db.prepare('CREATE TABLE IF NOT EXISTS importados (chave TEXT PRIMARY KEY, quando INTEGER, ate TEXT, dias INTEGER)'),
+    db.prepare('CREATE TABLE IF NOT EXISTS doacoes (id TEXT PRIMARY KEY, quando INTEGER, nome TEXT, valor TEXT, moeda TEXT, tipo TEXT, mensagem TEXT, publica INTEGER)'),
+    db.prepare('CREATE TABLE IF NOT EXISTS apoio_eventos (dia TEXT, acao TEXT, pais TEXT, n INTEGER, PRIMARY KEY (dia, acao, pais))'),
   ]);
   pronto = true;
 }
@@ -168,6 +175,45 @@ async function coletarSkills(env, db, mundos, reg) {
   await db.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind('skills_passo', String(passo % total)).run();
 }
 
+/* ---------- Apoio ao projeto ---------- */
+const ACOES_APOIO = ['abriu', 'pix', 'pixlink', 'kofi'];
+const iguais = (a, b) => { a = String(a || ''); b = String(b || ''); let d = a.length ^ b.length; for (let i = 0; i < Math.max(a.length, b.length); i++) d |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0); return d === 0; };
+// Ko-fi manda um formulário com o campo "data" (JSON). O e-mail de quem doou não é guardado.
+async function receberKofi(req, env) {
+  if (!env.DB || !env.KOFI_TOKEN) return new Response('indisponível', { status: 503 });
+  let d;
+  try { d = JSON.parse((await req.formData()).get('data') || ''); } catch { return new Response('formato inválido', { status: 400 }); }
+  if (!d || !iguais(d.verification_token, env.KOFI_TOKEN)) return new Response('recusado', { status: 403 });
+  await preparar(env.DB);
+  const id = String(d.kofi_transaction_id || d.message_id || crypto.randomUUID()).slice(0, 80);
+  const quando = Math.floor((Date.parse(d.timestamp) || Date.now()) / 1000);
+  await env.DB.prepare('INSERT OR IGNORE INTO doacoes (id, quando, nome, valor, moeda, tipo, mensagem, publica) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+    .bind(id, quando, String(d.from_name || '').slice(0, 80), String(d.amount || '').slice(0, 20), String(d.currency || '').slice(0, 8),
+      String(d.type || '').slice(0, 30), String(d.message || '').slice(0, 500), d.is_public === false ? 0 : 1).run();
+  return new Response('ok');
+}
+// Contagem do que o visitante fez na caixa de apoio: só a ação, o dia (Brasília) e o país que a Cloudflare informa
+async function contarApoio(req, env, origem) {
+  if (!env.DB || !ORIGENS.includes(origem)) return new Response(null, { status: 204 });
+  let acao = '';
+  try { acao = String(JSON.parse(await req.text()).acao || ''); } catch { /* corpo inválido: ignora */ }
+  if (!ACOES_APOIO.includes(acao)) return new Response(null, { status: 204 });
+  const pais = /^[A-Z]{2}$/.test((req.cf && req.cf.country) || '') ? req.cf.country : '??';
+  const dia = new Date((agora() + BRASILIA) * 1000).toISOString().slice(0, 10);
+  await preparar(env.DB);
+  await env.DB.prepare('INSERT INTO apoio_eventos (dia, acao, pais, n) VALUES (?, ?, ?, 1) ON CONFLICT(dia, acao, pais) DO UPDATE SET n = n + 1').bind(dia, acao, pais).run();
+  return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': origem } });
+}
+async function painelApoio(req, env, cors) {
+  const chave = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!env.PAINEL_CHAVE || !iguais(chave, env.PAINEL_CHAVE)) return json({ erro: 'chave do painel ausente ou errada' }, 403, cors);
+  if (!env.DB) return json({ erro: 'banco D1 não ligado' }, 503, cors);
+  await preparar(env.DB);
+  const doacoes = (await env.DB.prepare('SELECT quando, nome, valor, moeda, tipo, mensagem, publica FROM doacoes ORDER BY quando DESC').all()).results || [];
+  const eventos = (await env.DB.prepare('SELECT dia, acao, pais, n FROM apoio_eventos WHERE dia >= ? ORDER BY dia').bind(new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10)).all()).results || [];
+  return json({ doacoes, eventos, kofiLigado: !!env.KOFI_TOKEN }, 200, cors, { 'Cache-Control': 'no-store' });
+}
+
 /* ---------- Histórico que já existe em outros sites ---------- */
 // Combinado com o Wildboo, que administra o MediviaGeeks e o MediviaThings: na primeira vez que um personagem é
 // aberto aqui, buscamos UMA vez o histórico que eles já têm (XP e tempo online por dia do MediviaGeeks; skills do
@@ -254,7 +300,10 @@ export default {
     const origem = req.headers.get('Origin') || '';
     const cors = { 'Access-Control-Allow-Origin': ORIGENS.includes(origem) ? origem : ORIGENS[0], 'Access-Control-Allow-Methods': 'GET, OPTIONS', Vary: 'Origin' };
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+    if (req.method === 'POST' && url.pathname === '/kofi') return receberKofi(req, env);
+    if (req.method === 'POST' && url.pathname === '/apoio') return contarApoio(req, env, origem);
     if (req.method !== 'GET') return json({ erro: 'só leitura' }, 405, cors);
+    if (url.pathname === '/painel/apoio') return painelApoio(req, env, cors);
 
     let rota;
     try { rota = decodeURIComponent(url.pathname.slice(1)).replace(/\/+$/, ''); } catch { return json({ erro: 'endereço inválido' }, 400, cors); }
