@@ -5,6 +5,8 @@
 //
 // Endereços (os mesmos da API, só leitura):
 //   /player/{nome}   /online/{mundo}   /highscores/{mundo}/{vocação}/{skill}/{página}   /guilds/{mundo}   /houses/{mundo}
+//   /guilda/{mundo}/{nome}  a guilda com os membros (rank, nick) e, de cada um, nível, vocação, online, último login e
+//                       XP de ontem, 7 e 30 dias; importa o histórico de poucos membros por vez (o site pede de novo)
 //   /historico/{nome}   XP e tempo online por dia (horário de Brasília) e as skills dos rankings, do que a coleta guardou;
 //                       na primeira vez de cada personagem, importa o histórico que já existe (ver importar())
 //   /coleta             quando a coleta rodou pela última vez, o que fez ou o erro, e os totais do banco
@@ -75,6 +77,7 @@ async function preparar(db) {
     db.prepare('CREATE TABLE IF NOT EXISTS xp_importado (chave TEXT, dia TEXT, nivel INTEGER, ganho INTEGER, PRIMARY KEY (chave, dia))'),
     db.prepare('CREATE TABLE IF NOT EXISTS online_importado (chave TEXT, dia TEXT, segundos INTEGER, PRIMARY KEY (chave, dia))'),
     db.prepare('CREATE TABLE IF NOT EXISTS importados (chave TEXT PRIMARY KEY, quando INTEGER, ate TEXT, dias INTEGER)'),
+    db.prepare('CREATE TABLE IF NOT EXISTS perfil (chave TEXT PRIMARY KEY, vocacao TEXT, nivel INTEGER, ultimo_login INTEGER, atualizado INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS doacoes (id TEXT PRIMARY KEY, quando INTEGER, nome TEXT, valor TEXT, moeda TEXT, tipo TEXT, mensagem TEXT, publica INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS apoio_eventos (dia TEXT, acao TEXT, pais TEXT, n INTEGER, PRIMARY KEY (dia, acao, pais))'),
   ]);
@@ -93,6 +96,13 @@ async function guardarXp(db, lista, origem) {
     db.prepare("INSERT OR REPLACE INTO ultimo_xp (chave, experiencia) SELECT json_extract(value, '$.c'), json_extract(value, '$.e') FROM json_each(?)").bind(dados),
   ]);
 }
+
+/* ---------- Perfil: vocação, nível e último login ---------- */
+const UPSERT_PERFIL = " ON CONFLICT(chave) DO UPDATE SET vocacao = COALESCE(excluded.vocacao, vocacao), nivel = COALESCE(excluded.nivel, nivel), " +
+  "ultimo_login = MAX(COALESCE(excluded.ultimo_login, 0), COALESCE(ultimo_login, 0)), atualizado = excluded.atualizado";
+const guardarPerfil = (db, lista) => lista.length ? db.prepare("INSERT INTO perfil (chave, vocacao, nivel, ultimo_login, atualizado) SELECT json_extract(value, '$.c'), json_extract(value, '$.v'), json_extract(value, '$.l'), json_extract(value, '$.e'), ? FROM json_each(?) WHERE true" + UPSERT_PERFIL)
+  .bind(agora(), JSON.stringify(lista)) : null;
+const diaBr = seg => new Date((seg + BRASILIA) * 1000).toISOString().slice(0, 10);
 
 /* ---------- Coleta agendada ---------- */
 // Cada execução deixa um registro (quando, o que fez ou o erro) em estado/ultima_coleta, visto em /coleta
@@ -113,7 +123,7 @@ async function coletar(env, reg = { passos: [] }) {
     const r = await pedir(env, 'online/' + mundo);
     reg.passos.push('online/' + mundo + ': ' + r.status);
     if (!r.ok) continue;   // 429 ou erro: tenta no próximo minuto
-    const lista = ((await r.json()).players || []).map(p => ({ chave: chaveNome(p.name), nome: p.name, entrou: Number(p.timestamp) || 0, nivel: p.level }));
+    const lista = ((await r.json()).players || []).map(p => ({ chave: chaveNome(p.name), nome: p.name, entrou: Number(p.timestamp) || 0, nivel: p.level, vocacao: p.vocation }));
     // A lista vai num texto JSON só. Quem não está mais nela (ou entrou de novo, com outra hora de entrada) fecha a
     // sessão; se for acompanhado, entra na fila da ficha. Quem é novo entra em online_agora. Quatro consultas por mundo.
     const dados = JSON.stringify(lista.map(p => ({ k: p.chave + '@' + p.entrou, c: p.chave, n: p.nome, e: p.entrou, l: p.nivel })));
@@ -123,7 +133,8 @@ async function coletar(env, reg = { passos: [] }) {
       db.prepare('INSERT OR IGNORE INTO fila (chave, nome, pedido) SELECT o.chave, o.nome, ? FROM online_agora o JOIN personagens p ON p.chave = o.chave WHERE ' + fora).bind(t, mundo, dados),
       db.prepare('DELETE FROM online_agora AS o WHERE ' + fora).bind(mundo, dados),
       db.prepare("INSERT OR IGNORE INTO online_agora (mundo, chave, nome, entrou, nivel) SELECT ?, json_extract(value, '$.c'), json_extract(value, '$.n'), json_extract(value, '$.e'), json_extract(value, '$.l') FROM json_each(?)").bind(mundo, dados),
-    ]);
+      guardarPerfil(db, lista.map(p => ({ c: p.chave, v: p.vocacao || null, l: Number(p.nivel) || null, e: p.entrou || null }))),
+    ].filter(Boolean));
     reg.passos.push(mundo + ': ' + lista.length + ' online');
   }
   // Fichas de quem deslogou (só os acompanhados), poucas por minuto
@@ -241,12 +252,92 @@ async function importar(db, chave, nome) {
   } catch { /* sem o MediviaGeeks: fica só a nossa coleta */ }
   try {
     const rt = await pedirFora(THINGS + 'characters/search?name=' + encodeURIComponent(nome));
-    const sk = rt.ok ? ((await rt.json()).character || {}).skills : null;
+    const ch = rt.ok ? ((await rt.json()).character || {}) : {};
+    const sk = ch.skills;
+    if (ch.name) { const p = guardarPerfil(db, [{ c: chave, v: ch.vocation || null, l: Number(ch.level) || null, e: Math.floor((Date.parse(ch.lastLoginAt) || 0) / 1000) || null }]); if (p) await p.run(); }
     const lista = Object.entries(sk || {}).filter(([k, v]) => /^(maglevel|melee|distance|blocking|fishing|mining|cooking)$/.test(k) && Number(v) > 0).map(([k, v]) => ({ k, v: Number(v) }));
     // OR IGNORE: o que o nosso ranking já guardou vale mais
     if (lista.length) await db.prepare("INSERT OR IGNORE INTO skills (chave, skill, valor, quando) SELECT ?, json_extract(value, '$.k'), json_extract(value, '$.v'), ? FROM json_each(?)").bind(chave, agora(), JSON.stringify(lista)).run();
   } catch { /* sem o MediviaThings: as skills chegam pelo nosso ranking */ }
   await db.prepare('INSERT OR REPLACE INTO importados (chave, quando, ate, dias) VALUES (?, ?, ?, ?)').bind(chave, agora(), ate, dias).run();
+}
+
+/* ---------- Guilda ---------- */
+const IMPORTA_POR_VEZ = 3;   // cada importação faz 3 pedidos e uns 5 ao banco: 3 por vez cabem nos 50 por execução
+// Resposta da API com o mesmo cache das rotas abertas (vale o tempo que a API indicou; reserva de um dia para o 429)
+async function apiCache(env, ctx, rota) {
+  const cache = caches.default;
+  const chave = new Request('https://api.medivialabs.com/cache/' + encodeURIComponent(rota.toLowerCase()));
+  const reserva = new Request('https://api.medivialabs.com/reserva/' + encodeURIComponent(rota.toLowerCase()));
+  const guardada = await cache.match(chave);
+  if (guardada) { try { return { ok: true, dados: await guardada.json() }; } catch { /* busca de novo */ } }
+  const r = await pedir(env, rota);
+  if (!r.ok) {
+    const velha = r.status === 429 || r.status >= 500 ? await cache.match(reserva) : null;
+    if (velha) { try { return { ok: true, dados: await velha.json() }; } catch { /* sem reserva */ } }
+    return { ok: false, status: r.status };
+  }
+  const corpo = await r.text();
+  let dados;
+  try { dados = JSON.parse(corpo); } catch { return { ok: false, status: 502 }; }
+  const vale = Math.max(30, Math.min(3600, Number(dados.cached_for) || 300));
+  ctx.waitUntil(cache.put(chave, new Response(corpo, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=' + vale } })));
+  ctx.waitUntil(cache.put(reserva, new Response(corpo, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=86400' } })));
+  return { ok: true, dados };
+}
+async function guilda(env, ctx, mundo, nome, cors) {
+  const db = env.DB;
+  if (!db) return json({ erro: 'coleta ainda não ligada' }, 503, cors);
+  await preparar(db);
+  const g = await apiCache(env, ctx, 'guilds/' + mundo);
+  if (!g.ok) return json({ erro: g.status === 429 ? 'a API do Medivia pediu um tempo; tente de novo em instantes' : 'a API do Medivia respondeu ' + g.status }, g.status === 429 ? 429 : 502, cors);
+  const gu = (g.dados.guilds || []).find(x => chaveNome(x.name) === chaveNome(nome));
+  if (!gu) return json({ erro: 'não encontrada' }, 404, cors);
+  const membros = (gu.members || []).map(m => ({ nome: m.name, chave: chaveNome(m.name), rank: m.rank || '', nick: m.nick || '' }));
+  const lista = JSON.stringify(membros.map(m => ({ c: m.chave, n: m.nome })));
+  const dentro = "(SELECT json_extract(value, '$.c') FROM json_each(?))";
+  // quem é da guilda passa a ser acompanhado (XP a cada logout)
+  await db.prepare("INSERT OR IGNORE INTO personagens (chave, nome, mundo, desde, visto) SELECT json_extract(value, '$.c'), json_extract(value, '$.n'), ?, ?, ? FROM json_each(?)").bind(mundo, agora(), agora(), lista).run();
+  // histórico que já existe: poucos membros por vez
+  const ja = new Set(((await db.prepare('SELECT chave FROM importados WHERE chave IN ' + dentro).bind(lista).all()).results || []).map(x => x.chave));
+  const pendentes = membros.filter(m => !ja.has(m.chave));
+  for (const m of pendentes.slice(0, IMPORTA_POR_VEZ)) await importar(db, m.chave, m.nome);
+  const faltam = Math.max(0, pendentes.length - IMPORTA_POR_VEZ);
+  // quem está online agora no mundo (a lista da API vale para qualquer mundo, não só os da coleta)
+  const on = await apiCache(env, ctx, 'online/' + mundo);
+  const online = new Map(((on.ok && on.dados.players) || []).map(p => [chaveNome(p.name), p]));
+  const t = agora(), desde = t - 32 * 86400, diaDesde = diaBr(desde);
+  const todos = async (sql, ...args) => (await db.prepare(sql).bind(...args).all()).results || [];
+  const [perfis, pontos, ultimos, imps, xpImp, impNivel, sess, agoraOn] = await Promise.all([
+    todos('SELECT chave, vocacao, nivel, ultimo_login FROM perfil WHERE chave IN ' + dentro, lista),
+    todos('SELECT chave, quando, nivel, experiencia FROM xp WHERE quando >= ? AND chave IN ' + dentro + ' ORDER BY quando', desde, lista),
+    todos('SELECT chave, nivel, MAX(quando) AS quando FROM xp WHERE chave IN ' + dentro + ' GROUP BY chave', lista),
+    todos('SELECT chave, ate FROM importados WHERE chave IN ' + dentro, lista),
+    todos('SELECT chave, dia, ganho FROM xp_importado WHERE dia >= ? AND chave IN ' + dentro, diaDesde, lista),
+    todos('SELECT chave, nivel, MAX(dia) AS dia FROM xp_importado WHERE chave IN ' + dentro + ' GROUP BY chave', lista),
+    todos('SELECT chave, MAX(entrou) AS entrou FROM sessoes WHERE chave IN ' + dentro + ' GROUP BY chave', lista),
+    todos('SELECT chave, entrou FROM online_agora WHERE chave IN ' + dentro, lista),
+  ]);
+  const por = (rows, k = 'chave') => new Map(rows.map(r => [r[k], r]));
+  const perfil = por(perfis), ultimo = por(ultimos), imp = por(imps), nivImp = por(impNivel), sessao = por(sess), onAgora = por(agoraOn);
+  const hoje = diaBr(t), ontem = diaBr(t - 86400), de7 = diaBr(t - 6 * 86400), de30 = diaBr(t - 29 * 86400);
+  const saida = membros.map(m => {
+    // XP por dia: o importado até o último dia de lá; dali para frente, o nosso (último valor do dia menos o do dia anterior)
+    const dias = new Map();
+    for (const x of xpImp) if (x.chave === m.chave) dias.set(x.dia, x.ganho);
+    const limite = (imp.get(m.chave) || {}).ate || '';
+    const fim = new Map(), ini = new Map();
+    for (const p of pontos) if (p.chave === m.chave) { const d = diaBr(p.quando); if (!ini.has(d)) ini.set(d, p.experiencia); fim.set(d, p.experiencia); }
+    [...fim.keys()].sort().forEach((d, i, a) => { if (d > limite || !dias.has(d)) dias.set(d, i ? fim.get(d) - fim.get(a[i - 1]) : fim.get(d) - ini.get(d)); });
+    const soma = de => { let v = 0; for (const [d, g] of dias) if (d >= de && d <= hoje) v += g; return v; };
+    const o = online.get(m.chave), pf = perfil.get(m.chave) || {};
+    const nivel = o ? Number(o.level) : (ultimo.get(m.chave) || {}).nivel || pf.nivel || (nivImp.get(m.chave) || {}).nivel || null;
+    const login = Math.max(pf.ultimo_login || 0, (sessao.get(m.chave) || {}).entrou || 0, (onAgora.get(m.chave) || {}).entrou || 0) || null;
+    return { nome: m.nome, rank: m.rank, nick: m.nick, nivel, vocacao: (o && o.vocation) || pf.vocacao || null, online: !!o, ultimoLogin: login,
+      xp: dias.size ? { ontem: dias.has(ontem) ? dias.get(ontem) : null, d7: soma(de7), d30: soma(de30) } : null };
+  });
+  return json({ guilda: { id: gu.id, nome: gu.name, mundo, criada: gu.created_at || null, descricao: gu.description || '' }, membros: saida, faltam },
+    200, cors, { 'Cache-Control': faltam ? 'no-store' : 'public, max-age=60' });
 }
 
 /* ---------- Histórico de um personagem ---------- */
@@ -321,6 +412,8 @@ export default {
       const n = await env.DB.prepare('SELECT (SELECT COUNT(*) FROM online_agora) AS online, (SELECT COUNT(*) FROM sessoes) AS sessoes, (SELECT COUNT(*) FROM xp) AS xp, (SELECT COUNT(*) FROM personagens) AS acompanhados, (SELECT COUNT(*) FROM fila) AS fila, (SELECT COUNT(*) FROM skills) AS skills').first();
       return json({ ultima: e ? JSON.parse(e.valor) : 'a coleta agendada ainda não rodou nenhuma vez', totais: n }, 200, cors);
     }
+    const gm = rota.match(new RegExp('^guilda\\/(' + MUNDO + ')\\/([^/]{2,60})$'));
+    if (gm) return guilda(env, ctx, gm[1], gm[2], cors);
     const hist = rota.match(/^historico\/([^/]{2,40})$/);
     if (hist) return historico(env, hist[1], cors);
     if (!ROTAS.some(r => r.test(rota))) return json({ erro: 'endereço desconhecido' }, 404, cors);
@@ -356,6 +449,8 @@ export default {
             await env.DB.prepare('INSERT INTO personagens (chave, nome, mundo, desde, visto) VALUES (?, ?, ?, ?, ?) ON CONFLICT(chave) DO UPDATE SET nome = excluded.nome, mundo = excluded.mundo, visto = excluded.visto')
               .bind(chaveNome(p.name), p.name, String(p.world || '').toLowerCase(), agora(), agora()).run();
             await guardarXp(env.DB, [p], 'consulta');
+            const pf = guardarPerfil(env.DB, [{ c: chaveNome(p.name), v: p.vocation || null, l: Number(p.level) || null, e: null }]);
+            if (pf) await pf.run();
           })().catch(() => {}));
         }
       }

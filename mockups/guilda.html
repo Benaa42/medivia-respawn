@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo: página Guilda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Modelo da página "Guilda" do Medivia Labs com os números da Kcteam vistos no MediviaGeeks e no MediviaThings em
+   22/10/2026. Cores e fontes do site; nada aqui é publicado. */
+:root {
+  color-scheme: dark;
+  --ground: #0f1314; --box: #171d1e; --card: #1e2627; --edge: #2c3637; --band: #1b3a2c;
+  --title: #f1f5f3; --label: #c2cbc8; --faint: #8b9894; --amber: #f0ad4d; --value: #3ae374; --red: #ff7468;
+  --gold-edge: rgba(240, 173, 77, 0.55); --gold-wash: rgba(240, 173, 77, 0.06); --gold-ink: #241703;
+  --knight: #ff7468; --archer: #3ae374; --mage: #a970ff; --druid: #3cc6f0;
+  --font-ui: "Onest", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Onest", "Segoe UI", sans-serif;
+  --r-lg: 22px; --r-md: 14px; --r-sm: 10px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--label); font: 400 15px/1.45 var(--font-ui); font-variant-numeric: lining-nums tabular-nums; }
+h1, h2, h3, p { margin: 0; }
+.faixa { background: #0a0e0f; border-bottom: 1px solid var(--edge); font-size: 13px; }
+.faixa div { max-width: 1240px; margin: 0 auto; padding: 7px 20px; color: var(--faint); }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 18px 20px 60px; display: flex; flex-direction: column; gap: 18px; }
+.barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.marca { font: 800 28px var(--font-display); color: var(--title); }
+.marca b { color: var(--amber); font-weight: inherit; }
+.menu { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; border: 1px solid var(--gold-edge); border-radius: 999px; background: var(--gold-wash); }
+.menu span { padding: 8px 14px; border-radius: 999px; color: var(--title); font: 600 14px var(--font-ui); }
+
+.busca { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+.busca input, .busca select { padding: 11px 14px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 15px var(--font-ui); }
+.busca input { flex: 1 1 260px; max-width: 360px; }
+.btn { padding: 10px 18px; border: 0; border-radius: 999px; background: var(--card); color: var(--title); font: 700 14px var(--font-ui); }
+.nota { font-size: 13px; color: var(--faint); }
+
+.grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+.cart { border-radius: var(--r-lg); background: var(--box); padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.cart.dois { grid-column: span 2; } .cart.tres { grid-column: 1 / -1; }
+.cart h2 { font: 800 20px var(--font-display); color: var(--title); display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+.cart h2 small { font: 500 13px var(--font-ui); color: var(--faint); }
+
+/* cabeçalho da guilda */
+.nome { font: 800 40px/1 var(--font-display); color: var(--title); letter-spacing: -0.02em; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { padding: 3px 10px; border-radius: 999px; background: var(--card); font: 600 12px var(--font-ui); color: var(--label); }
+.chip.on { background: var(--band); color: var(--value); }
+.chip.on::before { content: "● "; }
+.numeros { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.num { padding: 12px 14px; border-radius: var(--r-md); background: var(--card); }
+.num span { display: block; font-size: 12px; color: var(--faint); }
+.num b { font: 800 26px/1.1 var(--font-display); color: var(--title); }
+.num b.g { color: var(--value); }
+.num small { display: block; font-size: 12px; color: var(--faint); }
+
+/* ranking da semana: barras horizontais */
+.rank { display: flex; flex-direction: column; gap: 8px; }
+.rank div { display: grid; grid-template-columns: 22px minmax(0, 120px) minmax(0, 1fr) 70px; align-items: center; gap: 10px; font-size: 14px; }
+.rank .pos { color: var(--faint); font-weight: 700; text-align: right; }
+.rank .pos.ouro { color: var(--amber); }
+.rank .quem { color: var(--title); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank i { height: 12px; border-radius: 999px; background: #263031; overflow: hidden; }
+.rank i em { display: block; height: 100%; border-radius: 999px; }
+.rank b { text-align: right; color: var(--value); }
+
+/* vocações */
+.vocs { display: grid; gap: 10px; }
+.voc { display: grid; grid-template-columns: 90px minmax(0, 1fr) 30px; gap: 10px; align-items: center; font-size: 14px; color: var(--title); }
+.voc i { height: 12px; border-radius: 999px; background: #263031; overflow: hidden; }
+.voc i em { display: block; height: 100%; border-radius: 999px; }
+.voc b { text-align: right; }
+.media-voc { font-size: 13px; color: var(--faint); }
+
+/* tabela de membros */
+.tab { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { padding: 6px 10px; font: 500 12px var(--font-ui); color: var(--faint); text-align: right; border-bottom: 1px solid var(--edge); white-space: nowrap; }
+th.l, td.l { text-align: left; }
+th.ord { color: var(--title); }
+th.ord::after { content: " ↓"; color: var(--amber); }
+td { padding: 8px 10px; border-bottom: 1px solid var(--edge); text-align: right; white-space: nowrap; color: var(--title); }
+td .n { font-weight: 700; color: var(--amber); text-decoration: underline; text-decoration-color: transparent; }
+td .nick { display: block; font-size: 12px; color: var(--faint); font-weight: 400; }
+.st { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3a4647; margin-right: 8px; vertical-align: middle; }
+.st.on { background: var(--value); box-shadow: 0 0 8px var(--value); }
+.vc { display: inline-block; padding: 2px 9px; border-radius: 999px; font: 600 12px var(--font-ui); border: 1px solid; }
+.vc.k { color: var(--knight); border-color: color-mix(in srgb, var(--knight) 45%, transparent); }
+.vc.a { color: var(--archer); border-color: color-mix(in srgb, var(--archer) 45%, transparent); }
+.vc.m { color: var(--mage); border-color: color-mix(in srgb, var(--mage) 45%, transparent); }
+.vc.d { color: var(--druid); border-color: color-mix(in srgb, var(--druid) 45%, transparent); }
+.rk { display: inline-block; padding: 2px 9px; border-radius: 999px; background: var(--card); font-size: 12px; color: var(--label); }
+.rk.lider { background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--amber); }
+td.g { color: var(--value); font-weight: 600; }
+td.z { color: var(--faint); }
+td.m { color: #ff7b7b; font-weight: 600; }
+td.q { color: var(--label); }
+.etiqueta { position: fixed; right: 16px; bottom: 16px; padding: 6px 12px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 12px var(--font-ui); }
+@media (max-width: 980px) { .grade { grid-template-columns: 1fr; } .cart.dois, .cart.tres { grid-column: auto; } .numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+</head>
+<body>
+<div class="faixa"><div>Mapper da wiki ↗ · Novidades · Sugestões e problemas</div></div>
+<div class="wrap">
+  <div class="barra"><span class="marca">Medivia <b>Labs</b></span><nav class="menu"><span>Cronômetro</span><span>Analisador de hunt</span><span>Criaturas</span><span>Calculadora</span><span>Sorteio</span></nav></div>
+
+  <div class="busca">
+    <input value="Kcteam" aria-label="Nome da guilda">
+    <select aria-label="Mundo"><option>Pendulum</option></select>
+    <button class="btn">Ver guilda</button>
+    <span class="nota">Membros da API oficial do Medivia; níveis e XP do histórico guardado de cada um.</span>
+  </div>
+
+  <div class="grade">
+    <section class="cart tres">
+      <div class="nome">Kcteam</div>
+      <div class="chips"><span class="chip">Pendulum</span><span class="chip">Fundada em 22/08/2024</span><span class="chip">13 membros</span><span class="chip on">4 online agora</span></div>
+      <div class="numeros">
+        <div class="num"><span>Nível médio</span><b>613</b><small>maior 812 · menor 400</small></div>
+        <div class="num"><span>XP ontem</span><b class="g">+134,4kk</b><small>soma dos membros</small></div>
+        <div class="num"><span>XP em 7 dias</span><b class="g">+1 028kk</b><small>média de 146,9kk por dia</small></div>
+        <div class="num"><span>XP em 30 dias</span><b class="g">+3 681kk</b><small>9 de 13 membros upando</small></div>
+      </div>
+    </section>
+
+    <section class="cart dois">
+      <h2>Quem mais upou <small>últimos 7 dias</small></h2>
+      <div class="rank">
+        <div><span class="pos ouro">1</span><span class="quem">Dybas</span><i><em style="width:100%;background:var(--archer)"></em></i><b>279,2kk</b></div>
+        <div><span class="pos ouro">2</span><span class="quem">Don Raydan</span><i><em style="width:71%;background:var(--druid)"></em></i><b>199,2kk</b></div>
+        <div><span class="pos ouro">3</span><span class="quem">Deik</span><i><em style="width:62%;background:var(--knight)"></em></i><b>173,9kk</b></div>
+        <div><span class="pos">4</span><span class="quem">Bena</span><i><em style="width:48%;background:var(--archer)"></em></i><b>132,8kk</b></div>
+        <div><span class="pos">5</span><span class="quem">Mary Sky</span><i><em style="width:45%;background:var(--druid)"></em></i><b>125,2kk</b></div>
+        <div><span class="pos">6</span><span class="quem">Jonhsons Baby</span><i><em style="width:27%;background:var(--mage)"></em></i><b>75,4kk</b></div>
+        <div><span class="pos">7</span><span class="quem">Raydan</span><i><em style="width:12%;background:var(--mage)"></em></i><b>34,6kk</b></div>
+        <div><span class="pos">8</span><span class="quem">Shakechila</span><i><em style="width:3%;background:var(--mage)"></em></i><b>8,0kk</b></div>
+      </div>
+    </section>
+
+    <section class="cart">
+      <h2>Vocações</h2>
+      <div class="vocs">
+        <div class="voc"><span>Archers</span><i><em style="width:100%;background:var(--archer)"></em></i><b>4</b></div>
+        <div class="voc"><span>Druids</span><i><em style="width:100%;background:var(--druid)"></em></i><b>4</b></div>
+        <div class="voc"><span>Mages</span><i><em style="width:75%;background:var(--mage)"></em></i><b>3</b></div>
+        <div class="voc"><span>Knights</span><i><em style="width:50%;background:var(--knight)"></em></i><b>2</b></div>
+      </div>
+      <p class="media-voc">Nível médio: archers 606 · druids 585 · mages 663 · knights 607.</p>
+    </section>
+
+    <section class="cart tres">
+      <h2>Membros <small>clique num nome para abrir a página do personagem</small></h2>
+      <div class="tab"><table>
+        <thead><tr><th class="l">Personagem</th><th class="l">Rank</th><th class="ord">Nível</th><th class="l">Vocação</th><th>XP ontem</th><th>XP 7 dias</th><th>XP 30 dias</th><th>Último login</th></tr></thead>
+        <tbody>
+          <tr><td class="l"><span class="st on"></span><span class="n">Dybas</span></td><td class="l"><span class="rk lider">Leader</span></td><td>812</td><td class="l"><span class="vc a">Master Archer</span></td><td class="g">+10,3kk</td><td class="g">+279,2kk</td><td class="g">+973,7kk</td><td class="q">online</td></tr>
+          <tr><td class="l"><span class="st"></span><span class="n">Deik</span></td><td class="l"><span class="rk">Kcteam</span></td><td>785</td><td class="l"><span class="vc k">Crusader Knight</span></td><td class="g">+44,5kk</td><td class="g">+173,9kk</td><td class="g">+671,2kk</td><td class="q">22/10/2026 12:06</td></tr>
+          <tr><td class="l"><span class="st"></span><span class="n">Raydan</span><span class="nick">Don</span></td><td class="l"><span class="rk">Kcteam</span></td><td>722</td><td class="l"><span class="vc m">Supreme Mage</span></td><td class="g">+3,6kk</td><td class="g">+34,6kk</td><td class="g">+312,0kk</td><td class="q">21/10/2026 09:33</td></tr>
+          <tr><td class="l"><span class="st"></span><span class="n">Don Raydan</span></td><td class="l"><span class="rk">Kcteam</span></td><td>707</td><td class="l"><span class="vc d">Arch Druid</span></td><td class="g">+12,0kk</td><td class="g">+199,2kk</td><td class="g">+483,1kk</td><td class="q">21/10/2026 23:57</td></tr>
+          <tr><td class="l"><span class="st on"></span><span class="n">Bena</span><span class="nick">SaiiiiGaatooo</span></td><td class="l"><span class="rk">Kcteam</span></td><td>671</td><td class="l"><span class="vc a">Master Archer</span></td><td class="g">+20,7kk</td><td class="g">+132,8kk</td><td class="g">+553,0kk</td><td class="q">online</td></tr>
+          <tr><td class="l"><span class="st"></span><span class="n">Shakechila</span><span class="nick">PoPia</span></td><td class="l"><span class="rk">Kcteam</span></td><td>656</td><td class="l"><span class="vc m">Supreme Mage</span></td><td class="z">—</td><td class="g">+8,0kk</td><td class="g">+14,8kk</td><td class="q">18/10/2026 23:21</td></tr>
+          <tr><td class="l"><span class="st on"></span><span class="n">Jonhsons Baby</span><span class="nick">Dove</span></td><td class="l"><span class="rk">Kcteam</span></td><td>611</td><td class="l"><span class="vc m">Supreme Mage</span></td><td class="g">+17,5kk</td><td class="g">+75,4kk</td><td class="g">+245,1kk</td><td class="q">online</td></tr>
+          <tr><td class="l"><span class="st on"></span><span class="n">Mary Sky</span></td><td class="l"><span class="rk">Kcteam</span></td><td>594</td><td class="l"><span class="vc d">Arch Druid</span></td><td class="g">+25,8kk</td><td class="g">+125,2kk</td><td class="g">+429,4kk</td><td class="q">online</td></tr>
+          <tr><td class="l"><span class="st"></span><span class="n">Vitu</span></td><td class="l"><span class="rk">Kcteam</span></td><td>581</td><td class="l"><span class="vc d">Druid</span></td><td class="z">—</td><td class="z">—</td><td class="z">—</td><td class="q">09/09/2026 20:18</td></tr>
+          <tr><td class="l"><span class="st"></span><span class="n">Octany</span></td><td class="l"><span class="rk">Kcteam</span></td><td>540</td><td class="l"><span class="vc a">Master Archer</span></td><td class="z">—</td><td class="z">—</td><td class="z">—</td><td class="q">15/09/2026 11:29</td></tr>
+          <tr><td class="l"><span class="st"></span><span class="n">Bandeido</span></td><td class="l"><span class="rk">Kcteam</span></td><td>457</td><td class="l"><span class="vc d">Druid</span></td><td class="z">—</td><td class="z">—</td><td class="z">—</td><td class="q">—</td></tr>
+          <tr><td class="l"><span class="st"></span><span class="n">Gazelino</span></td><td class="l"><span class="rk">Kcteam</span></td><td>429</td><td class="l"><span class="vc k">Imperial Knight</span></td><td class="g">+24,5k</td><td class="g">+185,2k</td><td class="m">−5,6kk</td><td class="q">—</td></tr>
+          <tr><td class="l"><span class="st"></span><span class="n">Dihhzl</span></td><td class="l"><span class="rk">Member</span></td><td>400</td><td class="l"><span class="vc a">Royal Archer</span></td><td class="z">—</td><td class="z">—</td><td class="g">+4,2kk</td><td class="q">—</td></tr>
+        </tbody>
+      </table></div>
+      <p class="nota">Ordem por nível; clicar no título de qualquer coluna reordena. Quem está online agora fica com o ponto verde aceso.</p>
+    </section>
+  </div>
+</div>
+<span class="etiqueta">Modelo · dados da Kcteam em 22/10</span>
+</body>
+</html>
