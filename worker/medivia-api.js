@@ -115,6 +115,28 @@ const guardarPerfil = (db, lista) => lista.length ? db.prepare("INSERT INTO perf
   .bind(agora(), JSON.stringify(lista)) : null;
 const diaBr = seg => new Date((seg + BRASILIA) * 1000).toISOString().slice(0, 10);
 
+/* ---------- Contador de gravações ---------- */
+// O D1 gratuito aceita 100 mil linhas gravadas por dia (UTC). Cada execução conta as linhas que o banco diz ter gravado
+// (meta.rows_written) e soma em estado/gravadas:<dia>, visto em /coleta: uma gravação a mais quando houve alguma.
+function medir(env, ctx) {
+  if (!env.DB) return { env, ctx, fim: () => {} };
+  let linhas = 0;
+  const soma = r => { for (const x of [].concat(r || [])) linhas += Number(x && x.meta && x.meta.rows_written) || 0; return r; };
+  const embrulha = st => ({ _st: st, bind: (...a) => embrulha(st.bind(...a)), run: async () => soma(await st.run()), all: async () => soma(await st.all()), first: (...a) => st.first(...a) });
+  const db = { prepare: q => embrulha(env.DB.prepare(q)), batch: async lista => soma(await env.DB.batch(lista.map(x => x._st || x))) };
+  // o que roda depois da resposta (waitUntil) também grava: a soma espera tudo terminar
+  const pendentes = [];
+  const ctx2 = { waitUntil: p => { pendentes.push(p); ctx.waitUntil(p); } };
+  const fim = () => ctx.waitUntil((async () => {
+    let feitos = 0;
+    while (feitos < pendentes.length) { const ate = pendentes.length; await Promise.allSettled(pendentes.slice(feitos, ate)); feitos = ate; }
+    if (!linhas) return;
+    await env.DB.prepare('INSERT INTO estado (chave, valor) VALUES (?, ?) ON CONFLICT(chave) DO UPDATE SET valor = CAST(valor AS INTEGER) + CAST(excluded.valor AS INTEGER)')
+      .bind('gravadas:' + new Date().toISOString().slice(0, 10), String(linhas + 1)).run().catch(() => {});
+  })());
+  return { env: { ...env, DB: db }, ctx: ctx2, fim };
+}
+
 /* ---------- Coleta agendada ---------- */
 // Cada execução deixa um registro (quando, o que fez ou o erro) em estado/ultima_coleta, visto em /coleta
 async function coletarComRegistro(env) {
@@ -252,11 +274,13 @@ async function importar(db, chave, nome) {
     const [rx, ro] = await Promise.all([pedirFora(GEEKS + 'playersexp?name=' + encodeURIComponent(nome)), pedirFora(GEEKS + 'onlinehistory?name=' + encodeURIComponent(nome) + '&includeCurrent=true')]);
     const xp = rx.ok ? await rx.json() : [];
     const on = ro.ok ? await ro.json() : {};
-    const linhasXp = (Array.isArray(xp) ? xp : []).filter(x => x && x.DATA && Number.isFinite(Number(x.EXPGAIN)))
+    // só o último ano: cada dia é uma linha gravada, e o plano gratuito aceita 100 mil por dia
+    const corte = diaBr(agora() - IMPORTA_DIAS * 86400);
+    const linhasXp = (Array.isArray(xp) ? xp : []).filter(x => x && x.DATA && Number.isFinite(Number(x.EXPGAIN)) && String(x.DATA).slice(0, 10) >= corte)
       .map(x => ({ d: String(x.DATA).slice(0, 10), n: Number(x.LEVEL) || 0, g: Number(x.EXPGAIN) }));
     // o tempo online deles vem em minutos por dia
     const linhasOn = Object.entries(on && typeof on === 'object' && !Array.isArray(on) ? on : {})
-      .filter(([d, m]) => /^\d{4}-\d{2}-\d{2}$/.test(d) && Number.isFinite(Number(m))).map(([d, m]) => ({ d, s: Math.round(Number(m) * 60) }));
+      .filter(([d, m]) => /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= corte && Number.isFinite(Number(m))).map(([d, m]) => ({ d, s: Math.round(Number(m) * 60) }));
     if (linhasXp.length) await db.prepare("INSERT OR REPLACE INTO xp_importado (chave, dia, nivel, ganho) SELECT ?, json_extract(value, '$.d'), json_extract(value, '$.n'), json_extract(value, '$.g') FROM json_each(?)").bind(chave, JSON.stringify(linhasXp)).run();
     if (linhasOn.length) await db.prepare("INSERT OR REPLACE INTO online_importado (chave, dia, segundos) SELECT ?, json_extract(value, '$.d'), json_extract(value, '$.s') FROM json_each(?)").bind(chave, JSON.stringify(linhasOn)).run();
     dias = linhasXp.length;
@@ -275,6 +299,7 @@ async function importar(db, chave, nome) {
 }
 
 /* ---------- Guilda ---------- */
+const IMPORTA_DIAS = 365;   // a importação traz só o último ano de histórico
 const IMPORTA_POR_VEZ = 2;   // cada importação faz 3 pedidos e uns 6 ao banco: 2 por vez deixam folga nos ~50 por execução
 // Resposta da API com o mesmo cache das rotas abertas (vale o tempo que a API indicou; reserva de um dia para o 429)
 async function apiCache(env, ctx, rota) {
@@ -399,81 +424,91 @@ async function historico(env, nome, cors) {
   return json({ nome, acompanhado, online: !!on, skills, importado: imp && imp.dias ? { de: 'MediviaGeeks', ate: imp.ate } : null, xp: dias, online_por_dia: [...tempo.entries()].sort().map(([d, s]) => ({ dia: d, segundos: s })) }, 200, cors, { 'Cache-Control': 'public, max-age=60' });
 }
 
-export default {
-  async fetch(req, env, ctx) {
-    const url = new URL(req.url);
-    const origem = req.headers.get('Origin') || '';
-    const cors = { 'Access-Control-Allow-Origin': ORIGENS.includes(origem) ? origem : ORIGENS[0], 'Access-Control-Allow-Methods': 'GET, OPTIONS', Vary: 'Origin' };
-    if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
-    if (req.method === 'POST' && url.pathname === '/kofi') return receberKofi(req, env);
-    if (req.method === 'POST' && url.pathname === '/apoio') return contarApoio(req, env, origem);
-    if (req.method !== 'GET') return json({ erro: 'só leitura' }, 405, cors);
-    if (url.pathname === '/painel/apoio') return painelApoio(req, env, cors);
+// Atende um pedido ao site da API (a entrada do Worker, abaixo, passa antes pelo contador de gravações)
+async function atender(req, env, ctx) {
+  const url = new URL(req.url);
+  const origem = req.headers.get('Origin') || '';
+  const cors = { 'Access-Control-Allow-Origin': ORIGENS.includes(origem) ? origem : ORIGENS[0], 'Access-Control-Allow-Methods': 'GET, OPTIONS', Vary: 'Origin' };
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+  if (req.method === 'POST' && url.pathname === '/kofi') return receberKofi(req, env);
+  if (req.method === 'POST' && url.pathname === '/apoio') return contarApoio(req, env, origem);
+  if (req.method !== 'GET') return json({ erro: 'só leitura' }, 405, cors);
+  if (url.pathname === '/painel/apoio') return painelApoio(req, env, cors);
 
-    let rota;
-    try { rota = decodeURIComponent(url.pathname.slice(1)).replace(/\/+$/, ''); } catch { return json({ erro: 'endereço inválido' }, 400, cors); }
+  let rota;
+  try { rota = decodeURIComponent(url.pathname.slice(1)).replace(/\/+$/, ''); } catch { return json({ erro: 'endereço inválido' }, 400, cors); }
 
-    // Teste do login: consulta quem está online em Pendulum e diz só se a API aceitou a conta
-    if (rota === 'teste') {
-      if (!env.MEDIVIA_USUARIO || !env.MEDIVIA_SENHA) return json({ ok: false, motivo: 'faltam os segredos MEDIVIA_USUARIO e MEDIVIA_SENHA' }, 200, cors);
-      const r = await pedir(env, 'online/pendulum');
-      return json({ ok: r.ok, status: r.status, motivo: r.ok ? 'login aceito pela API' : r.status === 401 ? 'a API recusou o login (usuário ou senha)' : 'a API respondeu com erro', coleta: env.DB ? 'banco ligado' : 'banco D1 ainda não ligado' }, 200, cors);
-    }
-    if (rota === 'coleta') {
-      if (!env.DB) return json({ erro: 'banco D1 não ligado' }, 200, cors);
-      await preparar(env.DB);
-      const e = await env.DB.prepare('SELECT valor FROM estado WHERE chave = ?').bind('ultima_coleta').first();
-      const n = await env.DB.prepare('SELECT (SELECT COUNT(*) FROM online_agora) AS online, (SELECT COUNT(*) FROM sessoes) AS sessoes, (SELECT COUNT(*) FROM xp) AS xp, (SELECT COUNT(*) FROM personagens) AS acompanhados, (SELECT COUNT(*) FROM fila) AS fila, (SELECT COUNT(*) FROM skills) AS skills').first();
-      return json({ ultima: e ? JSON.parse(e.valor) : 'a coleta agendada ainda não rodou nenhuma vez', totais: n }, 200, cors);
-    }
-    const gm = rota.match(new RegExp('^guilda\\/(' + MUNDO + ')\\/([^/]{2,60})$'));
-    if (gm) return guilda(env, ctx, gm[1], gm[2], cors);
-    const hist = rota.match(/^historico\/([^/]{2,40})$/);
-    if (hist) return historico(env, hist[1], cors);
-    if (!ROTAS.some(r => r.test(rota))) return json({ erro: 'endereço desconhecido' }, 404, cors);
+  // Teste do login: consulta quem está online em Pendulum e diz só se a API aceitou a conta
+  if (rota === 'teste') {
+    if (!env.MEDIVIA_USUARIO || !env.MEDIVIA_SENHA) return json({ ok: false, motivo: 'faltam os segredos MEDIVIA_USUARIO e MEDIVIA_SENHA' }, 200, cors);
+    const r = await pedir(env, 'online/pendulum');
+    return json({ ok: r.ok, status: r.status, motivo: r.ok ? 'login aceito pela API' : r.status === 401 ? 'a API recusou o login (usuário ou senha)' : 'a API respondeu com erro', coleta: env.DB ? 'banco ligado' : 'banco D1 ainda não ligado' }, 200, cors);
+  }
+  if (rota === 'coleta') {
+    if (!env.DB) return json({ erro: 'banco D1 não ligado' }, 200, cors);
+    await preparar(env.DB);
+    const e = await env.DB.prepare('SELECT valor FROM estado WHERE chave = ?').bind('ultima_coleta').first();
+    const n = await env.DB.prepare('SELECT (SELECT COUNT(*) FROM online_agora) AS online, (SELECT COUNT(*) FROM sessoes) AS sessoes, (SELECT COUNT(*) FROM xp) AS xp, (SELECT COUNT(*) FROM personagens) AS acompanhados, (SELECT COUNT(*) FROM fila) AS fila, (SELECT COUNT(*) FROM skills) AS skills').first();
+    const dia = d => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
+    const g = d => env.DB.prepare('SELECT valor FROM estado WHERE chave = ?').bind('gravadas:' + dia(d)).first().then(x => Number(x && x.valor) || 0);
+    const gravadas = { hoje_utc: await g(0), ontem_utc: await g(1), limite_por_dia: 100000 };
+    return json({ ultima: e ? JSON.parse(e.valor) : 'a coleta agendada ainda não rodou nenhuma vez', totais: n, gravadas }, 200, cors);
+  }
+  const gm = rota.match(new RegExp('^guilda\\/(' + MUNDO + ')\\/([^/]{2,60})$'));
+  if (gm) return guilda(env, ctx, gm[1], gm[2], cors);
+  const hist = rota.match(/^historico\/([^/]{2,40})$/);
+  if (hist) return historico(env, hist[1], cors);
+  if (!ROTAS.some(r => r.test(rota))) return json({ erro: 'endereço desconhecido' }, 404, cors);
 
-    // Resposta guardada: vale pelo tempo que a própria API indicou; uma cópia de reserva vale um dia (para o 429)
-    const cache = caches.default;
-    const chave = new Request('https://api.medivialabs.com/cache/' + encodeURIComponent(rota.toLowerCase()));
-    const reserva = new Request('https://api.medivialabs.com/reserva/' + encodeURIComponent(rota.toLowerCase()));
-    let res = await cache.match(chave);
-    // Ficha vinda do cache: o personagem também passa a ser acompanhado (sem gravar nada se já era)
-    if (res && env.DB && rota.startsWith('player/')) {
-      const nome = rota.slice(7);
-      ctx.waitUntil(preparar(env.DB).then(() => env.DB.prepare('INSERT OR IGNORE INTO personagens (chave, nome, mundo, desde, visto) VALUES (?, ?, ?, ?, ?)').bind(chaveNome(nome), nome, '', agora(), agora()).run()).catch(() => {}));
-    }
-    if (!res) {
-      const r = await pedir(env, rota);
-      if (!r.ok) {
-        const velha = r.status === 429 || r.status >= 500 ? await cache.match(reserva) : null;
-        if (velha) res = velha;
-        else return json({ erro: r.status === 404 ? 'não encontrado' : r.status === 429 ? 'a API do Medivia pediu um tempo; tente de novo em instantes' : 'a API do Medivia respondeu ' + r.status }, r.status === 404 ? 404 : r.status === 429 ? 429 : 502, cors);
-      } else {
-        const corpo = await r.text();
-        let vale = 300, dados = null;
-        try { dados = JSON.parse(corpo); vale = Math.max(30, Math.min(3600, Number(dados.cached_for) || 300)); } catch { return json({ erro: 'a API do Medivia mandou algo que não é JSON' }, 502, cors); }
-        res = new Response(corpo, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=' + vale } });
-        ctx.waitUntil(cache.put(chave, res.clone()));
-        ctx.waitUntil(cache.put(reserva, new Response(corpo, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=86400' } })));
-        // Quem abre um personagem no site passa a ser acompanhado: a coleta guarda o XP dele a cada logout
-        if (env.DB && rota.startsWith('player/') && dados && dados.player) {
-          const p = dados.player;
-          ctx.waitUntil((async () => {
-            await preparar(env.DB);
-            await env.DB.prepare('INSERT INTO personagens (chave, nome, mundo, desde, visto) VALUES (?, ?, ?, ?, ?) ON CONFLICT(chave) DO UPDATE SET nome = excluded.nome, mundo = excluded.mundo, visto = excluded.visto')
-              .bind(chaveNome(p.name), p.name, String(p.world || '').toLowerCase(), agora(), agora()).run();
-            await guardarXp(env.DB, [p], 'consulta');
-            const pf = guardarPerfil(env.DB, [{ c: chaveNome(p.name), v: p.vocation || null, l: Number(p.level) || null, e: null }]);
-            if (pf) await pf.run();
-          })().catch(() => {}));
-        }
+  // Resposta guardada: vale pelo tempo que a própria API indicou; uma cópia de reserva vale um dia (para o 429)
+  const cache = caches.default;
+  const chave = new Request('https://api.medivialabs.com/cache/' + encodeURIComponent(rota.toLowerCase()));
+  const reserva = new Request('https://api.medivialabs.com/reserva/' + encodeURIComponent(rota.toLowerCase()));
+  let res = await cache.match(chave);
+  // Ficha vinda do cache: o personagem também passa a ser acompanhado (sem gravar nada se já era)
+  if (res && env.DB && rota.startsWith('player/')) {
+    const nome = rota.slice(7);
+    ctx.waitUntil(preparar(env.DB).then(() => env.DB.prepare('INSERT OR IGNORE INTO personagens (chave, nome, mundo, desde, visto) VALUES (?, ?, ?, ?, ?)').bind(chaveNome(nome), nome, '', agora(), agora()).run()).catch(() => {}));
+  }
+  if (!res) {
+    const r = await pedir(env, rota);
+    if (!r.ok) {
+      const velha = r.status === 429 || r.status >= 500 ? await cache.match(reserva) : null;
+      if (velha) res = velha;
+      else return json({ erro: r.status === 404 ? 'não encontrado' : r.status === 429 ? 'a API do Medivia pediu um tempo; tente de novo em instantes' : 'a API do Medivia respondeu ' + r.status }, r.status === 404 ? 404 : r.status === 429 ? 429 : 502, cors);
+    } else {
+      const corpo = await r.text();
+      let vale = 300, dados = null;
+      try { dados = JSON.parse(corpo); vale = Math.max(30, Math.min(3600, Number(dados.cached_for) || 300)); } catch { return json({ erro: 'a API do Medivia mandou algo que não é JSON' }, 502, cors); }
+      res = new Response(corpo, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=' + vale } });
+      ctx.waitUntil(cache.put(chave, res.clone()));
+      ctx.waitUntil(cache.put(reserva, new Response(corpo, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=86400' } })));
+      // Quem abre um personagem no site passa a ser acompanhado: a coleta guarda o XP dele a cada logout
+      if (env.DB && rota.startsWith('player/') && dados && dados.player) {
+        const p = dados.player;
+        ctx.waitUntil((async () => {
+          await preparar(env.DB);
+          await env.DB.prepare('INSERT INTO personagens (chave, nome, mundo, desde, visto) VALUES (?, ?, ?, ?, ?) ON CONFLICT(chave) DO UPDATE SET nome = excluded.nome, mundo = excluded.mundo, visto = excluded.visto')
+            .bind(chaveNome(p.name), p.name, String(p.world || '').toLowerCase(), agora(), agora()).run();
+          await guardarXp(env.DB, [p], 'consulta');
+          const pf = guardarPerfil(env.DB, [{ c: chaveNome(p.name), v: p.vocation || null, l: Number(p.level) || null, e: null }]);
+          if (pf) await pf.run();
+        })().catch(() => {}));
       }
     }
-    const out = new Response(res.body, res);
-    for (const [k, v] of Object.entries(cors)) out.headers.set(k, v);
-    return out;
+  }
+  const out = new Response(res.body, res);
+  for (const [k, v] of Object.entries(cors)) out.headers.set(k, v);
+  return out;
+}
+
+export default {
+  async fetch(req, env, ctx) {
+    const m = medir(env, ctx);
+    try { return await atender(req, m.env, m.ctx); } finally { m.fim(); }
   },
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(coletarComRegistro(env));
+    const m = medir(env, ctx);
+    ctx.waitUntil(coletarComRegistro(m.env).finally(m.fim));
   },
 };
