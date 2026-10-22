@@ -5,7 +5,8 @@
 //
 // Endereços (os mesmos da API, só leitura):
 //   /player/{nome}   /online/{mundo}   /highscores/{mundo}/{vocação}/{skill}/{página}   /guilds/{mundo}   /houses/{mundo}
-//   /historico/{nome}   XP e tempo online por dia (horário de Brasília) e as skills dos rankings, do que a coleta guardou
+//   /historico/{nome}   XP e tempo online por dia (horário de Brasília) e as skills dos rankings, do que a coleta guardou;
+//                       na primeira vez de cada personagem, importa o histórico que já existe (ver importar())
 //   /coleta             quando a coleta rodou pela última vez, o que fez ou o erro, e os totais do banco
 //   /teste              confere se o login da conta do site funciona (não mostra usuário nem senha)
 // Cada resposta da API diz por quanto tempo vale (cached_for). O Worker guarda a resposta por esse tempo e só volta
@@ -66,6 +67,9 @@ async function preparar(db) {
     db.prepare('CREATE TABLE IF NOT EXISTS ultimo_xp (chave TEXT PRIMARY KEY, experiencia INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS estado (chave TEXT PRIMARY KEY, valor TEXT)'),
     db.prepare('CREATE TABLE IF NOT EXISTS skills (chave TEXT, skill TEXT, valor INTEGER, quando INTEGER, PRIMARY KEY (chave, skill))'),
+    db.prepare('CREATE TABLE IF NOT EXISTS xp_importado (chave TEXT, dia TEXT, nivel INTEGER, ganho INTEGER, PRIMARY KEY (chave, dia))'),
+    db.prepare('CREATE TABLE IF NOT EXISTS online_importado (chave TEXT, dia TEXT, segundos INTEGER, PRIMARY KEY (chave, dia))'),
+    db.prepare('CREATE TABLE IF NOT EXISTS importados (chave TEXT PRIMARY KEY, quando INTEGER, ate TEXT, dias INTEGER)'),
   ]);
   pronto = true;
 }
@@ -164,12 +168,48 @@ async function coletarSkills(env, db, mundos, reg) {
   await db.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind('skills_passo', String(passo % total)).run();
 }
 
+/* ---------- Histórico que já existe em outros sites ---------- */
+// Combinado com o Wildboo, que administra o MediviaGeeks e o MediviaThings: na primeira vez que um personagem é
+// aberto aqui, buscamos UMA vez o histórico que eles já têm (XP e tempo online por dia do MediviaGeeks; skills do
+// MediviaThings que o nosso ranking ainda não tem) e daí em diante vale só a nossa coleta. A página dá o crédito.
+const GEEKS = 'https://mediviageeks.com/api/';
+const THINGS = 'https://mediviathings-native.fly.dev/v1/';
+const pedirFora = url => fetch(url, { headers: { Accept: 'application/json', 'User-Agent': 'MediviaLabs/1.0 (+https://medivialabs.com)' } });
+async function importar(db, chave, nome) {
+  const ja = await db.prepare('SELECT 1 AS x FROM importados WHERE chave = ?').bind(chave).first();
+  if (ja) return;
+  let dias = 0, ate = '';
+  try {
+    const [rx, ro] = await Promise.all([pedirFora(GEEKS + 'playersexp?name=' + encodeURIComponent(nome)), pedirFora(GEEKS + 'onlinehistory?name=' + encodeURIComponent(nome) + '&includeCurrent=true')]);
+    const xp = rx.ok ? await rx.json() : [];
+    const on = ro.ok ? await ro.json() : {};
+    const linhasXp = (Array.isArray(xp) ? xp : []).filter(x => x && x.DATA && Number.isFinite(Number(x.EXPGAIN)))
+      .map(x => ({ d: String(x.DATA).slice(0, 10), n: Number(x.LEVEL) || 0, g: Number(x.EXPGAIN) }));
+    // o tempo online deles vem em minutos por dia
+    const linhasOn = Object.entries(on && typeof on === 'object' && !Array.isArray(on) ? on : {})
+      .filter(([d, m]) => /^\d{4}-\d{2}-\d{2}$/.test(d) && Number.isFinite(Number(m))).map(([d, m]) => ({ d, s: Math.round(Number(m) * 60) }));
+    if (linhasXp.length) await db.prepare("INSERT OR REPLACE INTO xp_importado (chave, dia, nivel, ganho) SELECT ?, json_extract(value, '$.d'), json_extract(value, '$.n'), json_extract(value, '$.g') FROM json_each(?)").bind(chave, JSON.stringify(linhasXp)).run();
+    if (linhasOn.length) await db.prepare("INSERT OR REPLACE INTO online_importado (chave, dia, segundos) SELECT ?, json_extract(value, '$.d'), json_extract(value, '$.s') FROM json_each(?)").bind(chave, JSON.stringify(linhasOn)).run();
+    dias = linhasXp.length;
+    ate = linhasXp.map(x => x.d).sort().pop() || '';
+  } catch { /* sem o MediviaGeeks: fica só a nossa coleta */ }
+  try {
+    const rt = await pedirFora(THINGS + 'characters/search?name=' + encodeURIComponent(nome));
+    const sk = rt.ok ? ((await rt.json()).character || {}).skills : null;
+    const lista = Object.entries(sk || {}).filter(([k, v]) => /^(maglevel|melee|distance|blocking|fishing|mining|cooking)$/.test(k) && Number(v) > 0).map(([k, v]) => ({ k, v: Number(v) }));
+    // OR IGNORE: o que o nosso ranking já guardou vale mais
+    if (lista.length) await db.prepare("INSERT OR IGNORE INTO skills (chave, skill, valor, quando) SELECT ?, json_extract(value, '$.k'), json_extract(value, '$.v'), ? FROM json_each(?)").bind(chave, agora(), JSON.stringify(lista)).run();
+  } catch { /* sem o MediviaThings: as skills chegam pelo nosso ranking */ }
+  await db.prepare('INSERT OR REPLACE INTO importados (chave, quando, ate, dias) VALUES (?, ?, ?, ?)').bind(chave, agora(), ate, dias).run();
+}
+
 /* ---------- Histórico de um personagem ---------- */
 async function historico(env, nome, cors) {
   const db = env.DB;
   if (!db) return json({ erro: 'coleta ainda não ligada' }, 503, cors);
   await preparar(db);
   const chave = chaveNome(nome), desde = agora() - 181 * 86400;
+  await importar(db, chave, nome);
   const pontos = (await db.prepare('SELECT quando, nivel, experiencia FROM xp WHERE chave = ? AND quando >= ? ORDER BY quando').bind(chave, desde).all()).results || [];
   const sess = (await db.prepare('SELECT entrou, saiu FROM sessoes WHERE chave = ? AND saiu >= ? ORDER BY entrou').bind(chave, desde).all()).results || [];
   const on = await db.prepare('SELECT entrou FROM online_agora WHERE chave = ?').bind(chave).first();
@@ -191,9 +231,19 @@ async function historico(env, nome, cors) {
   for (const s of sess) somar(s.entrou, s.saiu);
   if (on) somar(on.entrou, agora());
   const acompanhado = !!(await db.prepare('SELECT 1 AS x FROM personagens WHERE chave = ?').bind(chave).first());
+  const imp = await db.prepare('SELECT ate, dias FROM importados WHERE chave = ?').bind(chave).first();
+  const diaDesde = dia(desde);
+  const xpImp = (await db.prepare('SELECT dia, nivel, ganho FROM xp_importado WHERE chave = ? AND dia >= ? ORDER BY dia').bind(chave, diaDesde).all()).results || [];
+  const onImp = (await db.prepare('SELECT dia, segundos FROM online_importado WHERE chave = ? AND dia >= ?').bind(chave, diaDesde).all()).results || [];
+  // até o último dia importado vale o de lá (o nosso primeiro dia é parcial); depois, o nosso
+  const limite = imp && imp.ate ? imp.ate : '';
+  const juntos = new Map(xpImp.map(x => [x.dia, { dia: x.dia, nivel: x.nivel, experiencia: null, ganho: x.ganho }]));
+  for (const d of dias) if (d.dia > limite || !juntos.has(d.dia)) juntos.set(d.dia, d);
+  dias.splice(0, dias.length, ...[...juntos.values()].sort((a, b) => (a.dia < b.dia ? -1 : 1)));
+  for (const o of onImp) if (o.dia <= limite || !tempo.has(o.dia)) tempo.set(o.dia, o.segundos);
   const sk = (await db.prepare('SELECT skill, valor, quando FROM skills WHERE chave = ?').bind(chave).all()).results || [];
   const skills = Object.fromEntries(sk.map(x => [x.skill, { valor: x.valor, quando: x.quando }]));
-  return json({ nome, acompanhado, online: !!on, skills, xp: dias, online_por_dia: [...tempo.entries()].sort().map(([d, s]) => ({ dia: d, segundos: s })) }, 200, cors, { 'Cache-Control': 'public, max-age=60' });
+  return json({ nome, acompanhado, online: !!on, skills, importado: imp && imp.dias ? { de: 'MediviaGeeks', ate: imp.ate } : null, xp: dias, online_por_dia: [...tempo.entries()].sort().map(([d, s]) => ({ dia: d, segundos: s })) }, 200, cors, { 'Cache-Control': 'public, max-age=60' });
 }
 
 export default {

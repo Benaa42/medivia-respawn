@@ -1618,6 +1618,7 @@ const I18N = {
     'pers.histDesde': 'guardado desde {d}',
     'pers.histComeca': 'começa a contar hoje',
     'pers.histNota': 'O Medivia Labs guarda o XP deste personagem a cada logout, a partir da primeira vez que ele é aberto aqui. As barras listradas viram os dias de verdade conforme o histórico cresce.',
+    'pers.histImp': 'Histórico até {d} importado do',
     'pers.hoje': 'Hoje',
     'pers.d7': '7 dias',
     'pers.d30': '30 dias',
@@ -2321,6 +2322,7 @@ const I18N = {
     'pers.histDesde': 'recorded since {d}',
     'pers.histComeca': 'starts counting today',
     'pers.histNota': 'Medivia Labs records this character\'s XP at every logout, from the first time it is opened here. The striped bars turn into real days as the history grows.',
+    'pers.histImp': 'History until {d} imported from',
     'pers.hoje': 'Today',
     'pers.d7': '7 days',
     'pers.d30': '30 days',
@@ -3024,6 +3026,7 @@ const I18N = {
     'pers.histDesde': 'guardado desde {d}',
     'pers.histComeca': 'empieza a contar hoy',
     'pers.histNota': 'Medivia Labs guarda el XP de este personaje en cada logout, desde la primera vez que se abre aquí. Las barras rayadas se vuelven días reales a medida que crece el historial.',
+    'pers.histImp': 'Historial hasta {d} importado de',
     'pers.hoje': 'Hoy',
     'pers.d7': '7 días',
     'pers.d30': '30 días',
@@ -3727,6 +3730,7 @@ const I18N = {
     'pers.histDesde': 'zapisywane od {d}',
     'pers.histComeca': 'liczy od dziś',
     'pers.histNota': 'Medivia Labs zapisuje XP tej postaci przy każdym wylogowaniu, od pierwszego otwarcia tutaj. Paskowane słupki zamieniają się w prawdziwe dni wraz z historią.',
+    'pers.histImp': 'Historia do {d} zaimportowana z',
     'pers.hoje': 'Dziś',
     'pers.d7': '7 dni',
     'pers.d30': '30 dni',
@@ -10245,7 +10249,7 @@ function renderPersonagem() {
   const comDados = dias.filter(d => ganho.has(d));
   const horas = sec => persTempo((sec || 0) / 3600);
   const primeiro = h && h.xp && h.xp.length ? h.xp[0].dia : null;
-  const hist = card('dois', el('h2', null, tr('pers.hist'), el('small', { text: primeiro ? tr('pers.histDesde', { d: new Date(primeiro + 'T12:00:00Z').toLocaleDateString(loc, { day: 'numeric', month: 'short' }) }) : tr('pers.histComeca') })),
+  const hist = card('dois', el('h2', null, tr('pers.hist'), el('small', { text: primeiro ? tr('pers.histDesde', { d: new Date(primeiro + 'T12:00:00Z').toLocaleDateString(loc, primeiro.slice(0, 4) === hojeBr.slice(0, 4) ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' }) }) : tr('pers.histComeca') })),
     el('div', { class: 'pers-barras', 'aria-hidden': 'true' }, dias.map((d, i) => ganho.has(d)
       ? el('i', { class: d === hojeBr ? 'hoje' : null, style: 'height:' + Math.max(2, Math.round(100 * (ganho.get(d) || 0) / maior)) + '%', title: d + ': +' + fmtInt(ganho.get(d) || 0) })
       : el('i', { class: 'vazio', style: 'height:' + (18 + (i * 37) % 27) + '%' }))),
@@ -10256,7 +10260,10 @@ function renderPersonagem() {
         el('td', { text: nivelDia.has(d) ? String(nivelDia.get(d)) : '—' }),
         el('td', { class: ganho.get(d) ? 'g' : 'none', text: ganho.has(d) ? '+' + fmtInt(ganho.get(d)) : '—' }),
         el('td', { class: onl.has(d) ? null : 'none', text: onl.has(d) ? horas(onl.get(d)) : '—' })))))),
-    el('p', { class: 'support-note', text: tr('pers.histNota') }));
+    el('p', { class: 'support-note', text: tr('pers.histNota') }),
+    // crédito do histórico importado (combinado com o Wildboo, que administra o MediviaGeeks)
+    h && h.importado ? el('p', { class: 'support-note' }, tr('pers.histImp', { d: new Date(h.importado.ate + 'T12:00:00Z').toLocaleDateString(loc, { day: 'numeric', month: 'short', year: 'numeric' }) }) + ' ',
+      el('a', { href: 'https://mediviageeks.com/profile/' + encodeURIComponent(p.name), target: '_blank', rel: 'noopener', text: 'MediviaGeeks' }), '.') : null);
   // Skills: dos rankings do mundo que o Worker coleta (a API não traz skills na ficha); fora do top 1000 fica "—"
   const hs = (h && h.skills) || {};
   const quandoSk = Math.max(0, ...Object.values(hs).map(x => x.quando || 0));
