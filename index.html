@@ -722,7 +722,8 @@ details.backup textarea {
 .unit-toggle button[aria-pressed="true"] { background: var(--title); color: var(--ground); }
 .clock.mmss .clock-digits { font-size: 50px; }
 
-.nav-links { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 8px; font-weight: 600; }
+/* linha do mapper: o link à esquerda; novidades, sugestões, idiomas e apoio à direita */
+.nav-links { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 18px; margin-top: 8px; font-weight: 600; }
 /* Barra de ferramentas: as abas à esquerda; novidades, idioma e apoio à direita.
    É o menu do site, então não usa a pílula branca dos outros seletores: a barra tem contorno e fundo dourados e a
    aba aberta é dourada cheia. */
@@ -1006,6 +1007,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   .tabs .wide { display: none; }
   .tabs .short { display: inline; }
   .toolbar-end { margin-left: 0; }
+  .toolbar { display: contents; }   /* só sobra o menu, que é fixo: a barra não ocupa lugar (nem o espaço entre blocos) */
 }
 .nav-link { padding: 0; border: 0; background: none; color: var(--faint); font: 400 13px/1.4 var(--font-ui); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .nav-link:hover { color: var(--title); }
@@ -1046,7 +1048,20 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
     <div>
       <h1><img class="brand-mark" src="logo.svg?v=1" width="44" height="44" alt=""><span>Medivia <b>Labs</b></span></h1>
       <p data-i18n="tagline">Ferramentas para as suas caçadas no Medivia: cronômetro de respawn, analisador de hunt, criaturas, calculadora e sorteio.</p>
-      <p class="nav-links"><a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a></p>
+      <div class="nav-links">
+        <a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a>
+      <div class="toolbar-end">
+        <button class="nav-link" type="button" id="changes-top" data-i18n="changes.open">Novidades</button>
+        <button class="nav-link" type="button" id="feedback-top" data-i18n="fb.open">Sugestões e problemas</button>
+        <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
+          <button type="button" data-lang="en" lang="en" title="English" aria-label="English"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><path fill="#b22234" d="M0 0h20v2H0zM0 4h20v2H0zM0 8h20v2H0zM0 12h20v2H0z"/><rect width="9" height="8" fill="#3c3b6e"/></svg></button>
+          <button type="button" data-lang="pl" lang="pl" title="Polski" aria-label="Polski"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg></button>
+          <button type="button" data-lang="pt" lang="pt-BR" title="Português" aria-label="Português"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#009b3a"/><path fill="#fedf00" d="M10 1.6 18 7l-8 5.4L2 7z"/><circle cx="10" cy="7" r="3" fill="#002776"/></svg></button>
+          <button type="button" data-lang="es" lang="es" title="Español" aria-label="Español"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg></button>
+        </span>
+        <button class="dlg support-top" type="button" id="support-top" data-i18n="support.open" hidden>Apoiar o projeto</button>
+      </div>
+      </div>
     </div>
     <aside class="goals" id="goals" aria-labelledby="goals-title" hidden>
       <h2 id="goals-title" data-i18n="goals.title">Metas da comunidade</h2>
@@ -1063,17 +1078,6 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       <button type="button" data-go="calc"><svg class="ico" aria-hidden="true"><use href="#i-calc"/></svg><span data-i18n="calc.nav">Calculadora</span></button>
       <button type="button" data-go="raffle"><svg class="ico" aria-hidden="true"><use href="#i-dice"/></svg><span data-i18n="nav.raffle">Sorteio</span></button>
     </nav>
-    <div class="toolbar-end">
-      <button class="nav-link" type="button" id="changes-top" data-i18n="changes.open">Novidades</button>
-      <button class="nav-link" type="button" id="feedback-top" data-i18n="fb.open">Sugestões e problemas</button>
-      <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
-        <button type="button" data-lang="en" lang="en" title="English" aria-label="English"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><path fill="#b22234" d="M0 0h20v2H0zM0 4h20v2H0zM0 8h20v2H0zM0 12h20v2H0z"/><rect width="9" height="8" fill="#3c3b6e"/></svg></button>
-        <button type="button" data-lang="pl" lang="pl" title="Polski" aria-label="Polski"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg></button>
-        <button type="button" data-lang="pt" lang="pt-BR" title="Português" aria-label="Português"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#009b3a"/><path fill="#fedf00" d="M10 1.6 18 7l-8 5.4L2 7z"/><circle cx="10" cy="7" r="3" fill="#002776"/></svg></button>
-        <button type="button" data-lang="es" lang="es" title="Español" aria-label="Español"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg></button>
-      </span>
-      <button class="dlg support-top" type="button" id="support-top" data-i18n="support.open" hidden>Apoiar o projeto</button>
-    </div>
   </div>
 
   <section class="page" id="page-timer">
@@ -7800,6 +7804,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-22 13:52',
+    pt: ['Topo reorganizado: novidades, sugestões, idiomas e apoio subiram para junto do Mapper da wiki, e o menu fica logo acima de cada página.'],
+    en: ['Header rearranged: news, feedback, languages and support moved up next to the wiki Mapper link, and the menu now sits right above each page.'],
+    es: ['Cabecera reorganizada: novedades, sugerencias, idiomas y apoyo subieron junto al Mapper de la wiki, y el menú queda justo encima de cada página.'],
+    pl: ['Nagłówek uporządkowany: nowości, sugestie, języki i wsparcie są teraz obok linku do Mappera z wiki, a menu jest tuż nad każdą stroną.'],
+  },
   { at: '2026-10-22 03:32',
     pt: ['O site ficou mais largo em telas grandes: mais espaço para o cronômetro, as tabelas e as listas.'],
     en: ['The site is wider on large screens: more room for the timer, the tables and the lists.'],
