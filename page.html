@@ -813,10 +813,15 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-mini { width: 110px; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
 .pers-mini i { display: block; height: 100%; background: var(--amber); }
 .pers-cart .creatures-wrap { flex: none; min-height: 0; }
-.pers-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; }
-.pers-skills div { display: flex; justify-content: space-between; gap: 10px; padding: 7px 12px; border-radius: var(--r-sm); background: var(--card); font-size: 14px; }
-.pers-skills b { color: var(--title); font-variant-numeric: tabular-nums; }
-.pers-skills b.none { color: var(--faint); font-weight: 500; }
+/* Skills: barra do tamanho relativo à maior skill do personagem, na cor do que a skill é */
+.pers-skills { display: flex; flex-direction: column; gap: 9px; }
+.pers-skills div { display: grid; grid-template-columns: 92px minmax(0, 1fr) 44px; align-items: center; gap: 12px; font-size: 14px; }
+.pers-skills span { color: var(--label); }
+.pers-skills i { display: block; height: 10px; border-radius: 999px; background: #2c3637; overflow: hidden; }
+.pers-skills i em { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, color-mix(in srgb, var(--sk) 45%, #12191a), var(--sk)); box-shadow: 0 0 10px color-mix(in srgb, var(--sk) 35%, transparent); }
+.pers-skills b { font-weight: 700; color: var(--title); text-align: right; font-variant-numeric: tabular-nums; }
+.pers-skills div.fora i { background: repeating-linear-gradient(135deg, #2c3637 0 4px, #232c2d 4px 8px); }
+.pers-skills div.fora b { font-weight: 500; color: var(--faint); }
 .pers-magias td.num, .pers-magias th.num { width: 1%; padding-left: 28px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .pers-cart .pers-magias { min-width: 0; font-size: 13px; }
 .pers-magias th { padding: 3px 8px; }
@@ -1625,6 +1630,7 @@ const I18N = {
     'pers.onlineHoje': 'Online hoje',
     'pers.skills': 'Skills',
     'pers.skillsNota': 'A API do Medivia não traz as skills na ficha: elas vêm dos rankings do mundo (os 1000 primeiros de cada skill), coletados aos poucos. Fora do ranking aparece —.',
+    'pers.foraRanking': 'Fora dos 1000 primeiros do ranking',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
     'pers.int': 'Intelligence',
@@ -2328,6 +2334,7 @@ const I18N = {
     'pers.onlineHoje': 'Online today',
     'pers.skills': 'Skills',
     'pers.skillsNota': 'The Medivia API has no skills in the character data: they come from the world rankings (top 1000 of each skill), collected little by little. Outside the rankings it shows —.',
+    'pers.foraRanking': 'Outside the top 1000 of the ranking',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
     'pers.int': 'Intelligence',
@@ -3031,6 +3038,7 @@ const I18N = {
     'pers.onlineHoje': 'En línea hoy',
     'pers.skills': 'Skills',
     'pers.skillsNota': 'La API de Medivia no trae las skills en la ficha: vienen de los rankings del mundo (los 1000 primeros de cada skill), recolectados poco a poco. Fuera del ranking aparece —.',
+    'pers.foraRanking': 'Fuera de los 1000 primeros del ranking',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
     'pers.int': 'Intelligence',
@@ -3734,6 +3742,7 @@ const I18N = {
     'pers.onlineHoje': 'Online dziś',
     'pers.skills': 'Umiejętności',
     'pers.skillsNota': 'API Medivii nie podaje umiejętności w danych postaci: pochodzą z rankingów świata (top 1000 każdej umiejętności), zbieranych stopniowo. Poza rankingiem widać —.',
+    'pers.foraRanking': 'Poza top 1000 rankingu',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
     'pers.int': 'Intelligence',
@@ -10184,6 +10193,8 @@ const PERS_FACTIONS = [
   ['Chaos', ['Creatures of Hollow Expanse', 'Creatures of Crystalline Spire', 'Creatures of Shimmering Veil', 'Creatures of Warped Citadel']],
 ];
 const PERS_SKILLS = ['maglevel', 'distance', 'melee', 'blocking', 'fishing', 'mining', 'cooking'];
+// magia roxa, arco verde, lâmina vermelha, escudo azul-aço, água, ouro de minério, fogo do fogão
+const PERS_SKILL_COR = { maglevel: '#a970ff', distance: '#3ddc84', melee: '#ff5a5a', blocking: '#7fa7c9', fishing: '#3cc6f0', mining: '#e2c54e', cooking: '#ffa53c' };
 function renderPersonagem() {
   const g = $('#pers-grade');
   if (!g) return;
@@ -10261,7 +10272,12 @@ function renderPersonagem() {
   const hs = (h && h.skills) || {};
   const quandoSk = Math.max(0, ...Object.values(hs).map(x => x.quando || 0));
   const skills = card('', el('h2', null, tr('pers.skills'), quandoSk ? el('small', { text: tr('pers.skillsQuando', { d: new Date(quandoSk * 1000).toLocaleString(loc, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) }) }) : null),
-    el('div', { class: 'pers-skills' }, PERS_SKILLS.map(k => el('div', null, el('span', { text: tr('pers.sk.' + k) }), el('b', { class: hs[k] ? null : 'none', text: hs[k] ? String(hs[k].valor) : '—' })))),
+    el('div', { class: 'pers-skills' }, (() => {
+      const maior = Math.max(1, ...PERS_SKILLS.map(k => (hs[k] && hs[k].valor) || 0));
+      return PERS_SKILLS.slice().sort((a, b) => ((hs[b] && hs[b].valor) || 0) - ((hs[a] && hs[a].valor) || 0)).map(k => hs[k]
+        ? el('div', null, el('span', { text: tr('pers.sk.' + k) }), el('i', null, el('em', { style: '--sk:' + PERS_SKILL_COR[k] + ';width:' + Math.max(3, Math.round(100 * hs[k].valor / maior)) + '%' })), el('b', { text: String(hs[k].valor) }))
+        : el('div', { class: 'fora', title: tr('pers.foraRanking') }, el('span', { text: tr('pers.sk.' + k) }), el('i'), el('b', { text: '—' })));
+    })()),
     el('p', { class: 'support-note', text: tr('pers.skillsNota') }));
   // Spell power (fórmula da wiki) e o dano de cada magia e runa da vocação
   const voc = String(p.vocation || '').toLowerCase();
