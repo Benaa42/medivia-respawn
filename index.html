@@ -73,13 +73,19 @@ kbd {
   gap: 20px;
 }
 
-.masthead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 28px; }
-.masthead > div { flex: 1 1 320px; min-width: 0; }
-.masthead h1 { display: flex; align-items: center; gap: 12px; font: 800 32px/1.05 var(--font-display); letter-spacing: -0.01em; color: var(--title); }
-.masthead h1 b { font-weight: inherit; color: var(--amber); }   /* "Labs" no dourado da marca */
-.brand-mark { flex: none; width: 44px; height: 44px; }
-.masthead p { max-width: 60ch; margin-top: 6px; }
-.goals { flex: 0 1 270px; min-width: 0; display: grid; gap: 6px; padding: 10px 12px; background: var(--box); border: 1px solid var(--edge); border-radius: var(--r-sm); }
+/* Faixa de utilidades: fina e escura, na largura toda da tela, acima de tudo */
+.faixa { background: #0a0e0f; border-bottom: 1px solid var(--edge); }
+.faixa-dentro { max-width: 1280px; margin-inline: auto; padding: 7px 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 18px; }
+.faixa-grupo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+.faixa-mapper { color: var(--value); font: 600 13px var(--font-ui); text-decoration: underline; text-underline-offset: 3px; }
+.faixa-mapper::after { content: " ↗"; text-decoration: none; display: inline-block; margin-left: 2px; }
+.faixa .support-top { padding: 5px 12px; font-size: 12.5px; }
+/* Marca do site, à esquerda do menu */
+.marca { display: flex; align-items: center; gap: 12px; font: 800 30px/1.05 var(--font-display); letter-spacing: -0.01em; color: var(--title); white-space: nowrap; }
+.marca b { font-weight: inherit; color: var(--amber); }   /* "Labs" no dourado da marca */
+.brand-mark { flex: none; width: 42px; height: 42px; }
+.colophon-frase { flex: 1 0 100%; color: var(--label); }
+.goals { min-width: 0; display: grid; gap: 6px; padding: 10px 12px; background: var(--box); border: 1px solid var(--edge); border-radius: var(--r-sm); }
 .goals h2 { font: 700 12px/1.2 var(--font-ui); color: var(--amber); }
 .goals-list { display: grid; gap: 5px; }
 .goal { display: grid; grid-template-columns: 4.6rem minmax(0, 1fr) auto; align-items: center; gap: 8px; font-size: 12.5px; color: var(--title); }
@@ -88,7 +94,11 @@ kbd {
 .goal-track { height: 6px; background: var(--card); border-radius: 3px; overflow: hidden; }
 .goal-fill { height: 100%; min-width: 3px; background: var(--value); border-radius: 3px; transition: width .6s ease; }
 .goals-hint { color: var(--faint); font-size: 11.5px; line-height: 1.3; }
-@media (max-width: 640px) { .goals { flex-basis: 100%; } }
+.goals.fora { display: none; }
+/* nas Criaturas as metas ficam numa faixa: título, as duas barras lado a lado e a dica */
+.page > .goals { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px 20px; }
+.page > .goals .goals-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 24px; }
+@media (max-width: 760px) { .page > .goals { grid-template-columns: 1fr; } .page > .goals .goals-list { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .goal-fill { transition: none; } }
 
 /* O selo de quem fez o site fica no fim da página, pequeno e apagado; acende quando o mouse passa */
@@ -744,7 +754,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   .toolbar > * { pointer-events: auto; }
   .tabs { background: linear-gradient(var(--gold-wash), var(--gold-wash)), var(--ground); transition: box-shadow 0.2s; }
   .toolbar.stuck .tabs { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55); }
-  .toolbar.stuck .toolbar-end { visibility: hidden; }
+  .toolbar.stuck .marca { visibility: hidden; }
 }
 .toolbar-end { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-left: auto; }
 .toolbar-end .unit-toggle { margin-left: 0; }
@@ -1043,34 +1053,29 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   <symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/></symbol>
   <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></symbol>
 </svg>
-<div class="wrap">
-  <header class="masthead">
-    <div>
-      <h1><img class="brand-mark" src="logo.svg?v=1" width="44" height="44" alt=""><span>Medivia <b>Labs</b></span></h1>
-      <p data-i18n="tagline">Ferramentas para as suas caçadas no Medivia: cronômetro de respawn, analisador de hunt, criaturas, calculadora e sorteio.</p>
-      <div class="nav-links">
-        <a href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a>
-      <div class="toolbar-end">
+<!-- Faixa de utilidades no alto: o que se usa de vez em quando, pequeno e sempre no mesmo lugar -->
+<div class="faixa">
+  <div class="faixa-dentro">
+    <div class="faixa-grupo">
+        <a class="faixa-mapper" href="https://wiki.medivia.online/mapper/" target="_blank" rel="noopener" data-i18n="mapper">Mapper da wiki</a>
         <button class="nav-link" type="button" id="changes-top" data-i18n="changes.open">Novidades</button>
         <button class="nav-link" type="button" id="feedback-top" data-i18n="fb.open">Sugestões e problemas</button>
-        <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
-          <button type="button" data-lang="en" lang="en" title="English" aria-label="English"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><path fill="#b22234" d="M0 0h20v2H0zM0 4h20v2H0zM0 8h20v2H0zM0 12h20v2H0z"/><rect width="9" height="8" fill="#3c3b6e"/></svg></button>
-          <button type="button" data-lang="pl" lang="pl" title="Polski" aria-label="Polski"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg></button>
-          <button type="button" data-lang="pt" lang="pt-BR" title="Português" aria-label="Português"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#009b3a"/><path fill="#fedf00" d="M10 1.6 18 7l-8 5.4L2 7z"/><circle cx="10" cy="7" r="3" fill="#002776"/></svg></button>
-          <button type="button" data-lang="es" lang="es" title="Español" aria-label="Español"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg></button>
-        </span>
-        <button class="dlg support-top" type="button" id="support-top" data-i18n="support.open" hidden>Apoiar o projeto</button>
-      </div>
-      </div>
     </div>
-    <aside class="goals" id="goals" aria-labelledby="goals-title" hidden>
-      <h2 id="goals-title" data-i18n="goals.title">Metas da comunidade</h2>
-      <div id="goals-list" class="goals-list"></div>
-      <p class="goals-hint" data-i18n="goals.hint">Cada print enviado conta.</p>
-    </aside>
-  </header>
+    <div class="faixa-grupo">
+      <span class="unit-toggle lang" role="group" aria-label="Idioma" data-i18n-attr="aria-label:lang.label">
+        <button type="button" data-lang="en" lang="en" title="English" aria-label="English"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><path fill="#b22234" d="M0 0h20v2H0zM0 4h20v2H0zM0 8h20v2H0zM0 12h20v2H0z"/><rect width="9" height="8" fill="#3c3b6e"/></svg></button>
+        <button type="button" data-lang="pl" lang="pl" title="Polski" aria-label="Polski"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg></button>
+        <button type="button" data-lang="pt" lang="pt-BR" title="Português" aria-label="Português"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#009b3a"/><path fill="#fedf00" d="M10 1.6 18 7l-8 5.4L2 7z"/><circle cx="10" cy="7" r="3" fill="#002776"/></svg></button>
+        <button type="button" data-lang="es" lang="es" title="Español" aria-label="Español"><svg class="flag" viewBox="0 0 20 14" aria-hidden="true"><rect width="20" height="14" fill="#aa151b"/><rect y="3.5" width="20" height="7" fill="#f1bf00"/></svg></button>
+      </span>
+      <button class="dlg support-top" type="button" id="support-top" data-i18n="support.open" hidden>Apoiar o projeto</button>
+    </div>
+  </div>
+</div>
+<div class="wrap">
 
   <div class="toolbar">
+    <h1 class="marca"><img class="brand-mark" src="logo.svg?v=1" width="44" height="44" alt=""><span>Medivia <b>Labs</b></span></h1>
     <nav class="tabs" aria-label="Ferramentas" data-i18n-attr="aria-label:nav.label">
       <button type="button" data-go="timer"><svg class="ico" aria-hidden="true"><use href="#i-timer"/></svg><span data-i18n="nav.timer">Cronômetro</span></button>
       <button type="button" data-go="hunt"><svg class="ico" aria-hidden="true"><use href="#i-hunt"/></svg><span class="wide" data-i18n="nav.hunt">Analisador de hunt</span><span class="short" data-i18n="nav.huntShort">Hunt</span></button>
@@ -1079,6 +1084,12 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
       <button type="button" data-go="raffle"><svg class="ico" aria-hidden="true"><use href="#i-dice"/></svg><span data-i18n="nav.raffle">Sorteio</span></button>
     </nav>
   </div>
+
+  <aside class="goals" id="goals" aria-labelledby="goals-title" hidden>
+    <h2 id="goals-title" data-i18n="goals.title">Metas da comunidade</h2>
+    <div id="goals-list" class="goals-list"></div>
+    <p class="goals-hint" data-i18n="goals.hint">Cada print enviado conta.</p>
+  </aside>
 
   <section class="page" id="page-timer">
   <p class="paste has-tut"><span data-i18n="paste.a">Com o print da janela de bônus copiado, aperte</span> <kbd>Ctrl</kbd> + <kbd>V</kbd> <span data-i18n="paste.b">em qualquer lugar desta página. Ele é lido na hora, sem clicar em nada antes.</span><button class="tut-btn" type="button" data-tut="print" aria-haspopup="dialog" title="Ver o tutorial em vídeo" aria-label="Ver o tutorial em vídeo" data-i18n-attr="title:tut.open;aria-label:tut.open">?</button>
@@ -1278,6 +1289,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
   </section>
 
   <footer class="colophon">
+    <p class="colophon-frase" data-i18n="tagline">Ferramentas para as suas caçadas no Medivia: cronômetro de respawn, analisador de hunt, criaturas, calculadora e sorteio.</p>
     <p data-i18n="colophon">Ferramenta de fã, sem ligação oficial com o Medivia. Os tempos vêm da janela de bônus do jogo. A imagem do print é lida no seu navegador e descartada em seguida.</p>
     <div class="colophon-links">
       <button class="support-btn" type="button" id="changes-btn" data-i18n="changes.open">Novidades</button>
@@ -6906,6 +6918,15 @@ async function rename(id, input) {
 // Metas da comunidade: quantos respawns e criaturas o banco compartilhado já tem e o próximo marco (ao chegar em
 // 50, a meta passa a 100). Só aparece com o banco ligado e com algum dado já recebido.
 const GOAL_STEPS = [25, 50, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000, 3000, 5000, 10000];
+// As metas moram no Cronômetro (em cima da lista de respawns) e nas Criaturas (depois da dica do print), que são as
+// páginas onde se manda print; nas outras ficam escondidas.
+function placeGoals(page) {
+  const box = $('#goals');
+  if (!box) return;
+  if (page === 'timer') $('#page-timer .side').prepend(box);
+  else if (page === 'creatures') $('#page-creatures > .paste').after(box);
+  box.classList.toggle('fora', page !== 'timer' && page !== 'creatures');
+}
 function renderGoals() {
   const box = $('#goals');
   if (!box) return;
@@ -7816,6 +7837,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-22 15:37',
+    pt: ['Topo novo: uma faixa fina no alto com Mapper da wiki, Novidades, Sugestões, idiomas e Apoiar; logo abaixo, a marca e o menu, que continua acompanhando a rolagem. As metas da comunidade agora ficam no Cronômetro e nas Criaturas, onde se manda print.'],
+    en: ['New header: a thin strip at the top with the wiki Mapper, News, Feedback, languages and Support; below it, the logo and the menu, which still follows the scroll. Community goals now live in the Timer and Creatures pages, where screenshots are sent.'],
+    es: ['Cabecera nueva: una franja fina arriba con el Mapper de la wiki, Novedades, Sugerencias, idiomas y Apoyar; debajo, la marca y el menú, que sigue acompañando el desplazamiento. Las metas de la comunidad ahora están en el Cronómetro y en Criaturas, donde se envían capturas.'],
+    pl: ['Nowy nagłówek: cienki pasek u góry z Mapperem z wiki, Nowościami, Sugestiami, językami i Wsparciem; pod nim logo i menu, które dalej podąża za przewijaniem. Cele społeczności są teraz w Minutniku i Stworzeniach, gdzie wysyła się zrzuty.'],
+  },
   { at: '2026-10-22 13:52',
     pt: ['Topo reorganizado: novidades, sugestões, idiomas e apoio subiram para junto do Mapper da wiki, e o menu fica logo acima de cada página.'],
     en: ['Header rearranged: news, feedback, languages and support moved up next to the wiki Mapper link, and the menu now sits right above each page.'],
@@ -10623,6 +10650,7 @@ function goTo(route, push = true) {
   if (name === 'raffle') { openRaffle(); return; }
   const to = PAGES.includes(name) ? name : 'timer', was = pageNow;
   pageNow = to;
+  placeGoals(to);
   for (const p of PAGES) $('#page-' + p).hidden = p !== to;
   for (const b of document.querySelectorAll('[data-go]')) { if (b.dataset.go === to) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }
   // #creatures/itens abre direto a aba dos itens (os endereços antigos das outras duas tabelas caem nela também);

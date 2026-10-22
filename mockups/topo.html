@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topo do Medivia Labs: três propostas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --ground: #0f1314; --box: #171d1e; --card: #1e2627; --edge: #2c3637; --band: #1b3a2c;
+  --title: #f1f5f3; --label: #c2cbc8; --faint: #8b9894; --amber: #f0ad4d; --value: #3ae374;
+  --gold-edge: rgba(240, 173, 77, 0.55); --gold-wash: rgba(240, 173, 77, 0.06); --gold-ink: #241703;
+  --font-ui: "Onest", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Onest", "Segoe UI", sans-serif;
+  --r-lg: 22px; --r-md: 14px; --r-sm: 10px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #0a0d0e; color: var(--label); font: 400 15px/1.45 var(--font-ui); }
+h1, h2, h3, p { margin: 0; }
+.pagina { max-width: 1320px; margin: 0 auto; padding: 28px 20px 60px; display: flex; flex-direction: column; gap: 36px; }
+.intro h1 { font: 800 30px/1.1 var(--font-display); color: var(--title); }
+.intro p { margin-top: 8px; max-width: 75ch; }
+/* cada proposta numa moldura que imita a janela do navegador */
+.proposta { display: flex; flex-direction: column; gap: 12px; }
+.proposta > h2 { font: 800 22px var(--font-display); color: var(--title); display: flex; gap: 12px; align-items: baseline; }
+.proposta > h2 span { font: 700 13px var(--font-ui); color: var(--gold-ink); background: var(--amber); padding: 2px 10px; border-radius: 999px; }
+.proposta > p { max-width: 90ch; }
+.proposta ul { margin: 0; padding-left: 20px; display: grid; gap: 3px; }
+.tela { background: var(--ground); border: 1px solid var(--edge); border-radius: var(--r-md); overflow: hidden; }
+.site { max-width: 1240px; margin: 0 auto; padding: 22px 20px 26px; display: flex; flex-direction: column; gap: 18px; }
+
+/* peças comuns */
+.marca { display: flex; align-items: center; gap: 10px; font: 800 26px/1 var(--font-display); color: var(--title); white-space: nowrap; }
+.marca img { width: 36px; height: 36px; }
+.marca b { color: var(--amber); font-weight: inherit; }
+.marca.pequena { font-size: 22px; } .marca.pequena img { width: 30px; height: 30px; }
+.menu { display: inline-flex; gap: 2px; padding: 4px; border: 1px solid var(--gold-edge); border-radius: 999px; background: var(--gold-wash); }
+.menu a { display: inline-flex; align-items: center; gap: 7px; padding: 8px 15px; border-radius: 999px; color: var(--title); font: 600 14px/1.2 var(--font-ui); white-space: nowrap; text-decoration: none; }
+.menu a.on { background: var(--amber); color: var(--gold-ink); }
+.menu a i { width: 14px; height: 14px; border: 1.7px solid currentColor; border-radius: 4px; display: inline-block; }
+.menu a .ext { font-size: 12px; opacity: 0.8; }
+.link { color: var(--faint); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.link.verde { color: var(--value); font-weight: 600; font-size: 14px; }
+.bandeiras { display: inline-flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--box); border: 1px solid var(--edge); }
+.bandeiras span { flex: none; width: 24px; height: 16px; border-radius: 3px; opacity: 0.35; }
+.bandeiras span.on { opacity: 1; outline: 2px solid var(--band); }
+.b-us { background: linear-gradient(#b22234 0 15%, #fff 15% 30%, #b22234 30% 45%, #fff 45% 60%, #b22234 60% 75%, #fff 75%); }
+.b-pl { background: linear-gradient(#fff 50%, #dc143c 50%); }
+.b-br { background: radial-gradient(circle, #002776 22%, #fedf00 23% 44%, #009b3a 45%); }
+.b-es { background: linear-gradient(#aa151b 25%, #f1bf00 25% 75%, #aa151b 75%); }
+.idioma { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--edge); background: var(--box); color: var(--title); font: 600 13px var(--font-ui); }
+.idioma .b-br { width: 20px; height: 14px; border-radius: 3px; display: inline-block; }
+.apoiar { display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; border: 1px solid var(--gold-edge); border-radius: 999px; color: var(--amber); font: 700 13px var(--font-ui); white-space: nowrap; }
+.apoiar::before { content: "♥"; }
+.metas-faixa { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 22px; padding: 9px 16px; border-radius: var(--r-sm); background: var(--box); border: 1px solid var(--edge); font-size: 13px; }
+.metas-faixa b.t { color: var(--amber); font-weight: 700; }
+.meta { display: inline-flex; align-items: center; gap: 8px; color: var(--title); }
+.meta i { width: 90px; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; display: inline-block; }
+.meta i em { display: block; height: 100%; background: var(--value); }
+.meta small { color: var(--faint); }
+.dica { padding: 14px 18px; border-radius: var(--r-md); background: var(--box); color: var(--title); font-weight: 600; }
+.dica small { display: block; margin-top: 4px; color: var(--label); font-weight: 400; font-size: 12px; }
+.conteudo { display: grid; grid-template-columns: 240px 1fr; gap: 18px; }
+.lado, .principal { border-radius: var(--r-lg); background: var(--box); padding: 16px; min-height: 150px; }
+.lado h3, .principal h3 { font: 800 18px var(--font-display); color: var(--title); }
+.fantasma { margin-top: 12px; display: grid; gap: 8px; }
+.fantasma span { height: 12px; border-radius: 6px; background: var(--card); }
+.fantasma span:nth-child(2) { width: 70%; } .fantasma span:nth-child(3) { width: 85%; }
+.rel { display: grid; place-items: center; height: 120px; }
+.rel b { font: 800 60px var(--font-display); color: var(--title); }
+
+/* A: tudo numa linha */
+.a-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.a-linha .menu { margin-inline: auto; }
+.a-dir { display: flex; align-items: center; gap: 10px; }
+.metas-faixa .fim { margin-left: auto; display: flex; gap: 16px; }
+
+/* B: duas linhas */
+.b-l1 { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; }
+.b-l1 .esq { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.b-l1 .esq p { color: var(--faint); font-size: 13px; max-width: 46ch; line-height: 1.35; }
+.b-l1 .dir { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.b-l2 { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; padding-top: 14px; border-top: 1px solid var(--edge); }
+.metas-pilula { display: inline-flex; align-items: center; gap: 14px; padding: 7px 14px; border-radius: 999px; background: var(--box); border: 1px solid var(--edge); font-size: 12.5px; }
+.metas-pilula b.t { color: var(--amber); }
+.metas-pilula .meta i { width: 60px; }
+
+/* C: faixa de utilidades no alto */
+.c-faixa { background: #0b0f10; border-bottom: 1px solid var(--edge); }
+.c-faixa .site { padding-block: 7px; flex-direction: row; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.c-faixa .grupo { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.c-faixa .bandeiras { padding: 3px; } .c-faixa .bandeiras span { width: 20px; height: 13px; }
+.c-faixa .apoiar { padding: 4px 12px; font-size: 12px; }
+.c-l1 { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.c-meta-card { border-radius: var(--r-md); background: var(--card); padding: 10px 12px; margin-bottom: 12px; display: grid; gap: 6px; font-size: 12.5px; }
+.c-meta-card b.t { color: var(--amber); font-size: 12px; }
+.c-meta-card .meta i { width: 70px; }
+.c-meta-card .meta { justify-content: space-between; }
+
+.recomendo { padding: 14px 18px; border-radius: var(--r-md); border: 1px solid var(--gold-edge); background: var(--gold-wash); color: var(--title); }
+@media (max-width: 760px) { .conteudo { grid-template-columns: 1fr; } .a-linha .menu, .b-l2 .menu, .c-l1 .menu { overflow-x: auto; max-width: 100%; } }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header class="intro">
+    <h1>Topo do site: três propostas</h1>
+    <p>Hoje o topo tem cinco coisas soltas em alturas diferentes: marca e frase, Mapper, links e idiomas, metas e o menu. As propostas abaixo juntam cada coisa por função. O que é usado o tempo todo (menu) fica em destaque; o que é usado de vez em quando (idioma, novidades, sugestões, apoio) fica pequeno e num lugar fixo; as metas vão para perto de onde se manda print.</p>
+  </header>
+
+  <!-- A -->
+  <section class="proposta">
+    <h2>Proposta A <span>uma linha</span></h2>
+    <p>Marca, menu e as utilidades na mesma linha. Embaixo, uma faixa fina com as metas e os links de novidades e sugestões.</p>
+    <ul>
+      <li>O topo fica com duas faixas baixas: o conteúdo começa bem mais cedo na tela.</li>
+      <li>A frase de apresentação sai do topo (vai para o rodapé). O Mapper da wiki vira o último item do menu, com uma setinha de link externo.</li>
+      <li>Idioma vira um botão só (bandeira do idioma atual, que abre a lista).</li>
+    </ul>
+    <div class="tela"><div class="site">
+      <div class="a-linha">
+        <div class="marca pequena"><img src="../logo.svg" alt=""><span>Medivia <b>Labs</b></span></div>
+        <nav class="menu"><a class="on" href="#"><i></i>Cronômetro</a><a href="#"><i></i>Analisador de hunt</a><a href="#"><i></i>Criaturas</a><a href="#"><i></i>Calculadora</a><a href="#"><i></i>Sorteio</a><a href="#">Mapper <span class="ext">↗</span></a></nav>
+        <div class="a-dir"><span class="idioma"><span class="b-br"></span>PT ▾</span><span class="apoiar">Apoiar</span></div>
+      </div>
+      <div class="metas-faixa">
+        <b class="t">Metas da comunidade</b>
+        <span class="meta">Respawns <i><em style="width:54%"></em></i> 54<small>/100</small></span>
+        <span class="meta">Criaturas <i><em style="width:64%"></em></i> 64<small>/100</small></span>
+        <small style="color:var(--faint)">Cada print enviado conta.</small>
+        <span class="fim"><span class="link">Novidades</span><span class="link">Sugestões e problemas</span></span>
+      </div>
+      <p class="dica">Com o print da janela de bônus copiado, aperte Ctrl + V em qualquer lugar desta página.<small>O print da ficha de uma criatura no bestiário também vale.</small></p>
+      <div class="conteudo"><div class="lado"><h3>Respawns</h3><div class="fantasma"><span></span><span></span><span></span></div></div><div class="principal"><h3>Northern Shallows</h3><div class="rel"><b>177</b></div></div></div>
+    </div></div>
+  </section>
+
+  <!-- B -->
+  <section class="proposta">
+    <h2>Proposta B <span>duas linhas</span></h2>
+    <p>Em cima, a identidade do site à esquerda e as utilidades à direita, alinhadas na mesma altura. Embaixo, separado por uma linha, o menu com as metas compactas ao lado.</p>
+    <ul>
+      <li>Mantém a frase de apresentação (menor, ao lado da marca) e o Mapper como link.</li>
+      <li>Cada linha tem só um alinhamento: nada fica "flutuando" entre uma faixa e outra, que é o que hoje dá a sensação de bagunça.</li>
+      <li>As metas viram uma pílula na ponta do menu, com as duas barrinhas.</li>
+    </ul>
+    <div class="tela"><div class="site">
+      <div class="b-l1">
+        <div class="esq"><div class="marca"><img src="../logo.svg" alt=""><span>Medivia <b>Labs</b></span></div><p>Ferramentas para as suas caçadas no Medivia. <span class="link verde">Mapper da wiki</span></p></div>
+        <div class="dir"><span class="link">Novidades</span><span class="link">Sugestões e problemas</span><span class="bandeiras"><span class="b-us"></span><span class="b-pl"></span><span class="b-br on"></span><span class="b-es"></span></span><span class="apoiar">Apoiar o projeto</span></div>
+      </div>
+      <div class="b-l2">
+        <nav class="menu"><a class="on" href="#"><i></i>Cronômetro</a><a href="#"><i></i>Analisador de hunt</a><a href="#"><i></i>Criaturas</a><a href="#"><i></i>Calculadora</a><a href="#"><i></i>Sorteio</a></nav>
+        <span class="metas-pilula"><b class="t">Metas</b><span class="meta">Respawns <i><em style="width:54%"></em></i> 54<small>/100</small></span><span class="meta">Criaturas <i><em style="width:64%"></em></i> 64<small>/100</small></span></span>
+      </div>
+      <p class="dica">Com o print da janela de bônus copiado, aperte Ctrl + V em qualquer lugar desta página.<small>O print da ficha de uma criatura no bestiário também vale.</small></p>
+      <div class="conteudo"><div class="lado"><h3>Respawns</h3><div class="fantasma"><span></span><span></span><span></span></div></div><div class="principal"><h3>Northern Shallows</h3><div class="rel"><b>177</b></div></div></div>
+    </div></div>
+  </section>
+
+  <!-- C -->
+  <section class="proposta">
+    <h2>Proposta C <span>faixa de utilidades no alto</span></h2>
+    <p>Uma faixa fina e escura no alto da página, como nos sites de jogos, com tudo o que é "de apoio". Logo abaixo, a marca e o menu numa linha só. As metas descem para dentro do Cronômetro, em cima da lista de respawns, que é onde os prints entram.</p>
+    <ul>
+      <li>O topo fica o mais limpo dos três: só marca e menu chamam atenção.</li>
+      <li>As metas aparecem no Cronômetro e nas Criaturas (onde se manda print) e somem das outras páginas.</li>
+      <li>A frase de apresentação vai para o rodapé.</li>
+    </ul>
+    <div class="tela">
+      <div class="c-faixa"><div class="site">
+        <div class="grupo"><span class="link verde" style="font-size:13px">Mapper da wiki ↗</span><span class="link">Novidades</span><span class="link">Sugestões e problemas</span></div>
+        <div class="grupo"><span class="bandeiras"><span class="b-us"></span><span class="b-pl"></span><span class="b-br on"></span><span class="b-es"></span></span><span class="apoiar">Apoiar o projeto</span></div>
+      </div></div>
+      <div class="site">
+        <div class="c-l1">
+          <div class="marca"><img src="../logo.svg" alt=""><span>Medivia <b>Labs</b></span></div>
+          <nav class="menu"><a class="on" href="#"><i></i>Cronômetro</a><a href="#"><i></i>Analisador de hunt</a><a href="#"><i></i>Criaturas</a><a href="#"><i></i>Calculadora</a><a href="#"><i></i>Sorteio</a></nav>
+        </div>
+        <p class="dica">Com o print da janela de bônus copiado, aperte Ctrl + V em qualquer lugar desta página.<small>O print da ficha de uma criatura no bestiário também vale.</small></p>
+        <div class="conteudo">
+          <div class="lado"><div class="c-meta-card"><b class="t">Metas da comunidade</b><span class="meta">Respawns <i><em style="width:54%"></em></i> 54/100</span><span class="meta">Criaturas <i><em style="width:64%"></em></i> 64/100</span></div><h3>Respawns</h3><div class="fantasma"><span></span><span></span></div></div>
+          <div class="principal"><h3>Northern Shallows</h3><div class="rel"><b>177</b></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="recomendo"><b>Minha recomendação: C.</b> É a que mais limpa o topo e deixa o menu como protagonista, e as metas ganham sentido perto do lugar onde o print é colado. Se quiser manter a frase de apresentação à vista para quem chega pela primeira vez, a B é a mais segura: muda pouco e arruma os alinhamentos.</p>
+</div>
+</body>
+</html>
