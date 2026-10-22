@@ -64,7 +64,7 @@ kbd {
 }
 
 .wrap {
-  max-width: 1120px;
+  max-width: 1280px;   /* conteúdo de 1240 px: aproveita mais as telas largas */
   margin-inline: auto;
   padding-inline: 20px;
   padding-block: 28px 40px;
@@ -758,6 +758,9 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
 .pers-cart { min-width: 0; padding: 18px 20px 20px; border-radius: var(--r-lg); background: var(--box); display: flex; flex-direction: column; gap: 14px; }
 .pers-cart.dois { grid-column: span 2; }
+/* coluna da esquerda: ficha e skills empilhadas; o quadro de skills ocupa o que sobrar ao lado do histórico */
+.pers-pilha { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.pers-pilha > .pers-cart:last-child { flex: 1; }
 .pers-cart.tres { grid-column: 1 / -1; }
 .pers-cart h2 { font: 800 21px/1.2 var(--font-display); color: var(--title); display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
 .pers-cart h2 small { font: 500 13px var(--font-ui); color: var(--faint); }
@@ -795,11 +798,46 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-graf .media { position: absolute; left: 12px; right: 12px; top: calc(30px + var(--h) * var(--r)); border-top: 1px dashed color-mix(in srgb, var(--title) 55%, transparent); pointer-events: none; }
 .pers-graf .media span { position: absolute; right: 0; bottom: 3px; padding: 1px 6px; border-radius: 6px; background: var(--card); font: 600 11px var(--font-ui); color: var(--title); }
 @media (max-width: 560px) { .pers-graf { --n: 7 !important; --h: 120px; gap: 4px; padding-inline: 8px; } .pers-graf .v { font-size: 10px; } .pers-graf .col:nth-child(-n+7) { display: none; } }
+.pers-sp { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 12px; }
+.pers-sp label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--faint); }
+.pers-sp input[type=text] { width: 64px; padding: 5px 8px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 600 14px var(--font-ui); }
+.pers-sp .total { font: 800 28px/1 var(--font-display); color: var(--amber); padding-bottom: 2px; }
+.pers-sp label.toggle { flex-direction: row; padding-bottom: 6px; font-size: 13px; color: var(--label); }
+.pers-ritmo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px; }
+.pers-ritmo .seg, .pers-pag .seg { flex-wrap: wrap; }
+.pers-ritmo .seg button, .pers-pag .seg button { flex: none; padding: 7px 11px; white-space: nowrap; }
+.pers-colunas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 22px; }
+.pers-coluna { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pers-coluna h3 { font: 700 13px var(--font-ui); color: var(--faint); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.pers-coluna h3 small { font-weight: 500; }
+.pers-task { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 10px 12px; border-radius: var(--r-md); background: var(--card); }
+.pers-task .cri { font-weight: 700; color: var(--amber); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; overflow-wrap: anywhere; }
+.pers-task .n { font-weight: 600; color: var(--title); text-align: right; white-space: nowrap; }
+.pers-task .bar { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; }
+.pers-task .bar i { display: block; height: 100%; background: var(--amber); border-radius: 999px; }
+.pers-task.feita .bar i { background: var(--value); }
+.pers-task.feita .cri { color: var(--value); }
+.pers-resp { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; color: var(--label); }
+.pers-resp b { color: var(--title); font-weight: 600; }
+.pers-resp .t { color: var(--value); font-weight: 700; }
+.pers-resp.falta { color: var(--faint); }
+.pers-abrir { margin-left: auto; padding: 4px 10px; border: 0; border-radius: 999px; background: var(--band); color: var(--value); font: 700 12px var(--font-ui); cursor: pointer; }
+.pers-abrir:hover { background: #22513a; }
+.pers-boost { padding: 1px 7px; border-radius: 6px; background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--amber); font: 700 11px var(--font-ui); }
+.pers-entregas { display: flex; flex-wrap: wrap; gap: 6px; }
+.pers-entregas span { padding: 5px 10px; border-radius: var(--r-sm); background: var(--card); font-size: 13px; }
+.pers-entregas b { color: var(--title); margin-left: 4px; }
+.pers-abas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.pers-abas input { flex: 0 1 220px; padding: 7px 12px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 13px var(--font-ui); }
+.pers-mini { width: 110px; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+.pers-mini i { display: block; height: 100%; background: var(--amber); }
+.pers-cart .creatures-wrap { flex: none; min-height: 0; }
+/* Skills: barra do tamanho relativo à maior skill do personagem, na cor do que a skill é */
 .pers-skills { display: flex; flex-direction: column; gap: 9px; }
 .pers-skills div { display: grid; grid-template-columns: 92px minmax(0, 1fr) 44px; align-items: center; gap: 12px; font-size: 14px; }
-.pers-skills span { color: var(--label); }
-.pers-skills i { display: block; height: 10px; border-radius: 999px; background: #2c3637; overflow: hidden; }
-.pers-skills i em { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, color-mix(in srgb, var(--sk) 45%, #12191a), var(--sk)); box-shadow: 0 0 10px color-mix(in srgb, var(--sk) 35%, transparent); }
+.pers-skills span { color: var(--title); font-weight: 500; }
+.pers-skills i { display: block; height: 12px; border-radius: 999px; background: #263031; overflow: hidden; }
+.pers-skills i em { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, color-mix(in srgb, var(--sk) 78%, #12191a), var(--sk) 70%, color-mix(in srgb, var(--sk) 75%, #fff)); box-shadow: 0 0 12px color-mix(in srgb, var(--sk) 55%, transparent); }
 .pers-skills b { font-weight: 700; color: var(--title); text-align: right; font-variant-numeric: tabular-nums; }
 .pers-skills div.fora i { background: repeating-linear-gradient(135deg, #2c3637 0 4px, #232c2d 4px 8px); }
 .pers-skills div.fora b { font-weight: 500; color: var(--faint); }
@@ -7762,6 +7800,12 @@ if (support.pix || support.kofi) {
    O que mudou no site, da publicação mais recente para a mais antiga.
    A cada publicação, acrescente uma entrada no começo: data e hora (horário de Brasília) e os itens nos três idiomas. */
 const CHANGES = [
+  { at: '2026-10-22 03:32',
+    pt: ['O site ficou mais largo em telas grandes: mais espaço para o cronômetro, as tabelas e as listas.'],
+    en: ['The site is wider on large screens: more room for the timer, the tables and the lists.'],
+    es: ['El sitio es más ancho en pantallas grandes: más espacio para el cronómetro, las tablas y las listas.'],
+    pl: ['Strona jest szersza na dużych ekranach: więcej miejsca na minutnik, tabele i listy.'],
+  },
   { at: '2026-10-20 23:21',
     pt: ['Nomes corrigidos no banco: Thornfin (Iron Fissures, Barbed Trench) e Demorc Brute (Typhon Swamp), que tinham sido lidos errado no print. O respawn \"Brary\", uma cópia cortada do Library, foi removido.'],
     en: ['Names fixed in the shared bank: Thornfin (Iron Fissures, Barbed Trench) and Demorc Brute (Typhon Swamp), misread from screenshots. The \"Brary\" respawn, a cut-off copy of Library, was removed.'],
@@ -10529,7 +10573,7 @@ function renderPersonagem() {
   if (pers.aba === 'andamento' || pers.aba === 'concluidas') desenharTasks();
   const aba = (id, n) => el('button', { type: 'button', text: tr('pers.' + id, { n }), 'aria-pressed': String(pers.aba === id), onclick: () => { pers.aba = id; pers.pag = 0; renderPersonagem(); } });
   const facsFeitas = PERS_FACTIONS.filter(([, l]) => l.every(facFeita)).length;
-  const tasks = card('dois', el('h2', { text: tr('pers.tasksB') }),
+  const tasks = card('tres', el('h2', { text: tr('pers.tasksB') }),
     el('div', { class: 'pers-abas' }, el('span', { class: 'unit-toggle' }, aba('andamento', andamento.length), aba('concluidas', concluidas.length), aba('factions', facsFeitas + '/' + PERS_FACTIONS.length)),
       pers.aba === 'factions' ? null : busca),
     pers.aba === 'factions' ? factions() : el('div', { class: 'creatures-wrap' }, tabela),
@@ -10538,14 +10582,14 @@ function renderPersonagem() {
   const mortes = p.deaths || [];
   const quem = d => [...new Set((d.killers || []).map(k => String(k.name || '').replace(/^(a|an) /i, '')))].join(', ');
   const mort = card('', el('h2', { text: tr('pers.mortes') }),
-    mortes.length ? el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table' },
+    mortes.length ? el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table pers-dias' },
       el('thead', null, el('tr', null, [tr('pers.col.quando'), tr('pers.nivel'), tr('pers.col.por')].map(c => el('th', { scope: 'col', text: c })))),
       el('tbody', null, mortes.map(d => el('tr', null, el('td', { text: persData(d.timestamp * 1000, loc, true) }),
         el('td', { text: d.level }), el('td', { text: quem(d) })))))) : el('p', { class: 'support-note', text: tr('pers.semMortes') }),
     el('p', { class: 'support-note', text: tr('pers.mortesNota') }));
   // a busca das tasks mantém o foco ao redesenhar só a tabela; ao redesenhar a página inteira, o foco volta para ela
   const focoBusca = document.activeElement && document.activeElement.closest && document.activeElement.closest('.pers-abas');
-  g.replaceChildren(ficha, hist, skills, poder, tasks, mort, hunts);
+  g.replaceChildren(el('div', { class: 'pers-pilha' }, ficha, skills), hist, poder, mort, tasks, hunts);
   if (focoBusca) busca.focus();
 }
 $('#pers-ver').addEventListener('click', () => persCarregar($('#pers-nome').value));
