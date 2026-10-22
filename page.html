@@ -775,45 +775,25 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-linhas b.a { color: var(--amber); }
 .pers-linhas b small { margin-left: 6px; font-weight: 500; color: var(--faint); }
 .pers-cart h3.pers-sub { font: 700 15px var(--font-display); color: var(--title); margin-top: 4px; }
-.pers-barras { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); align-items: end; gap: 4px; height: 150px; padding: 10px 12px 0; border-radius: var(--r-md); background: var(--card); }
-.pers-barras i { display: block; min-height: 2px; border-radius: 4px 4px 0 0; background: var(--value); }
-.pers-barras i.vazio { background: repeating-linear-gradient(135deg, #2c3637 0 4px, #232c2d 4px 8px); }
-.pers-barras i.hoje { background: var(--amber); }
-.pers-sp { display: flex; flex-wrap: wrap; align-items: end; gap: 8px 12px; }
-.pers-sp label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--faint); }
-.pers-sp input[type=text] { width: 64px; padding: 5px 8px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 600 14px var(--font-ui); }
-.pers-sp .total { font: 800 28px/1 var(--font-display); color: var(--amber); padding-bottom: 2px; }
-.pers-sp label.toggle { flex-direction: row; padding-bottom: 6px; font-size: 13px; color: var(--label); }
-.pers-ritmo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px; }
-.pers-ritmo .seg, .pers-pag .seg { flex-wrap: wrap; }
-.pers-ritmo .seg button, .pers-pag .seg button { flex: none; padding: 7px 11px; white-space: nowrap; }
-.pers-colunas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 22px; }
-.pers-coluna { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.pers-coluna h3 { font: 700 13px var(--font-ui); color: var(--faint); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
-.pers-coluna h3 small { font-weight: 500; }
-.pers-task { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; padding: 10px 12px; border-radius: var(--r-md); background: var(--card); }
-.pers-task .cri { font-weight: 700; color: var(--amber); display: flex; flex-wrap: wrap; align-items: center; gap: 6px; overflow-wrap: anywhere; }
-.pers-task .n { font-weight: 600; color: var(--title); text-align: right; white-space: nowrap; }
-.pers-task .bar { grid-column: 1 / -1; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; }
-.pers-task .bar i { display: block; height: 100%; background: var(--amber); border-radius: 999px; }
-.pers-task.feita .bar i { background: var(--value); }
-.pers-task.feita .cri { color: var(--value); }
-.pers-resp { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; color: var(--label); }
-.pers-resp b { color: var(--title); font-weight: 600; }
-.pers-resp .t { color: var(--value); font-weight: 700; }
-.pers-resp.falta { color: var(--faint); }
-.pers-abrir { margin-left: auto; padding: 4px 10px; border: 0; border-radius: 999px; background: var(--band); color: var(--value); font: 700 12px var(--font-ui); cursor: pointer; }
-.pers-abrir:hover { background: #22513a; }
-.pers-boost { padding: 1px 7px; border-radius: 6px; background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--amber); font: 700 11px var(--font-ui); }
-.pers-entregas { display: flex; flex-wrap: wrap; gap: 6px; }
-.pers-entregas span { padding: 5px 10px; border-radius: var(--r-sm); background: var(--card); font-size: 13px; }
-.pers-entregas b { color: var(--title); margin-left: 4px; }
-.pers-abas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.pers-abas input { flex: 0 1 220px; padding: 7px 12px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 13px var(--font-ui); }
-.pers-mini { width: 110px; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
-.pers-mini i { display: block; height: 100%; background: var(--amber); }
-.pers-cart .creatures-wrap { flex: none; min-height: 0; }
-/* Skills: barra do tamanho relativo à maior skill do personagem, na cor do que a skill é */
+/* Gráfico de XP: colunas com o valor em cima e o dia embaixo; a linha da média atravessa a faixa das barras */
+.pers-graf { --h: 140px; position: relative; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 6px; padding: 12px 12px 8px; border-radius: var(--r-md); background: var(--card); }
+.pers-graf .col { display: grid; grid-template-rows: 18px var(--h) auto; justify-items: center; min-width: 0; }
+.pers-graf .v { align-self: end; font: 700 11px/1 var(--font-ui); color: var(--title); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pers-graf .area { position: relative; width: 100%; display: flex; align-items: flex-end; justify-content: center; border-bottom: 1px solid var(--edge); }
+.pers-graf .bar { width: min(100%, 30px); min-height: 3px; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, var(--value), color-mix(in srgb, var(--value) 45%, #12191a)); }
+.pers-graf .col.top .bar { background: linear-gradient(180deg, var(--amber), color-mix(in srgb, var(--amber) 45%, #12191a)); }
+.pers-graf .col.top .v { color: var(--amber); }
+.pers-graf .col.hoje .bar { opacity: 0.5; }
+.pers-graf .col.morte .bar { background: #ff5a5a; }
+.pers-graf .col.morte .v { color: #ff7b7b; }
+.pers-graf .col.sem .bar { background: repeating-linear-gradient(135deg, #2c3637 0 4px, #232c2d 4px 8px); }
+.pers-graf .col.sem .v { color: var(--faint); font-weight: 500; }
+.pers-graf .d { padding-top: 6px; text-align: center; font: 500 11px/1.25 var(--font-ui); color: var(--faint); }
+.pers-graf .d b { display: block; font-size: 13px; color: var(--label); }
+.pers-graf .col.hoje .d b { color: var(--value); }
+.pers-graf .media { position: absolute; left: 12px; right: 12px; top: calc(30px + var(--h) * var(--r)); border-top: 1px dashed color-mix(in srgb, var(--title) 55%, transparent); pointer-events: none; }
+.pers-graf .media span { position: absolute; right: 0; bottom: 3px; padding: 1px 6px; border-radius: 6px; background: var(--card); font: 600 11px var(--font-ui); color: var(--title); }
+@media (max-width: 560px) { .pers-graf { --n: 7 !important; --h: 120px; gap: 4px; padding-inline: 8px; } .pers-graf .v { font-size: 10px; } .pers-graf .col:nth-child(-n+7) { display: none; } }
 .pers-skills { display: flex; flex-direction: column; gap: 9px; }
 .pers-skills div { display: grid; grid-template-columns: 92px minmax(0, 1fr) 44px; align-items: center; gap: 12px; font-size: 14px; }
 .pers-skills span { color: var(--label); }
@@ -846,6 +826,9 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-fac.feita .bar i { background: var(--value); }
 .pers-entregas span.feita { color: var(--value); }
 .pers-dias td, .pers-dias th { font-variant-numeric: tabular-nums; }
+.pers-cart .pers-dias { min-width: 0; }
+.pers-cart .pers-dias td:last-child { min-width: 0; white-space: nowrap; }
+@media (max-width: 560px) { .pers-cart .pers-dias th, .pers-cart .pers-dias td { padding-inline: 5px; } .pers-cart .pers-dias th:first-child, .pers-cart .pers-dias td:first-child { padding-left: 0; } .pers-cart .pers-dias th:last-child, .pers-cart .pers-dias td:last-child { padding-right: 0; } }
 .pers-dias td.g { color: var(--value); font-weight: 600; }
 .pers-cart .creatures-table { min-width: 0; }
 @media (max-width: 980px) { .pers-grade { grid-template-columns: 1fr; } .pers-cart.dois, .pers-cart.tres { grid-column: auto; } .pers-colunas { grid-template-columns: 1fr; } }
@@ -1622,7 +1605,9 @@ const I18N = {
     'pers.hist': 'Histórico de XP',
     'pers.histDesde': 'guardado desde {d}',
     'pers.histComeca': 'começa a contar hoje',
-    'pers.histNota': 'O Medivia Labs guarda o XP deste personagem a cada logout, a partir da primeira vez que ele é aberto aqui. As barras listradas viram os dias de verdade conforme o histórico cresce.',
+    'pers.histNota': 'Valores em kk (milhões de XP). No computador, passe o mouse numa barra para ver o XP exato do dia; a linha tracejada é a média dos dias fechados.',
+    'pers.ult14': 'últimos 14 dias',
+    'pers.mediaDia': 'média {v}/dia',
     'pers.hoje': 'Hoje',
     'pers.d7': '7 dias',
     'pers.d30': '30 dias',
@@ -2326,7 +2311,9 @@ const I18N = {
     'pers.hist': 'XP history',
     'pers.histDesde': 'recorded since {d}',
     'pers.histComeca': 'starts counting today',
-    'pers.histNota': 'Medivia Labs records this character\'s XP at every logout, from the first time it is opened here. The striped bars turn into real days as the history grows.',
+    'pers.histNota': 'Values in kk (millions of XP). On a computer, hover a bar to see the exact XP of the day; the dashed line is the average of the finished days.',
+    'pers.ult14': 'last 14 days',
+    'pers.mediaDia': 'avg {v}/day',
     'pers.hoje': 'Today',
     'pers.d7': '7 days',
     'pers.d30': '30 days',
@@ -3030,7 +3017,9 @@ const I18N = {
     'pers.hist': 'Historial de XP',
     'pers.histDesde': 'guardado desde {d}',
     'pers.histComeca': 'empieza a contar hoy',
-    'pers.histNota': 'Medivia Labs guarda el XP de este personaje en cada logout, desde la primera vez que se abre aquí. Las barras rayadas se vuelven días reales a medida que crece el historial.',
+    'pers.histNota': 'Valores en kk (millones de XP). En el ordenador, pasa el ratón por una barra para ver el XP exacto del día; la línea discontinua es la media de los días cerrados.',
+    'pers.ult14': 'últimos 14 días',
+    'pers.mediaDia': 'media {v}/día',
     'pers.hoje': 'Hoy',
     'pers.d7': '7 días',
     'pers.d30': '30 días',
@@ -3734,7 +3723,9 @@ const I18N = {
     'pers.hist': 'Historia XP',
     'pers.histDesde': 'zapisywane od {d}',
     'pers.histComeca': 'liczy od dziś',
-    'pers.histNota': 'Medivia Labs zapisuje XP tej postaci przy każdym wylogowaniu, od pierwszego otwarcia tutaj. Paskowane słupki zamieniają się w prawdziwe dni wraz z historią.',
+    'pers.histNota': 'Wartości w kk (miliony XP). Na komputerze najedź na słupek, aby zobaczyć dokładne XP dnia; linia przerywana to średnia z zakończonych dni.',
+    'pers.ult14': 'ostatnie 14 dni',
+    'pers.mediaDia': 'średnio {v}/dzień',
     'pers.hoje': 'Dziś',
     'pers.d7': '7 dni',
     'pers.d30': '30 dni',
@@ -10255,18 +10246,37 @@ function renderPersonagem() {
   const soma = n => dias.slice(-n).reduce((a, d) => a + (ganho.get(d) || 0), 0);
   const comDados = dias.filter(d => ganho.has(d));
   const horas = sec => persTempo((sec || 0) / 3600);
+  // na tabela de dias, curto (3h44) para caber no celular
+  const horasCurto = sec => { const m = Math.max(1, Math.round((sec || 0) / 60)); return m < 60 ? m + ' min' : Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0'); };
   const primeiro = h && h.xp && h.xp.length ? h.xp[0].dia : null;
-  const hist = card('dois', el('h2', null, tr('pers.hist'), el('small', { text: primeiro ? tr('pers.histDesde', { d: new Date(primeiro + 'T12:00:00Z').toLocaleDateString(loc, primeiro.slice(0, 4) === hojeBr.slice(0, 4) ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' }) }) : tr('pers.histComeca') })),
-    el('div', { class: 'pers-barras', 'aria-hidden': 'true' }, dias.map((d, i) => ganho.has(d)
-      ? el('i', { class: d === hojeBr ? 'hoje' : null, style: 'height:' + Math.max(2, Math.round(100 * (ganho.get(d) || 0) / maior)) + '%', title: d + ': +' + fmtInt(ganho.get(d) || 0) })
-      : el('i', { class: 'vazio', style: 'height:' + (18 + (i * 37) % 27) + '%' }))),
+  const hist = card('dois', el('h2', null, tr('pers.hist'), el('small', { text: primeiro ? tr('pers.ult14') : tr('pers.histComeca') })),
+    (() => {
+      // últimos 14 dias; a média conta só os dias fechados que têm dado (hoje ainda está em andamento)
+      const ult = dias.slice(-14), kk = v => (v < 0 ? '−' : '') + (Math.abs(v) >= 1e6 ? (Math.abs(v) / 1e6).toLocaleString(loc, { maximumFractionDigits: 1 }) + 'kk' : Math.round(Math.abs(v) / 1e3) + 'k');
+      const fechados = ult.filter(d => d !== hojeBr && ganho.has(d)).map(d => ganho.get(d));
+      const topo = Math.max(1, ...ult.map(d => ganho.get(d) || 0));
+      const media = fechados.length ? fechados.reduce((a, b) => a + b, 0) / fechados.length : 0;
+      const melhor = fechados.length ? Math.max(...fechados) : null;
+      const cols = ult.map(d => {
+        const tem = ganho.has(d), v = ganho.get(d) || 0, dt = new Date(d + 'T12:00:00Z');
+        const cls = 'col' + (d === hojeBr ? ' hoje' : '') + (!tem ? ' sem' : v < 0 ? ' morte' : v === melhor && v > 0 ? ' top' : '');
+        return el('div', { class: cls, title: dt.toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long' }) + (tem ? ': ' + (v >= 0 ? '+' : '') + fmtInt(v) + ' XP' : '') },
+          el('span', { class: 'v', text: tem ? kk(v) : '—' }),
+          el('span', { class: 'area' }, el('span', { class: 'bar', style: 'height:' + (tem && v > 0 ? Math.max(2, Math.round(100 * v / topo)) : 2) + '%' })),
+          el('span', { class: 'd' }, el('b', { text: d === hojeBr ? tr('pers.hoje') : String(dt.getUTCDate()) }), d === hojeBr ? null : dt.toLocaleDateString(loc, { weekday: 'short', timeZone: 'UTC' }).replace('.', '')));
+      });
+      // a linha da média fica na faixa das barras: 12 px de margem + 18 px do valor + (altura × o que falta até o topo)
+      return el('div', { class: 'pers-graf', style: '--n:' + ult.length },
+        ...cols,
+        media > 0 ? el('div', { class: 'media', style: '--r:' + (1 - media / topo).toFixed(3) }, el('span', { text: tr('pers.mediaDia', { v: kk(media) }) })) : null);
+    })(),
     el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table pers-dias' },
       el('thead', null, el('tr', null, [tr('pers.col.dia'), tr('pers.nivel'), tr('pers.col.ganho'), tr('pers.col.online')].map(c => el('th', { scope: 'col', text: c })))),
       el('tbody', null, dias.slice(-5).reverse().map(d => el('tr', null,
-        el('td', { text: d === hojeBr ? tr('pers.hoje') : new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: 'numeric', month: 'short' }) }),
+        el('td', { text: d === hojeBr ? tr('pers.hoje') : new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: '2-digit' }) }),
         el('td', { text: nivelDia.has(d) ? String(nivelDia.get(d)) : '—' }),
         el('td', { class: ganho.get(d) ? 'g' : 'none', text: ganho.has(d) ? '+' + fmtInt(ganho.get(d)) : '—' }),
-        el('td', { class: onl.has(d) ? null : 'none', text: onl.has(d) ? horas(onl.get(d)) : '—' })))))),
+        el('td', { class: onl.has(d) ? null : 'none', text: onl.has(d) ? horasCurto(onl.get(d)) : '—' })))))),
     el('p', { class: 'support-note', text: tr('pers.histNota') }));
   // Skills: dos rankings do mundo que o Worker coleta (a API não traz skills na ficha); fora do top 1000 fica "—"
   const hs = (h && h.skills) || {};
