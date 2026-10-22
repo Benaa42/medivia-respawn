@@ -60,9 +60,16 @@ const pedir = (env, rota) => fetch(API + rota.split('/').map(encodeURIComponent)
 });
 
 /* ---------- Banco (D1) ---------- */
+// Versão das tabelas: troque ao criar ou mudar uma tabela abaixo. Com a versão já gravada em estado/esquema, preparar()
+// custa uma consulta só; o lote inteiro (cada comando conta no limite de ~50 operações por execução) roda uma vez.
+const ESQUEMA = '2026-10-22-perfil';
 let pronto = false;
 async function preparar(db) {
   if (pronto) return;
+  try {
+    const e = await db.prepare('SELECT valor FROM estado WHERE chave = ?').bind('esquema').first();
+    if (e && e.valor === ESQUEMA) { pronto = true; return; }
+  } catch { /* a tabela estado ainda não existe: o lote abaixo cria */ }
   await db.batch([
     db.prepare('CREATE TABLE IF NOT EXISTS personagens (chave TEXT PRIMARY KEY, nome TEXT, mundo TEXT, desde INTEGER, visto INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS xp (chave TEXT, quando INTEGER, nivel INTEGER, experiencia INTEGER, origem TEXT)'),
@@ -81,6 +88,7 @@ async function preparar(db) {
     db.prepare('CREATE TABLE IF NOT EXISTS doacoes (id TEXT PRIMARY KEY, quando INTEGER, nome TEXT, valor TEXT, moeda TEXT, tipo TEXT, mensagem TEXT, publica INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS apoio_eventos (dia TEXT, acao TEXT, pais TEXT, n INTEGER, PRIMARY KEY (dia, acao, pais))'),
   ]);
+  await db.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind('esquema', ESQUEMA).run();
   pronto = true;
 }
 // Guarda o XP de várias fichas de uma vez, só das que mudaram desde a última vez. No plano gratuito o D1 aceita só 50
@@ -93,13 +101,16 @@ async function guardarXp(db, lista, origem) {
   const dados = JSON.stringify(fichas);
   await db.batch([
     db.prepare("INSERT INTO xp (chave, quando, nivel, experiencia, origem) SELECT json_extract(j.value, '$.c'), ?, json_extract(j.value, '$.n'), json_extract(j.value, '$.e'), ? FROM json_each(?) j LEFT JOIN ultimo_xp u ON u.chave = json_extract(j.value, '$.c') WHERE u.experiencia IS NULL OR u.experiencia <> json_extract(j.value, '$.e')").bind(agora(), origem, dados),
-    db.prepare("INSERT OR REPLACE INTO ultimo_xp (chave, experiencia) SELECT json_extract(value, '$.c'), json_extract(value, '$.e') FROM json_each(?)").bind(dados),
+    db.prepare("INSERT INTO ultimo_xp (chave, experiencia) SELECT json_extract(value, '$.c'), json_extract(value, '$.e') FROM json_each(?) WHERE true ON CONFLICT(chave) DO UPDATE SET experiencia = excluded.experiencia WHERE experiencia IS NOT excluded.experiencia").bind(dados),
   ]);
 }
 
 /* ---------- Perfil: vocação, nível e último login ---------- */
+// só grava quando algo muda (vocação, nível ou um login mais novo): a lista de online passa por aqui a cada minuto
 const UPSERT_PERFIL = " ON CONFLICT(chave) DO UPDATE SET vocacao = COALESCE(excluded.vocacao, vocacao), nivel = COALESCE(excluded.nivel, nivel), " +
-  "ultimo_login = MAX(COALESCE(excluded.ultimo_login, 0), COALESCE(ultimo_login, 0)), atualizado = excluded.atualizado";
+  "ultimo_login = MAX(COALESCE(excluded.ultimo_login, 0), COALESCE(ultimo_login, 0)), atualizado = excluded.atualizado " +
+  "WHERE (excluded.vocacao IS NOT NULL AND vocacao IS NOT excluded.vocacao) OR (excluded.nivel IS NOT NULL AND nivel IS NOT excluded.nivel) " +
+  "OR COALESCE(excluded.ultimo_login, 0) > COALESCE(ultimo_login, 0)";
 const guardarPerfil = (db, lista) => lista.length ? db.prepare("INSERT INTO perfil (chave, vocacao, nivel, ultimo_login, atualizado) SELECT json_extract(value, '$.c'), json_extract(value, '$.v'), json_extract(value, '$.l'), json_extract(value, '$.e'), ? FROM json_each(?) WHERE true" + UPSERT_PERFIL)
   .bind(agora(), JSON.stringify(lista)) : null;
 const diaBr = seg => new Date((seg + BRASILIA) * 1000).toISOString().slice(0, 10);
@@ -178,7 +189,8 @@ async function coletarSkills(env, db, mundos, reg) {
     const linhas = ((await r.json()).highscores || []).filter(h => h && h.name && Number.isFinite(Number(h.value)));
     if (!linhas.length) continue;
     vazia = false;
-    await db.prepare("INSERT OR REPLACE INTO skills (chave, skill, valor, quando) SELECT json_extract(value, '$.c'), ?, json_extract(value, '$.v'), ? FROM json_each(?)")
+    // só grava a skill que mudou (a página de ranking volta a cada duas horas quase igual)
+    await db.prepare("INSERT INTO skills (chave, skill, valor, quando) SELECT json_extract(value, '$.c'), ?, json_extract(value, '$.v'), ? FROM json_each(?) WHERE true ON CONFLICT(chave, skill) DO UPDATE SET valor = excluded.valor, quando = excluded.quando WHERE valor IS NOT excluded.valor")
       .bind(skill, agora(), JSON.stringify(linhas.map(h => ({ c: chaveNome(h.name), v: Number(h.value) })))).run();
   }
   if (recusou) return;   // 429: repete a mesma página no próximo minuto
@@ -263,7 +275,7 @@ async function importar(db, chave, nome) {
 }
 
 /* ---------- Guilda ---------- */
-const IMPORTA_POR_VEZ = 3;   // cada importação faz 3 pedidos e uns 5 ao banco: 3 por vez cabem nos 50 por execução
+const IMPORTA_POR_VEZ = 2;   // cada importação faz 3 pedidos e uns 6 ao banco: 2 por vez deixam folga nos ~50 por execução
 // Resposta da API com o mesmo cache das rotas abertas (vale o tempo que a API indicou; reserva de um dia para o 429)
 async function apiCache(env, ctx, rota) {
   const cache = caches.default;
@@ -297,12 +309,14 @@ async function guilda(env, ctx, mundo, nome, cors) {
   const lista = JSON.stringify(membros.map(m => ({ c: m.chave, n: m.nome })));
   const dentro = "(SELECT json_extract(value, '$.c') FROM json_each(?))";
   // quem é da guilda passa a ser acompanhado (XP a cada logout)
-  await db.prepare("INSERT OR IGNORE INTO personagens (chave, nome, mundo, desde, visto) SELECT json_extract(value, '$.c'), json_extract(value, '$.n'), ?, ?, ? FROM json_each(?)").bind(mundo, agora(), agora(), lista).run();
+  // as gravações (acompanhar e importar) não derrubam a página: se o banco recusar, ela mostra o que já tem
+  let gravou = true;
+  try { await db.prepare("INSERT OR IGNORE INTO personagens (chave, nome, mundo, desde, visto) SELECT json_extract(value, '$.c'), json_extract(value, '$.n'), ?, ?, ? FROM json_each(?)").bind(mundo, agora(), agora(), lista).run(); } catch { gravou = false; }
   // histórico que já existe: poucos membros por vez
   const ja = new Set(((await db.prepare('SELECT chave FROM importados WHERE chave IN ' + dentro).bind(lista).all()).results || []).map(x => x.chave));
   const pendentes = membros.filter(m => !ja.has(m.chave));
-  for (const m of pendentes.slice(0, IMPORTA_POR_VEZ)) await importar(db, m.chave, m.nome);
-  const faltam = Math.max(0, pendentes.length - IMPORTA_POR_VEZ);
+  if (gravou) { try { for (const m of pendentes.slice(0, IMPORTA_POR_VEZ)) await importar(db, m.chave, m.nome); } catch { gravou = false; } }
+  const faltam = gravou ? Math.max(0, pendentes.length - IMPORTA_POR_VEZ) : 0;
   // quem está online agora no mundo (a lista da API vale para qualquer mundo, não só os da coleta)
   const on = await apiCache(env, ctx, 'online/' + mundo);
   const online = new Map(((on.ok && on.dados.players) || []).map(p => [chaveNome(p.name), p]));
