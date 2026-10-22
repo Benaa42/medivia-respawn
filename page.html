@@ -835,6 +835,15 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-rolagem::-webkit-scrollbar-thumb { border-radius: 999px; background: #3a4647; }
 .pers-rolagem::-webkit-scrollbar-track { background: transparent; }
 .pers-dias td.m { color: #ff7b7b; font-weight: 600; }
+.pers-dias tr.recorde td { background: var(--gold-wash); }
+.pers-dias tr.recorde td.g { color: var(--amber); }
+/* melhor dia de XP do histórico, acima da tabela */
+.pers-recorde { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; padding: 10px 14px; border: 1px solid var(--gold-edge); border-radius: var(--r-md); background: var(--gold-wash); }
+.pers-recorde .ico { width: 22px; height: 22px; flex: none; color: var(--amber); }
+.pers-recorde .rot { font: 700 12px var(--font-ui); color: var(--amber); text-transform: uppercase; letter-spacing: 0.06em; }
+.pers-recorde .dia { font-weight: 600; color: var(--title); }
+.pers-recorde .xp { margin-left: auto; font: 800 22px/1 var(--font-display); color: var(--amber); font-variant-numeric: tabular-nums; }
+.pers-recorde .nv { font-size: 12px; color: var(--label); }
 .pers-cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-top: 6px; }
 .pers-cab h3 { font: 800 18px/1.2 var(--font-display); color: var(--title); }
 .pers-cab span { font-size: 13px; color: var(--label); }
@@ -1631,6 +1640,7 @@ const I18N = {
     'pers.histDesde': 'guardado desde {d}',
     'pers.histComeca': 'começa a contar hoje',
     'pers.histNota': 'Valores em kk (milhões de XP). No computador, passe o mouse numa barra para ver o XP exato do dia; a linha tracejada é a média dos dias fechados.',
+    'pers.recorde': 'Melhor dia',
     'pers.onlineTit': 'Histórico de tempo online',
     'pers.onlineMedia': 'Média por dia:',
     'pers.onlineGraf': 'Horas online por dia',
@@ -2340,6 +2350,7 @@ const I18N = {
     'pers.histDesde': 'recorded since {d}',
     'pers.histComeca': 'starts counting today',
     'pers.histNota': 'Values in kk (millions of XP). On a computer, hover a bar to see the exact XP of the day; the dashed line is the average of the finished days.',
+    'pers.recorde': 'Best day',
     'pers.onlineTit': 'Online time history',
     'pers.onlineMedia': 'Daily average:',
     'pers.onlineGraf': 'Hours online per day',
@@ -3049,6 +3060,7 @@ const I18N = {
     'pers.histDesde': 'guardado desde {d}',
     'pers.histComeca': 'empieza a contar hoy',
     'pers.histNota': 'Valores en kk (millones de XP). En el ordenador, pasa el ratón por una barra para ver el XP exacto del día; la línea discontinua es la media de los días cerrados.',
+    'pers.recorde': 'Mejor día',
     'pers.onlineTit': 'Historial de tiempo en línea',
     'pers.onlineMedia': 'Media por día:',
     'pers.onlineGraf': 'Horas en línea por día',
@@ -3758,6 +3770,7 @@ const I18N = {
     'pers.histDesde': 'zapisywane od {d}',
     'pers.histComeca': 'liczy od dziś',
     'pers.histNota': 'Wartości w kk (miliony XP). Na komputerze najedź na słupek, aby zobaczyć dokładne XP dnia; linia przerywana to średnia z zakończonych dni.',
+    'pers.recorde': 'Najlepszy dzień',
     'pers.onlineTit': 'Historia czasu online',
     'pers.onlineMedia': 'Średnio dziennie:',
     'pers.onlineGraf': 'Godziny online dziennie',
@@ -10225,6 +10238,26 @@ const PERS_SKILLS = ['maglevel', 'distance', 'melee', 'blocking', 'fishing', 'mi
 const PERS_SKILL_COR = { maglevel: '#a970ff', distance: '#3ddc84', melee: '#ff5a5a', blocking: '#7fa7c9', fishing: '#3cc6f0', mining: '#e2c54e', cooking: '#ffa53c' };
 // Tempo online por dia: o SVG é montado em texto só com números e datas formatadas; dias sem registro dentro do
 // período contam como 0 (o personagem não entrou). Hoje fica com o ponto vazado, porque o dia ainda não acabou.
+// O dia de mais XP de todo o histórico guardado (empate: o mais recente)
+function persMelhorDia(ganho) {
+  let melhor = null;
+  for (const [d, v] of ganho) if (v > 0 && (!melhor || v >= ganho.get(melhor))) melhor = d;
+  return melhor;
+}
+function persRecorde(ganho, nivelDia, loc) {
+  const d = persMelhorDia(ganho);
+  if (!d) return null;
+  const ico = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  ico.setAttribute('viewBox', '0 0 24 24');
+  ico.setAttribute('class', 'ico');
+  ico.setAttribute('aria-hidden', 'true');
+  ico.innerHTML = '<path fill="currentColor" d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1 1.7zm10 0v2.7A2 2 0 0 0 18 8V7z"/>';
+  return el('div', { class: 'pers-recorde' }, ico,
+    el('span', { class: 'rot', text: tr('pers.recorde') }),
+    el('span', { class: 'dia', text: new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) }),
+    nivelDia.has(d) ? el('span', { class: 'nv', text: tr('pers.nivel') + ' ' + nivelDia.get(d) }) : null,
+    el('span', { class: 'xp', text: '+' + fmtInt(ganho.get(d)) + ' XP' }));
+}
 function persOnline(onl, hojeBr, loc) {
   if (!onl.size) return [];
   const estreito = matchMedia('(max-width: 560px)').matches, n = estreito ? 14 : 30;
@@ -10344,9 +10377,10 @@ function renderPersonagem() {
         ...cols,
         media > 0 ? el('div', { class: 'media', style: '--r:' + (1 - media / topo).toFixed(3) }, el('span', { text: tr('pers.mediaDia', { v: kk(media) }) })) : null);
     })(),
+    persRecorde(ganho, nivelDia, loc),
     el('div', { class: 'pers-rolagem' }, el('table', { class: 'creatures-table pers-dias' },
       el('thead', null, el('tr', null, [tr('pers.col.dia'), tr('pers.nivel'), tr('pers.col.ganho')].map(c => el('th', { scope: 'col', text: c })))),
-      el('tbody', null, [...new Set([hojeBr, ...ganho.keys()])].sort().reverse().map(d => el('tr', null,
+      el('tbody', null, [...new Set([hojeBr, ...ganho.keys()])].sort().reverse().map(d => el('tr', { class: d === persMelhorDia(ganho) ? 'recorde' : null },
         el('td', { text: d === hojeBr ? tr('pers.hoje') : new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: '2-digit', year: d.slice(0, 4) === hojeBr.slice(0, 4) ? undefined : '2-digit' }) }),
         el('td', { text: nivelDia.has(d) ? String(nivelDia.get(d)) : '—' }),
         el('td', { class: !ganho.has(d) || !ganho.get(d) ? 'none' : ganho.get(d) < 0 ? 'm' : 'g', text: ganho.has(d) ? (ganho.get(d) < 0 ? '−' + fmtInt(-ganho.get(d)) : '+' + fmtInt(ganho.get(d))) : '—' })))))),
