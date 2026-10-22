@@ -5,7 +5,7 @@
 //
 // Endereços (os mesmos da API, só leitura):
 //   /player/{nome}   /online/{mundo}   /highscores/{mundo}/{vocação}/{skill}/{página}   /guilds/{mundo}   /houses/{mundo}
-//   /historico/{nome}   XP e tempo online por dia (horário de Brasília), do que a coleta guardou
+//   /historico/{nome}   XP e tempo online por dia (horário de Brasília) e as skills dos rankings, do que a coleta guardou
 //   /coleta             quando a coleta rodou pela última vez, o que fez ou o erro, e os totais do banco
 //   /teste              confere se o login da conta do site funciona (não mostra usuário nem senha)
 // Cada resposta da API diz por quanto tempo vale (cached_for). O Worker guarda a resposta por esse tempo e só volta
@@ -18,7 +18,10 @@
 //   - quando um personagem ACOMPANHADO desloga, busca a ficha dele e guarda o XP exato (fila, poucos por minuto);
 //     acompanhado = alguém abriu o personagem no Medivia Labs;
 //   - uma página do ranking de nível por minuto, nos minutos 10 a 19 de cada hora: o XP dos 1000 primeiros, só
-//     quando mudou.
+//     quando mudou;
+//   - nos outros minutos, uma página dos rankings de skills (RANKINGS_SKILLS, 10 páginas cada, em rodízio): a API não
+//     traz as skills na ficha, só nos rankings. O magic level vem do ranking de cada vocação, senão archers e knights
+//     nunca entrariam entre os 1000 primeiros. Uma volta completa leva umas duas horas.
 
 const API = 'https://medivia.online/api/public/';
 const ORIGENS = ['https://medivialabs.com', 'https://www.medivialabs.com', 'http://localhost:8765', 'http://localhost:8766'];
@@ -33,6 +36,8 @@ const ROTAS = [
 const FILA_POR_MINUTO = 3;     // fichas buscadas por minuto na coleta, com intervalo entre elas (a API aceita 1 pedido por segundo)
 const INTERVALO_MS = 2500;
 const BRASILIA = -3 * 3600;    // os dias do histórico contam no horário de Brasília
+const RANKINGS_SKILLS = [['maglevel', 'mages'], ['maglevel', 'druids'], ['maglevel', 'archers'], ['maglevel', 'knights'],
+  ['distance', 'archers'], ['melee', 'knights'], ['blocking', 'all'], ['fishing', 'all'], ['mining', 'all'], ['cooking', 'all']];
 
 const json = (obj, status, cors, extra = {}) => new Response(JSON.stringify(obj), { status, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', ...extra } });
 const dormir = ms => new Promise(r => setTimeout(r, ms));
@@ -60,6 +65,7 @@ async function preparar(db) {
     db.prepare('CREATE TABLE IF NOT EXISTS fila (chave TEXT PRIMARY KEY, nome TEXT, pedido INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS ultimo_xp (chave TEXT PRIMARY KEY, experiencia INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS estado (chave TEXT PRIMARY KEY, valor TEXT)'),
+    db.prepare('CREATE TABLE IF NOT EXISTS skills (chave TEXT, skill TEXT, valor INTEGER, quando INTEGER, PRIMARY KEY (chave, skill))'),
   ]);
   pronto = true;
 }
@@ -119,9 +125,11 @@ async function coletar(env, reg = { passos: [] }) {
     if (r.ok) { const p = (await r.json()).player; if (p) await guardarXp(db, [p], 'logout'); }
     await db.prepare('DELETE FROM fila WHERE chave = ?').bind(f.chave).run();
   }
-  // Ranking de nível: uma página por minuto nos minutos 10 a 19 de cada hora
+  // Ranking de nível: uma página por minuto nos minutos 10 a 19 de cada hora; nos outros, uma página de skills
   const min = new Date().getUTCMinutes();
-  if (min >= 10 && min <= 19) {
+  await dormir(1500);   // a API aceita 1 pedido por segundo
+  if (min < 10 || min > 19) { await coletarSkills(env, db, mundos, reg); return; }
+  {
     const pagina = min - 9;
     for (const mundo of mundos) {
       const r = await pedir(env, 'highscores/' + mundo + '/all/level/' + pagina);
@@ -130,6 +138,30 @@ async function coletar(env, reg = { passos: [] }) {
       await guardarXp(db, linhas.map(h => ({ name: h.name, level: h.value, experience: h.count })), 'ranking');
     }
   }
+}
+
+// Uma página de ranking de skill por minuto. O passo do rodízio fica em estado/skills_passo; um ranking com página
+// vazia (menos de 1000 pessoas, ou cooking, que às vezes vem vazio) pula para o próximo.
+async function coletarSkills(env, db, mundos, reg) {
+  const e = await db.prepare('SELECT valor FROM estado WHERE chave = ?').bind('skills_passo').first();
+  const total = RANKINGS_SKILLS.length * 10;
+  let passo = (Number(e && e.valor) || 0) % total;
+  const [skill, voc] = RANKINGS_SKILLS[Math.floor(passo / 10)], pagina = passo % 10 + 1;
+  let vazia = true, recusou = false;
+  for (const mundo of mundos) {
+    const r = await pedir(env, 'highscores/' + mundo + '/' + voc + '/' + skill + '/' + pagina);
+    reg.passos.push(skill + '/' + voc + '/' + pagina + ': ' + r.status);
+    if (r.status === 429) { recusou = true; continue; }
+    if (!r.ok) continue;
+    const linhas = ((await r.json()).highscores || []).filter(h => h && h.name && Number.isFinite(Number(h.value)));
+    if (!linhas.length) continue;
+    vazia = false;
+    await db.prepare("INSERT OR REPLACE INTO skills (chave, skill, valor, quando) SELECT json_extract(value, '$.c'), ?, json_extract(value, '$.v'), ? FROM json_each(?)")
+      .bind(skill, agora(), JSON.stringify(linhas.map(h => ({ c: chaveNome(h.name), v: Number(h.value) })))).run();
+  }
+  if (recusou) return;   // 429: repete a mesma página no próximo minuto
+  passo = vazia ? (Math.floor(passo / 10) + 1) * 10 : passo + 1;
+  await db.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind('skills_passo', String(passo % total)).run();
 }
 
 /* ---------- Histórico de um personagem ---------- */
@@ -159,7 +191,9 @@ async function historico(env, nome, cors) {
   for (const s of sess) somar(s.entrou, s.saiu);
   if (on) somar(on.entrou, agora());
   const acompanhado = !!(await db.prepare('SELECT 1 AS x FROM personagens WHERE chave = ?').bind(chave).first());
-  return json({ nome, acompanhado, online: !!on, xp: dias, online_por_dia: [...tempo.entries()].sort().map(([d, s]) => ({ dia: d, segundos: s })) }, 200, cors, { 'Cache-Control': 'public, max-age=60' });
+  const sk = (await db.prepare('SELECT skill, valor, quando FROM skills WHERE chave = ?').bind(chave).all()).results || [];
+  const skills = Object.fromEntries(sk.map(x => [x.skill, { valor: x.valor, quando: x.quando }]));
+  return json({ nome, acompanhado, online: !!on, skills, xp: dias, online_por_dia: [...tempo.entries()].sort().map(([d, s]) => ({ dia: d, segundos: s })) }, 200, cors, { 'Cache-Control': 'public, max-age=60' });
 }
 
 export default {
@@ -183,7 +217,7 @@ export default {
       if (!env.DB) return json({ erro: 'banco D1 não ligado' }, 200, cors);
       await preparar(env.DB);
       const e = await env.DB.prepare('SELECT valor FROM estado WHERE chave = ?').bind('ultima_coleta').first();
-      const n = await env.DB.prepare('SELECT (SELECT COUNT(*) FROM online_agora) AS online, (SELECT COUNT(*) FROM sessoes) AS sessoes, (SELECT COUNT(*) FROM xp) AS xp, (SELECT COUNT(*) FROM personagens) AS acompanhados, (SELECT COUNT(*) FROM fila) AS fila').first();
+      const n = await env.DB.prepare('SELECT (SELECT COUNT(*) FROM online_agora) AS online, (SELECT COUNT(*) FROM sessoes) AS sessoes, (SELECT COUNT(*) FROM xp) AS xp, (SELECT COUNT(*) FROM personagens) AS acompanhados, (SELECT COUNT(*) FROM fila) AS fila, (SELECT COUNT(*) FROM skills) AS skills').first();
       return json({ ultima: e ? JSON.parse(e.valor) : 'a coleta agendada ainda não rodou nenhuma vez', totais: n }, 200, cors);
     }
     const hist = rota.match(/^historico\/([^/]{2,40})$/);
