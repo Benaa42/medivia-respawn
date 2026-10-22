@@ -827,9 +827,11 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-fac.feita .bar i { background: var(--value); }
 .pers-entregas span.feita { color: var(--value); }
 .pers-dias td, .pers-dias th { font-variant-numeric: tabular-nums; }
-.pers-cart .pers-dias { min-width: 0; }
+.pers-cart .pers-dias { min-width: 0; font-size: 13px; }
+.pers-cart .pers-dias th { padding: 4px 8px; font-size: 11px; }
+.pers-cart .pers-dias td { padding: 4px 8px; }
 /* tabelas do histórico: umas 6 linhas à vista, o resto pela rolagem (o cabeçalho fica parado) */
-.pers-rolagem { max-height: 252px; overflow: auto; scrollbar-width: thin; scrollbar-color: #3a4647 transparent; }
+.pers-rolagem { max-height: 214px; overflow: auto; scrollbar-width: thin; scrollbar-color: #3a4647 transparent; }
 .pers-rolagem::-webkit-scrollbar { width: 8px; height: 8px; }
 .pers-rolagem::-webkit-scrollbar-thumb { border-radius: 999px; background: #3a4647; }
 .pers-rolagem::-webkit-scrollbar-track { background: transparent; }
@@ -848,7 +850,7 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-online .ponto { fill: var(--amber); stroke: var(--card); stroke-width: 1.5; }
 .pers-online .ponto.hoje { fill: var(--card); stroke: var(--amber); stroke-width: 1.8; }
 .pers-online .media { stroke: color-mix(in srgb, var(--title) 55%, transparent); stroke-dasharray: 4 4; }
-.pers-hbar { display: inline-block; width: 90px; height: 6px; margin-right: 10px; border-radius: 999px; background: #2c3637; overflow: hidden; vertical-align: middle; }
+.pers-hbar { display: inline-block; width: 80px; height: 5px; margin-right: 10px; border-radius: 999px; background: #2c3637; overflow: hidden; vertical-align: middle; }
 .pers-hbar i { display: block; height: 100%; background: var(--amber); border-radius: 999px; }
 @media (max-width: 560px) { .pers-hbar { width: 54px; } }
 .pers-cart .pers-dias td:last-child { min-width: 0; white-space: nowrap; }
