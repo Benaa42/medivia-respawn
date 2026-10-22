@@ -827,6 +827,29 @@ svg.ico { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColo
 .pers-entregas span.feita { color: var(--value); }
 .pers-dias td, .pers-dias th { font-variant-numeric: tabular-nums; }
 .pers-cart .pers-dias { min-width: 0; }
+/* tabelas do histórico: umas 6 linhas à vista, o resto pela rolagem (o cabeçalho fica parado) */
+.pers-rolagem { max-height: 252px; overflow: auto; scrollbar-width: thin; scrollbar-color: #3a4647 transparent; }
+.pers-rolagem::-webkit-scrollbar { width: 8px; height: 8px; }
+.pers-rolagem::-webkit-scrollbar-thumb { border-radius: 999px; background: #3a4647; }
+.pers-rolagem::-webkit-scrollbar-track { background: transparent; }
+.pers-dias td.m { color: #ff7b7b; font-weight: 600; }
+.pers-cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; margin-top: 6px; }
+.pers-cab h3 { font: 800 18px/1.2 var(--font-display); color: var(--title); }
+.pers-cab span { font-size: 13px; color: var(--label); }
+.pers-cab span b { color: var(--amber); }
+/* gráfico do tempo online: linha âmbar sobre a grade de 0 a 24 h */
+.pers-online { padding: 10px 8px 4px; border-radius: var(--r-md); background: var(--card); }
+.pers-online svg { display: block; width: 100%; height: auto; overflow: visible; }
+.pers-online .grade { stroke: #2c3637; stroke-width: 1; }
+.pers-online .eixo { fill: var(--faint); font: 500 10px var(--font-ui); }
+.pers-online .area { fill: color-mix(in srgb, var(--amber) 14%, transparent); }
+.pers-online .linha { fill: none; stroke: var(--amber); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.pers-online .ponto { fill: var(--amber); stroke: var(--card); stroke-width: 1.5; }
+.pers-online .ponto.hoje { fill: var(--card); stroke: var(--amber); stroke-width: 1.8; }
+.pers-online .media { stroke: color-mix(in srgb, var(--title) 55%, transparent); stroke-dasharray: 4 4; }
+.pers-hbar { display: inline-block; width: 90px; height: 6px; margin-right: 10px; border-radius: 999px; background: #2c3637; overflow: hidden; vertical-align: middle; }
+.pers-hbar i { display: block; height: 100%; background: var(--amber); border-radius: 999px; }
+@media (max-width: 560px) { .pers-hbar { width: 54px; } }
 .pers-cart .pers-dias td:last-child { min-width: 0; white-space: nowrap; }
 @media (max-width: 560px) { .pers-cart .pers-dias th, .pers-cart .pers-dias td { padding-inline: 5px; } .pers-cart .pers-dias th:first-child, .pers-cart .pers-dias td:first-child { padding-left: 0; } .pers-cart .pers-dias th:last-child, .pers-cart .pers-dias td:last-child { padding-right: 0; } }
 .pers-dias td.g { color: var(--value); font-weight: 600; }
@@ -1606,6 +1629,9 @@ const I18N = {
     'pers.histDesde': 'guardado desde {d}',
     'pers.histComeca': 'começa a contar hoje',
     'pers.histNota': 'Valores em kk (milhões de XP). No computador, passe o mouse numa barra para ver o XP exato do dia; a linha tracejada é a média dos dias fechados.',
+    'pers.onlineTit': 'Histórico de tempo online',
+    'pers.onlineMedia': 'Média por dia:',
+    'pers.onlineGraf': 'Horas online por dia',
     'pers.ult14': 'últimos 14 dias',
     'pers.mediaDia': 'média {v}/dia',
     'pers.hoje': 'Hoje',
@@ -2312,6 +2338,9 @@ const I18N = {
     'pers.histDesde': 'recorded since {d}',
     'pers.histComeca': 'starts counting today',
     'pers.histNota': 'Values in kk (millions of XP). On a computer, hover a bar to see the exact XP of the day; the dashed line is the average of the finished days.',
+    'pers.onlineTit': 'Online time history',
+    'pers.onlineMedia': 'Daily average:',
+    'pers.onlineGraf': 'Hours online per day',
     'pers.ult14': 'last 14 days',
     'pers.mediaDia': 'avg {v}/day',
     'pers.hoje': 'Today',
@@ -3018,6 +3047,9 @@ const I18N = {
     'pers.histDesde': 'guardado desde {d}',
     'pers.histComeca': 'empieza a contar hoy',
     'pers.histNota': 'Valores en kk (millones de XP). En el ordenador, pasa el ratón por una barra para ver el XP exacto del día; la línea discontinua es la media de los días cerrados.',
+    'pers.onlineTit': 'Historial de tiempo en línea',
+    'pers.onlineMedia': 'Media por día:',
+    'pers.onlineGraf': 'Horas en línea por día',
     'pers.ult14': 'últimos 14 días',
     'pers.mediaDia': 'media {v}/día',
     'pers.hoje': 'Hoy',
@@ -3724,6 +3756,9 @@ const I18N = {
     'pers.histDesde': 'zapisywane od {d}',
     'pers.histComeca': 'liczy od dziś',
     'pers.histNota': 'Wartości w kk (miliony XP). Na komputerze najedź na słupek, aby zobaczyć dokładne XP dnia; linia przerywana to średnia z zakończonych dni.',
+    'pers.onlineTit': 'Historia czasu online',
+    'pers.onlineMedia': 'Średnio dziennie:',
+    'pers.onlineGraf': 'Godziny online dziennie',
     'pers.ult14': 'ostatnie 14 dni',
     'pers.mediaDia': 'średnio {v}/dzień',
     'pers.hoje': 'Dziś',
@@ -10186,6 +10221,43 @@ const PERS_FACTIONS = [
 const PERS_SKILLS = ['maglevel', 'distance', 'melee', 'blocking', 'fishing', 'mining', 'cooking'];
 // magia roxa, arco verde, lâmina vermelha, escudo azul-aço, água, ouro de minério, fogo do fogão
 const PERS_SKILL_COR = { maglevel: '#a970ff', distance: '#3ddc84', melee: '#ff5a5a', blocking: '#7fa7c9', fishing: '#3cc6f0', mining: '#e2c54e', cooking: '#ffa53c' };
+// Tempo online por dia: o SVG é montado em texto só com números e datas formatadas; dias sem registro dentro do
+// período contam como 0 (o personagem não entrou). Hoje fica com o ponto vazado, porque o dia ainda não acabou.
+function persOnline(onl, hojeBr, loc) {
+  if (!onl.size) return [];
+  const estreito = matchMedia('(max-width: 560px)').matches, n = estreito ? 14 : 30;
+  const diaDe = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
+  const primeiro = [...onl.keys()].sort()[0];
+  const dias = [];
+  for (let i = n - 1; i >= 0; i--) { const d = diaDe(Date.now() - i * 864e5); if (d >= primeiro) dias.push(d); }
+  const hm = sec => { const m = Math.round((sec || 0) / 60); return m < 60 ? m + ' min' : Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0'); };
+  const fechados = dias.filter(d => d !== hojeBr).map(d => onl.get(d) || 0);
+  const media = fechados.length ? fechados.reduce((a, b) => a + b, 0) / fechados.length : 0;
+  const W = estreito ? 360 : 640, H = 170, eL = 30, eR = 10, eT = 8, eB = 26, larg = W - eL - eR, alt = H - eT - eB;
+  const x = i => eL + (dias.length > 1 ? larg * i / (dias.length - 1) : larg / 2), y = sec => eT + alt * (1 - Math.min(24, sec / 3600) / 24);
+  const pts = dias.map((d, i) => [x(i), y(onl.get(d) || 0)]);
+  const passo = Math.ceil(dias.length / (estreito ? 7 : 10));
+  const svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + tr('pers.onlineGraf') + '">' +
+    [0, 6, 12, 18, 24].map(hh => '<line class="grade" x1="' + eL + '" x2="' + (W - eR) + '" y1="' + y(hh * 3600) + '" y2="' + y(hh * 3600) + '"/><text class="eixo" x="' + (eL - 6) + '" y="' + (y(hh * 3600) + 3) + '" text-anchor="end">' + hh + 'h</text>').join('') +
+    '<path class="area" d="M' + pts[0][0] + ' ' + y(0) + pts.map(p => ' L' + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('') + ' L' + pts[pts.length - 1][0] + ' ' + y(0) + 'Z"/>' +
+    '<path class="linha" d="' + pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ') + '"/>' +
+    (media ? '<line class="media" x1="' + eL + '" x2="' + (W - eR) + '" y1="' + y(media).toFixed(1) + '" y2="' + y(media).toFixed(1) + '"/>' : '') +
+    dias.map((d, i) => '<circle class="ponto' + (d === hojeBr ? ' hoje' : '') + '" cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="3.2"><title>' +
+      new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long' }) + ': ' + hm(onl.get(d) || 0) + '</title></circle>').join('') +
+    dias.map((d, i) => (i === dias.length - 1 || (i % passo === 0 && dias.length - 1 - i >= passo * 0.7)) ?  '<text class="eixo" x="' + pts[i][0].toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + (d === hojeBr ? tr('pers.hoje') : d.slice(8) + '/' + d.slice(5, 7)) + '</text>' : '').join('') +
+    '</svg>';
+  const graf = el('div', { class: 'pers-online' });
+  graf.innerHTML = svg;
+  const todos = [...onl.keys()].sort().reverse();
+  return [
+    el('div', { class: 'pers-cab' }, el('h3', { text: tr('pers.onlineTit') }), media ? el('span', null, tr('pers.onlineMedia') + ' ', el('b', { text: hm(media) })) : null),
+    graf,
+    el('div', { class: 'pers-rolagem' }, el('table', { class: 'creatures-table pers-dias' },
+      el('thead', null, el('tr', null, el('th', { scope: 'col', text: tr('pers.col.dia') }), el('th', { scope: 'col', text: tr('pers.col.online') }))),
+      el('tbody', null, todos.map(d => el('tr', null,
+        el('td', { text: d === hojeBr ? tr('pers.hoje') : new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: '2-digit', year: d.slice(0, 4) === hojeBr.slice(0, 4) ? undefined : '2-digit' }) }),
+        el('td', null, el('span', { class: 'pers-hbar' }, el('i', { style: 'width:' + Math.min(100, Math.round(100 * (onl.get(d) || 0) / 86400)) + '%' })), hm(onl.get(d))))))))];
+}
 function renderPersonagem() {
   const g = $('#pers-grade');
   if (!g) return;
@@ -10270,14 +10342,15 @@ function renderPersonagem() {
         ...cols,
         media > 0 ? el('div', { class: 'media', style: '--r:' + (1 - media / topo).toFixed(3) }, el('span', { text: tr('pers.mediaDia', { v: kk(media) }) })) : null);
     })(),
-    el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table pers-dias' },
-      el('thead', null, el('tr', null, [tr('pers.col.dia'), tr('pers.nivel'), tr('pers.col.ganho'), tr('pers.col.online')].map(c => el('th', { scope: 'col', text: c })))),
-      el('tbody', null, dias.slice(-5).reverse().map(d => el('tr', null,
-        el('td', { text: d === hojeBr ? tr('pers.hoje') : new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: '2-digit' }) }),
+    el('div', { class: 'pers-rolagem' }, el('table', { class: 'creatures-table pers-dias' },
+      el('thead', null, el('tr', null, [tr('pers.col.dia'), tr('pers.nivel'), tr('pers.col.ganho')].map(c => el('th', { scope: 'col', text: c })))),
+      el('tbody', null, [...new Set([hojeBr, ...ganho.keys()])].sort().reverse().map(d => el('tr', null,
+        el('td', { text: d === hojeBr ? tr('pers.hoje') : new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: '2-digit', year: d.slice(0, 4) === hojeBr.slice(0, 4) ? undefined : '2-digit' }) }),
         el('td', { text: nivelDia.has(d) ? String(nivelDia.get(d)) : '—' }),
-        el('td', { class: ganho.get(d) ? 'g' : 'none', text: ganho.has(d) ? '+' + fmtInt(ganho.get(d)) : '—' }),
-        el('td', { class: onl.has(d) ? null : 'none', text: onl.has(d) ? horasCurto(onl.get(d)) : '—' })))))),
-    el('p', { class: 'support-note', text: tr('pers.histNota') }));
+        el('td', { class: !ganho.has(d) || !ganho.get(d) ? 'none' : ganho.get(d) < 0 ? 'm' : 'g', text: ganho.has(d) ? (ganho.get(d) < 0 ? '−' + fmtInt(-ganho.get(d)) : '+' + fmtInt(ganho.get(d))) : '—' })))))),
+    el('p', { class: 'support-note', text: tr('pers.histNota') }),
+    // Tempo online: gráfico de linha dos últimos 30 dias (14 no celular) com a média, e a tabela de todos os dias
+    ...persOnline(onl, hojeBr, loc));
   // Skills: dos rankings do mundo que o Worker coleta (a API não traz skills na ficha); fora do top 1000 fica "—"
   const hs = (h && h.skills) || {};
   const quandoSk = Math.max(0, ...Object.values(hs).map(x => x.quando || 0));

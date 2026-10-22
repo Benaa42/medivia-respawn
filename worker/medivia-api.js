@@ -208,7 +208,7 @@ async function historico(env, nome, cors) {
   const db = env.DB;
   if (!db) return json({ erro: 'coleta ainda não ligada' }, 503, cors);
   await preparar(db);
-  const chave = chaveNome(nome), desde = agora() - 181 * 86400;
+  const chave = chaveNome(nome), desde = agora() - 1100 * 86400;   // até 3 anos de histórico (o importado vai até 2 anos)
   await importar(db, chave, nome);
   const pontos = (await db.prepare('SELECT quando, nivel, experiencia FROM xp WHERE chave = ? AND quando >= ? ORDER BY quando').bind(chave, desde).all()).results || [];
   const sess = (await db.prepare('SELECT entrou, saiu FROM sessoes WHERE chave = ? AND saiu >= ? ORDER BY entrou').bind(chave, desde).all()).results || [];
