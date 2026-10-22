@@ -10238,6 +10238,16 @@ const PERS_SKILLS = ['maglevel', 'distance', 'melee', 'blocking', 'fishing', 'mi
 const PERS_SKILL_COR = { maglevel: '#a970ff', distance: '#3ddc84', melee: '#ff5a5a', blocking: '#7fa7c9', fishing: '#3cc6f0', mining: '#e2c54e', cooking: '#ffa53c' };
 // Tempo online por dia: o SVG é montado em texto só com números e datas formatadas; dias sem registro dentro do
 // período contam como 0 (o personagem não entrou). Hoje fica com o ponto vazado, porque o dia ainda não acabou.
+// Datas na ordem de cada idioma, sempre com barras (o polonês usa pontos: trocados por barras).
+// d = 'AAAA-MM-DD' (dia de Brasília) ou um instante (Date/número em ms); comHora acrescenta HH:MM no horário local.
+function persData(d, loc, comHora) {
+  const dia = typeof d === 'string';
+  const t = dia ? new Date(d + 'T12:00:00Z') : new Date(d);
+  const txt = t.toLocaleDateString(loc, { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: dia ? 'UTC' : undefined }).replace(/[.\-]\s?/g, '/').replace(/\/$/, '');
+  return comHora ? txt + ' ' + t.toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' }) : txt;
+}
+// dia e mês sem o ano (eixos dos gráficos)
+const persDiaMes = (d, loc) => new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { day: '2-digit', month: '2-digit', timeZone: 'UTC' }).replace(/[.\-]\s?/g, '/').replace(/\/$/, '');
 // O dia de mais XP de todo o histórico guardado (empate: o mais recente)
 function persMelhorDia(ganho) {
   let melhor = null;
@@ -10254,7 +10264,7 @@ function persRecorde(ganho, nivelDia, loc) {
   ico.innerHTML = '<path fill="currentColor" d="M7 3h10v2h3v3a4 4 0 0 1-4 4h-.3A5 5 0 0 1 13 14.9V18h3v3H8v-3h3v-3.1A5 5 0 0 1 8.3 12H8a4 4 0 0 1-4-4V5h3zm0 4H6v1a2 2 0 0 0 1 1.7zm10 0v2.7A2 2 0 0 0 18 8V7z"/>';
   return el('div', { class: 'pers-recorde' }, ico,
     el('span', { class: 'rot', text: tr('pers.recorde') }),
-    el('span', { class: 'dia', text: new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) }),
+    el('span', { class: 'dia', text: persData(d, loc) }),
     nivelDia.has(d) ? el('span', { class: 'nv', text: tr('pers.nivel') + ' ' + nivelDia.get(d) }) : null,
     el('span', { class: 'xp', text: '+' + fmtInt(ganho.get(d)) + ' XP' }));
 }
@@ -10278,8 +10288,8 @@ function persOnline(onl, hojeBr, loc) {
     '<path class="linha" d="' + pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ') + '"/>' +
     (media ? '<line class="media" x1="' + eL + '" x2="' + (W - eR) + '" y1="' + y(media).toFixed(1) + '" y2="' + y(media).toFixed(1) + '"/>' : '') +
     dias.map((d, i) => '<circle class="ponto' + (d === hojeBr ? ' hoje' : '') + '" cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="3.2"><title>' +
-      new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long' }) + ': ' + hm(onl.get(d) || 0) + '</title></circle>').join('') +
-    dias.map((d, i) => (i === dias.length - 1 || (i % passo === 0 && dias.length - 1 - i >= passo * 0.7)) ?  '<text class="eixo" x="' + pts[i][0].toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + (d === hojeBr ? tr('pers.hoje') : d.slice(8) + '/' + d.slice(5, 7)) + '</text>' : '').join('') +
+      persData(d, loc) + ': ' + hm(onl.get(d) || 0) + '</title></circle>').join('') +
+    dias.map((d, i) => (i === dias.length - 1 || (i % passo === 0 && dias.length - 1 - i >= passo * 0.7)) ?  '<text class="eixo" x="' + pts[i][0].toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + (d === hojeBr ? tr('pers.hoje') : persDiaMes(d, loc)) + '</text>' : '').join('') +
     '</svg>';
   const graf = el('div', { class: 'pers-online' });
   graf.innerHTML = svg;
@@ -10290,7 +10300,7 @@ function persOnline(onl, hojeBr, loc) {
     el('div', { class: 'pers-rolagem' }, el('table', { class: 'creatures-table pers-dias' },
       el('thead', null, el('tr', null, el('th', { scope: 'col', text: tr('pers.col.dia') }), el('th', { scope: 'col', text: tr('pers.col.online') }))),
       el('tbody', null, todos.map(d => el('tr', null,
-        el('td', { text: d === hojeBr ? tr('pers.hoje') : new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: '2-digit', year: d.slice(0, 4) === hojeBr.slice(0, 4) ? undefined : '2-digit' }) }),
+        el('td', { text: d === hojeBr ? tr('pers.hoje') : persData(d, loc) }),
         el('td', null, el('span', { class: 'pers-hbar' }, el('i', { style: 'width:' + Math.min(100, Math.round(100 * (onl.get(d) || 0) / 86400)) + '%' })), hm(onl.get(d))))))))];
 }
 function renderPersonagem() {
@@ -10367,10 +10377,10 @@ function renderPersonagem() {
       const cols = ult.map(d => {
         const tem = ganho.has(d), v = ganho.get(d) || 0, dt = new Date(d + 'T12:00:00Z');
         const cls = 'col' + (d === hojeBr ? ' hoje' : '') + (!tem ? ' sem' : v < 0 ? ' morte' : v === melhor && v > 0 ? ' top' : '');
-        return el('div', { class: cls, title: dt.toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long' }) + (tem ? ': ' + (v >= 0 ? '+' : '') + fmtInt(v) + ' XP' : '') },
+        return el('div', { class: cls, title: persData(d, loc) + (tem ? ': ' + (v >= 0 ? '+' : '') + fmtInt(v) + ' XP' : '') },
           el('span', { class: 'v', text: tem ? kk(v) : '—' }),
           el('span', { class: 'area' }, el('span', { class: 'bar', style: 'height:' + (tem && v > 0 ? Math.max(2, Math.round(100 * v / topo)) : 2) + '%' })),
-          el('span', { class: 'd' }, el('b', { text: d === hojeBr ? tr('pers.hoje') : String(dt.getUTCDate()) }), d === hojeBr ? null : dt.toLocaleDateString(loc, { weekday: 'short', timeZone: 'UTC' }).replace('.', '')));
+          el('span', { class: 'd' }, el('b', { text: d === hojeBr ? tr('pers.hoje') : persDiaMes(d, loc) }), d === hojeBr ? null : dt.toLocaleDateString(loc, { weekday: 'short', timeZone: 'UTC' }).replace('.', '')));
       });
       // a linha da média fica na faixa das barras: 12 px de margem + 18 px do valor + (altura × o que falta até o topo)
       return el('div', { class: 'pers-graf', style: '--n:' + ult.length },
@@ -10381,7 +10391,7 @@ function renderPersonagem() {
     el('div', { class: 'pers-rolagem' }, el('table', { class: 'creatures-table pers-dias' },
       el('thead', null, el('tr', null, [tr('pers.col.dia'), tr('pers.nivel'), tr('pers.col.ganho')].map(c => el('th', { scope: 'col', text: c })))),
       el('tbody', null, [...new Set([hojeBr, ...ganho.keys()])].sort().reverse().map(d => el('tr', { class: d === persMelhorDia(ganho) ? 'recorde' : null },
-        el('td', { text: d === hojeBr ? tr('pers.hoje') : new Date(d + 'T12:00:00Z').toLocaleDateString(loc, { weekday: 'short', day: '2-digit', month: '2-digit', year: d.slice(0, 4) === hojeBr.slice(0, 4) ? undefined : '2-digit' }) }),
+        el('td', { text: d === hojeBr ? tr('pers.hoje') : persData(d, loc) }),
         el('td', { text: nivelDia.has(d) ? String(nivelDia.get(d)) : '—' }),
         el('td', { class: !ganho.has(d) || !ganho.get(d) ? 'none' : ganho.get(d) < 0 ? 'm' : 'g', text: ganho.has(d) ? (ganho.get(d) < 0 ? '−' + fmtInt(-ganho.get(d)) : '+' + fmtInt(ganho.get(d))) : '—' })))))),
     el('p', { class: 'support-note', text: tr('pers.histNota') }),
@@ -10390,7 +10400,7 @@ function renderPersonagem() {
   // Skills: dos rankings do mundo que o Worker coleta (a API não traz skills na ficha); fora do top 1000 fica "—"
   const hs = (h && h.skills) || {};
   const quandoSk = Math.max(0, ...Object.values(hs).map(x => x.quando || 0));
-  const skills = card('', el('h2', null, tr('pers.skills'), quandoSk ? el('small', { text: tr('pers.skillsQuando', { d: new Date(quandoSk * 1000).toLocaleString(loc, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) }) }) : null),
+  const skills = card('', el('h2', null, tr('pers.skills'), quandoSk ? el('small', { text: tr('pers.skillsQuando', { d: persData(quandoSk * 1000, loc, true) }) }) : null),
     el('div', { class: 'pers-skills' }, (() => {
       const maior = Math.max(1, ...PERS_SKILLS.map(k => (hs[k] && hs[k].valor) || 0));
       return PERS_SKILLS.slice().sort((a, b) => ((hs[b] && hs[b].valor) || 0) - ((hs[a] && hs[a].valor) || 0)).map(k => hs[k]
@@ -10529,7 +10539,7 @@ function renderPersonagem() {
   const mort = card('', el('h2', { text: tr('pers.mortes') }),
     mortes.length ? el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table' },
       el('thead', null, el('tr', null, [tr('pers.col.quando'), tr('pers.nivel'), tr('pers.col.por')].map(c => el('th', { scope: 'col', text: c })))),
-      el('tbody', null, mortes.map(d => el('tr', null, el('td', { text: new Date(d.timestamp * 1000).toLocaleString(loc, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }),
+      el('tbody', null, mortes.map(d => el('tr', null, el('td', { text: persData(d.timestamp * 1000, loc, true) }),
         el('td', { text: d.level }), el('td', { text: quem(d) })))))) : el('p', { class: 'support-note', text: tr('pers.semMortes') }),
     el('p', { class: 'support-note', text: tr('pers.mortesNota') }));
   // a busca das tasks mantém o foco ao redesenhar só a tabela; ao redesenhar a página inteira, o foco volta para ela
