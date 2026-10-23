@@ -10500,7 +10500,7 @@ $('#calc-clear').addEventListener('click', () => {
    depois do endereço. O sorteio está no mesmo menu, mas abre por cima da página em que a pessoa está (#raffle abre
    o site já com ele). Os cronômetros continuam contando em qualquer página. */
 /* ---------- Personagem ----------
-   Página ainda escondida (sem botão no menu): abre pelo endereço #personagem ou #personagem/<nome>. Os dados vêm da
+   Página ainda escondida (sem botão no menu): abre pelo endereço #character ou #character/<nome>. Os dados vêm da
    API oficial do Medivia pelo Worker api.medivialabs.com (worker/medivia-api.js), que guarda o login da conta do
    site e as respostas; o histórico de XP e de tempo online é o que a coleta agendada do Worker guardou. */
 const API_MEDIVIA = 'https://api.medivialabs.com/';
@@ -10521,7 +10521,7 @@ async function persCarregar(nome) {
     const h = await fetch(API_MEDIVIA + 'historico/' + encodeURIComponent(pers.dados.name)).catch(() => null);
     pers.hist = h && h.ok ? await h.json() : null;
     persStatus('', '');
-    if (pageNow === 'personagem') { try { history.replaceState(null, '', location.pathname + location.search + '#personagem/' + encodeURIComponent(pers.dados.name)); } catch { /* o endereço fica como está */ } }
+    if (pageNow === 'personagem') { try { history.replaceState(null, '', location.pathname + location.search + '#character/' + encodeURIComponent(pers.dados.name)); } catch { /* o endereço fica como está */ } }
   } catch (e) { persStatus('err', tr(e.message === '429' ? 'pers.limite' : 'pers.erro')); }
   renderPersonagem();
 }
@@ -10932,7 +10932,7 @@ $('#pers-ver').addEventListener('click', () => persCarregar($('#pers-nome').valu
 $('#pers-nome').addEventListener('keydown', e => { if (e.key === 'Enter') persCarregar(e.target.value); });
 $('#pers-meu').addEventListener('click', () => { if (!pers.dados) return; ui.meuPers = pers.dados.name; saveUi(); renderPersonagem(); });
 /* ---------- Guilda ----------
-   Página ainda escondida (sem botão no menu): abre pelo endereço #guilda/<nome> ou pelo nome da guilda na página do
+   Página ainda escondida (sem botão no menu): abre pelo endereço #guild/<nome> ou pelo nome da guilda na página do
    personagem. Os membros vêm da API oficial; nível, vocação, online, último login e XP de cada um vêm do Worker
    (/guilda/{mundo}/{nome}), que importa o histórico de poucos membros por vez: enquanto falta, a página pede de novo. */
 const GU_MUNDOS = ['pendulum', 'destiny', 'legacy'];
@@ -10991,7 +10991,7 @@ async function guCarregar(nome, recarga) {
     // o histórico dos membros chega em partes: a página pede de novo até completar
     if (f) { guStatus('busy', tr('gu.importando', { a: n - f, b: n })); gu.espera = setTimeout(() => { if (pageNow === 'guilda' && gu.nome === nome) guCarregar(nome, true); }, 2500); }
     else guStatus('', '');
-    if (pageNow === 'guilda') { try { history.replaceState(null, '', location.pathname + location.search + '#guilda/' + encodeURIComponent(gu.dados.guilda.nome)); } catch { /* o endereço fica como está */ } }
+    if (pageNow === 'guilda') { try { history.replaceState(null, '', location.pathname + location.search + '#guild/' + encodeURIComponent(gu.dados.guilda.nome)); } catch { /* o endereço fica como está */ } }
   } catch (e) { guStatus('err', tr(e.message === '429' ? 'pers.limite' : 'pers.erro')); }
   renderGuilda();
 }
@@ -11160,8 +11160,12 @@ $('#gu-ver').addEventListener('click', () => guCarregar($('#gu-nome').value));
 $('#gu-nome').addEventListener('keydown', e => { if (e.key === 'Enter') guCarregar(e.target.value); });
 $('#gu-mundo').addEventListener('change', e => { ui.guMundo = e.target.value; saveUi(); if (gu.nome) { gu.dados = null; guCarregar(gu.nome); } });
 const PAGES = ['timer', 'hunt', 'creatures', 'calc', 'personagem', 'guilda'];   // personagem e guilda: sem botão no menu por enquanto
+// Nome de cada página no endereço do navegador: sempre em inglês. Os nomes antigos em português continuam abrindo.
+const ROTA_URL = { personagem: 'character', guilda: 'guild' };
+const ROTA_PAGINA = { character: 'personagem', guild: 'guilda', personagem: 'personagem', guilda: 'guilda' };
 function goTo(route, push = true) {
-  const [name, sub] = String(route || '').split('/');
+  const [bruto, sub] = String(route || '').split('/');
+  const name = ROTA_PAGINA[bruto] || bruto;
   if (name === 'raffle') { openRaffle(); return; }
   const to = PAGES.includes(name) ? name : 'timer', was = pageNow;
   pageNow = to;
@@ -11188,7 +11192,7 @@ function goTo(route, push = true) {
     nome = nome || gu.nome;
     if (nome && (!gu.dados || slug(nome) !== slug(gu.dados.guilda.nome))) guCarregar(nome); else renderGuilda();
   }
-  const hash = to === 'timer' ? '' : '#' + to + (to === 'personagem' && pers.dados ? '/' + encodeURIComponent(pers.dados.name) : to === 'guilda' && gu.dados ? '/' + encodeURIComponent(gu.dados.guilda.nome) : '');
+  const hash = to === 'timer' ? '' : '#' + (ROTA_URL[to] || to) + (to === 'personagem' && pers.dados ? '/' + encodeURIComponent(pers.dados.name) : to === 'guilda' && gu.dados ? '/' + encodeURIComponent(gu.dados.guilda.nome) : '');
   if (push && location.hash !== hash) { try { history.pushState(null, '', location.pathname + location.search + hash); } catch { /* o endereço fica como está */ } }
   if (was !== to) window.scrollTo(0, 0);
 }
