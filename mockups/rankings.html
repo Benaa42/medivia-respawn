@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo: página Rankings</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Modelo da página Rankings (fase 1: nível e skills) com os rankings reais de Pendulum em 23/10/2026. Nada aqui é publicado. */
+:root { --ground: #0f1314; --box: #171d1e; --card: #1e2627; --edge: #2c3637; --band: #1b3a2c; --title: #f1f5f3; --label: #c2cbc8; --faint: #8b9894; --amber: #f0ad4d; --value: #3ae374;
+  --gold-edge: rgba(240, 173, 77, 0.55); --gold-wash: rgba(240, 173, 77, 0.06); --gold-ink: #241703; --k: #ff7468; --a: #3ae374; --m: #a970ff; --d: #3cc6f0; --x: #8b9894;
+  --font-ui: "Onest", "Segoe UI", system-ui, sans-serif; --font-display: "Bricolage Grotesque", "Onest", sans-serif; }
+* { box-sizing: border-box; } body { margin: 0; background: var(--ground); color: var(--label); font: 400 14px/1.45 var(--font-ui); font-variant-numeric: tabular-nums; }
+h1, h2, h3, p { margin: 0; }
+.faixa { background: #0a0e0f; border-bottom: 1px solid var(--edge); font-size: 13px; } .faixa div { max-width: 1240px; margin: 0 auto; padding: 7px 20px; color: var(--faint); }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 18px 20px 60px; display: flex; flex-direction: column; gap: 18px; }
+.barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.marca { font: 800 28px var(--font-display); color: var(--title); } .marca b { color: var(--amber); font-weight: inherit; }
+.menu { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; border: 1px solid var(--gold-edge); border-radius: 999px; background: var(--gold-wash); }
+.menu span { padding: 8px 14px; border-radius: 999px; color: var(--title); font: 600 14px var(--font-ui); } .menu span.on { background: var(--amber); color: var(--gold-ink); }
+.menu span.novo::after { content: "novo"; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: var(--band); color: var(--value); font-size: 10px; }
+.exemplo { font: 700 13px var(--font-ui); color: var(--amber); margin-top: 8px; }
+.quadro { background: var(--box); border-radius: 22px; padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 16px; }
+.filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 18px; }
+.campo, .grupo { display: flex; flex-direction: column; gap: 5px; } .campo > span:first-child, .grupo .rot { font-size: 12px; color: var(--faint); }
+.sel, .inp { padding: 8px 12px; border: 1px solid var(--edge); border-radius: 10px; background: var(--card); color: var(--title); font-weight: 600; min-width: 140px; }
+.inp { color: var(--faint); font-weight: 500; min-width: 220px; } .busca { margin-left: auto; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 999px; background: var(--card); }
+.seg b { padding: 6px 11px; border-radius: 999px; font: 600 13px var(--font-ui); color: var(--label); } .seg b.on { background: var(--title); color: var(--ground); }
+h2 { font: 800 22px var(--font-display); color: var(--title); display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; } h2 small { font: 500 13px var(--font-ui); color: var(--faint); }
+/* pódio dos três primeiros */
+.podio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 12px; max-width: 760px; margin: 0 auto; width: 100%; }
+.pod { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 12px 14px; border-radius: 16px; background: var(--card); text-align: center; }
+.pod.p1 { padding-top: 26px; background: linear-gradient(180deg, rgba(240,173,77,0.16), var(--card)); box-shadow: inset 0 0 0 1px var(--gold-edge); }
+.pod.p2 { background: linear-gradient(180deg, rgba(194,203,200,0.12), var(--card)); } .pod.p3 { background: linear-gradient(180deg, rgba(208,138,76,0.14), var(--card)); }
+.pod .pos { font: 800 15px var(--font-display); color: var(--faint); } .pod.p1 .pos { color: var(--amber); font-size: 18px; }
+.pod .nm { font: 800 18px var(--font-display); color: var(--title); } .pod.p1 .nm { font-size: 22px; }
+.pod .val { font: 800 26px/1 var(--font-display); color: var(--amber); } .pod.p1 .val { font-size: 32px; }
+.pod small { color: var(--faint); font-size: 12px; }
+.vc { display: inline-block; padding: 1px 9px; border: 1px solid; border-radius: 999px; font: 600 12px var(--font-ui); }
+.v-k { color: var(--k); border-color: color-mix(in srgb, var(--k) 45%, transparent); } .v-a { color: var(--a); border-color: color-mix(in srgb, var(--a) 45%, transparent); }
+.v-m { color: var(--m); border-color: color-mix(in srgb, var(--m) 45%, transparent); } .v-d { color: var(--d); border-color: color-mix(in srgb, var(--d) 45%, transparent); } .v-x { color: var(--x); border-color: var(--edge); }
+/* tabela */
+.tabwrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { padding: 6px 10px; border-bottom: 1px solid var(--edge); font: 500 12px var(--font-ui); color: var(--faint); text-align: right; white-space: nowrap; }
+td { padding: 7px 10px; border-bottom: 1px solid var(--edge); text-align: right; color: var(--title); white-space: nowrap; }
+th.l, td.l { text-align: left; } th.c, td.c { text-align: center; width: 48px; }
+td.pos { color: var(--faint); font-weight: 700; } td a { color: var(--amber); font-weight: 700; text-decoration: none; }
+td.g { color: var(--value); font-weight: 700; } td.f { color: var(--faint); }
+tr.meu td { background: var(--gold-wash); } tr.meu td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
+.eu { padding: 0 6px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 10px var(--font-ui); vertical-align: 1px; }
+.meupos { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--gold-edge); background: var(--gold-wash); color: var(--title); font-size: 14px; }
+.meupos b { color: var(--amber); }
+.pag { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--label); }
+.pgs { display: inline-flex; gap: 4px; } .pgs b { width: 30px; height: 30px; display: inline-grid; place-items: center; border-radius: 50%; background: var(--card); color: var(--label); font-weight: 600; } .pgs b.on { background: var(--amber); color: var(--gold-ink); }
+.nota-mock { font-size: 13px; color: var(--faint); }
+.etiqueta { position: fixed; right: 16px; bottom: 16px; padding: 6px 12px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 12px var(--font-ui); }
+@media (max-width: 760px) { .podio { grid-template-columns: 1fr; } .pod.p1 { order: -1; } .busca { margin-left: 0; } }
+</style></head><body>
+<div class="faixa"><div>Mapper da wiki ↗ · Novidades · Sugestões e problemas</div></div>
+<div class="wrap">
+  <div class="barra"><span class="marca">Medivia <b>Labs</b></span><nav class="menu"><span>Cronômetro</span><span>Analisador de hunt</span><span>Criaturas</span><span class="on novo">Rankings</span><span>Calculadora</span><span>Sorteio</span></nav></div>
+
+  <p class="exemplo">Exemplo 1: ranking de Nível, todas as vocações</p>
+  <section class="quadro">
+    <div class="filtros">
+  <label class="campo"><span>Mundo</span><span class="sel">Pendulum ▾</span></label>
+  <div class="grupo"><span class="rot">Ranking</span><div class="seg"><b class="on">Nível</b><b class="">Magic level</b><b class="">Melee</b><b class="">Distance</b><b class="">Blocking</b><b class="">Fishing</b><b class="">Mining</b><b class="">Cooking</b></div></div>
+  <div class="grupo"><span class="rot">Vocação</span><div class="seg"><b class="on">Todas</b><b class="">Knights</b><b class="">Archers</b><b class="">Mages</b><b class="">Druids</b></div></div>
+  <label class="campo busca"><span>Achar no ranking</span><span class="inp">Nome do personagem</span></label>
+</div>
+    <h2>Nível em Pendulum <small>os 1.000 primeiros, atualizado a cada hora pela API do Medivia</small></h2>
+    <div class="podio"><div class="pod p2"><span class="pos">2º</span><b class="nm">Xecutionist</b><span class="vc v-a">Archer</span><span class="val">1022</span><small>39,17 bi de XP</small></div><div class="pod p1"><span class="pos">1º</span><b class="nm">Wild Boo</b><span class="vc v-m">Mage</span><span class="val">1039</span><small>41,69 bi de XP</small></div><div class="pod p3"><span class="pos">3º</span><b class="nm">Faba</b><span class="vc v-k">Knight</span><span class="val">959</span><small>30,83 bi de XP</small></div></div>
+    <div class="tabwrap"><table><thead><tr><th class="c">#</th><th class="l">Personagem</th><th>Vocação</th><th>Nível</th><th>Experiência</th></tr></thead><tbody>
+<tr class=""><td class="c pos">4</td><td class="l"><a href="#">Nubi</a></td><td class=""><span class="vc v-m">Mage</span></td><td class="g">913</td><td class="">25.634.044.023</td></tr>
+<tr class=""><td class="c pos">5</td><td class="l"><a href="#">Aliciadora do Mal</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="g">898</td><td class="">24.045.303.649</td></tr>
+<tr class=""><td class="c pos">6</td><td class="l"><a href="#">Lilla</a></td><td class=""><span class="vc v-k">Knight</span></td><td class="g">846</td><td class="">19.278.360.685</td></tr>
+<tr class=""><td class="c pos">7</td><td class="l"><a href="#">Hidas</a></td><td class=""><span class="vc v-m">Mage</span></td><td class="g">843</td><td class="">19.008.153.956</td></tr>
+<tr class=""><td class="c pos">8</td><td class="l"><a href="#">Bar Tek</a></td><td class=""><span class="vc v-m">Mage</span></td><td class="g">841</td><td class="">18.821.603.244</td></tr>
+<tr class=""><td class="c pos">9</td><td class="l"><a href="#">Afterzerah</a></td><td class=""><span class="vc v-k">Knight</span></td><td class="g">827</td><td class="">17.729.631.698</td></tr>
+<tr class=""><td class="c pos">10</td><td class="l"><a href="#">Legendarybow Dropwhen</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="g">813</td><td class="">16.614.731.349</td></tr>
+<tr class=""><td class="c pos">11</td><td class="l"><a href="#">Dybas</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="g">813</td><td class="">16.588.913.658</td></tr>
+<tr class=""><td class="c pos">12</td><td class="l"><a href="#">Apollo</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="g">810</td><td class="">16.430.277.134</td></tr>
+<tr class=""><td class="c pos">13</td><td class="l"><a href="#">Bulwa</a></td><td class=""><span class="vc v-k">Knight</span></td><td class="g">804</td><td class="">15.913.888.013</td></tr>
+<tr class=""><td class="c pos">14</td><td class="l"><a href="#">Adhdken</a></td><td class=""><span class="vc v-m">Mage</span></td><td class="g">792</td><td class="">15.103.623.469</td></tr>
+<tr class=""><td class="c pos">15</td><td class="l"><a href="#">Baba Yagha</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="g">788</td><td class="">14.782.230.999</td></tr>
+<tr class=""><td class="c pos">16</td><td class="l"><a href="#">Stoor</a></td><td class=""><span class="vc v-k">Knight</span></td><td class="g">787</td><td class="">14.698.313.699</td></tr>
+<tr class=""><td class="c pos">17</td><td class="l"><a href="#">Girzin</a></td><td class=""><span class="vc v-k">Knight</span></td><td class="g">786</td><td class="">14.630.574.555</td></tr>
+<tr class=""><td class="c pos">18</td><td class="l"><a href="#">Deik</a></td><td class=""><span class="vc v-k">Knight</span></td><td class="g">786</td><td class="">14.628.677.145</td></tr>
+<tr class=""><td class="c pos">19</td><td class="l"><a href="#">Guilherme Nelvam</a></td><td class=""><span class="vc v-k">Knight</span></td><td class="g">776</td><td class="">13.981.766.318</td></tr>
+<tr class=""><td class="c pos">20</td><td class="l"><a href="#">Raust</a></td><td class=""><span class="vc v-m">Mage</span></td><td class="g">773</td><td class="">13.799.566.943</td></tr>
+</tbody></table></div>
+    <div class="pag"><span>1–100 de 1.000</span><span class="pgs"><b class="on">1</b><b class="">2</b><b class="">3</b><b class="">4</b><b class="">5</b><b class="">6</b><b class="">7</b><b class="">8</b><b class="">9</b><b class="">10</b></span></div>
+  </section>
+
+  <p class="exemplo">Exemplo 2: ranking de Distance, só archers, com o seu personagem destacado</p>
+  <section class="quadro">
+    <div class="filtros">
+  <label class="campo"><span>Mundo</span><span class="sel">Pendulum ▾</span></label>
+  <div class="grupo"><span class="rot">Ranking</span><div class="seg"><b class="">Nível</b><b class="">Magic level</b><b class="">Melee</b><b class="on">Distance</b><b class="">Blocking</b><b class="">Fishing</b><b class="">Mining</b><b class="">Cooking</b></div></div>
+  <div class="grupo"><span class="rot">Vocação</span><div class="seg"><b class="">Todas</b><b class="">Knights</b><b class="on">Archers</b><b class="">Mages</b><b class="">Druids</b></div></div>
+  <label class="campo busca"><span>Achar no ranking</span><span class="inp">Nome do personagem</span></label>
+</div>
+    <h2>Distance dos archers em Pendulum</h2>
+    <div class="meupos">Seu personagem, <b>Bena</b>, está em <b>42º</b> com distance <b>145</b>. <a href="#" style="color:var(--value);font-weight:700">Ir até ele</a></div>
+    <div class="podio"><div class="pod p2"><span class="pos">2º</span><b class="nm">Madocz</b><span class="vc v-a">Archer</span><span class="val">159</span><small>nível 707</small></div><div class="pod p1"><span class="pos">1º</span><b class="nm">Aliciadora do Mal</b><span class="vc v-a">Archer</span><span class="val">161</span><small>nível 898</small></div><div class="pod p3"><span class="pos">3º</span><b class="nm">Xecutionist</b><span class="vc v-a">Archer</span><span class="val">158</span><small>nível 1022</small></div></div>
+    <div class="tabwrap"><table><thead><tr><th class="c">#</th><th class="l">Personagem</th><th>Vocação</th><th>Nível</th><th>Distance</th></tr></thead><tbody>
+<tr class=""><td class="c pos">4</td><td class="l"><a href="#">Dybas</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">813</td><td class="g">158</td></tr>
+<tr class=""><td class="c pos">5</td><td class="l"><a href="#">Ares Belles</a></td><td class=""><span class="vc v-x">—</span></td><td class=""><span class="f">—</span></td><td class="g">157</td></tr>
+<tr class=""><td class="c pos">6</td><td class="l"><a href="#">West</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">755</td><td class="g">156</td></tr>
+<tr class=""><td class="c pos">7</td><td class="l"><a href="#">Terran</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">613</td><td class="g">154</td></tr>
+<tr class=""><td class="c pos">8</td><td class="l"><a href="#">Legendarybow Dropwhen</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">813</td><td class="g">154</td></tr>
+<tr class=""><td class="c pos">9</td><td class="l"><a href="#">Ensiferum</a></td><td class=""><span class="vc v-x">—</span></td><td class=""><span class="f">—</span></td><td class="g">154</td></tr>
+<tr class=""><td class="c pos">10</td><td class="l"><a href="#">Honesto</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">712</td><td class="g">153</td></tr>
+<tr class=""><td class="c pos">11</td><td class="l"><a href="#">Daizy</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">667</td><td class="g">152</td></tr>
+<tr class=""><td class="c pos">12</td><td class="l"><a href="#">Apollo</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">810</td><td class="g">151</td></tr>
+<tr class=""><td class="c pos">13</td><td class="l"><a href="#">Joao Paulo</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">744</td><td class="g">151</td></tr>
+<tr class=""><td class="c pos">14</td><td class="l"><a href="#">Nordy'Artillery</a></td><td class=""><span class="vc v-x">—</span></td><td class=""><span class="f">—</span></td><td class="g">151</td></tr>
+<tr class=""><td class="c pos">15</td><td class="l"><a href="#">Miss Finesse</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">742</td><td class="g">151</td></tr>
+<tr class=""><td class="c pos">16</td><td class="l"><a href="#">Neyz</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">758</td><td class="g">150</td></tr>
+<tr class=""><td class="c pos">17</td><td class="l"><a href="#">Yonaguska Redface</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">578</td><td class="g">149</td></tr>
+<tr class=""><td class="c pos">18</td><td class="l"><a href="#">Pallydocorre</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">754</td><td class="g">149</td></tr>
+<tr class=""><td class="c pos">19</td><td class="l"><a href="#">Volkz'Yep</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">587</td><td class="g">149</td></tr>
+<tr class=""><td class="c pos">20</td><td class="l"><a href="#">Sir Coop</a></td><td class=""><span class="vc v-x">—</span></td><td class=""><span class="f">—</span></td><td class="g">148</td></tr>
+<tr class=""><td class="c pos">21</td><td class="l"><a href="#">Baba Yagha</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">788</td><td class="g">148</td></tr>
+<tr class=""><td class="c pos">22</td><td class="l"><a href="#">Sheng'Leng</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">608</td><td class="g">148</td></tr>
+<tr class=""><td class="c pos">23</td><td class="l"><a href="#">Lupiuz</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">703</td><td class="g">147</td></tr>
+<tr class=""><td class="c pos">24</td><td class="l"><a href="#">Sonixx</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">694</td><td class="g">147</td></tr>
+<tr class=""><td class="c pos">25</td><td class="l"><a href="#">Mzika</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">641</td><td class="g">147</td></tr>
+<tr class=""><td class="c pos">26</td><td class="l"><a href="#">Lysy Viper</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">771</td><td class="g">146</td></tr>
+<tr class=""><td class="c pos">27</td><td class="l"><a href="#">Anabolic</a></td><td class=""><span class="vc v-x">—</span></td><td class=""><span class="f">—</span></td><td class="g">146</td></tr>
+<tr class=""><td class="c pos">28</td><td class="l"><a href="#">Reval</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">649</td><td class="g">146</td></tr>
+<tr class=""><td class="c pos">29</td><td class="l"><a href="#">Stuart Liro</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">652</td><td class="g">146</td></tr>
+<tr class=""><td class="c pos">30</td><td class="l"><a href="#">Socha</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">602</td><td class="g">146</td></tr>
+<tr class=""><td class="c pos">31</td><td class="l"><a href="#">Sir'Anakin</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">661</td><td class="g">146</td></tr>
+<tr class=""><td class="c pos">32</td><td class="l"><a href="#">Makima</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">569</td><td class="g">146</td></tr>
+<tr class=""><td class="c pos">33</td><td class="l"><a href="#">Anizin Archer</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">523</td><td class="g">146</td></tr>
+<tr class=""><td class="c pos">34</td><td class="l"><a href="#">Valnor</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">589</td><td class="g">145</td></tr>
+<tr class=""><td class="c pos">35</td><td class="l"><a href="#">Hyde</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">582</td><td class="g">145</td></tr>
+<tr class=""><td class="c pos">36</td><td class="l"><a href="#">Cerulean Waygate</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">604</td><td class="g">145</td></tr>
+<tr class=""><td class="c pos">37</td><td class="l"><a href="#">Umbral Arbiter</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">542</td><td class="g">145</td></tr>
+<tr class=""><td class="c pos">38</td><td class="l"><a href="#">Forrozeiro</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">722</td><td class="g">145</td></tr>
+<tr class=""><td class="c pos">39</td><td class="l"><a href="#">Rae Rae</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">683</td><td class="g">145</td></tr>
+<tr class=""><td class="c pos">40</td><td class="l"><a href="#">Klasztornik</a></td><td class=""><span class="vc v-x">—</span></td><td class=""><span class="f">—</span></td><td class="g">145</td></tr>
+<tr class=""><td class="c pos">41</td><td class="l"><a href="#">Inge Krydd</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">535</td><td class="g">145</td></tr>
+<tr class="meu"><td class="c pos">42</td><td class="l"><a href="#">Bena</a> <span class="eu">você</span></td><td class=""><span class="vc v-a">Archer</span></td><td class="">671</td><td class="g">145</td></tr>
+<tr class=""><td class="c pos">43</td><td class="l"><a href="#">Proto Mann</a></td><td class=""><span class="vc v-a">Archer</span></td><td class="">668</td><td class="g">145</td></tr>
+<tr class=""><td class="c pos">44</td><td class="l"><a href="#">Travox</a></td><td class=""><span class="vc v-x">—</span></td><td class=""><span class="f">—</span></td><td class="g">145</td></tr>
+</tbody></table></div>
+    <div class="pag"><span>1–100 de 1.000</span><span class="pgs"><b class="on">1</b><b class="">2</b><b class="">3</b><b class="">4</b><b class="">5</b><b class="">6</b><b class="">7</b><b class="">8</b><b class="">9</b><b class="">10</b></span></div>
+  </section>
+  <p class="nota-mock">No modelo aparecem só as primeiras linhas; a página de verdade mostra 100 por página, em 10 páginas. Clicar num nome abre a página do personagem.</p>
+</div>
+<span class="etiqueta">Modelo · rankings reais de Pendulum em 23/10</span>
+</body></html>

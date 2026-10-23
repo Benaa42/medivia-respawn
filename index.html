@@ -877,6 +877,49 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-cruz th.v-d, .gu-cc .quem.v-d, .gu-cm .gu-n.v-d { color: var(--v-d); }
 .gu-cruz th.v-x, .gu-cc .quem.v-x, .gu-cm .gu-n.v-x { color: var(--v-x); }
 @media (max-width: 980px) { .gu-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Rankings: filtros, pódio dos três primeiros e a tabela */
+#page-rankings { --v-k: #ff7468; --v-a: #3ae374; --v-m: #a970ff; --v-d: #3cc6f0; --v-x: #8b9894; }
+.rk-quadro { display: flex; flex-direction: column; gap: 16px; padding: 18px 20px 22px; border-radius: var(--r-lg); background: var(--box); }
+.rk-grade { display: contents; }
+.rk-filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 18px; }
+.rk-campo { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.rk-campo > span:first-child { font-size: 12px; color: var(--faint); }
+.rk-campo select, .rk-achar input { padding: 8px 12px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 600 14px var(--font-ui); }
+.rk-campo .seg { flex-wrap: wrap; }
+.rk-campo .seg button { flex: none; padding: 6px 11px; white-space: nowrap; }
+.rk-busca { margin-left: auto; }
+.rk-achar { display: flex; gap: 8px; }
+.rk-achar input { width: 200px; font-weight: 500; }
+.rk-titulo { font: 800 22px var(--font-display); color: var(--title); }
+.rk-meu { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 10px 14px; border: 1px solid var(--gold-edge); border-radius: var(--r-md); background: var(--gold-wash); color: var(--title); }
+.rk-meu b { color: var(--amber); }
+.rk-ir { padding: 0; border: 0; background: none; color: var(--value); font: 700 14px var(--font-ui); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.rk-podio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 12px; width: 100%; max-width: 760px; margin: 0 auto; }
+.rk-pod { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 12px 14px; border: 0; border-radius: 16px; background: var(--card); color: inherit; font: inherit; text-align: center; cursor: pointer; }
+.rk-pod.p1 { padding-top: 26px; background: linear-gradient(180deg, rgba(240, 173, 77, 0.16), var(--card)); box-shadow: inset 0 0 0 1px var(--gold-edge); }
+.rk-pod.p2 { background: linear-gradient(180deg, rgba(194, 203, 200, 0.12), var(--card)); }
+.rk-pod.p3 { background: linear-gradient(180deg, rgba(208, 138, 76, 0.14), var(--card)); }
+.rk-pod .pos { font: 800 15px var(--font-display); color: var(--faint); }
+.rk-pod.p1 .pos { font-size: 18px; color: var(--amber); }
+.rk-pod .nm { font: 800 18px var(--font-display); color: var(--title); overflow-wrap: anywhere; }
+.rk-pod.p1 .nm { font-size: 22px; }
+.rk-pod .val { font: 800 26px/1 var(--font-display); color: var(--amber); }
+.rk-pod.p1 .val { font-size: 32px; }
+.rk-pod small { font-size: 12px; color: var(--faint); }
+.rk-tab { min-width: 0; }
+.rk-tab th.c, .rk-tab td.c { width: 52px; text-align: center; }
+.rk-tab th.l, .rk-tab td.l { text-align: left; }
+.pers-cart .rk-tab td:last-child, .rk-tab td:last-child { min-width: 0; color: var(--title); white-space: nowrap; }
+.rk-tab td.pos { color: var(--faint); font-weight: 700; }
+.rk-tab td.g { color: var(--value); font-weight: 700; }
+.rk-tab tr.meu td, .rk-tab tr.alvo td { background: var(--gold-wash); }
+.rk-tab tr.meu td:first-child, .rk-tab tr.alvo td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
+.rk-eu { margin-left: 6px; padding: 0 6px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 10px/1.6 var(--font-ui); vertical-align: 1px; }
+.rk-pag { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--label); }
+.rk-pgs { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.rk-pgs button { width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--card); color: var(--label); font: 600 13px var(--font-ui); cursor: pointer; }
+.rk-pgs button[aria-pressed="true"] { background: var(--amber); color: var(--gold-ink); }
+@media (max-width: 760px) { .rk-podio { grid-template-columns: 1fr; } .rk-pod.p1 { order: -1; } .rk-busca { margin-left: 0; } .rk-achar input { width: 100%; } .rk-busca, .rk-achar { width: 100%; } }
 .pers-busca input { flex: 1 1 240px; max-width: 360px; padding: 11px 14px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 15px var(--font-ui); }
 .pers-busca input:focus { outline: 2px solid var(--value); outline-offset: -1px; border-color: transparent; }
 .pers-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
@@ -1325,11 +1368,15 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
   <section class="page" id="page-guilda" hidden>
     <div class="pers-busca">
       <input type="search" id="gu-nome" maxlength="60" autocomplete="off" spellcheck="false" placeholder="Nome da guilda" aria-label="Nome da guilda" data-i18n-attr="placeholder:gu.nome;aria-label:gu.nome">
-      <select id="gu-mundo" aria-label="Mundo" data-i18n-attr="aria-label:gu.mundo"><option value="pendulum">Pendulum</option><option value="destiny">Destiny</option><option value="legacy">Legacy</option></select>
+      <select id="gu-mundo" aria-label="Mundo" data-i18n-attr="aria-label:gu.mundo"><option value="pendulum">Pendulum</option><option value="legacy">Legacy</option><option value="serenity">Serenity</option><option value="luminary">Luminary</option><option value="liberty">Liberty</option><option value="destiny">Destiny</option><option value="immensity">Immensity</option><option value="eternum">Eternum</option><option value="prosperity">Prosperity</option></select>
       <button class="dlg go" type="button" id="gu-ver" data-i18n="gu.ver">Ver guilda</button>
     </div>
     <p class="status" id="gu-status" role="status" hidden></p>
     <div class="pers-grade" id="gu-grade"></div>
+  </section>
+
+  <section class="page" id="page-rankings" hidden>
+    <div class="rk-quadro"><div class="rk-grade" id="rk-grade"></div></div>
   </section>
 
   <section class="page" id="page-calc" hidden>
@@ -1899,6 +1946,27 @@ const I18N = {
     'gu.col.d30': 'XP 30 dias',
     'gu.col.login': 'Último login',
     'gu.online': 'online',
+    'rk.ranking': 'Ranking',
+    'rk.voc.all': 'Todas',
+    'rk.voc.knights': 'Knights',
+    'rk.voc.archers': 'Archers',
+    'rk.voc.mages': 'Mages',
+    'rk.voc.druids': 'Druids',
+    'rk.vocDe.knights': 'dos knights',
+    'rk.vocDe.archers': 'dos archers',
+    'rk.vocDe.mages': 'dos mages',
+    'rk.vocDe.druids': 'dos druids',
+    'rk.titulo': '{r} em {m}',
+    'rk.tituloVoc': '{r} {v} em {m}',
+    'rk.achar': 'Achar no ranking',
+    'rk.acharBtn': 'Achar',
+    'rk.procurando': 'Procurando {x} no ranking…',
+    'rk.naoAchei': '{x} não está entre os 1.000 primeiros deste ranking.',
+    'rk.carregando': 'Carregando o ranking…',
+    'rk.seuA': 'Seu personagem,',
+    'rk.seuB': 'está em {p}º com {r} {v}.',
+    'rk.irAte': 'Ir até ele',
+    'rk.voce': 'você',
     'pers.tag.shared': 'compartilhada',
     'pers.tag.locked': 'travada',
     'pers.tag.naoEscolhida': 'não escolhida',
@@ -2660,6 +2728,27 @@ const I18N = {
     'gu.col.d30': 'XP 30 days',
     'gu.col.login': 'Last login',
     'gu.online': 'online',
+    'rk.ranking': 'Ranking',
+    'rk.voc.all': 'All',
+    'rk.voc.knights': 'Knights',
+    'rk.voc.archers': 'Archers',
+    'rk.voc.mages': 'Mages',
+    'rk.voc.druids': 'Druids',
+    'rk.vocDe.knights': 'of the knights',
+    'rk.vocDe.archers': 'of the archers',
+    'rk.vocDe.mages': 'of the mages',
+    'rk.vocDe.druids': 'of the druids',
+    'rk.titulo': '{r} on {m}',
+    'rk.tituloVoc': '{r} {v} on {m}',
+    'rk.achar': 'Find in the ranking',
+    'rk.acharBtn': 'Find',
+    'rk.procurando': 'Looking for {x} in the ranking…',
+    'rk.naoAchei': '{x} is not in the top 1,000 of this ranking.',
+    'rk.carregando': 'Loading the ranking…',
+    'rk.seuA': 'Your character,',
+    'rk.seuB': 'is #{p} with {r} {v}.',
+    'rk.irAte': 'Go to it',
+    'rk.voce': 'you',
     'pers.tag.shared': 'shared',
     'pers.tag.locked': 'locked',
     'pers.tag.naoEscolhida': 'not chosen',
@@ -3421,6 +3510,27 @@ const I18N = {
     'gu.col.d30': 'XP 30 días',
     'gu.col.login': 'Último login',
     'gu.online': 'en línea',
+    'rk.ranking': 'Ranking',
+    'rk.voc.all': 'Todas',
+    'rk.voc.knights': 'Knights',
+    'rk.voc.archers': 'Archers',
+    'rk.voc.mages': 'Mages',
+    'rk.voc.druids': 'Druids',
+    'rk.vocDe.knights': 'de los knights',
+    'rk.vocDe.archers': 'de los archers',
+    'rk.vocDe.mages': 'de los mages',
+    'rk.vocDe.druids': 'de los druids',
+    'rk.titulo': '{r} en {m}',
+    'rk.tituloVoc': '{r} {v} en {m}',
+    'rk.achar': 'Buscar en el ranking',
+    'rk.acharBtn': 'Buscar',
+    'rk.procurando': 'Buscando {x} en el ranking…',
+    'rk.naoAchei': '{x} no está entre los 1.000 primeros de este ranking.',
+    'rk.carregando': 'Cargando el ranking…',
+    'rk.seuA': 'Tu personaje,',
+    'rk.seuB': 'está en el {p}º con {r} {v}.',
+    'rk.irAte': 'Ir hasta él',
+    'rk.voce': 'tú',
     'pers.tag.shared': 'compartida',
     'pers.tag.locked': 'bloqueada',
     'pers.tag.naoEscolhida': 'no elegida',
@@ -4182,6 +4292,27 @@ const I18N = {
     'gu.col.d30': 'XP 30 dni',
     'gu.col.login': 'Ostatnie logowanie',
     'gu.online': 'online',
+    'rk.ranking': 'Ranking',
+    'rk.voc.all': 'Wszystkie',
+    'rk.voc.knights': 'Knights',
+    'rk.voc.archers': 'Archers',
+    'rk.voc.mages': 'Mages',
+    'rk.voc.druids': 'Druids',
+    'rk.vocDe.knights': 'knightów',
+    'rk.vocDe.archers': 'archerów',
+    'rk.vocDe.mages': 'mage\'ów',
+    'rk.vocDe.druids': 'druidów',
+    'rk.titulo': '{r} na {m}',
+    'rk.tituloVoc': '{r} {v} na {m}',
+    'rk.achar': 'Znajdź w rankingu',
+    'rk.acharBtn': 'Znajdź',
+    'rk.procurando': 'Szukam {x} w rankingu…',
+    'rk.naoAchei': '{x} nie ma w pierwszym 1000 tego rankingu.',
+    'rk.carregando': 'Wczytuję ranking…',
+    'rk.seuA': 'Twoja postać,',
+    'rk.seuB': 'jest na {p}. miejscu z {r} {v}.',
+    'rk.irAte': 'Przejdź',
+    'rk.voce': 'ty',
     'pers.tag.shared': 'wspólne',
     'pers.tag.locked': 'zablokowane',
     'pers.tag.naoEscolhida': 'niewybrane',
@@ -6026,7 +6157,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5, guMundo: 'pendulum', guFormato: 'cartoes' }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5, guMundo: 'pendulum', guFormato: 'cartoes', rkMundo: 'pendulum', rkSkill: 'level', rkVoc: 'all' }, lsGet(LS_UI, {}));
 // Bônus de XP: minutos de XP Boost da loja, golden premium (+5% no boost) e outros bônus em %, para a hunt inteira
 const XPB_MINS = [0, 30, 60, 90, 120, 180];
 {
@@ -6215,6 +6346,7 @@ function setLang(lang) {
   renderRoom();
   if (pageNow === 'personagem') renderPersonagem();
   if (pageNow === 'guilda') renderGuilda();
+  if (pageNow === 'rankings') renderRankings();
   voiceLang();
   if (pageNow === 'creatures') renderCreatures();
   if (pageNow === 'hunt') renderHunt();
@@ -10990,7 +11122,7 @@ $('#pers-meu').addEventListener('click', () => { if (!pers.dados) return; ui.meu
    Página ainda escondida (sem botão no menu): abre pelo endereço #guild/<nome> ou pelo nome da guilda na página do
    personagem. Os membros vêm da API oficial; nível, vocação, online, último login e XP de cada um vêm do Worker
    (/guilda/{mundo}/{nome}), que importa o histórico de poucos membros por vez: enquanto falta, a página pede de novo. */
-const GU_MUNDOS = ['pendulum', 'destiny', 'legacy'];
+const GU_MUNDOS = ['pendulum', 'legacy', 'serenity', 'luminary', 'liberty', 'destiny', 'immensity', 'eternum', 'prosperity'];
 const gu = { nome: '', dados: null, ord: 'nivel', desc: true, espera: null, aba: 'membros', fichas: new Map(), buscando: false };
 // Fichas dos membros (para as tasks do Huntsman): uma por vez, porque a API aceita 1 pedido por segundo. O Worker guarda
 // cada ficha por 5 minutos; resposta rápida é cache e não precisa da pausa. Num 429, espera e tenta mais uma vez.
@@ -11222,7 +11354,127 @@ function renderGuilda() {
 $('#gu-ver').addEventListener('click', () => guCarregar($('#gu-nome').value));
 $('#gu-nome').addEventListener('keydown', e => { if (e.key === 'Enter') guCarregar(e.target.value); });
 $('#gu-mundo').addEventListener('change', e => { ui.guMundo = e.target.value; saveUi(); if (gu.nome) { gu.dados = null; guCarregar(gu.nome); } });
-const PAGES = ['timer', 'hunt', 'creatures', 'calc', 'personagem', 'guilda'];   // personagem e guilda: sem botão no menu por enquanto
+/* ---------- Rankings ----------
+   Página ainda escondida (sem botão no menu): abre pelo endereço #rankings. Os rankings oficiais de nível e de skills
+   (os 1.000 primeiros de cada mundo, 100 por página), com a vocação e o nível de cada um completados pelo Worker
+   (/ranking/{mundo}/{vocação}/{skill}/{página}). */
+const MUNDOS = ['pendulum', 'legacy', 'serenity', 'luminary', 'liberty', 'destiny', 'immensity', 'eternum', 'prosperity'];
+const RK_SKILLS = ['level', 'maglevel', 'melee', 'distance', 'blocking', 'fishing', 'mining', 'cooking'];
+const RK_VOCS = ['all', 'knights', 'archers', 'mages', 'druids'];
+const rk = { pagina: 1, dados: null, chave: '', carregando: false, alvo: '', achando: false, msg: '' };
+const rkMundo = () => MUNDOS.includes(ui.rkMundo) ? ui.rkMundo : 'pendulum';
+const rkSkill = () => RK_SKILLS.includes(ui.rkSkill) ? ui.rkSkill : 'level';
+const rkVoc = () => RK_VOCS.includes(ui.rkVoc) ? ui.rkVoc : 'all';
+const mundoNome = m => m[0].toUpperCase() + m.slice(1);
+const rkRota = p => 'ranking/' + rkMundo() + '/' + rkVoc() + '/' + rkSkill() + '/' + p;
+// uma página do ranking; o Worker guarda cada uma por 5 minutos
+async function rkBuscar(p) {
+  const r = await fetch(API_MEDIVIA + rkRota(p));
+  if (!r.ok) throw new Error(String(r.status));
+  return (await r.json()).lista || [];
+}
+async function rkCarregar(p) {
+  rk.pagina = Math.min(10, Math.max(1, p || 1));
+  const chave = rkRota(rk.pagina);
+  if (rk.chave !== chave) rk.dados = null;   // outro filtro ou página: a lista velha sai enquanto a nova carrega
+  rk.chave = chave;
+  rk.carregando = true;
+  renderRankings();
+  try {
+    const lista = await rkBuscar(rk.pagina);
+    if (rk.chave !== chave) return;
+    rk.dados = lista;
+    rk.msg = '';
+  } catch (e) { if (rk.chave === chave) { rk.dados = null; rk.msg = tr(e.message === '429' ? 'pers.limite' : 'pers.erro'); } }
+  rk.carregando = false;
+  renderRankings();
+}
+// "Achar no ranking": procura o nome nas 10 páginas, uma por vez (a API aceita 1 pedido por segundo)
+async function rkAchar(nome) {
+  nome = String(nome || '').trim();
+  if (!nome || rk.achando) return;
+  rk.achando = true; rk.alvo = nome; rk.msg = tr('rk.procurando', { x: nome });
+  renderRankings();
+  const alvo = slug(nome), chave = rkRota(0);
+  try {
+    for (let p = 1; p <= 10; p++) {
+      if (rkRota(0) !== chave || pageNow !== 'rankings') return;
+      const ini = Date.now();
+      const lista = rk.dados && rk.chave === rkRota(p) ? rk.dados : await rkBuscar(p);
+      if (lista.some(h => slug(h.nome) === alvo)) {
+        rk.pagina = p; rk.dados = lista; rk.chave = rkRota(p); rk.msg = '';
+        rk.achando = false;
+        renderRankings();
+        const linha = $('#rk-grade tr.alvo');
+        if (linha) linha.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return;
+      }
+      if (Date.now() - ini > 250) await new Promise(r => setTimeout(r, 1100));
+    }
+    rk.msg = tr('rk.naoAchei', { x: nome });
+  } catch (e) { rk.msg = tr(e.message === '429' ? 'pers.limite' : 'pers.erro'); }
+  rk.achando = false;
+  renderRankings();
+}
+function renderRankings() {
+  const g = $('#rk-grade');
+  if (!g) return;
+  const loc = document.documentElement.lang || 'en', skill = rkSkill(), voc = rkVoc(), mundo = rkMundo();
+  const rotSkill = s => s === 'level' ? tr('pers.nivel') : tr('pers.sk.' + s);
+  const VB = { knights: 'k', archers: 'a', mages: 'm', druids: 'd' };
+  const VN = { k: 'Knight', a: 'Archer', m: 'Mage', d: 'Druid' };
+  const seg = (lista, atual, rot, pega) => el('span', { class: 'seg' }, lista.map(v => el('button', { type: 'button', text: rot(v), 'aria-pressed': String(v === atual), onclick: () => { pega(v); saveUi(); rk.alvo = ''; rkCarregar(1); } })));
+  const filtros = el('div', { class: 'rk-filtros' },
+    el('label', { class: 'rk-campo' }, el('span', { text: tr('gu.mundo') }),
+      el('select', { onchange: e => { ui.rkMundo = e.target.value; saveUi(); rk.alvo = ''; rkCarregar(1); } }, MUNDOS.map(m => el('option', { value: m, text: mundoNome(m), selected: m === mundo })))),
+    el('div', { class: 'rk-campo' }, el('span', { text: tr('rk.ranking') }), seg(RK_SKILLS, skill, rotSkill, v => { ui.rkSkill = v; })),
+    el('div', { class: 'rk-campo' }, el('span', { text: tr('pers.voc') }), seg(RK_VOCS, voc, v => tr('rk.voc.' + v), v => { ui.rkVoc = v; })),
+    el('form', { class: 'rk-campo rk-busca', onsubmit: e => { e.preventDefault(); rkAchar(e.target.elements.nome.value); } },
+      el('span', { text: tr('rk.achar') }),
+      el('span', { class: 'rk-achar' }, el('input', { name: 'nome', type: 'search', maxlength: 40, autocomplete: 'off', spellcheck: false, placeholder: tr('pers.nome'), value: rk.alvo }),
+        el('button', { class: 'dlg', type: 'submit', text: tr('rk.acharBtn'), disabled: rk.achando }))));
+  const titulo = el('h2', { class: 'rk-titulo', text: voc === 'all' ? tr('rk.titulo', { r: rotSkill(skill), m: mundoNome(mundo) }) : tr('rk.tituloVoc', { r: rotSkill(skill), v: tr('rk.vocDe.' + voc), m: mundoNome(mundo) }) });
+  const partes = [filtros, titulo];
+  if (rk.msg) partes.push(el('p', { class: 'status', text: rk.msg }));
+  const lista = rk.dados;
+  if (!lista) { if (rk.carregando) partes.push(el('p', { class: 'support-note', text: tr('rk.carregando') })); g.replaceChildren(...partes); return; }
+  const base = (rk.pagina - 1) * 100;
+  const meu = ui.meuPers ? slug(ui.meuPers) : '', alvo = rk.alvo ? slug(rk.alvo) : '';
+  const vb = h => guVoc(h.vocacao) || VB[voc] || null;
+  const chip = h => { const v = vb(h); return el('span', { class: 'gu-vc v-' + (v || 'x'), text: h.vocacao || (v ? VN[v] : '—') }); };
+  const valor = h => skill === 'level' ? String(h.valor) : String(h.valor);
+  const abrir = h => goTo('personagem/' + encodeURIComponent(h.nome));
+  // seu personagem nesta página
+  const iMeu = meu ? lista.findIndex(h => slug(h.nome) === meu) : -1;
+  if (iMeu >= 0) partes.push(el('div', { class: 'rk-meu' }, tr('rk.seuA') + ' ', el('b', { text: lista[iMeu].nome }), ' ' + tr('rk.seuB', { p: base + iMeu + 1, r: rotSkill(skill).toLowerCase(), v: valor(lista[iMeu]) }) + ' ',
+    el('button', { type: 'button', class: 'rk-ir', text: tr('rk.irAte'), onclick: () => { const l = $('#rk-grade tr.meu'); if (l) l.scrollIntoView({ block: 'center', behavior: 'smooth' }); } })));
+  // pódio dos três primeiros (só na primeira página)
+  if (rk.pagina === 1 && lista.length >= 3) {
+    const pod = (h, pos) => el('button', { type: 'button', class: 'rk-pod p' + pos, onclick: () => abrir(h) },
+      el('span', { class: 'pos', text: pos + 'º' }), el('b', { class: 'nm', text: h.nome }), chip(h), el('span', { class: 'val', text: valor(h) }),
+      el('small', { text: skill === 'level' ? (h.xp ? (h.xp / 1e9).toLocaleString(loc, { maximumFractionDigits: 2 }) + ' bi XP' : '') : h.nivel ? tr('pers.nivel').toLowerCase() + ' ' + h.nivel : '' }));
+    partes.push(el('div', { class: 'rk-podio' }, pod(lista[1], 2), pod(lista[0], 1), pod(lista[2], 3)));
+  }
+  const ini = rk.pagina === 1 ? 3 : 0;
+  partes.push(el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table rk-tab' },
+    el('thead', null, el('tr', null, el('th', { class: 'c', scope: 'col', text: '#' }), el('th', { class: 'l', scope: 'col', text: tr('gu.col.pers') }),
+      el('th', { class: 'l', scope: 'col', text: tr('pers.voc') }), el('th', { scope: 'col', text: tr('pers.nivel') }),
+      skill === 'level' ? el('th', { scope: 'col', text: tr('pers.xp') }) : el('th', { scope: 'col', text: rotSkill(skill) }))),
+    el('tbody', null, lista.slice(ini).map((h, i) => {
+      const s = slug(h.nome), cls = [s === meu ? 'meu' : '', s === alvo ? 'alvo' : ''].filter(Boolean).join(' ');
+      return el('tr', { class: cls || null },
+        el('td', { class: 'c pos', text: String(base + ini + i + 1) }),
+        el('td', { class: 'l' }, el('button', { class: 'gu-n', type: 'button', text: h.nome, onclick: () => abrir(h) }), s === meu ? el('span', { class: 'rk-eu', text: tr('rk.voce') }) : null),
+        el('td', { class: 'l' }, chip(h)),
+        el('td', { class: skill === 'level' ? 'g' : null, text: h.nivel ? String(h.nivel) : '—' }),
+        skill === 'level' ? el('td', { text: h.xp ? fmtInt(h.xp) : '—' }) : el('td', { class: 'g', text: valor(h) }));
+    })))));
+  // páginas: 10 de 100
+  partes.push(el('div', { class: 'rk-pag' }, el('span', { text: tr('pers.faixa', { a: base + 1, b: base + lista.length, t: fmtInt(1000) }) }),
+    el('span', { class: 'rk-pgs' }, Array.from({ length: 10 }, (_, i) => el('button', { type: 'button', text: String(i + 1), 'aria-pressed': String(rk.pagina === i + 1), onclick: () => { rkCarregar(i + 1); window.scrollTo({ top: g.offsetTop - 80, behavior: 'smooth' }); } })))));
+  g.replaceChildren(...partes);
+}
+const PAGES = ['timer', 'hunt', 'creatures', 'calc', 'personagem', 'guilda', 'rankings'];   // personagem, guilda e rankings: sem botão no menu por enquanto
 // Nome de cada página no endereço do navegador: sempre em inglês. Os nomes antigos em português continuam abrindo.
 const ROTA_URL = { personagem: 'character', guilda: 'guild' };
 const ROTA_PAGINA = { character: 'personagem', guild: 'guilda', personagem: 'personagem', guilda: 'guilda' };
@@ -11249,6 +11501,7 @@ function goTo(route, push = true) {
     nome = nome || pers.nome || ui.meuPers;
     if (nome && (!pers.dados || slug(nome) !== slug(pers.dados.name))) persCarregar(nome); else renderPersonagem();
   }
+  if (to === 'rankings') { if (!rk.dados || rk.chave !== rkRota(rk.pagina)) rkCarregar(rk.pagina); else renderRankings(); }
   if (to === 'guilda') {
     let nome = '';
     try { nome = sub ? decodeURIComponent(sub) : ''; } catch { nome = ''; }

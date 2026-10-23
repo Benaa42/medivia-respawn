@@ -7,6 +7,7 @@
 //   /player/{nome}   /online/{mundo}   /highscores/{mundo}/{vocação}/{skill}/{página}   /guilds/{mundo}   /houses/{mundo}
 //   /guilda/{mundo}/{nome}  a guilda com os membros (rank, nick) e, de cada um, nível, vocação, online, último login e
 //                       XP de ontem, 7 e 30 dias; importa o histórico de poucos membros por vez (o site pede de novo)
+//   /ranking/{mundo}/{vocação}/{skill}/{página}  o ranking oficial com a vocação e o nível de cada um, do que está guardado
 //   /historico/{nome}   XP e tempo online por dia (horário de Brasília) e as skills dos rankings, do que a coleta guardou;
 //                       na primeira vez de cada personagem, importa o histórico que já existe (ver importar())
 //   /coleta             quando a coleta rodou pela última vez, o que fez ou o erro, e os totais do banco
@@ -401,6 +402,27 @@ async function guilda(env, ctx, mundo, nome, cors) {
     200, cors, { 'Cache-Control': faltam ? 'no-store' : 'public, max-age=60' });
 }
 
+/* ---------- Ranking ---------- */
+// A API devolve só nome, valor e XP de cada posição; a vocação e o nível vêm da tabela perfil (quem já esteve online
+// em algum mundo coletado, foi aberto no site ou importado). No ranking de nível, o nível é o próprio valor.
+async function ranking(env, ctx, mundo, voc, skill, pagina, cors) {
+  const r = await apiCache(env, ctx, 'highscores/' + mundo + '/' + voc + '/' + skill + '/' + pagina);
+  if (!r.ok) return json({ erro: r.status === 429 ? 'a API do Medivia pediu um tempo; tente de novo em instantes' : 'a API do Medivia respondeu ' + r.status }, r.status === 429 ? 429 : 502, cors);
+  const lista = (r.dados.highscores || []).filter(h => h && h.name);
+  const perfis = new Map();
+  if (env.DB && lista.length) {
+    try {
+      await preparar(env.DB);
+      const rows = (await env.DB.prepare("SELECT chave, vocacao, nivel FROM perfil WHERE chave IN (SELECT value FROM json_each(?))").bind(JSON.stringify(lista.map(h => chaveNome(h.name)))).all()).results || [];
+      for (const p of rows) perfis.set(p.chave, p);
+    } catch { /* sem o banco: o ranking sai sem vocação e nível */ }
+  }
+  return json({ cached_at: r.dados.cached_at || null, lista: lista.map(h => {
+    const p = perfis.get(chaveNome(h.name)) || {};
+    return { nome: h.name, valor: h.value, xp: skill === 'level' ? h.count : null, vocacao: p.vocacao || null, nivel: skill === 'level' ? h.value : p.nivel || null };
+  }) }, 200, cors, { 'Cache-Control': 'public, max-age=300' });
+}
+
 /* ---------- Histórico de um personagem ---------- */
 async function historico(env, nome, cors) {
   const db = env.DB;
@@ -476,6 +498,8 @@ async function atender(req, env, ctx) {
     const gravadas = { hoje_utc: await g(0), ontem_utc: await g(1), limite_por_dia: 100000 };
     return json({ ultima: e ? JSON.parse(e.valor) : 'a coleta agendada ainda não rodou nenhuma vez', totais: n, gravadas }, 200, cors);
   }
+  const rk = rota.match(new RegExp('^ranking\\/(' + MUNDO + ')\\/(all|none|mages|druids|archers|knights)\\/(level|maglevel|melee|distance|blocking|fishing|mining|cooking)\\/(10|[1-9])$'));
+  if (rk) return ranking(env, ctx, rk[1], rk[2], rk[3], rk[4], cors);
   const gm = rota.match(new RegExp('^guilda\\/(' + MUNDO + ')\\/([^/]{2,60})$'));
   if (gm) return guilda(env, ctx, gm[1], gm[2], cors);
   const hist = rota.match(/^historico\/([^/]{2,40})$/);
