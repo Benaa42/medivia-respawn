@@ -809,6 +809,29 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-rk { display: inline-block; padding: 2px 9px; border-radius: 999px; background: var(--card); font-size: 12px; color: var(--label); }
 .gu-rk.lider { background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--amber); }
 .pers-cart .gu-ficha { padding: 0; border: 0; background: none; color: var(--amber); font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.gu-abas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.gu-abas .unit-toggle { margin-left: 0; }
+.gu-abas .support-note { font-size: 13px; }
+.gu-sub { font: 700 15px var(--font-display); color: var(--title); margin-top: 4px; }
+.gu-comuns { display: flex; flex-direction: column; gap: 8px; }
+.gu-comum { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto; align-items: center; gap: 8px 16px; padding: 10px 14px; border-radius: var(--r-md); background: var(--card); }
+.gu-comum .cri { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-weight: 700; color: var(--amber); }
+.gu-comum .qt { padding: 1px 8px; border-radius: 999px; background: var(--band); color: var(--value); font: 700 12px var(--font-ui); }
+.gu-quem { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.gu-tk { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--box); font-size: 13px; color: var(--title); white-space: nowrap; }
+.gu-tk b { font-weight: 600; color: var(--label); font-variant-numeric: tabular-nums; }
+.gu-tk.feita { background: var(--band); }
+.gu-tk.feita b { color: var(--value); }
+.gu-tk .boost { padding: 0 5px; border-radius: 5px; background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--amber); font: 700 10px var(--font-ui); }
+.gu-resp { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; color: var(--label); text-align: right; }
+.gu-resp button { padding: 3px 10px; border: 0; border-radius: 999px; background: var(--band); color: var(--value); font: 700 12px var(--font-ui); cursor: pointer; }
+.gu-resp .t { color: var(--value); font-weight: 600; }
+.gu-por { display: flex; flex-direction: column; }
+.gu-por > div { display: grid; grid-template-columns: minmax(0, 170px) minmax(0, 1fr); align-items: start; gap: 6px 14px; padding: 9px 0; border-bottom: 1px solid var(--edge); }
+.gu-por .quem { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.gu-por .quem small { font-size: 12px; color: var(--faint); }
+.gu-tk.comum { outline: 1px solid var(--gold-edge); }
+@media (max-width: 700px) { .gu-comum { grid-template-columns: 1fr; } .gu-resp { align-items: flex-start; text-align: left; } .gu-por > div { grid-template-columns: 1fr; } }
 @media (max-width: 980px) { .gu-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .pers-busca input { flex: 1 1 240px; max-width: 360px; padding: 11px 14px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 15px var(--font-ui); }
 .pers-busca input:focus { outline: 2px solid var(--value); outline-offset: -1px; border-color: transparent; }
@@ -1827,6 +1850,19 @@ const I18N = {
     'gu.col.d30': 'XP 30 dias',
     'gu.col.login': 'Último login',
     'gu.online': 'online',
+    'gu.aba.membros': 'Membros ({n})',
+    'gu.aba.diarias': 'Diárias',
+    'gu.aba.semanais': 'Semanais',
+    'gu.fichas': 'Buscando as tasks dos membros: {a} de {b}…',
+    'gu.comum': 'Tasks em comum',
+    'gu.semComum': 'Nenhuma task repetida entre os membros.',
+    'gu.nMembros': '{n} membros',
+    'gu.porMembro': 'Por membro',
+    'gu.semTask': 'sem tasks',
+    'gu.semFicha': 'ficha não carregou',
+    'gu.grupoTempo': '{r} · {k}/h em grupo de {n} · todos terminam em {t}',
+    'gu.todosFeitos': 'todos concluíram',
+    'gu.semResp': 'sem respawn no banco',
     'pers.vida': 'Vida',
     'pers.mana': 'Mana',
     'pers.cap': 'Capacidade',
@@ -2562,6 +2598,19 @@ const I18N = {
     'gu.col.d30': 'XP 30 days',
     'gu.col.login': 'Last login',
     'gu.online': 'online',
+    'gu.aba.membros': 'Members ({n})',
+    'gu.aba.diarias': 'Daily',
+    'gu.aba.semanais': 'Weekly',
+    'gu.fichas': 'Fetching the members\' tasks: {a} of {b}…',
+    'gu.comum': 'Shared tasks',
+    'gu.semComum': 'No task is shared between members.',
+    'gu.nMembros': '{n} members',
+    'gu.porMembro': 'By member',
+    'gu.semTask': 'no tasks',
+    'gu.semFicha': 'sheet did not load',
+    'gu.grupoTempo': '{r} · {k}/h in a group of {n} · everyone done in {t}',
+    'gu.todosFeitos': 'everyone is done',
+    'gu.semResp': 'no respawn in the bank',
     'pers.vida': 'Health',
     'pers.mana': 'Mana',
     'pers.cap': 'Capacity',
@@ -3297,6 +3346,19 @@ const I18N = {
     'gu.col.d30': 'XP 30 días',
     'gu.col.login': 'Último login',
     'gu.online': 'en línea',
+    'gu.aba.membros': 'Miembros ({n})',
+    'gu.aba.diarias': 'Diarias',
+    'gu.aba.semanais': 'Semanales',
+    'gu.fichas': 'Buscando las tasks de los miembros: {a} de {b}…',
+    'gu.comum': 'Tasks en común',
+    'gu.semComum': 'Ninguna task se repite entre los miembros.',
+    'gu.nMembros': '{n} miembros',
+    'gu.porMembro': 'Por miembro',
+    'gu.semTask': 'sin tasks',
+    'gu.semFicha': 'la ficha no cargó',
+    'gu.grupoTempo': '{r} · {k}/h en grupo de {n} · todos terminan en {t}',
+    'gu.todosFeitos': 'todos completaron',
+    'gu.semResp': 'sin respawn en el banco',
     'pers.vida': 'Vida',
     'pers.mana': 'Maná',
     'pers.cap': 'Capacidad',
@@ -4032,6 +4094,19 @@ const I18N = {
     'gu.col.d30': 'XP 30 dni',
     'gu.col.login': 'Ostatnie logowanie',
     'gu.online': 'online',
+    'gu.aba.membros': 'Członkowie ({n})',
+    'gu.aba.diarias': 'Dzienne',
+    'gu.aba.semanais': 'Tygodniowe',
+    'gu.fichas': 'Pobieram taski członków: {a} z {b}…',
+    'gu.comum': 'Wspólne taski',
+    'gu.semComum': 'Żaden task nie powtarza się między członkami.',
+    'gu.nMembros': '{n} członków',
+    'gu.porMembro': 'Według członka',
+    'gu.semTask': 'brak tasków',
+    'gu.semFicha': 'nie wczytano',
+    'gu.grupoTempo': '{r} · {k}/h w grupie {n} · wszyscy skończą w {t}',
+    'gu.todosFeitos': 'wszyscy ukończyli',
+    'gu.semResp': 'brak respawnu w banku',
     'pers.vida': 'Życie',
     'pers.mana': 'Mana',
     'pers.cap': 'Udźwig',
@@ -10391,14 +10466,14 @@ async function persCarregar(nome) {
 // Nome da task no plural ("Drake Lords", "Phoenixes") para o nome da criatura
 const persSingular = n => String(n).replace(/ies$/i, 'y').replace(/ves$/i, 'f').replace(/(x|ch|sh|ss)es$/i, '$1').replace(/s$/i, '');
 // O respawn do banco que mata a criatura mais rápido, no grupo e bônus escolhidos na página
-function persMelhor(nome) {
+function persMelhor(nome, pct = pers.pct, party = pers.party) {
   const alvo = new Set([slug(nome), slug(persSingular(nome))]);
   let best = null;
   for (const r of allRespawns()) {
     if (r.custom) continue;
     for (const m of r.monsters) {
       if (!alvo.has(slug(m.name)) || !m.base || !m.count) continue;
-      const kph = killsExact(respawnAt(m.base, pers.pct, pers.party), m.count);
+      const kph = killsExact(respawnAt(m.base, pct, party), m.count);
       if (!best || kph > best.kph) best = { r, m, kph };
     }
   }
@@ -10799,7 +10874,33 @@ $('#pers-meu').addEventListener('click', () => { if (!pers.dados) return; ui.meu
    personagem. Os membros vêm da API oficial; nível, vocação, online, último login e XP de cada um vêm do Worker
    (/guilda/{mundo}/{nome}), que importa o histórico de poucos membros por vez: enquanto falta, a página pede de novo. */
 const GU_MUNDOS = ['pendulum', 'destiny', 'legacy'];
-const gu = { nome: '', dados: null, ord: 'nivel', desc: true, espera: null };
+const gu = { nome: '', dados: null, ord: 'nivel', desc: true, espera: null, aba: 'membros', fichas: new Map(), buscando: false };
+// Fichas dos membros (para as tasks do Huntsman): uma por vez, porque a API aceita 1 pedido por segundo. O Worker guarda
+// cada ficha por 5 minutos; resposta rápida é cache e não precisa da pausa. Num 429, espera e tenta mais uma vez.
+async function guFichas() {
+  if (gu.buscando || !gu.dados) return;
+  gu.buscando = true;
+  const guilda = gu.dados.guilda.nome;
+  const dorme = ms => new Promise(r => setTimeout(r, ms));
+  try {
+    for (const m of gu.dados.membros) {
+      if (!gu.dados || gu.dados.guilda.nome !== guilda || pageNow !== 'guilda') break;
+      if (gu.fichas.has(m.nome)) continue;
+      let ficha = null;
+      for (let tentativa = 0; tentativa < 2 && !ficha; tentativa++) {
+        const ini = Date.now();
+        try {
+          const r = await fetch(API_MEDIVIA + 'player/' + encodeURIComponent(m.nome));
+          if (r.status === 429) { await dorme(4000); continue; }
+          ficha = r.ok ? (await r.json()).player || 'erro' : 'erro';
+        } catch { ficha = 'erro'; }
+        if (Date.now() - ini > 250) await dorme(1100);
+      }
+      gu.fichas.set(m.nome, ficha || 'erro');
+      if (gu.aba !== 'membros') renderGuilda();
+    }
+  } finally { gu.buscando = false; if (gu.aba !== 'membros') renderGuilda(); }
+}
 const guVoc = v => /knight/i.test(v || '') ? 'k' : /archer/i.test(v || '') ? 'a' : /druid/i.test(v || '') ? 'd' : /mage|sorcer/i.test(v || '') ? 'm' : null;
 // XP em kk como no jogo: +134,4kk; acima de 1 bilhão sem casa decimal (+1 028kk)
 function guKk(v) {
@@ -10814,6 +10915,7 @@ async function guCarregar(nome, recarga) {
   nome = String(nome || '').trim().replace(/\s+/g, ' ').slice(0, 60);
   if (!nome) return;
   clearTimeout(gu.espera);
+  if (slug(nome) !== slug(gu.nome)) { gu.fichas = new Map(); gu.aba = 'membros'; }
   gu.nome = nome;
   $('#gu-nome').value = nome;
   const mundo = GU_MUNDOS.includes(ui.guMundo) ? ui.guMundo : 'pendulum';
@@ -10830,6 +10932,57 @@ async function guCarregar(nome, recarga) {
     if (pageNow === 'guilda') { try { history.replaceState(null, '', location.pathname + location.search + '#guilda/' + encodeURIComponent(gu.dados.guilda.nome)); } catch { /* o endereço fica como está */ } }
   } catch (e) { guStatus('err', tr(e.message === '429' ? 'pers.limite' : 'pers.erro')); }
   renderGuilda();
+}
+// Tasks do Huntsman de todos (tipo: 'daily' ou 'weekly'): primeiro as que se repetem entre os membros, com o melhor
+// respawn para um grupo desse tamanho e o tempo para todos terminarem; depois as de cada membro.
+function guTasks(tipo, M) {
+  const porCriatura = new Map();
+  for (const m of M) {
+    const f = gu.fichas.get(m.nome);
+    const tarefas = f && f !== 'erro' && f.huntsman && f.huntsman[tipo] ? f.huntsman[tipo].tasks || [] : [];
+    for (const t of tarefas) {
+      const k = slug(t.name || '');
+      if (!k) continue;
+      if (!porCriatura.has(k)) porCriatura.set(k, { nome: t.name, quem: [] });
+      porCriatura.get(k).quem.push({ m, t });
+    }
+  }
+  const temTasks = m => { const f = gu.fichas.get(m.nome); return f && f !== 'erro' && f.huntsman && f.huntsman[tipo] && (f.huntsman[tipo].tasks || []).length ? 1 : 0; };
+  const comuns = [...porCriatura.values()].filter(c => c.quem.length > 1).sort((a, b) => b.quem.length - a.quem.length || a.nome.localeCompare(b.nome));
+  const emComum = new Set(comuns.map(c => slug(c.nome)));
+  const chip = (rot, t, marca) => {
+    const req = t.required || 0, prog = Math.min(req, t.progress || 0), feita = t.completed || (req && prog >= req);
+    return el('span', { class: 'gu-tk' + (feita ? ' feita' : '') + (marca ? ' comum' : '') }, rot, t.boost ? el('span', { class: 'boost', text: '+' + t.boost + '%' }) : null,
+      el('b', { text: feita ? '✓' : fmtInt(prog) + '/' + fmtInt(req) }));
+  };
+  const linhaComum = c => {
+    const falta = Math.max(0, ...c.quem.map(({ t }) => (t.required || 0) - Math.min(t.required || 0, t.progress || 0)));
+    const n = Math.min(4, c.quem.length), party = (PARTIES.find(p => p.n === n) || PARTIES[0]).mult;
+    const b = persMelhor(c.nome, ui.pct, party);
+    return el('div', { class: 'gu-comum' },
+      el('span', { class: 'cri' }, c.nome, el('span', { class: 'qt', text: tr('gu.nMembros', { n: c.quem.length }) })),
+      el('div', { class: 'gu-quem' }, c.quem.map(({ m, t }) => chip(m.nome, t))),
+      el('div', { class: 'gu-resp' },
+        !falta ? el('span', { class: 't', text: tr('gu.todosFeitos') })
+          : b ? [el('span', { text: tr('gu.grupoTempo', { r: b.r.name, k: Math.round(b.kph), n: c.quem.length, t: persTempo(falta / b.kph) }) }),
+            el('button', { type: 'button', text: tr('pers.abrir'), onclick: () => { select(b.r.id); goTo('timer'); } })]
+          : el('span', { class: 'none', text: tr('gu.semResp') })));
+  };
+  return el('div', { class: 'gu-tasks' },
+    el('h3', { class: 'gu-sub', text: tr('gu.comum') }),
+    comuns.length ? el('div', { class: 'gu-comuns' }, comuns.map(linhaComum)) : el('p', { class: 'support-note', text: tr('gu.semComum') }),
+    el('h3', { class: 'gu-sub', text: tr('gu.porMembro') }),
+    // quem tem tasks primeiro; sem tasks (ou sem ficha) no fim
+    el('div', { class: 'gu-por' }, M.slice().sort((a, b) => temTasks(b) - temTasks(a)).map(m => {
+      const f = gu.fichas.get(m.nome);
+      const h = f && f !== 'erro' && f.huntsman && f.huntsman[tipo];
+      const tarefas = h ? h.tasks || [] : [];
+      return el('div', null,
+        el('div', { class: 'quem' }, el('button', { class: 'gu-n', type: 'button', text: m.nome, onclick: () => goTo('personagem/' + encodeURIComponent(m.nome)) }),
+          h && h.difficulty && h.difficulty.name ? el('small', { text: h.difficulty.name }) : null),
+        el('div', { class: 'gu-quem' }, !f ? el('span', { class: 'none', text: '…' }) : f === 'erro' ? el('span', { class: 'none', text: tr('gu.semFicha') })
+          : tarefas.length ? tarefas.map(t => chip(t.name, t, emComum.has(slug(t.name || '')))) : el('span', { class: 'none', text: tr('gu.semTask') })));
+    })));
 }
 function renderGuilda() {
   const g = $('#gu-grade');
@@ -10907,8 +11060,13 @@ function renderGuilda() {
         xpTd(m.xp && m.xp.ontem), xpTd(m.xp && m.xp.d7), xpTd(m.xp && m.xp.d30),
         el('td', { class: 'q', text: m.online ? tr('gu.online') : m.ultimoLogin ? persData(m.ultimoLogin * 1000, loc, true) : '—' }));
     })));
+  const aba = (id, rot) => el('button', { type: 'button', text: rot, 'aria-pressed': String(gu.aba === id), onclick: () => { gu.aba = id; if (id !== 'membros') guFichas(); renderGuilda(); } });
+  const carregadas = M.filter(m => gu.fichas.has(m.nome)).length;
   const membros = card('tres', el('h2', null, tr('gu.membrosTit'), el('small', { text: tr('gu.cliqueNome') })),
-    el('div', { class: 'creatures-wrap' }, tabela));
+    el('div', { class: 'gu-abas' },
+      el('span', { class: 'unit-toggle' }, aba('membros', tr('gu.aba.membros', { n: M.length })), aba('daily', tr('gu.aba.diarias')), aba('weekly', tr('gu.aba.semanais'))),
+      gu.aba !== 'membros' && carregadas < M.length ? el('span', { class: 'support-note', text: tr('gu.fichas', { a: carregadas, b: M.length }) }) : null),
+    gu.aba === 'membros' ? el('div', { class: 'creatures-wrap' }, tabela) : guTasks(gu.aba, M));
   g.replaceChildren(topo, rank, vocCard, membros);
 }
 $('#gu-ver').addEventListener('click', () => guCarregar($('#gu-nome').value));
