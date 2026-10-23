@@ -52,10 +52,10 @@ const MUNDOS_TODOS = ['pendulum', 'legacy', 'serenity', 'luminary', 'liberty', '
 const FOTO_POR_MINUTO = 3;    // páginas da foto diária por minuto (cada mundo: 10 do ranking geral e até 40 por vocação)
 const FOTO_VOCS = [['knights', 'Knight'], ['archers', 'Archer'], ['mages', 'Mage'], ['druids', 'Druid']];
 // Freio de gravações. Plano pago (desde 23/10/2026): 50 milhões de linhas gravadas por mês incluídas. O freio olha o
-// dia (UTC) e a soma dos últimos 30 dias; cada importação grava umas 500.
-const IMPORTA_ATE = 3000000;        // a guilda e a importação da base só importam com o dia abaixo disto
-const IMPORTA_ATE_FICHA = 3500000;  // quem abre a ficha de um personagem ainda importa até aqui
-const FOTO_ATE = 4000000;           // a foto diária para aqui
+// dia (UTC) e a soma dos últimos 30 dias; cada importação grava umas 1.100 (histórico completo).
+const IMPORTA_ATE = 5000000;        // a guilda e a importação da base só importam com o dia abaixo disto
+const IMPORTA_ATE_FICHA = 5500000;  // quem abre a ficha de um personagem ainda importa até aqui
+const FOTO_ATE = 6000000;           // a foto diária para aqui
 const MES_ATE = 40000000;           // nos últimos 30 dias: acima disto, nada disso grava (só a coleta normal)
 const BASE_POR_MINUTO = 3;          // históricos importados por minuto (3 pedidos ao MediviaGeeks e ao MediviaThings cada)
 const FICHAS_POR_MINUTO = 3;        // fichas de quem está na foto lidas por minuto (tasks), em rodízio
@@ -494,7 +494,10 @@ const THINGS = 'https://mediviathings-native.fly.dev/v1/';
 const pedirFora = url => fetch(url, { headers: { Accept: 'application/json', 'User-Agent': 'MediviaLabs/1.0 (+https://medivialabs.com)' } });
 // Importado de vez: com dias trazidos, ou sem nenhum há menos de uma hora (aí tenta de novo; o MediviaGeeks pode estar fora
 // ou o banco pode ter recusado a gravação). Devolve true quando o personagem fica importado.
-const IMPORTADO = '(dias > 0 OR quando > ?)';
+// Importado = trouxe algum dia depois de IMPORTADO_DESDE (o histórico completo; antes era só o último ano) ou tentou na
+// última hora. Quem foi importado antes disso é importado de novo, uma vez.
+const IMPORTADO_DESDE = 1792787400;   // 23/10/2026 17h30 (Brasília)
+const IMPORTADO = '((dias > 0 AND quando > ' + IMPORTADO_DESDE + ') OR quando > ?)';
 async function importar(db, chave, nome, teto = IMPORTA_ATE) {
   const ja = await db.prepare('SELECT 1 AS x FROM importados WHERE chave = ? AND ' + IMPORTADO).bind(chave, agora() - 3600).first();
   if (ja) return true;
@@ -505,8 +508,8 @@ async function importar(db, chave, nome, teto = IMPORTA_ATE) {
     if (!rx.ok) return false;   // MediviaGeeks fora: tenta na próxima vez, sem marcar nada
     const xp = await rx.json();
     const on = ro.ok ? await ro.json() : {};
-    // só o último ano: cada dia é uma linha gravada, e o plano gratuito aceita 100 mil por dia
-    const corte = diaBr(agora() - IMPORTA_DIAS * 86400);
+    // todo o histórico que existir (IMPORTA_DIAS = 0) ou só os últimos dias
+    const corte = IMPORTA_DIAS ? diaBr(agora() - IMPORTA_DIAS * 86400) : '';
     const linhasXp = (Array.isArray(xp) ? xp : []).filter(x => x && x.DATA && Number.isFinite(Number(x.EXPGAIN)) && String(x.DATA).slice(0, 10) >= corte)
       .map(x => ({ d: String(x.DATA).slice(0, 10), n: Number(x.LEVEL) || 0, g: Number(x.EXPGAIN) }));
     // o tempo online deles vem em minutos por dia
@@ -531,7 +534,7 @@ async function importar(db, chave, nome, teto = IMPORTA_ATE) {
 }
 
 /* ---------- Guilda ---------- */
-const IMPORTA_DIAS = 365;   // a importação traz só o último ano de histórico
+const IMPORTA_DIAS = 0;   // 0: a importação traz todo o histórico (o MediviaGeeks guarda uns 2 a 3 anos de XP)
 const IMPORTA_POR_VEZ = 2;   // cada importação faz 3 pedidos e uns 6 ao banco: 2 por vez deixam folga nos ~50 por execução
 // Resposta da API com o mesmo cache das rotas abertas (vale o tempo que a API indicou; reserva de um dia para o 429)
 async function apiCache(env, ctx, rota) {
@@ -639,7 +642,7 @@ async function historico(env, nome, cors) {
   const db = env.DB;
   if (!db) return json({ erro: 'coleta ainda não ligada' }, 503, cors);
   await preparar(db);
-  const chave = chaveNome(nome), desde = agora() - 1100 * 86400;   // até 3 anos de histórico (o importado vai até 2 anos)
+  const chave = chaveNome(nome), desde = agora() - 5000 * 86400;   // todo o histórico guardado
   await importar(db, chave, nome, IMPORTA_ATE_FICHA);
   const pontos = (await db.prepare('SELECT quando, nivel, experiencia FROM xp WHERE chave = ? AND quando >= ? ORDER BY quando').bind(chave, desde).all()).results || [];
   const sess = (await db.prepare('SELECT entrou, saiu FROM sessoes WHERE chave = ? AND saiu >= ? ORDER BY entrou').bind(chave, desde).all()).results || [];
