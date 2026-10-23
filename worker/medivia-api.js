@@ -171,13 +171,28 @@ async function coletar(env, reg = { passos: [] }) {
     reg.passos.push(mundo + ': ' + lista.length + ' online');
   }
   // Fichas de quem deslogou (só os acompanhados), poucas por minuto
-  // A ficha só atualiza depois do logout (dito no canal da API): espera 2 minutos antes de buscar
-  const fila = (await db.prepare('SELECT chave, nome FROM fila WHERE pedido <= ? ORDER BY pedido LIMIT ?').bind(t - 120, FILA_POR_MINUTO).all()).results || [];
+  // A ficha só atualiza depois do logout (dito no canal da API): espera 2 minutos antes de buscar. A API guarda cada
+  // resposta por até 5 minutos (cached_at diz quando): uma cópia de antes do logout (pedido) não vale, e o personagem
+  // fica na fila para o próximo minuto; depois de 15 minutos, aceita o que vier. A ficha nova também vai para o cache do
+  // Worker, para o site mostrar logo os dados de depois do logout.
+  const fila = (await db.prepare('SELECT chave, nome, pedido FROM fila WHERE pedido <= ? ORDER BY pedido LIMIT ?').bind(t - 120, FILA_POR_MINUTO).all()).results || [];
   for (const [i, f] of fila.entries()) {
     if (i) await dormir(INTERVALO_MS);
-    const r = await pedir(env, 'player/' + f.nome);
+    const rota = 'player/' + f.nome;
+    const r = await pedir(env, rota);
     if (r.status === 429) break;
-    if (r.ok) { const p = (await r.json()).player; if (p) await guardarXp(db, [p], 'logout'); }
+    if (r.ok) {
+      const corpo = await r.text();
+      let d = null;
+      try { d = JSON.parse(corpo); } catch { /* resposta estranha: sai da fila */ }
+      if (d && Number(d.cached_at) < f.pedido && f.pedido > t - 900) { reg.passos.push('ficha de antes do logout: ' + f.nome); continue; }
+      if (d && d.player) {
+        await guardarXp(db, [d.player], 'logout');
+        const vale = Math.max(30, Math.min(3600, Number(d.cached_for) || 300));
+        await caches.default.put(new Request('https://api.medivialabs.com/cache/' + encodeURIComponent(rota.toLowerCase())),
+          new Response(corpo, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=' + vale } })).catch(() => {});
+      }
+    }
     await db.prepare('DELETE FROM fila WHERE chave = ?').bind(f.chave).run();
   }
   // Ranking de nível: uma página por minuto nos minutos 10 a 19 de cada hora; nos outros, uma página de skills
