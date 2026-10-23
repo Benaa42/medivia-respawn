@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo: Rankings, tasks</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Modelo do ranking de tasks da página Rankings (fase 3). Nomes inventados e números na faixa dos reais, menos o Bena. Nada aqui é publicado. */
+:root { --ground: #0f1314; --box: #171d1e; --card: #1e2627; --edge: #2c3637; --band: #1b3a2c; --title: #f1f5f3; --label: #c2cbc8; --faint: #8b9894; --amber: #f0ad4d; --value: #3ae374;
+  --gold-edge: rgba(240, 173, 77, 0.55); --gold-wash: rgba(240, 173, 77, 0.06); --gold-ink: #241703; --k: #ff7468; --a: #3ae374; --m: #a970ff; --d: #3cc6f0; --x: #8b9894;
+  --font-ui: "Onest", "Segoe UI", system-ui, sans-serif; --font-display: "Bricolage Grotesque", "Onest", sans-serif; }
+* { box-sizing: border-box; } body { margin: 0; background: var(--ground); color: var(--label); font: 400 14px/1.45 var(--font-ui); font-variant-numeric: tabular-nums; }
+h1, h2, h3, p { margin: 0; }
+.faixa { background: #0a0e0f; border-bottom: 1px solid var(--edge); font-size: 13px; } .faixa div { max-width: 1240px; margin: 0 auto; padding: 7px 20px; color: var(--faint); }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 18px 20px 60px; display: flex; flex-direction: column; gap: 18px; }
+.barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.marca { font: 800 28px var(--font-display); color: var(--title); } .marca b { color: var(--amber); font-weight: inherit; }
+.menu { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; border: 1px solid var(--gold-edge); border-radius: 999px; background: var(--gold-wash); }
+.menu span { padding: 8px 14px; border-radius: 999px; color: var(--title); font: 600 14px var(--font-ui); } .menu span.on { background: var(--amber); color: var(--gold-ink); }
+.menu span.novo::after { content: "novo"; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: var(--band); color: var(--value); font-size: 10px; }
+.exemplo { font: 700 13px var(--font-ui); color: var(--amber); margin-top: 8px; }
+.quadro { background: var(--box); border-radius: 22px; padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 16px; }
+.filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 18px; }
+.campo, .grupo { display: flex; flex-direction: column; gap: 5px; } .campo > span:first-child, .grupo .rot { font-size: 12px; color: var(--faint); }
+.sel, .inp { padding: 8px 12px; border: 1px solid var(--edge); border-radius: 10px; background: var(--card); color: var(--title); font-weight: 600; min-width: 140px; }
+.inp { color: var(--faint); font-weight: 500; min-width: 220px; } .busca { margin-left: auto; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 999px; background: var(--card); }
+.seg b { padding: 6px 11px; border-radius: 999px; font: 600 13px var(--font-ui); color: var(--label); } .seg b.on { background: var(--title); color: var(--ground); }
+h2 { font: 800 22px var(--font-display); color: var(--title); display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; } h2 small { font: 500 13px var(--font-ui); color: var(--faint); }
+/* pódio dos três primeiros */
+.podio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 12px; max-width: 760px; margin: 0 auto; width: 100%; }
+.pod { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 12px 14px; border-radius: 16px; background: var(--card); text-align: center; }
+.pod.p1 { padding-top: 26px; background: linear-gradient(180deg, rgba(240,173,77,0.16), var(--card)); box-shadow: inset 0 0 0 1px var(--gold-edge); }
+.pod.p2 { background: linear-gradient(180deg, rgba(194,203,200,0.12), var(--card)); } .pod.p3 { background: linear-gradient(180deg, rgba(208,138,76,0.14), var(--card)); }
+.pod .pos { font: 800 15px var(--font-display); color: var(--faint); } .pod.p1 .pos { color: var(--amber); font-size: 18px; }
+.pod .nm { font: 800 18px var(--font-display); color: var(--title); } .pod.p1 .nm { font-size: 22px; }
+.pod .val { font: 800 26px/1 var(--font-display); color: var(--amber); } .pod.p1 .val { font-size: 32px; }
+.pod small { color: var(--faint); font-size: 12px; }
+.vc { display: inline-block; padding: 1px 9px; border: 1px solid; border-radius: 999px; font: 600 12px var(--font-ui); }
+.v-k { color: var(--k); border-color: color-mix(in srgb, var(--k) 45%, transparent); } .v-a { color: var(--a); border-color: color-mix(in srgb, var(--a) 45%, transparent); }
+.v-m { color: var(--m); border-color: color-mix(in srgb, var(--m) 45%, transparent); } .v-d { color: var(--d); border-color: color-mix(in srgb, var(--d) 45%, transparent); } .v-x { color: var(--x); border-color: var(--edge); }
+/* tabela */
+.tabwrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { padding: 6px 10px; border-bottom: 1px solid var(--edge); font: 500 12px var(--font-ui); color: var(--faint); text-align: right; white-space: nowrap; }
+td { padding: 7px 10px; border-bottom: 1px solid var(--edge); text-align: right; color: var(--title); white-space: nowrap; }
+th.l, td.l { text-align: left; } th.c, td.c { text-align: center; width: 48px; }
+td.pos { color: var(--faint); font-weight: 700; } td a { color: var(--amber); font-weight: 700; text-decoration: none; }
+td.g { color: var(--value); font-weight: 700; } td.f { color: var(--faint); }
+tr.meu td { background: var(--gold-wash); } tr.meu td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
+.eu { padding: 0 6px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 10px var(--font-ui); vertical-align: 1px; }
+.meupos { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--gold-edge); background: var(--gold-wash); color: var(--title); font-size: 14px; }
+.meupos b { color: var(--amber); }
+.pag { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--label); }
+.pgs { display: inline-flex; gap: 4px; } .pgs b { width: 30px; height: 30px; display: inline-grid; place-items: center; border-radius: 50%; background: var(--card); color: var(--label); font-weight: 600; } .pgs b.on { background: var(--amber); color: var(--gold-ink); }
+.nota-mock { font-size: 13px; color: var(--faint); }
+.etiqueta { position: fixed; right: 16px; bottom: 16px; padding: 6px 12px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 12px var(--font-ui); }
+@media (max-width: 760px) { .podio { grid-template-columns: 1fr; } .pod.p1 { order: -1; } .busca { margin-left: 0; } }
+/* tasks */
+th.on { color: var(--title); }
+td.n { color: var(--title); } td.on { color: var(--value); font-weight: 700; }
+.tk { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.tk i { width: 70px; height: 6px; border-radius: 3px; background: var(--card); overflow: hidden; } .tk i b { display: block; height: 100%; background: var(--value); border-radius: 3px; }
+.pod .extra { display: flex; gap: 10px; color: var(--faint); font-size: 12px; } .pod .extra b { color: var(--label); font-weight: 600; }
+@media (max-width: 760px) { .tab-tk .opc { display: none; } .tab-tk th, .tab-tk td { padding: 6px 4px; font-size: 13px; } .tab-tk th.c, .tab-tk td.c { width: 28px; } .tk i { display: none; }
+  .quadro { padding: 16px 12px 20px; } .wrap { padding-inline: 16px; } }
+</style></head><body>
+<div class="faixa"><div>Mapper da wiki ↗ · Novidades · Sugestões e problemas</div></div>
+<div class="wrap">
+  <div class="barra"><span class="marca">Medivia <b>Labs</b></span><nav class="menu"><span>Cronômetro</span><span>Analisador de hunt</span><span>Criaturas</span><span class="on novo">Rankings</span><span>Calculadora</span><span>Sorteio</span></nav></div>
+
+  <p class="exemplo">Exemplo 1: tasks por pontos de Huntsman, todas as vocações</p>
+  <section class="quadro">
+    <div class="filtros">
+  <label class="campo"><span>Mundo</span><span class="sel">Pendulum ▾</span></label>
+  <div class="grupo"><span class="rot">Ranking</span><div class="seg"><b>Nível</b><b>XP ganha</b><b class="on">Tasks</b><b>Magic level</b><b>Melee</b><b>Distance</b><b>Blocking</b><b>Fishing</b><b>Mining</b><b>Cooking</b></div></div>
+  <div class="grupo"><span class="rot">Ordenar por</span><div class="seg"><b class="on">Pontos de Huntsman</b><b class="">Tasks concluídas</b><b class="">Abates</b></div></div>
+  <div class="grupo"><span class="rot">Vocação</span><div class="seg"><b class="on">Todas</b><b class="">Knights</b><b class="">Archers</b><b class="">Mages</b><b class="">Druids</b></div></div>
+  <label class="campo busca"><span>Achar no ranking</span><span class="inp">Nome do personagem</span></label>
+</div>
+    <h2>Pontos de Huntsman em Pendulum</h2>
+    <div class="meupos"><span>Seu personagem, <b>Bena</b>, está em <b>14º</b> com <b>605</b> pontos de Huntsman.</span> <a href="#" style="color:var(--value);font-weight:700">Ir até ele</a></div>
+    <div class="podio"><div class="pod p2"><span class="pos">2º</span><b class="nm">Orin Gale</b><span class="vc v-d">Druid</span><span class="val">2.375</span><small>pontos de huntsman</small><span class="extra"><span><b>163/171</b> tasks</span><span><b>91.623</b> abates</span></span></div><div class="pod p1"><span class="pos">1º</span><b class="nm">Iskra Vale</b><span class="vc v-a">Archer</span><span class="val">2.445</span><small>pontos de huntsman</small><span class="extra"><span><b>213/217</b> tasks</span><span><b>53.955</b> abates</span></span></div><div class="pod p3"><span class="pos">3º</span><b class="nm">Seline Marr</b><span class="vc v-d">Druid</span><span class="val">2.055</span><small>pontos de huntsman</small><span class="extra"><span><b>145/149</b> tasks</span><span><b>54.162</b> abates</span></span></div></div>
+    <div class="tabwrap"><table class="tab-tk"><thead><tr><th class="c">#</th><th class="l">Personagem</th><th class="opc">Vocação</th><th>Nível</th><th class="on">Pontos de Huntsman</th><th class="opc">Tasks concluídas</th><th class="opc">Abates em tasks</th></tr></thead><tbody>
+<tr class=""><td class="c pos">4</td><td class="l"><a href="#">Wyn Hart</a></td><td class="opc"><span class="vc v-k">Knight</span></td><td>645</td><td class="n on">1.860</td><td class="n opc"><span class="tk"><i><b style="width:95%"></b></i>142/149</span></td><td class="n opc">48.736</td></tr>
+<tr class=""><td class="c pos">5</td><td class="l"><a href="#">Vesna Lark</a></td><td class="opc"><span class="vc v-d">Druid</span></td><td>516</td><td class="n on">1.855</td><td class="n opc"><span class="tk"><i><b style="width:100%"></b></i>214/215</span></td><td class="n opc">42.244</td></tr>
+<tr class=""><td class="c pos">6</td><td class="l"><a href="#">Doran Pyke</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>484</td><td class="n on">1.655</td><td class="n opc"><span class="tk"><i><b style="width:99%"></b></i>199/202</span></td><td class="n opc">61.003</td></tr>
+<tr class=""><td class="c pos">7</td><td class="l"><a href="#">Calla Thorn</a></td><td class="opc"><span class="vc v-d">Druid</span></td><td>609</td><td class="n on">1.540</td><td class="n opc"><span class="tk"><i><b style="width:98%"></b></i>137/140</span></td><td class="n opc">95.816</td></tr>
+<tr class=""><td class="c pos">8</td><td class="l"><a href="#">Rhea Cinder</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>708</td><td class="n on">1.535</td><td class="n opc"><span class="tk"><i><b style="width:99%"></b></i>162/164</span></td><td class="n opc">97.386</td></tr>
+<tr class=""><td class="c pos">9</td><td class="l"><a href="#">Tamsin Rook</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>738</td><td class="n on">1.265</td><td class="n opc"><span class="tk"><i><b style="width:100%"></b></i>208/209</span></td><td class="n opc">53.432</td></tr>
+<tr class=""><td class="c pos">10</td><td class="l"><a href="#">Elric Thorne</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>604</td><td class="n on">815</td><td class="n opc"><span class="tk"><i><b style="width:99%"></b></i>246/249</span></td><td class="n opc">90.305</td></tr>
+<tr class=""><td class="c pos">11</td><td class="l"><a href="#">Yara Coil</a></td><td class="opc"><span class="vc v-k">Knight</span></td><td>537</td><td class="n on">795</td><td class="n opc"><span class="tk"><i><b style="width:100%"></b></i>196/196</span></td><td class="n opc">61.339</td></tr>
+<tr class=""><td class="c pos">12</td><td class="l"><a href="#">Talia Wren</a></td><td class="opc"><span class="vc v-d">Druid</span></td><td>666</td><td class="n on">745</td><td class="n opc"><span class="tk"><i><b style="width:99%"></b></i>191/192</span></td><td class="n opc">87.592</td></tr>
+<tr class=""><td class="c pos">13</td><td class="l"><a href="#">Sorin Ashby</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>666</td><td class="n on">675</td><td class="n opc"><span class="tk"><i><b style="width:100%"></b></i>140/140</span></td><td class="n opc">99.433</td></tr>
+<tr class="meu"><td class="c pos">14</td><td class="l"><a href="#">Bena</a> <span class="eu">você</span></td><td class="opc"><span class="vc v-a">Archer</span></td><td>671</td><td class="n on">605</td><td class="n opc"><span class="tk"><i><b style="width:99%"></b></i>204/206</span></td><td class="n opc">81.240</td></tr>
+<tr class=""><td class="c pos">15</td><td class="l"><a href="#">Varo Quill</a></td><td class="opc"><span class="vc v-k">Knight</span></td><td>440</td><td class="n on">605</td><td class="n opc"><span class="tk"><i><b style="width:97%"></b></i>185/191</span></td><td class="n opc">78.813</td></tr>
+<tr class=""><td class="c pos">16</td><td class="l"><a href="#">Lyra Venn</a></td><td class="opc"><span class="vc v-d">Druid</span></td><td>667</td><td class="n on">600</td><td class="n opc"><span class="tk"><i><b style="width:99%"></b></i>147/149</span></td><td class="n opc">86.875</td></tr>
+<tr class=""><td class="c pos">17</td><td class="l"><a href="#">Torvan Ashe</a></td><td class="opc"><span class="vc v-m">Mage</span></td><td>468</td><td class="n on">260</td><td class="n opc"><span class="tk"><i><b style="width:98%"></b></i>193/196</span></td><td class="n opc">70.382</td></tr>
+<tr class=""><td class="c pos">18</td><td class="l"><a href="#">Nessa Frost</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>530</td><td class="n on">250</td><td class="n opc"><span class="tk"><i><b style="width:97%"></b></i>185/191</span></td><td class="n opc">47.909</td></tr>
+<tr class=""><td class="c pos">19</td><td class="l"><a href="#">Kael Duskward</a></td><td class="opc"><span class="vc v-k">Knight</span></td><td>629</td><td class="n on">245</td><td class="n opc"><span class="tk"><i><b style="width:97%"></b></i>209/215</span></td><td class="n opc">49.478</td></tr>
+<tr class=""><td class="c pos">20</td><td class="l"><a href="#">Brann Holloway</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>821</td><td class="n on">175</td><td class="n opc"><span class="tk"><i><b style="width:98%"></b></i>150/153</span></td><td class="n opc">73.018</td></tr>
+<tr class=""><td class="c pos">21</td><td class="l"><a href="#">Ulric Stone</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>430</td><td class="n on">125</td><td class="n opc"><span class="tk"><i><b style="width:98%"></b></i>237/243</span></td><td class="n opc">81.862</td></tr>
+<tr class=""><td class="c pos">22</td><td class="l"><a href="#">Zev Morrow</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>752</td><td class="n on">105</td><td class="n opc"><span class="tk"><i><b style="width:99%"></b></i>165/166</span></td><td class="n opc">40.054</td></tr>
+<tr class=""><td class="c pos">23</td><td class="l"><a href="#">Ansel Brook</a></td><td class="opc"><span class="vc v-k">Knight</span></td><td>589</td><td class="n on">70</td><td class="n opc"><span class="tk"><i><b style="width:98%"></b></i>207/211</span></td><td class="n opc">64.879</td></tr>
+<tr class=""><td class="c pos">24</td><td class="l"><a href="#">Mira Solenne</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>494</td><td class="n on">20</td><td class="n opc"><span class="tk"><i><b style="width:96%"></b></i>196/204</span></td><td class="n opc">98.193</td></tr>
+<tr class=""><td class="c pos">25</td><td class="l"><a href="#">Pell Ardent</a></td><td class="opc"><span class="vc v-m">Mage</span></td><td>652</td><td class="n on">5</td><td class="n opc"><span class="tk"><i><b style="width:99%"></b></i>223/225</span></td><td class="n opc">61.449</td></tr>
+</tbody></table></div>
+    <div class="pag"><span>Os 100 primeiros</span></div>
+  </section>
+
+  <p class="exemplo">Exemplo 2: tasks concluídas, todas as vocações</p>
+  <section class="quadro">
+    <div class="filtros">
+  <label class="campo"><span>Mundo</span><span class="sel">Pendulum ▾</span></label>
+  <div class="grupo"><span class="rot">Ranking</span><div class="seg"><b>Nível</b><b>XP ganha</b><b class="on">Tasks</b><b>Magic level</b><b>Melee</b><b>Distance</b><b>Blocking</b><b>Fishing</b><b>Mining</b><b>Cooking</b></div></div>
+  <div class="grupo"><span class="rot">Ordenar por</span><div class="seg"><b class="">Pontos de Huntsman</b><b class="on">Tasks concluídas</b><b class="">Abates</b></div></div>
+  <div class="grupo"><span class="rot">Vocação</span><div class="seg"><b class="on">Todas</b><b class="">Knights</b><b class="">Archers</b><b class="">Mages</b><b class="">Druids</b></div></div>
+  <label class="campo busca"><span>Achar no ranking</span><span class="inp">Nome do personagem</span></label>
+</div>
+    <h2>Tasks concluídas em Pendulum</h2>
+    <div class="meupos"><span>Seu personagem, <b>Bena</b>, está em <b>9º</b> com <b>204/206</b> tasks concluídas.</span> <a href="#" style="color:var(--value);font-weight:700">Ir até ele</a></div>
+    <div class="podio"><div class="pod p2"><span class="pos">2º</span><b class="nm">Ulric Stone</b><span class="vc v-a">Archer</span><span class="val">237/243</span><small>tasks concluídas</small><span class="extra"><span><b>125</b> pontos</span><span><b>81.862</b> abates</span></span></div><div class="pod p1"><span class="pos">1º</span><b class="nm">Elric Thorne</b><span class="vc v-a">Archer</span><span class="val">246/249</span><small>tasks concluídas</small><span class="extra"><span><b>815</b> pontos</span><span><b>90.305</b> abates</span></span></div><div class="pod p3"><span class="pos">3º</span><b class="nm">Pell Ardent</b><span class="vc v-m">Mage</span><span class="val">223/225</span><small>tasks concluídas</small><span class="extra"><span><b>5</b> pontos</span><span><b>61.449</b> abates</span></span></div></div>
+    <div class="tabwrap"><table class="tab-tk"><thead><tr><th class="c">#</th><th class="l">Personagem</th><th class="opc">Vocação</th><th>Nível</th><th class="opc">Pontos de Huntsman</th><th class="on">Tasks concluídas</th><th class="opc">Abates em tasks</th></tr></thead><tbody>
+<tr class=""><td class="c pos">4</td><td class="l"><a href="#">Vesna Lark</a></td><td class="opc"><span class="vc v-d">Druid</span></td><td>516</td><td class="n opc">1.855</td><td class="n on"><span class="tk"><i><b style="width:100%"></b></i>214/215</span></td><td class="n opc">42.244</td></tr>
+<tr class=""><td class="c pos">5</td><td class="l"><a href="#">Iskra Vale</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>491</td><td class="n opc">2.445</td><td class="n on"><span class="tk"><i><b style="width:98%"></b></i>213/217</span></td><td class="n opc">53.955</td></tr>
+<tr class=""><td class="c pos">6</td><td class="l"><a href="#">Kael Duskward</a></td><td class="opc"><span class="vc v-k">Knight</span></td><td>629</td><td class="n opc">245</td><td class="n on"><span class="tk"><i><b style="width:97%"></b></i>209/215</span></td><td class="n opc">49.478</td></tr>
+<tr class=""><td class="c pos">7</td><td class="l"><a href="#">Tamsin Rook</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>738</td><td class="n opc">1.265</td><td class="n on"><span class="tk"><i><b style="width:100%"></b></i>208/209</span></td><td class="n opc">53.432</td></tr>
+<tr class=""><td class="c pos">8</td><td class="l"><a href="#">Ansel Brook</a></td><td class="opc"><span class="vc v-k">Knight</span></td><td>589</td><td class="n opc">70</td><td class="n on"><span class="tk"><i><b style="width:98%"></b></i>207/211</span></td><td class="n opc">64.879</td></tr>
+<tr class="meu"><td class="c pos">9</td><td class="l"><a href="#">Bena</a> <span class="eu">você</span></td><td class="opc"><span class="vc v-a">Archer</span></td><td>671</td><td class="n opc">605</td><td class="n on"><span class="tk"><i><b style="width:99%"></b></i>204/206</span></td><td class="n opc">81.240</td></tr>
+<tr class=""><td class="c pos">10</td><td class="l"><a href="#">Doran Pyke</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>484</td><td class="n opc">1.655</td><td class="n on"><span class="tk"><i><b style="width:99%"></b></i>199/202</span></td><td class="n opc">61.003</td></tr>
+<tr class=""><td class="c pos">11</td><td class="l"><a href="#">Mira Solenne</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>494</td><td class="n opc">20</td><td class="n on"><span class="tk"><i><b style="width:96%"></b></i>196/204</span></td><td class="n opc">98.193</td></tr>
+<tr class=""><td class="c pos">12</td><td class="l"><a href="#">Yara Coil</a></td><td class="opc"><span class="vc v-k">Knight</span></td><td>537</td><td class="n opc">795</td><td class="n on"><span class="tk"><i><b style="width:100%"></b></i>196/196</span></td><td class="n opc">61.339</td></tr>
+<tr class=""><td class="c pos">13</td><td class="l"><a href="#">Torvan Ashe</a></td><td class="opc"><span class="vc v-m">Mage</span></td><td>468</td><td class="n opc">260</td><td class="n on"><span class="tk"><i><b style="width:98%"></b></i>193/196</span></td><td class="n opc">70.382</td></tr>
+<tr class=""><td class="c pos">14</td><td class="l"><a href="#">Talia Wren</a></td><td class="opc"><span class="vc v-d">Druid</span></td><td>666</td><td class="n opc">745</td><td class="n on"><span class="tk"><i><b style="width:99%"></b></i>191/192</span></td><td class="n opc">87.592</td></tr>
+<tr class=""><td class="c pos">15</td><td class="l"><a href="#">Varo Quill</a></td><td class="opc"><span class="vc v-k">Knight</span></td><td>440</td><td class="n opc">605</td><td class="n on"><span class="tk"><i><b style="width:97%"></b></i>185/191</span></td><td class="n opc">78.813</td></tr>
+<tr class=""><td class="c pos">16</td><td class="l"><a href="#">Nessa Frost</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>530</td><td class="n opc">250</td><td class="n on"><span class="tk"><i><b style="width:97%"></b></i>185/191</span></td><td class="n opc">47.909</td></tr>
+<tr class=""><td class="c pos">17</td><td class="l"><a href="#">Zev Morrow</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>752</td><td class="n opc">105</td><td class="n on"><span class="tk"><i><b style="width:99%"></b></i>165/166</span></td><td class="n opc">40.054</td></tr>
+<tr class=""><td class="c pos">18</td><td class="l"><a href="#">Orin Gale</a></td><td class="opc"><span class="vc v-d">Druid</span></td><td>780</td><td class="n opc">2.375</td><td class="n on"><span class="tk"><i><b style="width:95%"></b></i>163/171</span></td><td class="n opc">91.623</td></tr>
+<tr class=""><td class="c pos">19</td><td class="l"><a href="#">Rhea Cinder</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>708</td><td class="n opc">1.535</td><td class="n on"><span class="tk"><i><b style="width:99%"></b></i>162/164</span></td><td class="n opc">97.386</td></tr>
+<tr class=""><td class="c pos">20</td><td class="l"><a href="#">Brann Holloway</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>821</td><td class="n opc">175</td><td class="n on"><span class="tk"><i><b style="width:98%"></b></i>150/153</span></td><td class="n opc">73.018</td></tr>
+<tr class=""><td class="c pos">21</td><td class="l"><a href="#">Lyra Venn</a></td><td class="opc"><span class="vc v-d">Druid</span></td><td>667</td><td class="n opc">600</td><td class="n on"><span class="tk"><i><b style="width:99%"></b></i>147/149</span></td><td class="n opc">86.875</td></tr>
+<tr class=""><td class="c pos">22</td><td class="l"><a href="#">Seline Marr</a></td><td class="opc"><span class="vc v-d">Druid</span></td><td>520</td><td class="n opc">2.055</td><td class="n on"><span class="tk"><i><b style="width:97%"></b></i>145/149</span></td><td class="n opc">54.162</td></tr>
+<tr class=""><td class="c pos">23</td><td class="l"><a href="#">Wyn Hart</a></td><td class="opc"><span class="vc v-k">Knight</span></td><td>645</td><td class="n opc">1.860</td><td class="n on"><span class="tk"><i><b style="width:95%"></b></i>142/149</span></td><td class="n opc">48.736</td></tr>
+<tr class=""><td class="c pos">24</td><td class="l"><a href="#">Sorin Ashby</a></td><td class="opc"><span class="vc v-a">Archer</span></td><td>666</td><td class="n opc">675</td><td class="n on"><span class="tk"><i><b style="width:100%"></b></i>140/140</span></td><td class="n opc">99.433</td></tr>
+<tr class=""><td class="c pos">25</td><td class="l"><a href="#">Calla Thorn</a></td><td class="opc"><span class="vc v-d">Druid</span></td><td>609</td><td class="n opc">1.540</td><td class="n on"><span class="tk"><i><b style="width:98%"></b></i>137/140</span></td><td class="n opc">95.816</td></tr>
+</tbody></table></div>
+    <div class="pag"><span>Os 100 primeiros</span></div>
+  </section>
+  <p class="nota-mock">No modelo, 25 linhas; na página, as 100. Nomes inventados e números na faixa dos reais. No celular ficam só a posição, o nome, o nível e a coluna escolhida.</p>
+</div>
+<span class="etiqueta">MODELO</span>
+</body></html>
