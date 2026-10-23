@@ -825,7 +825,7 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-cc h4 { font: 700 15px var(--font-ui); color: var(--amber); }
 .gu-cm header span { font-size: 12px; color: var(--faint); text-align: right; }
 .gu-cc ul, .gu-cm ul { margin: 0; padding: 0; list-style: none; }
-.gu-cc li, .gu-cm li { display: grid; grid-template-columns: minmax(0, 1fr) 64px 56px 40px; align-items: center; gap: 8px; padding: 3px 0; font-size: 14px; }
+.gu-cc li, .gu-cm li { display: grid; grid-template-columns: minmax(0, 1fr) 64px 56px 48px; align-items: center; gap: 8px; padding: 3px 0; font-size: 14px; }
 .gu-cc li .quem { padding: 0; border: 0; background: none; font: 600 14px var(--font-ui); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .gu-cc li b, .gu-cm li b { text-align: right; color: var(--title); font-weight: 600; font-variant-numeric: tabular-nums; }
 .gu-cc li b.ok, .gu-cm li b.ok { color: var(--value); }
@@ -846,6 +846,13 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-cm .tn { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gu-pt { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
 .gu-cm li.f .tn, .gu-cm li.f b { color: var(--value); }
+.gu-cm li.p .nm, .gu-cc li b.pr, .gu-cm li b.pr, .gu-rod.pr, .gu-cruz .pr { color: var(--amber); }
+.gu-cc li.ne, .gu-cm li.ne { opacity: 0.5; }
+.gu-cc .qn { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; }
+.gu-cm .tn { flex-wrap: wrap; row-gap: 2px; white-space: normal; }   /* as etiquetas descem quando não cabem ao lado do nome */
+.gu-cm .tn .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gu-entregar { justify-self: start; padding: 0 6px; border-radius: 5px; background: var(--amber); color: var(--gold-ink); font: 700 10px var(--font-ui); white-space: nowrap; }
+.gu-cruz .pg.pr { background: var(--amber); border-color: var(--amber); color: var(--gold-ink); font-weight: 700; }
 .gu-sem { font-size: 13px; color: var(--faint); }
 .gu-sem b { color: var(--label); font-weight: 600; }
 /* tabela cruzada: uma linha por criatura, uma coluna por membro */
@@ -932,6 +939,11 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .pers-task .bar i { display: block; height: 100%; background: var(--amber); border-radius: 999px; }
 .pers-task.feita .bar i { background: var(--value); }
 .pers-task.feita .cri { color: var(--value); }
+/* pronta para entregar: progresso cheio, ainda não entregue ao NPC; diária não escolhida fica apagada */
+.pers-task.pronta .cri, .pers-resp.pr { color: var(--amber); }
+.pers-task.ne { opacity: 0.5; }
+.hunt-tag { display: inline-block; padding: 0 6px; border: 1px solid var(--edge); border-radius: 999px; color: var(--faint); font: 600 10.5px/1.5 var(--font-ui); white-space: nowrap; }
+.hunt-tag.shared { border-color: rgba(108, 182, 255, 0.5); color: #6cb6ff; }
 .pers-resp { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; color: var(--label); }
 .pers-resp b { color: var(--title); font-weight: 600; }
 .pers-resp .t { color: var(--value); font-weight: 700; }
@@ -1885,6 +1897,12 @@ const I18N = {
     'gu.col.d30': 'XP 30 dias',
     'gu.col.login': 'Último login',
     'gu.online': 'online',
+    'pers.tag.shared': 'compartilhada',
+    'pers.tag.locked': 'travada',
+    'pers.tag.naoEscolhida': 'não escolhida',
+    'pers.tag.entregar': 'entregar',
+    'pers.pronta': 'Pronta para entregar',
+    'gu.soEntregar': 'só falta entregar',
     'gu.comumDesc': '{n} tasks que mais de um membro tem',
     'gu.formato.cartoes': 'Cartões',
     'gu.formato.tabela': 'Tabela',
@@ -2640,6 +2658,12 @@ const I18N = {
     'gu.col.d30': 'XP 30 days',
     'gu.col.login': 'Last login',
     'gu.online': 'online',
+    'pers.tag.shared': 'shared',
+    'pers.tag.locked': 'locked',
+    'pers.tag.naoEscolhida': 'not chosen',
+    'pers.tag.entregar': 'turn in',
+    'pers.pronta': 'Ready to turn in',
+    'gu.soEntregar': 'only the turn-in is left',
     'gu.comumDesc': '{n} tasks more than one member has',
     'gu.formato.cartoes': 'Cards',
     'gu.formato.tabela': 'Table',
@@ -3395,6 +3419,12 @@ const I18N = {
     'gu.col.d30': 'XP 30 días',
     'gu.col.login': 'Último login',
     'gu.online': 'en línea',
+    'pers.tag.shared': 'compartida',
+    'pers.tag.locked': 'bloqueada',
+    'pers.tag.naoEscolhida': 'no elegida',
+    'pers.tag.entregar': 'entregar',
+    'pers.pronta': 'Lista para entregar',
+    'gu.soEntregar': 'solo falta entregar',
     'gu.comumDesc': '{n} tasks que tiene más de un miembro',
     'gu.formato.cartoes': 'Tarjetas',
     'gu.formato.tabela': 'Tabla',
@@ -4150,6 +4180,12 @@ const I18N = {
     'gu.col.d30': 'XP 30 dni',
     'gu.col.login': 'Ostatnie logowanie',
     'gu.online': 'online',
+    'pers.tag.shared': 'wspólne',
+    'pers.tag.locked': 'zablokowane',
+    'pers.tag.naoEscolhida': 'niewybrane',
+    'pers.tag.entregar': 'oddaj',
+    'pers.pronta': 'Gotowe do oddania',
+    'gu.soEntregar': 'zostało tylko oddać',
     'gu.comumDesc': '{n} tasków, które ma więcej niż jeden członek',
     'gu.formato.cartoes': 'Karty',
     'gu.formato.tabela': 'Tabela',
@@ -10529,6 +10565,20 @@ async function persCarregar(nome) {
 // Nome da task no plural ("Drake Lords", "Phoenixes") para o nome da criatura
 const persSingular = n => String(n).replace(/ies$/i, 'y').replace(/ves$/i, 'f').replace(/(x|ch|sh|ss)es$/i, '$1').replace(/s$/i, '');
 // O respawn do banco que mata a criatura mais rápido, no grupo e bônus escolhidos na página
+// Estado de uma task do Huntsman. Concluída é só a que a API marca como completed; com o progresso cheio e ainda não
+// entregue ao NPC, é "pronta para entregar". A diária não escolhida (selected: false) fica apagada.
+function huntEstado(t) {
+  const req = t.required || t.kills || 0, prog = Math.min(req, t.progress || 0), feita = !!t.completed;
+  return { req, prog, feita, pronta: !feita && req > 0 && prog >= req, naoEscolhida: t.selected === false };
+}
+// Etiquetas que a API dá para a task: compartilhada, travada e a diária não escolhida
+function huntTags(t, e) {
+  return [
+    t.shared ? el('span', { class: 'hunt-tag shared', text: tr('pers.tag.shared') }) : null,
+    t.locked ? el('span', { class: 'hunt-tag', text: tr('pers.tag.locked') }) : null,
+    e.naoEscolhida ? el('span', { class: 'hunt-tag', text: tr('pers.tag.naoEscolhida') }) : null,
+  ];
+}
 function persMelhor(nome, pct = pers.pct, party = pers.party) {
   const alvo = new Set([slug(nome), slug(persSingular(nome))]);
   let best = null;
@@ -10848,13 +10898,13 @@ function renderPersonagem() {
   // Huntsman: diárias, semanais e entregas, com o melhor respawn de cada criatura
   const seg = (lista, atual, pega) => el('span', { class: 'seg' }, lista.map(o => el('button', { type: 'button', text: o.t, 'aria-pressed': String(o.v === atual), onclick: () => { pega(o.v); renderPersonagem(); } })));
   const linha = t => {
-    const req = t.required || t.kills || 0, prog = Math.min(req, t.progress || 0), feita = t.completed || (req && prog >= req);
-    const sug = feita ? null : persSugestao(t.name || '?', req - prog);
-    return { feita, horas: sug && sug.horas, el: el('div', { class: 'pers-task' + (feita ? ' feita' : '') },
-      el('span', { class: 'cri' }, t.name || '?', t.boost ? el('span', { class: 'pers-boost', text: '+' + t.boost + '%' }) : null),
+    const e = huntEstado(t), { req, prog, feita, pronta } = e;
+    const sug = feita || pronta ? null : persSugestao(t.name || '?', req - prog);
+    return { feita: feita || pronta, horas: sug && sug.horas, el: el('div', { class: 'pers-task' + (feita ? ' feita' : pronta ? ' pronta' : e.naoEscolhida ? ' ne' : '') },
+      el('span', { class: 'cri' }, t.name || '?', t.boost ? el('span', { class: 'pers-boost', text: '+' + t.boost + '%' }) : null, huntTags(t, e)),
       el('span', { class: 'n', text: fmtInt(prog) + '/' + fmtInt(req) }),
       el('span', { class: 'bar' }, el('i', { style: 'width:' + (req ? Math.round(100 * prog / req) : 0) + '%' })),
-      feita ? el('span', { class: 'pers-resp', text: tr('pers.feita') }) : sug.el) };
+      feita ? el('span', { class: 'pers-resp', text: tr('pers.feita') }) : pronta ? el('span', { class: 'pers-resp pr', text: tr('pers.pronta') }) : sug.el) };
   };
   const diarias = ((hu.daily && hu.daily.tasks) || []).map(linha), semanais = ((hu.weekly && hu.weekly.tasks) || []).map(linha);
   const abertas = semanais.filter(x => !x.feita), soma7 = abertas.reduce((a, x) => a + (x.horas || 0), 0);
@@ -10998,37 +11048,39 @@ async function guCarregar(nome, recarga) {
 }
 // Tasks do Huntsman de todos (tipo: 'daily' ou 'weekly'). Primeiro as que se repetem entre os membros: em cartões
 // (padrão) ou numa tabela cruzada (criatura × membro), com o melhor respawn para um grupo desse tamanho e o tempo para
-// todos terminarem. Depois um cartão por membro, com as pendentes primeiro e as concluídas numa linha no fim.
+// todos terminarem. Depois um cartão por membro: pendentes, prontas para entregar e concluídas, nessa ordem.
 function guTasks(tipo, M) {
   const ficha = m => { const f = gu.fichas.get(m.nome); return f && f !== 'erro' ? f : null; };
   const dele = m => { const f = ficha(m); return (f && f.huntsman && f.huntsman[tipo] && f.huntsman[tipo].tasks) || []; };
-  const estado = t => { const req = t.required || 0, prog = Math.min(req, t.progress || 0); return { req, prog, feita: !!t.completed || (req > 0 && prog >= req) }; };
   const porCriatura = new Map();
   for (const m of M) for (const t of dele(m)) {
     const k = slug(t.name || '');
     if (!k) continue;
     if (!porCriatura.has(k)) porCriatura.set(k, { nome: t.name, quem: [] });
-    porCriatura.get(k).quem.push({ m, t, e: estado(t) });
+    porCriatura.get(k).quem.push({ m, t, e: huntEstado(t) });
   }
   // pendentes primeiro (mais membros antes); as que todos já concluíram vão para o fim
   const comuns = [...porCriatura.values()].filter(c => c.quem.length > 1)
-    .map(c => ({ ...c, todas: c.quem.every(q => q.e.feita), falta: Math.max(0, ...c.quem.map(q => q.e.req - q.e.prog)) }))
+    .map(c => ({ ...c, todas: c.quem.every(q => q.e.feita), prontos: c.quem.every(q => q.e.feita || q.e.pronta), falta: Math.max(0, ...c.quem.map(q => q.e.req - q.e.prog)) }))
     .sort((a, b) => a.todas - b.todas || b.quem.length - a.quem.length || a.nome.localeCompare(b.nome));
   const emComum = new Set(comuns.map(c => slug(c.nome)));
   const melhor = c => { const n = Math.min(4, c.quem.length); return persMelhor(c.nome, ui.pct, (PARTIES.find(p => p.n === n) || PARTIES[0]).mult); };
   const barra = e => el('i', { class: 'gu-bar' }, el('em', { style: 'width:' + (e.req ? Math.round(100 * e.prog / e.req) : 0) + '%' }));
-  const num = e => el('b', { class: e.feita ? 'ok' : null, text: e.feita ? '✓' : fmtInt(e.prog) + '/' + fmtInt(e.req) });
-  const bonus = t => t.boost ? el('span', { class: 'gu-boost', text: '+' + t.boost + '%' }) : el('span');
+  // na última coluna: "entregar" para a pronta; senão o bônus
+  const fim = (t, e) => e.pronta ? el('span', { class: 'gu-entregar', text: tr('pers.tag.entregar') }) : t.boost ? el('span', { class: 'gu-boost', text: '+' + t.boost + '%' }) : el('span');
   const abrir = b => el('button', { type: 'button', text: tr('pers.abrir'), onclick: () => { select(b.r.id); goTo('timer'); } });
   const vocDe = m => 'v-' + (guVoc(m.vocacao) || 'x');
+  const classe = e => e.feita ? 'f' : e.pronta ? 'p' : e.naoEscolhida ? 'ne' : null;
   // cartão de uma task em comum
   const cartao = c => {
-    const b = c.todas ? null : melhor(c);
+    const b = c.prontos ? null : melhor(c);
     return el('article', { class: 'gu-cc' + (c.todas ? ' feito' : '') },
       el('header', null, el('h4', { text: c.nome }), el('span', { class: 'gu-qt', text: tr('gu.nMembros', { n: c.quem.length }) })),
-      el('ul', null, c.quem.slice().sort((x, y) => x.e.feita - y.e.feita).map(({ m, t, e }) => el('li', { class: e.feita ? 'f' : null },
-        el('button', { class: 'quem ' + vocDe(m), type: 'button', text: m.nome, onclick: () => goTo('personagem/' + encodeURIComponent(m.nome)) }), barra(e), num(e), bonus(t)))),
+      el('ul', null, c.quem.slice().sort((x, y) => (x.e.feita + x.e.pronta) - (y.e.feita + y.e.pronta)).map(({ m, t, e }) => el('li', { class: classe(e) },
+        el('span', { class: 'qn' }, el('button', { class: 'quem ' + vocDe(m), type: 'button', text: m.nome, onclick: () => goTo('personagem/' + encodeURIComponent(m.nome)) }), huntTags(t, e)),
+        barra(e), el('b', { class: e.feita ? 'ok' : e.pronta ? 'pr' : null, text: e.feita ? '✓' : fmtInt(e.prog) + '/' + fmtInt(e.req) }), fim(t, e)))),
       c.todas ? el('div', { class: 'gu-rod ok', text: tr('gu.todosFeitos') })
+        : c.prontos ? el('div', { class: 'gu-rod pr', text: tr('gu.soEntregar') })
         : b ? el('div', { class: 'gu-rod' }, el('span', null, el('b', { text: b.r.name }), ' · ' + tr('gu.respGrupo', { k: Math.round(b.kph), n: c.quem.length })),
           el('span', { class: 'tempo', text: tr('gu.todosEm', { t: persTempo(c.falta / b.kph) }) }), abrir(b))
         : el('div', { class: 'gu-rod nada', text: tr('gu.semResp') }));
@@ -11040,25 +11092,31 @@ function guTasks(tipo, M) {
       el('thead', null, el('tr', null, el('th', { class: 'l', scope: 'col', text: tr('gu.col.task') }),
         colunas.map(m => el('th', { scope: 'col', class: vocDe(m), text: m.nome })), el('th', { class: 'l', scope: 'col', text: tr('gu.col.resp') }))),
       el('tbody', null, comuns.map(c => {
-        const b = c.todas ? null : melhor(c);
+        const b = c.prontos ? null : melhor(c);
         return el('tr', { class: c.todas ? 'feito' : null },
           el('td', { class: 'l cri' }, c.nome, ' ', el('span', { class: 'gu-qt', text: String(c.quem.length) })),
-          colunas.map(m => { const q = c.quem.find(x => x.m === m); return el('td', null, !q ? null : q.e.feita ? el('span', { class: 'ok', text: '✓' }) : el('span', { class: 'pg', text: fmtInt(q.e.prog) + '/' + fmtInt(q.e.req) })); }),
+          colunas.map(m => {
+            const q = c.quem.find(x => x.m === m);
+            return el('td', null, !q ? null : q.e.feita ? el('span', { class: 'ok', text: '✓' })
+              : el('span', { class: 'pg' + (q.e.pronta ? ' pr' : ''), title: q.e.pronta ? tr('pers.pronta') : null, text: fmtInt(q.e.prog) + '/' + fmtInt(q.e.req) }));
+          }),
           el('td', { class: 'l rs' }, c.todas ? el('span', { class: 'ok', text: tr('gu.todosFeitos') })
+            : c.prontos ? el('span', { class: 'pr', text: tr('gu.soEntregar') })
             : b ? [b.r.name + ' · ', el('b', { text: persTempo(c.falta / b.kph) }), ' ', abrir(b)] : el('span', { class: 'nada', text: tr('gu.semResp') })));
       }))));
   };
-  // cartão de um membro: as pendentes primeiro e depois as concluídas (nome e número em verde, barra cheia); o ponto
-  // dourado marca a task em comum
+  // cartão de um membro: pendentes, prontas para entregar e concluídas (nome e número em verde, barra cheia); o ponto
+  // dourado marca a task que se repete com outro membro
   const membro = m => {
-    const h = ficha(m).huntsman[tipo], lista = dele(m).map(t => ({ t, e: estado(t) }));
-    const pend = lista.filter(x => !x.e.feita), feitas = lista.filter(x => x.e.feita);
+    const h = ficha(m).huntsman[tipo], lista = dele(m).map(t => ({ t, e: huntEstado(t) }));
+    const ordem = x => x.e.feita ? 2 : x.e.pronta ? 1 : 0;
+    const feitas = lista.filter(x => x.e.feita).length;
     return el('article', { class: 'gu-cm' },
       el('header', null, el('button', { class: 'gu-n ' + vocDe(m), type: 'button', text: m.nome, onclick: () => goTo('personagem/' + encodeURIComponent(m.nome)) }),
-        el('span', { text: (h.difficulty && h.difficulty.name ? h.difficulty.name + ' · ' : '') + tr('gu.concluidas', { a: feitas.length, b: lista.length }) })),
-      lista.length ? el('ul', null, pend.concat(feitas).map(({ t, e }) => el('li', { class: e.feita ? 'f' : null },
-        el('span', { class: 'tn' }, emComum.has(slug(t.name || '')) ? el('span', { class: 'gu-pt', title: tr('gu.comum') }) : null, t.name), barra(e),
-        el('b', { text: fmtInt(e.feita ? e.req : e.prog) + '/' + fmtInt(e.req) }), bonus(t)))) : null);
+        el('span', { text: (h.difficulty && h.difficulty.name ? h.difficulty.name + ' · ' : '') + tr('gu.concluidas', { a: feitas, b: lista.length }) })),
+      lista.length ? el('ul', null, lista.slice().sort((x, y) => ordem(x) - ordem(y)).map(({ t, e }) => el('li', { class: classe(e) },
+        el('span', { class: 'tn' }, emComum.has(slug(t.name || '')) ? el('span', { class: 'gu-pt', title: tr('gu.comum') }) : null, el('span', { class: 'nm', text: t.name }), huntTags(t, e)),
+        barra(e), el('b', { class: e.pronta ? 'pr' : null, text: fmtInt(e.feita ? e.req : e.prog) + '/' + fmtInt(e.req) }), fim(t, e)))) : null);
   };
   const comTasks = M.filter(m => dele(m).length), semTasks = M.filter(m => ficha(m) && !dele(m).length), semFicha = M.filter(m => gu.fichas.get(m.nome) === 'erro');
   const formato = ui.guFormato === 'tabela' ? 'tabela' : 'cartoes';
