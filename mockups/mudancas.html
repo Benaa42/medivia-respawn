@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo: trocas de nome, transferências e bans</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Modelo da página de trocas de nome, transferências e banimentos. Nomes inventados. Nada aqui é publicado. */
+:root { --ground: #0f1314; --box: #171d1e; --card: #1e2627; --edge: #2c3637; --band: #1b3a2c; --title: #f1f5f3; --label: #c2cbc8; --faint: #8b9894; --amber: #f0ad4d; --value: #3ae374;
+  --gold-edge: rgba(240, 173, 77, 0.55); --gold-wash: rgba(240, 173, 77, 0.06); --gold-ink: #241703; --k: #ff7468; --a: #3ae374; --m: #a970ff; --d: #3cc6f0; --x: #8b9894;
+  --font-ui: "Onest", "Segoe UI", system-ui, sans-serif; --font-display: "Bricolage Grotesque", "Onest", sans-serif; }
+* { box-sizing: border-box; } body { margin: 0; background: var(--ground); color: var(--label); font: 400 14px/1.45 var(--font-ui); font-variant-numeric: tabular-nums; }
+h1, h2, h3, p { margin: 0; }
+.faixa { background: #0a0e0f; border-bottom: 1px solid var(--edge); font-size: 13px; } .faixa div { max-width: 1240px; margin: 0 auto; padding: 7px 20px; color: var(--faint); }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 18px 20px 60px; display: flex; flex-direction: column; gap: 18px; }
+.barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.marca { font: 800 28px var(--font-display); color: var(--title); } .marca b { color: var(--amber); font-weight: inherit; }
+.menu { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; border: 1px solid var(--gold-edge); border-radius: 999px; background: var(--gold-wash); }
+.menu span { padding: 8px 14px; border-radius: 999px; color: var(--title); font: 600 14px var(--font-ui); } .menu span.on { background: var(--amber); color: var(--gold-ink); }
+.menu span.novo::after { content: "novo"; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: var(--band); color: var(--value); font-size: 10px; }
+.exemplo { font: 700 13px var(--font-ui); color: var(--amber); margin-top: 8px; }
+.quadro { background: var(--box); border-radius: 22px; padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 16px; }
+.filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 18px; }
+.campo, .grupo { display: flex; flex-direction: column; gap: 5px; } .campo > span:first-child, .grupo .rot { font-size: 12px; color: var(--faint); }
+.sel, .inp { padding: 8px 12px; border: 1px solid var(--edge); border-radius: 10px; background: var(--card); color: var(--title); font-weight: 600; min-width: 140px; }
+.inp { color: var(--faint); font-weight: 500; min-width: 220px; } .busca { margin-left: auto; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 999px; background: var(--card); }
+.seg b { padding: 6px 11px; border-radius: 999px; font: 600 13px var(--font-ui); color: var(--label); } .seg b.on { background: var(--title); color: var(--ground); }
+h2 { font: 800 22px var(--font-display); color: var(--title); display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; } h2 small { font: 500 13px var(--font-ui); color: var(--faint); }
+/* pódio dos três primeiros */
+.podio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 12px; max-width: 760px; margin: 0 auto; width: 100%; }
+.pod { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 12px 14px; border-radius: 16px; background: var(--card); text-align: center; }
+.pod.p1 { padding-top: 26px; background: linear-gradient(180deg, rgba(240,173,77,0.16), var(--card)); box-shadow: inset 0 0 0 1px var(--gold-edge); }
+.pod.p2 { background: linear-gradient(180deg, rgba(194,203,200,0.12), var(--card)); } .pod.p3 { background: linear-gradient(180deg, rgba(208,138,76,0.14), var(--card)); }
+.pod .pos { font: 800 15px var(--font-display); color: var(--faint); } .pod.p1 .pos { color: var(--amber); font-size: 18px; }
+.pod .nm { font: 800 18px var(--font-display); color: var(--title); } .pod.p1 .nm { font-size: 22px; }
+.pod .val { font: 800 26px/1 var(--font-display); color: var(--amber); } .pod.p1 .val { font-size: 32px; }
+.pod small { color: var(--faint); font-size: 12px; }
+.vc { display: inline-block; padding: 1px 9px; border: 1px solid; border-radius: 999px; font: 600 12px var(--font-ui); }
+.v-k { color: var(--k); border-color: color-mix(in srgb, var(--k) 45%, transparent); } .v-a { color: var(--a); border-color: color-mix(in srgb, var(--a) 45%, transparent); }
+.v-m { color: var(--m); border-color: color-mix(in srgb, var(--m) 45%, transparent); } .v-d { color: var(--d); border-color: color-mix(in srgb, var(--d) 45%, transparent); } .v-x { color: var(--x); border-color: var(--edge); }
+/* tabela */
+.tabwrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { padding: 6px 10px; border-bottom: 1px solid var(--edge); font: 500 12px var(--font-ui); color: var(--faint); text-align: right; white-space: nowrap; }
+td { padding: 7px 10px; border-bottom: 1px solid var(--edge); text-align: right; color: var(--title); white-space: nowrap; }
+th.l, td.l { text-align: left; } th.c, td.c { text-align: center; width: 48px; }
+td.pos { color: var(--faint); font-weight: 700; } td a { color: var(--amber); font-weight: 700; text-decoration: none; }
+td.g { color: var(--value); font-weight: 700; } td.f { color: var(--faint); }
+tr.meu td { background: var(--gold-wash); } tr.meu td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
+.eu { padding: 0 6px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 10px var(--font-ui); vertical-align: 1px; }
+.meupos { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--gold-edge); background: var(--gold-wash); color: var(--title); font-size: 14px; }
+.meupos b { color: var(--amber); }
+.pag { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--label); }
+.pgs { display: inline-flex; gap: 4px; } .pgs b { width: 30px; height: 30px; display: inline-grid; place-items: center; border-radius: 50%; background: var(--card); color: var(--label); font-weight: 600; } .pgs b.on { background: var(--amber); color: var(--gold-ink); }
+.nota-mock { font-size: 13px; color: var(--faint); }
+.etiqueta { position: fixed; right: 16px; bottom: 16px; padding: 6px 12px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 12px var(--font-ui); }
+@media (max-width: 760px) { .podio { grid-template-columns: 1fr; } .pod.p1 { order: -1; } .busca { margin-left: 0; } }
+/* mudanças */
+.abas { display: flex; flex-wrap: wrap; gap: 6px; }
+.abas b { display: inline-flex; align-items: baseline; gap: 8px; padding: 9px 16px; border-radius: 999px; background: var(--card); color: var(--label); font: 700 14px var(--font-ui); }
+.abas b small { color: var(--faint); font-weight: 500; font-size: 12px; }
+.abas b.on { background: var(--amber); color: var(--gold-ink); } .abas b.on small { color: var(--gold-ink); opacity: 0.75; }
+.resumo { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--faint); font-size: 13px; } .resumo b { color: var(--title); font-size: 15px; }
+td.data { color: var(--faint); font-weight: 500; text-align: left; }
+.troca { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; } .troca s { color: var(--faint); text-decoration-color: rgba(139,152,148,.6); } .troca .seta { color: var(--faint); }
+.mundo { display: inline-block; padding: 1px 9px; border-radius: 999px; background: var(--card); color: var(--label); font: 600 12px var(--font-ui); }
+.mundo.novo { background: var(--band); color: var(--value); }
+.motivo { color: var(--title); } .motivo.grave { color: var(--k); }
+.prazo { color: var(--faint); } .prazo.perm { color: var(--k); font-weight: 600; }
+@media (max-width: 760px) { .opc { display: none; } th, td { padding: 6px 4px; font-size: 13px; } .quadro { padding: 16px 12px 20px; } .wrap { padding-inline: 16px; } td.data, td.dp { white-space: normal; } }
+</style></head><body>
+<div class="faixa"><div>Mapper da wiki ↗ · Novidades · Sugestões e problemas</div></div>
+<div class="wrap">
+  <div class="barra"><span class="marca">Medivia <b>Labs</b></span><nav class="menu"><span>Cronômetro</span><span>Analisador de hunt</span><span>Criaturas</span><span>Rankings</span><span>Calculadora</span><span>Sorteio</span></nav></div>
+
+  <p class="exemplo">Aba 1: trocas de nome (endereço #name-changes)</p>
+  <section class="quadro">
+    <div class="abas"><b class="on">Trocas de nome <small>2.759</small></b><b class="">Transferências <small>2.293</small></b><b class="">Banimentos <small>7.174</small></b></div>
+    <div class="filtros">
+  <label class="campo"><span>Mundo</span><span class="sel">Todos ▾</span></label>
+  <div class="grupo"><span class="rot">Vocação</span><div class="seg"><b class="on">Todas</b><b>Knights</b><b>Archers</b><b>Mages</b><b>Druids</b></div></div>
+  
+  <label class="campo busca"><span>Procurar</span><span class="inp">Nome do personagem</span></label>
+</div>
+    <div class="resumo"><span><b>41</b> nos últimos 7 dias</span><span><b>178</b> nos últimos 30 dias</span></div>
+    <div class="tabwrap"><table><thead><tr><th class="l">Data</th><th class="l">Nome antigo → nome novo</th><th>Nível</th><th class="l opc">Vocação</th><th class="l opc">Mundo</th></tr></thead><tbody>
+<tr><td class="data">23/10/2026 10:08</td><td class="l"><span class="troca"><s>Torvan Ashe</s><span class="seta">→</span><a href="#">Ashen Warden</a></span></td><td>514</td><td class="l opc"><span class="vc v-a">Royal Archer</span></td><td class="l opc"><span class="mundo">Eternum</span></td></tr>
+<tr><td class="data">23/10/2026 07:14</td><td class="l"><span class="troca"><s>Lyra Venn</s><span class="seta">→</span><a href="#">Quiet Ember</a></span></td><td>212</td><td class="l opc"><span class="vc v-a">Archer</span></td><td class="l opc"><span class="mundo">Legacy</span></td></tr>
+<tr><td class="data">23/10/2026 04:00</td><td class="l"><span class="troca"><s>Kael Duskward</s><span class="seta">→</span><a href="#">Northwind Sage</a></span></td><td>270</td><td class="l opc"><span class="vc v-d">Druid</span></td><td class="l opc"><span class="mundo">Immensity</span></td></tr>
+<tr><td class="data">22/10/2026 22:43</td><td class="l"><span class="troca"><s>Mira Solenne</s><span class="seta">→</span><a href="#">Ivory Talon</a></span></td><td>259</td><td class="l opc"><span class="vc v-a">Archer</span></td><td class="l opc"><span class="mundo">Destiny</span></td></tr>
+<tr><td class="data">22/10/2026 19:30</td><td class="l"><span class="troca"><s>Brann Holloway</s><span class="seta">→</span><a href="#">Grim Lantern</a></span></td><td>327</td><td class="l opc"><span class="vc v-m">Mage</span></td><td class="l opc"><span class="mundo">Serenity</span></td></tr>
+<tr><td class="data">22/10/2026 15:04</td><td class="l"><span class="troca"><s>Iskra Vale</s><span class="seta">→</span><a href="#">Vale Strider</a></span></td><td>733</td><td class="l opc"><span class="vc v-k">Knight</span></td><td class="l opc"><span class="mundo">Eternum</span></td></tr>
+<tr><td class="data">22/10/2026 09:35</td><td class="l"><span class="troca"><s>Doran Pyke</s><span class="seta">→</span><a href="#">Copper Rune</a></span></td><td>581</td><td class="l opc"><span class="vc v-a">Royal Archer</span></td><td class="l opc"><span class="mundo">Prosperity</span></td></tr>
+<tr><td class="data">22/10/2026 07:54</td><td class="l"><span class="troca"><s>Seline Marr</s><span class="seta">→</span><a href="#">Silent Briar</a></span></td><td>553</td><td class="l opc"><span class="vc v-m">Mage</span></td><td class="l opc"><span class="mundo">Prosperity</span></td></tr>
+<tr><td class="data">22/10/2026 03:01</td><td class="l"><span class="troca"><s>Tamsin Rook</s><span class="seta">→</span><a href="#">Old Hollow</a></span></td><td>641</td><td class="l opc"><span class="vc v-m">Mage</span></td><td class="l opc"><span class="mundo">Eternum</span></td></tr>
+<tr><td class="data">21/10/2026 22:38</td><td class="l"><span class="troca"><s>Varo Quill</s><span class="seta">→</span><a href="#">Dawn Keeper</a></span></td><td>681</td><td class="l opc"><span class="vc v-d">Druid</span></td><td class="l opc"><span class="mundo">Liberty</span></td></tr>
+<tr><td class="data">21/10/2026 20:59</td><td class="l"><span class="troca"><s>Elric Thorne</s><span class="seta">→</span><a href="#">Ember Reeve</a></span></td><td>690</td><td class="l opc"><span class="vc v-k">Elite Knight</span></td><td class="l opc"><span class="mundo">Liberty</span></td></tr>
+<tr><td class="data">21/10/2026 18:04</td><td class="l"><span class="troca"><s>Nessa Frost</s><span class="seta">→</span><a href="#">Moss Warden</a></span></td><td>393</td><td class="l opc"><span class="vc v-k">Knight</span></td><td class="l opc"><span class="mundo">Liberty</span></td></tr>
+</tbody></table></div>
+    <div class="pag"><span>1–50 de 2.759</span><span class="pgs"><b class="on">1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>…</b><b>56</b></span></div>
+  </section>
+
+  <p class="exemplo">Aba 2: transferências de mundo (#transfers)</p>
+  <section class="quadro">
+    <div class="abas"><b class="">Trocas de nome <small>2.759</small></b><b class="on">Transferências <small>2.293</small></b><b class="">Banimentos <small>7.174</small></b></div>
+    <div class="filtros">
+  <label class="campo"><span>Mundo</span><span class="sel">Todos ▾</span></label>
+  <div class="grupo"><span class="rot">Vocação</span><div class="seg"><b class="on">Todas</b><b>Knights</b><b>Archers</b><b>Mages</b><b>Druids</b></div></div>
+  <label class="campo"><span>Para o mundo</span><span class="sel">Todos ▾</span></label>
+  <label class="campo busca"><span>Procurar</span><span class="inp">Nome do personagem</span></label>
+</div>
+    <div class="resumo"><span><b>36</b> nos últimos 7 dias</span><span><b>152</b> nos últimos 30 dias</span><span>Mais procurado no mês: <b>Pendulum</b> (+41)</span></div>
+    <div class="tabwrap"><table><thead><tr><th class="l">Data</th><th class="l">Personagem</th><th class="opc">Nível</th><th class="l opc">Vocação</th><th class="l">De → para</th></tr></thead><tbody>
+<tr><td class="data">23/10/2026 03:36</td><td class="l"><a href="#">Torvan Ashe</a></td><td class="opc">400</td><td class="l opc"><span class="vc v-a">Archer</span></td><td class="l dp"><span class="mundo">Eternum</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Serenity</span></td></tr>
+<tr><td class="data">23/10/2026 01:01</td><td class="l"><a href="#">Lyra Venn</a></td><td class="opc">188</td><td class="l opc"><span class="vc v-k">Crusader Knight</span></td><td class="l dp"><span class="mundo">Destiny</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Prosperity</span></td></tr>
+<tr><td class="data">22/10/2026 23:23</td><td class="l"><a href="#">Kael Duskward</a></td><td class="opc">446</td><td class="l opc"><span class="vc v-a">Master Archer</span></td><td class="l dp"><span class="mundo">Luminary</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Pendulum</span></td></tr>
+<tr><td class="data">22/10/2026 19:53</td><td class="l"><a href="#">Mira Solenne</a></td><td class="opc">472</td><td class="l opc"><span class="vc v-m">Mage</span></td><td class="l dp"><span class="mundo">Eternum</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Immensity</span></td></tr>
+<tr><td class="data">22/10/2026 17:29</td><td class="l"><a href="#">Brann Holloway</a></td><td class="opc">158</td><td class="l opc"><span class="vc v-m">Mage</span></td><td class="l dp"><span class="mundo">Eternum</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Luminary</span></td></tr>
+<tr><td class="data">22/10/2026 14:28</td><td class="l"><a href="#">Iskra Vale</a></td><td class="opc">374</td><td class="l opc"><span class="vc v-k">Elite Knight</span></td><td class="l dp"><span class="mundo">Immensity</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Eternum</span></td></tr>
+<tr><td class="data">22/10/2026 08:32</td><td class="l"><a href="#">Doran Pyke</a></td><td class="opc">196</td><td class="l opc"><span class="vc v-k">Knight</span></td><td class="l dp"><span class="mundo">Destiny</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Pendulum</span></td></tr>
+<tr><td class="data">22/10/2026 07:02</td><td class="l"><a href="#">Seline Marr</a></td><td class="opc">460</td><td class="l opc"><span class="vc v-d">Arch Druid</span></td><td class="l dp"><span class="mundo">Serenity</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Liberty</span></td></tr>
+<tr><td class="data">22/10/2026 04:52</td><td class="l"><a href="#">Tamsin Rook</a></td><td class="opc">148</td><td class="l opc"><span class="vc v-k">Crusader Knight</span></td><td class="l dp"><span class="mundo">Luminary</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Destiny</span></td></tr>
+<tr><td class="data">22/10/2026 01:55</td><td class="l"><a href="#">Varo Quill</a></td><td class="opc">113</td><td class="l opc"><span class="vc v-a">Master Archer</span></td><td class="l dp"><span class="mundo">Luminary</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Destiny</span></td></tr>
+<tr><td class="data">21/10/2026 20:36</td><td class="l"><a href="#">Elric Thorne</a></td><td class="opc">136</td><td class="l opc"><span class="vc v-a">Royal Archer</span></td><td class="l dp"><span class="mundo">Legacy</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Liberty</span></td></tr>
+<tr><td class="data">21/10/2026 16:06</td><td class="l"><a href="#">Nessa Frost</a></td><td class="opc">309</td><td class="l opc"><span class="vc v-k">Knight</span></td><td class="l dp"><span class="mundo">Luminary</span> <span class="seta" style="color:var(--faint)">→</span> <span class="mundo novo">Liberty</span></td></tr>
+</tbody></table></div>
+    <div class="pag"><span>1–50 de 2.293</span><span class="pgs"><b class="on">1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>…</b><b>56</b></span></div>
+  </section>
+
+  <p class="exemplo">Aba 3: banimentos (#bans)</p>
+  <section class="quadro">
+    <div class="abas"><b class="">Trocas de nome <small>2.759</small></b><b class="">Transferências <small>2.293</small></b><b class="on">Banimentos <small>7.174</small></b></div>
+    <div class="filtros">
+  <label class="campo"><span>Mundo</span><span class="sel">Todos ▾</span></label>
+  <div class="grupo"><span class="rot">Vocação</span><div class="seg"><b class="on">Todas</b><b>Knights</b><b>Archers</b><b>Mages</b><b>Druids</b></div></div>
+  <div class="grupo"><span class="rot">Tipo</span><div class="seg"><b class="on">Todos</b><b>Permanentes</b><b>Temporários</b></div></div>
+  <label class="campo busca"><span>Procurar</span><span class="inp">Nome do personagem</span></label>
+</div>
+    <div class="resumo"><span><b>214</b> nos últimos 7 dias</span><span><b>1.083</b> nos últimos 30 dias</span><span>Mundo com mais bans no mês: <b>Luminary</b> (812)</span></div>
+    <div class="tabwrap"><table><thead><tr><th class="l">Data</th><th class="l">Personagem</th><th class="opc">Nível</th><th class="l opc">Vocação</th><th class="l opc">Mundo</th><th class="l opc">Motivo</th><th class="l">Prazo</th></tr></thead><tbody>
+<tr><td class="data">22/10/2026 19:17</td><td class="l"><a href="#">Grim Lantern</a></td><td class="opc">22</td><td class="l opc"><span class="vc v-d">Druid</span></td><td class="l opc"><span class="mundo">Eternum</span></td><td class="l opc"><span class="motivo grave">Infração grave</span></td><td class="l"><span class="prazo perm">permanente</span></td></tr>
+<tr><td class="data">22/10/2026 15:07</td><td class="l"><a href="#">Vale Strider</a></td><td class="opc">24</td><td class="l opc"><span class="vc v-a">Master Archer</span></td><td class="l opc"><span class="mundo">Luminary</span></td><td class="l opc"><span class="motivo grave">Infração grave</span></td><td class="l"><span class="prazo perm">permanente</span></td></tr>
+<tr><td class="data">22/10/2026 10:51</td><td class="l"><a href="#">Copper Rune</a></td><td class="opc">18</td><td class="l opc"><span class="vc v-a">Master Archer</span></td><td class="l opc"><span class="mundo">Luminary</span></td><td class="l opc"><span class="motivo grave">Infração grave</span></td><td class="l"><span class="prazo perm">permanente</span></td></tr>
+<tr><td class="data">22/10/2026 05:40</td><td class="l"><a href="#">Silent Briar</a></td><td class="opc">102</td><td class="l opc"><span class="vc v-m">Mage</span></td><td class="l opc"><span class="mundo">Eternum</span></td><td class="l opc"><span class="motivo">Infração leve</span></td><td class="l"><span class="prazo">até 17/10/2026</span></td></tr>
+<tr><td class="data">22/10/2026 00:14</td><td class="l"><a href="#">Old Hollow</a></td><td class="opc">32</td><td class="l opc"><span class="vc v-m">Mage</span></td><td class="l opc"><span class="mundo">Serenity</span></td><td class="l opc"><span class="motivo grave">Infração grave</span></td><td class="l"><span class="prazo perm">permanente</span></td></tr>
+<tr><td class="data">21/10/2026 21:24</td><td class="l"><a href="#">Dawn Keeper</a></td><td class="opc">18</td><td class="l opc"><span class="vc v-k">Knight</span></td><td class="l opc"><span class="mundo">Luminary</span></td><td class="l opc"><span class="motivo grave">Infração grave</span></td><td class="l"><span class="prazo perm">permanente</span></td></tr>
+<tr><td class="data">21/10/2026 17:42</td><td class="l"><a href="#">Ember Reeve</a></td><td class="opc">14</td><td class="l opc"><span class="vc v-k">Elite Knight</span></td><td class="l opc"><span class="mundo">Luminary</span></td><td class="l opc"><span class="motivo grave">Infração grave</span></td><td class="l"><span class="prazo perm">permanente</span></td></tr>
+<tr><td class="data">21/10/2026 13:57</td><td class="l"><a href="#">Moss Warden</a></td><td class="opc">22</td><td class="l opc"><span class="vc v-k">Elite Knight</span></td><td class="l opc"><span class="mundo">Luminary</span></td><td class="l opc"><span class="motivo grave">Infração grave</span></td><td class="l"><span class="prazo perm">permanente</span></td></tr>
+<tr><td class="data">21/10/2026 08:55</td><td class="l"><a href="#">Ashen Warden</a></td><td class="opc">102</td><td class="l opc"><span class="vc v-a">Archer</span></td><td class="l opc"><span class="mundo">Eternum</span></td><td class="l opc"><span class="motivo">Infração leve</span></td><td class="l"><span class="prazo">até 17/10/2026</span></td></tr>
+<tr><td class="data">21/10/2026 03:32</td><td class="l"><a href="#">Quiet Ember</a></td><td class="opc">37</td><td class="l opc"><span class="vc v-k">Knight</span></td><td class="l opc"><span class="mundo">Luminary</span></td><td class="l opc"><span class="motivo grave">Infração grave</span></td><td class="l"><span class="prazo perm">permanente</span></td></tr>
+<tr><td class="data">21/10/2026 00:22</td><td class="l"><a href="#">Northwind Sage</a></td><td class="opc">37</td><td class="l opc"><span class="vc v-a">Master Archer</span></td><td class="l opc"><span class="mundo">Luminary</span></td><td class="l opc"><span class="motivo grave">Infração grave</span></td><td class="l"><span class="prazo perm">permanente</span></td></tr>
+<tr><td class="data">20/10/2026 19:57</td><td class="l"><a href="#">Ivory Talon</a></td><td class="opc">17</td><td class="l opc"><span class="vc v-d">Druid</span></td><td class="l opc"><span class="mundo">Luminary</span></td><td class="l opc"><span class="motivo grave">Infração grave</span></td><td class="l"><span class="prazo perm">permanente</span></td></tr>
+</tbody></table></div>
+    <div class="pag"><span>1–50 de 7.174</span><span class="pgs"><b class="on">1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>…</b><b>56</b></span></div>
+  </section>
+  <p class="nota-mock">No modelo, 12 linhas por aba; na página, 50 por página. Nomes inventados. Clicar no nome abre a página do personagem. No celular ficam a data, o nome e o principal de cada aba: nível, de → para, prazo.</p>
+</div>
+<span class="etiqueta">MODELO</span>
+</body></html>
