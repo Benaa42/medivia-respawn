@@ -919,6 +919,16 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .rk-pgs { display: inline-flex; flex-wrap: wrap; gap: 4px; }
 .rk-pgs button { width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--card); color: var(--label); font: 600 13px var(--font-ui); cursor: pointer; }
 .rk-pgs button[aria-pressed="true"] { background: var(--amber); color: var(--gold-ink); }
+/* XP ganha: datas no título, selo de níveis ganhos e barra proporcional ao primeiro */
+.rk-titulo small { margin-left: 10px; font: 500 13px var(--font-ui); color: var(--faint); }
+.rk-up { margin-left: 6px; padding: 0 6px; border-radius: 999px; background: var(--band); color: var(--value); font: 700 11px/1.6 var(--font-ui); }
+.rk-pod .rk-up { margin: 0; }
+.rk-tab td.xp { width: 34%; }
+.rk-bxp { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.rk-bxp i { flex: 1 1 auto; max-width: 260px; height: 8px; border-radius: 4px; background: var(--card); overflow: hidden; }
+.rk-bxp i b { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, rgba(58, 227, 116, 0.45), var(--value)); }
+.rk-bxp span { min-width: 78px; color: var(--value); font-weight: 700; }
+@media (max-width: 760px) { .rk-bxp i { display: none; } .rk-tab td.xp { width: auto; } .rk-tab-xp th:nth-child(3), .rk-tab-xp td:nth-child(3) { display: none; } .rk-tab-xp th, .rk-tab-xp td { padding: 6px 4px; font-size: 13px; } .rk-tab-xp th.c, .rk-tab-xp td.c { width: 28px; } .rk-bxp span { min-width: 0; } }
 @media (max-width: 760px) { .rk-podio { grid-template-columns: 1fr; } .rk-pod.p1 { order: -1; } .rk-busca { margin-left: 0; } .rk-achar input { width: 100%; } .rk-busca, .rk-achar { width: 100%; } }
 .pers-busca input { flex: 1 1 240px; max-width: 360px; padding: 11px 14px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 15px var(--font-ui); }
 .pers-busca input:focus { outline: 2px solid var(--value); outline-offset: -1px; border-color: transparent; }
@@ -1967,6 +1977,18 @@ const I18N = {
     'rk.seuB': 'está em {p}º com {r} {v}.',
     'rk.irAte': 'Ir até ele',
     'rk.voce': 'você',
+    'rk.xp': 'XP ganha',
+    'rk.periodo': 'Período',
+    'rk.per.1': 'Ontem',
+    'rk.per.7': '7 dias',
+    'rk.per.30': '30 dias',
+    'rk.tituloXp': 'XP ganha em {m}',
+    'rk.tituloXpVoc': 'XP ganha {v} em {m}',
+    'rk.deA': 'de {a} a {b}',
+    'rk.seuXp': 'ganhou {g} e está em {p}º.',
+    'rk.xpRodape': 'Os 100 que mais ganharam, entre os 1.000 primeiros do ranking de nível',
+    'rk.xpVazio': 'Ainda sem dados para este período.',
+    'rk.naoAcheiXp': '{x} não está entre os 100 que mais ganharam.',
     'pers.tag.shared': 'compartilhada',
     'pers.tag.locked': 'travada',
     'pers.tag.naoEscolhida': 'não escolhida',
@@ -2749,6 +2771,18 @@ const I18N = {
     'rk.seuB': 'is #{p} with {r} {v}.',
     'rk.irAte': 'Go to it',
     'rk.voce': 'you',
+    'rk.xp': 'XP gained',
+    'rk.periodo': 'Period',
+    'rk.per.1': 'Yesterday',
+    'rk.per.7': '7 days',
+    'rk.per.30': '30 days',
+    'rk.tituloXp': 'XP gained on {m}',
+    'rk.tituloXpVoc': 'XP gained {v} on {m}',
+    'rk.deA': '{a} to {b}',
+    'rk.seuXp': 'gained {g} and is #{p}.',
+    'rk.xpRodape': 'The 100 who gained the most, among the top 1,000 of the level ranking',
+    'rk.xpVazio': 'No data for this period yet.',
+    'rk.naoAcheiXp': '{x} is not among the 100 who gained the most.',
     'pers.tag.shared': 'shared',
     'pers.tag.locked': 'locked',
     'pers.tag.naoEscolhida': 'not chosen',
@@ -3531,6 +3565,18 @@ const I18N = {
     'rk.seuB': 'está en el {p}º con {r} {v}.',
     'rk.irAte': 'Ir hasta él',
     'rk.voce': 'tú',
+    'rk.xp': 'XP ganada',
+    'rk.periodo': 'Período',
+    'rk.per.1': 'Ayer',
+    'rk.per.7': '7 días',
+    'rk.per.30': '30 días',
+    'rk.tituloXp': 'XP ganada en {m}',
+    'rk.tituloXpVoc': 'XP ganada {v} en {m}',
+    'rk.deA': 'del {a} al {b}',
+    'rk.seuXp': 'ganó {g} y está en el {p}º.',
+    'rk.xpRodape': 'Los 100 que más ganaron, entre los 1.000 primeros del ranking de nivel',
+    'rk.xpVazio': 'Aún no hay datos para este período.',
+    'rk.naoAcheiXp': '{x} no está entre los 100 que más ganaron.',
     'pers.tag.shared': 'compartida',
     'pers.tag.locked': 'bloqueada',
     'pers.tag.naoEscolhida': 'no elegida',
@@ -4313,6 +4359,18 @@ const I18N = {
     'rk.seuB': 'jest na {p}. miejscu z {r} {v}.',
     'rk.irAte': 'Przejdź',
     'rk.voce': 'ty',
+    'rk.xp': 'Zdobyty XP',
+    'rk.periodo': 'Okres',
+    'rk.per.1': 'Wczoraj',
+    'rk.per.7': '7 dni',
+    'rk.per.30': '30 dni',
+    'rk.tituloXp': 'Zdobyty XP na {m}',
+    'rk.tituloXpVoc': 'Zdobyty XP {v} na {m}',
+    'rk.deA': 'od {a} do {b}',
+    'rk.seuXp': 'zdobył {g} i jest na {p}. miejscu.',
+    'rk.xpRodape': '100 osób, które zdobyły najwięcej, spośród pierwszego 1000 rankingu poziomu',
+    'rk.xpVazio': 'Brak danych dla tego okresu.',
+    'rk.naoAcheiXp': '{x} nie ma wśród 100 osób, które zdobyły najwięcej.',
     'pers.tag.shared': 'wspólne',
     'pers.tag.locked': 'zablokowane',
     'pers.tag.naoEscolhida': 'niewybrane',
@@ -6157,7 +6215,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5, guMundo: 'pendulum', guFormato: 'cartoes', rkMundo: 'pendulum', rkSkill: 'level', rkVoc: 'all' }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5, guMundo: 'pendulum', guFormato: 'cartoes', rkMundo: 'pendulum', rkSkill: 'level', rkVoc: 'all', rkPeriodo: 1 }, lsGet(LS_UI, {}));
 // Bônus de XP: minutos de XP Boost da loja, golden premium (+5% no boost) e outros bônus em %, para a hunt inteira
 const XPB_MINS = [0, 30, 60, 90, 120, 180];
 {
@@ -11359,22 +11417,27 @@ $('#gu-mundo').addEventListener('change', e => { ui.guMundo = e.target.value; sa
    (os 1.000 primeiros de cada mundo, 100 por página), com a vocação e o nível de cada um completados pelo Worker
    (/ranking/{mundo}/{vocação}/{skill}/{página}). */
 const MUNDOS = ['pendulum', 'legacy', 'serenity', 'luminary', 'liberty', 'destiny', 'immensity', 'eternum', 'prosperity'];
-const RK_SKILLS = ['level', 'maglevel', 'melee', 'distance', 'blocking', 'fishing', 'mining', 'cooking'];
+const RK_SKILLS = ['level', 'xp', 'maglevel', 'melee', 'distance', 'blocking', 'fishing', 'mining', 'cooking'];   // xp: XP ganha (fotos diárias)
+const RK_PERIODOS = [1, 7, 30];
 const RK_VOCS = ['all', 'knights', 'archers', 'mages', 'druids'];
 const rk = { pagina: 1, dados: null, chave: '', carregando: false, alvo: '', achando: false, msg: '' };
 const rkMundo = () => MUNDOS.includes(ui.rkMundo) ? ui.rkMundo : 'pendulum';
 const rkSkill = () => RK_SKILLS.includes(ui.rkSkill) ? ui.rkSkill : 'level';
 const rkVoc = () => RK_VOCS.includes(ui.rkVoc) ? ui.rkVoc : 'all';
 const mundoNome = m => m[0].toUpperCase() + m.slice(1);
-const rkRota = p => 'ranking/' + rkMundo() + '/' + rkVoc() + '/' + rkSkill() + '/' + p;
+const rkPeriodo = () => RK_PERIODOS.includes(Number(ui.rkPeriodo)) ? Number(ui.rkPeriodo) : 1;
+// XP ganha: uma página só, os 100 que mais ganharam entre duas fotos do ranking de nível (/ganhos)
+const rkRota = p => rkSkill() === 'xp' ? 'ganhos/' + rkMundo() + '/' + rkVoc() + '/' + rkPeriodo() : 'ranking/' + rkMundo() + '/' + rkVoc() + '/' + rkSkill() + '/' + p;
 // uma página do ranking; o Worker guarda cada uma por 5 minutos
 async function rkBuscar(p) {
   const r = await fetch(API_MEDIVIA + rkRota(p));
   if (!r.ok) throw new Error(String(r.status));
-  return (await r.json()).lista || [];
+  const j = await r.json(), lista = j.lista || [];
+  lista.desde = j.desde || null; lista.ate = j.ate || null;   // XP ganha: os dias das duas fotos
+  return lista;
 }
 async function rkCarregar(p) {
-  rk.pagina = Math.min(10, Math.max(1, p || 1));
+  rk.pagina = rkSkill() === 'xp' ? 1 : Math.min(10, Math.max(1, p || 1));
   const chave = rkRota(rk.pagina);
   if (rk.chave !== chave) rk.dados = null;   // outro filtro ou página: a lista velha sai enquanto a nova carrega
   rk.chave = chave;
@@ -11397,7 +11460,7 @@ async function rkAchar(nome) {
   renderRankings();
   const alvo = slug(nome), chave = rkRota(0);
   try {
-    for (let p = 1; p <= 10; p++) {
+    for (let p = 1; p <= (rkSkill() === 'xp' ? 1 : 10); p++) {
       if (rkRota(0) !== chave || pageNow !== 'rankings') return;
       const ini = Date.now();
       const lista = rk.dados && rk.chave === rkRota(p) ? rk.dados : await rkBuscar(p);
@@ -11411,16 +11474,54 @@ async function rkAchar(nome) {
       }
       if (Date.now() - ini > 250) await new Promise(r => setTimeout(r, 1100));
     }
-    rk.msg = tr('rk.naoAchei', { x: nome });
+    rk.msg = tr(rkSkill() === 'xp' ? 'rk.naoAcheiXp' : 'rk.naoAchei', { x: nome });
   } catch (e) { rk.msg = tr(e.message === '429' ? 'pers.limite' : 'pers.erro'); }
   rk.achando = false;
   renderRankings();
+}
+// Os dias da XP ganha: da foto mais antiga até o dia antes da mais nova (a foto é tirada à meia-noite)
+function rkDatas(lista, loc) {
+  if (!lista || !lista.desde || !lista.ate) return null;
+  const ultimo = new Date(Date.parse(lista.ate + 'T12:00:00Z') - 864e5).toISOString().slice(0, 10);
+  return el('small', { text: ultimo <= lista.desde ? persData(lista.desde, loc) : tr('rk.deA', { a: persDiaMes(lista.desde, loc), b: persData(ultimo, loc) }) });
+}
+// "XP ganha": pódio e a tabela dos 100 que mais ganharam, com uma barra proporcional ao primeiro
+function renderRkXp(g, partes, lista, loc) {
+  if (!lista.length) { partes.push(el('p', { class: 'support-note', text: tr('rk.xpVazio') })); g.replaceChildren(...partes); return; }
+  const meu = ui.meuPers ? slug(ui.meuPers) : '', alvo = rk.alvo ? slug(rk.alvo) : '';
+  const chip = h => el('span', { class: 'gu-vc v-' + (guVoc(h.vocacao) || 'x'), text: h.vocacao || '—' });
+  const sobe = n => n > 0 ? el('span', { class: 'rk-up', text: '+' + n }) : null;
+  const abrir = h => goTo('personagem/' + encodeURIComponent(h.nome));
+  const iMeu = meu ? lista.findIndex(h => slug(h.nome) === meu) : -1;
+  if (iMeu >= 0) partes.push(el('div', { class: 'rk-meu' }, tr('rk.seuA') + ' ', el('b', { text: lista[iMeu].nome }), ' ' + tr('rk.seuXp', { g: guKk(lista[iMeu].ganho), p: iMeu + 1 }) + ' ',
+    el('button', { type: 'button', class: 'rk-ir', text: tr('rk.irAte'), onclick: () => { const l = $('#rk-grade tr.meu'); if (l) l.scrollIntoView({ block: 'center', behavior: 'smooth' }); } })));
+  if (lista.length >= 3) {
+    const pod = (h, pos) => el('button', { type: 'button', class: 'rk-pod p' + pos, onclick: () => abrir(h) },
+      el('span', { class: 'pos', text: pos + 'º' }), el('b', { class: 'nm', text: h.nome }), chip(h), el('span', { class: 'val', text: guKk(h.ganho) }),
+      el('small', { text: tr('pers.nivel').toLowerCase() + ' ' + h.nivel }), sobe(h.niveis));
+    partes.push(el('div', { class: 'rk-podio' }, pod(lista[1], 2), pod(lista[0], 1), pod(lista[2], 3)));
+  }
+  const ini = lista.length >= 3 ? 3 : 0, max = lista[0].ganho || 1;
+  partes.push(el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table rk-tab rk-tab-xp' },
+    el('thead', null, el('tr', null, el('th', { class: 'c', scope: 'col', text: '#' }), el('th', { class: 'l', scope: 'col', text: tr('gu.col.pers') }),
+      el('th', { class: 'l', scope: 'col', text: tr('pers.voc') }), el('th', { scope: 'col', text: tr('pers.nivel') }), el('th', { scope: 'col', text: tr('rk.xp') }))),
+    el('tbody', null, lista.slice(ini).map((h, i) => {
+      const s = slug(h.nome), cls = [s === meu ? 'meu' : '', s === alvo ? 'alvo' : ''].filter(Boolean).join(' ');
+      return el('tr', { class: cls || null },
+        el('td', { class: 'c pos', text: String(ini + i + 1) }),
+        el('td', { class: 'l' }, el('button', { class: 'gu-n', type: 'button', text: h.nome, onclick: () => abrir(h) }), s === meu ? el('span', { class: 'rk-eu', text: tr('rk.voce') }) : null),
+        el('td', { class: 'l' }, chip(h)),
+        el('td', null, String(h.nivel), sobe(h.niveis)),
+        el('td', { class: 'xp' }, el('div', { class: 'rk-bxp' }, el('i', null, el('b', { style: 'width:' + Math.max(1, h.ganho / max * 100).toFixed(1) + '%' })), el('span', { text: guKk(h.ganho) }))));
+    })))));
+  partes.push(el('div', { class: 'rk-pag' }, el('span', { text: tr('rk.xpRodape') })));
+  g.replaceChildren(...partes);
 }
 function renderRankings() {
   const g = $('#rk-grade');
   if (!g) return;
   const loc = document.documentElement.lang || 'en', skill = rkSkill(), voc = rkVoc(), mundo = rkMundo();
-  const rotSkill = s => s === 'level' ? tr('pers.nivel') : tr('pers.sk.' + s);
+  const rotSkill = s => s === 'level' ? tr('pers.nivel') : s === 'xp' ? tr('rk.xp') : tr('pers.sk.' + s);
   const VB = { knights: 'k', archers: 'a', mages: 'm', druids: 'd' };
   const VN = { k: 'Knight', a: 'Archer', m: 'Mage', d: 'Druid' };
   const seg = (lista, atual, rot, pega) => el('span', { class: 'seg' }, lista.map(v => el('button', { type: 'button', text: rot(v), 'aria-pressed': String(v === atual), onclick: () => { pega(v); saveUi(); rk.alvo = ''; rkCarregar(1); } })));
@@ -11428,16 +11529,20 @@ function renderRankings() {
     el('label', { class: 'rk-campo' }, el('span', { text: tr('gu.mundo') }),
       el('select', { onchange: e => { ui.rkMundo = e.target.value; saveUi(); rk.alvo = ''; rkCarregar(1); } }, MUNDOS.map(m => el('option', { value: m, text: mundoNome(m), selected: m === mundo })))),
     el('div', { class: 'rk-campo' }, el('span', { text: tr('rk.ranking') }), seg(RK_SKILLS, skill, rotSkill, v => { ui.rkSkill = v; })),
+    skill === 'xp' ? el('div', { class: 'rk-campo' }, el('span', { text: tr('rk.periodo') }), seg(RK_PERIODOS, rkPeriodo(), v => tr('rk.per.' + v), v => { ui.rkPeriodo = v; })) : null,
     el('div', { class: 'rk-campo' }, el('span', { text: tr('pers.voc') }), seg(RK_VOCS, voc, v => tr('rk.voc.' + v), v => { ui.rkVoc = v; })),
     el('form', { class: 'rk-campo rk-busca', onsubmit: e => { e.preventDefault(); rkAchar(e.target.elements.nome.value); } },
       el('span', { text: tr('rk.achar') }),
       el('span', { class: 'rk-achar' }, el('input', { name: 'nome', type: 'search', maxlength: 40, autocomplete: 'off', spellcheck: false, placeholder: tr('pers.nome'), value: rk.alvo }),
         el('button', { class: 'dlg', type: 'submit', text: tr('rk.acharBtn'), disabled: rk.achando }))));
-  const titulo = el('h2', { class: 'rk-titulo', text: voc === 'all' ? tr('rk.titulo', { r: rotSkill(skill), m: mundoNome(mundo) }) : tr('rk.tituloVoc', { r: rotSkill(skill), v: tr('rk.vocDe.' + voc), m: mundoNome(mundo) }) });
+  const titulo = skill === 'xp'
+    ? el('h2', { class: 'rk-titulo' }, voc === 'all' ? tr('rk.tituloXp', { m: mundoNome(mundo) }) : tr('rk.tituloXpVoc', { v: tr('rk.vocDe.' + voc), m: mundoNome(mundo) }), rkDatas(rk.dados, loc))
+    : el('h2', { class: 'rk-titulo', text: voc === 'all' ? tr('rk.titulo', { r: rotSkill(skill), m: mundoNome(mundo) }) : tr('rk.tituloVoc', { r: rotSkill(skill), v: tr('rk.vocDe.' + voc), m: mundoNome(mundo) }) });
   const partes = [filtros, titulo];
   if (rk.msg) partes.push(el('p', { class: 'status', text: rk.msg }));
   const lista = rk.dados;
   if (!lista) { if (rk.carregando) partes.push(el('p', { class: 'support-note', text: tr('rk.carregando') })); g.replaceChildren(...partes); return; }
+  if (skill === 'xp') { renderRkXp(g, partes, lista, loc); return; }
   const base = (rk.pagina - 1) * 100;
   const meu = ui.meuPers ? slug(ui.meuPers) : '', alvo = rk.alvo ? slug(rk.alvo) : '';
   const vb = h => guVoc(h.vocacao) || VB[voc] || null;
