@@ -9,6 +9,8 @@
 //                       XP de ontem, 7 e 30 dias; importa o histórico de poucos membros por vez (o site pede de novo)
 //   /ranking/{mundo}/{vocação}/{skill}/{página}  o ranking oficial com a vocação e o nível de cada um, do que está guardado
 //   /ganhos/{mundo}/{vocação}/{dias}  quem mais ganhou XP em 1, 7 ou 30 dias, pelas fotos diárias do ranking de nível
+//   /tarefas/{mundo}/{vocação}/{pontos|concluidas|abates}  ranking de tasks: pontos de Huntsman, tasks de criatura
+//                       concluídas e abates nelas, das fichas de quem está na foto
 //   /historico/{nome}   XP e tempo online por dia (horário de Brasília) e as skills dos rankings, do que a coleta guardou;
 //                       na primeira vez de cada personagem, importa o histórico que já existe (ver importar())
 //   /coleta             quando a coleta rodou pela última vez, o que fez ou o erro, e os totais do banco
@@ -34,6 +36,7 @@
 //     nunca entrariam entre os 1000 primeiros. Uma volta completa leva umas duas horas.
 //   - à meia-noite de Brasília, a foto do dia: o ranking de nível dos 9 mundos (nível e XP dos 1000 primeiros de cada
 //     um, para a XP ganha) e, dos rankings por vocação, a vocação de quem está na foto. Umas páginas por minuto.
+//   - a ficha de quem está na foto, em rodízio (tasks e banimentos), e o histórico de quem ainda não foi importado.
 
 const API = 'https://medivia.online/api/public/';
 const ORIGENS = ['https://medivialabs.com', 'https://www.medivialabs.com', 'http://localhost:8765', 'http://localhost:8766'];
@@ -48,10 +51,14 @@ const ROTAS = [
 const MUNDOS_TODOS = ['pendulum', 'legacy', 'serenity', 'luminary', 'liberty', 'destiny', 'immensity', 'eternum', 'prosperity'];
 const FOTO_POR_MINUTO = 3;    // páginas da foto diária por minuto (cada mundo: 10 do ranking geral e até 40 por vocação)
 const FOTO_VOCS = [['knights', 'Knight'], ['archers', 'Archer'], ['mages', 'Mage'], ['druids', 'Druid']];
-// Freio: o D1 gratuito aceita 100 mil linhas gravadas por dia (UTC). Cada importação grava umas 860.
-const IMPORTA_ATE = 60000;         // a guilda só importa enquanto o dia tiver gravado menos que isto
-const IMPORTA_ATE_FICHA = 85000;   // quem abre a ficha de um personagem ainda importa até aqui
-const FOTO_ATE = 95000;            // a foto diária para aqui (volta no minuto seguinte, se o dia virar)
+// Freio de gravações. Plano pago (desde 23/10/2026): 50 milhões de linhas gravadas por mês incluídas. O freio olha o
+// dia (UTC) e a soma dos últimos 30 dias; cada importação grava umas 500.
+const IMPORTA_ATE = 3000000;        // a guilda e a importação da base só importam com o dia abaixo disto
+const IMPORTA_ATE_FICHA = 3500000;  // quem abre a ficha de um personagem ainda importa até aqui
+const FOTO_ATE = 4000000;           // a foto diária para aqui
+const MES_ATE = 40000000;           // nos últimos 30 dias: acima disto, nada disso grava (só a coleta normal)
+const BASE_POR_MINUTO = 3;          // históricos importados por minuto (3 pedidos ao MediviaGeeks e ao MediviaThings cada)
+const FICHAS_POR_MINUTO = 3;        // fichas de quem está na foto lidas por minuto (tasks), em rodízio
 const FILA_POR_MINUTO = 3;     // fichas buscadas por minuto na coleta, com intervalo entre elas (a API aceita 1 pedido por segundo)
 const INTERVALO_MS = 2500;
 const BRASILIA = -3 * 3600;    // os dias do histórico contam no horário de Brasília
@@ -73,7 +80,7 @@ const pedir = (env, rota) => fetch(API + rota.split('/').map(encodeURIComponent)
 /* ---------- Banco (D1) ---------- */
 // Versão das tabelas: troque ao criar ou mudar uma tabela abaixo. Com a versão já gravada em estado/esquema, preparar()
 // custa uma consulta só; o lote inteiro (cada comando conta no limite de ~50 operações por execução) roda uma vez.
-const ESQUEMA = '2026-10-23-foto';
+const ESQUEMA = '2026-10-23-tarefas';
 let pronto = false;
 async function preparar(db) {
   if (pronto) return;
@@ -92,15 +99,28 @@ async function preparar(db) {
     db.prepare('CREATE TABLE IF NOT EXISTS ultimo_xp (chave TEXT PRIMARY KEY, experiencia INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS estado (chave TEXT PRIMARY KEY, valor TEXT)'),
     db.prepare('CREATE TABLE IF NOT EXISTS skills (chave TEXT, skill TEXT, valor INTEGER, quando INTEGER, PRIMARY KEY (chave, skill))'),
-    db.prepare('CREATE TABLE IF NOT EXISTS xp_importado (chave TEXT, dia TEXT, nivel INTEGER, ganho INTEGER, PRIMARY KEY (chave, dia))'),
-    db.prepare('CREATE TABLE IF NOT EXISTS online_importado (chave TEXT, dia TEXT, segundos INTEGER, PRIMARY KEY (chave, dia))'),
+    db.prepare('CREATE TABLE IF NOT EXISTS xp_importado (chave TEXT, dia TEXT, nivel INTEGER, ganho INTEGER, PRIMARY KEY (chave, dia)) WITHOUT ROWID'),
+    db.prepare('CREATE TABLE IF NOT EXISTS online_importado (chave TEXT, dia TEXT, segundos INTEGER, PRIMARY KEY (chave, dia)) WITHOUT ROWID'),
     db.prepare('CREATE TABLE IF NOT EXISTS importados (chave TEXT PRIMARY KEY, quando INTEGER, ate TEXT, dias INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS perfil (chave TEXT PRIMARY KEY, vocacao TEXT, nivel INTEGER, ultimo_login INTEGER, atualizado INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS doacoes (id TEXT PRIMARY KEY, quando INTEGER, nome TEXT, valor TEXT, moeda TEXT, tipo TEXT, mensagem TEXT, publica INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS apoio_eventos (dia TEXT, acao TEXT, pais TEXT, n INTEGER, PRIMARY KEY (dia, acao, pais))'),
     // WITHOUT ROWID: a chave é a própria tabela, então cada linha conta uma gravação só (com rowid seriam duas)
     db.prepare('CREATE TABLE IF NOT EXISTS foto (dia TEXT, mundo TEXT, chave TEXT, nome TEXT, nivel INTEGER, xp INTEGER, PRIMARY KEY (dia, mundo, chave)) WITHOUT ROWID'),
+    db.prepare('CREATE TABLE IF NOT EXISTS tarefas (chave TEXT PRIMARY KEY, nome TEXT, mundo TEXT, pontos INTEGER, concluidas INTEGER, total INTEGER, abates INTEGER, atualizado INTEGER) WITHOUT ROWID'),
+    db.prepare('CREATE TABLE IF NOT EXISTS bans (chave TEXT, dados TEXT, nome TEXT, mundo TEXT, visto INTEGER, PRIMARY KEY (chave, dados)) WITHOUT ROWID'),
   ]);
+  // O histórico importado nasceu com rowid (duas gravações por linha): passa para WITHOUT ROWID uma vez só, copiando
+  for (const [t, def, cols] of [['xp_importado', 'chave TEXT, dia TEXT, nivel INTEGER, ganho INTEGER', 'chave, dia, nivel, ganho'], ['online_importado', 'chave TEXT, dia TEXT, segundos INTEGER', 'chave, dia, segundos']]) {
+    const m = await db.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?").bind(t).first();
+    if (m && !/WITHOUT ROWID/i.test(m.sql)) await db.batch([
+      db.prepare('DROP TABLE IF EXISTS ' + t + '_n'),
+      db.prepare('CREATE TABLE ' + t + '_n (' + def + ', PRIMARY KEY (chave, dia)) WITHOUT ROWID'),
+      db.prepare('INSERT OR IGNORE INTO ' + t + '_n (' + cols + ') SELECT ' + cols + ' FROM ' + t),
+      db.prepare('DROP TABLE ' + t),
+      db.prepare('ALTER TABLE ' + t + '_n RENAME TO ' + t),
+    ]);
+  }
   await db.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind('esquema', ESQUEMA).run();
   pronto = true;
 }
@@ -127,8 +147,13 @@ const UPSERT_PERFIL = " ON CONFLICT(chave) DO UPDATE SET vocacao = COALESCE(excl
 const guardarPerfil = (db, lista) => lista.length ? db.prepare("INSERT INTO perfil (chave, vocacao, nivel, ultimo_login, atualizado) SELECT json_extract(value, '$.c'), json_extract(value, '$.v'), json_extract(value, '$.l'), json_extract(value, '$.e'), ? FROM json_each(?) WHERE true" + UPSERT_PERFIL)
   .bind(agora(), JSON.stringify(lista)) : null;
 const diaBr = seg => new Date((seg + BRASILIA) * 1000).toISOString().slice(0, 10);
-// linhas gravadas hoje (UTC), do contador de medir()
-const gravadasHoje = async db => Number(((await db.prepare('SELECT valor FROM estado WHERE chave = ?').bind('gravadas:' + new Date().toISOString().slice(0, 10)).first()) || {}).valor) || 0;
+// O freio: o dia (UTC) passou do teto ou os últimos 30 dias passaram de MES_ATE (contador de medir())
+async function passouDoTeto(db, tetoDia) {
+  const hoje = new Date().toISOString().slice(0, 10), desde = new Date(Date.now() - 29 * 864e5).toISOString().slice(0, 10);
+  const r = await db.prepare('SELECT SUM(CASE WHEN chave = ? THEN CAST(valor AS INTEGER) ELSE 0 END) AS dia, SUM(CAST(valor AS INTEGER)) AS mes FROM estado WHERE chave >= ? AND chave <= ?')
+    .bind('gravadas:' + hoje, 'gravadas:' + desde, 'gravadas:' + hoje).first();
+  return (Number(r && r.dia) || 0) > tetoDia || (Number(r && r.mes) || 0) > MES_ATE;
+}
 
 /* ---------- Contador de gravações ---------- */
 // O D1 gratuito aceita 100 mil linhas gravadas por dia (UTC). Cada execução conta as linhas que o banco diz ter gravado
@@ -210,8 +235,10 @@ async function coletar(env, reg = { passos: [] }) {
     }
     await db.prepare('DELETE FROM fila WHERE chave = ?').bind(f.chave).run();
   }
-  // Foto diária (só na madrugada de Brasília, até terminar)
+  // Foto diária (só na madrugada de Brasília, até terminar), fichas em rodízio e importação da base
   await coletarFoto(env, db, reg);
+  await coletarFichas(env, db, reg);
+  await importarBase(db, reg);
   // Ranking de nível: uma página por minuto nos minutos 10 a 19 de cada hora; nos outros, uma página de skills
   const min = new Date().getUTCMinutes();
   await dormir(1500);   // a API aceita 1 pedido por segundo
@@ -270,11 +297,13 @@ async function coletarFoto(env, db, reg) {
   const t = agora(), hoje = diaBr(t), hora = new Date((t + BRASILIA) * 1000).getUTCHours();
   let f = await lerFoto(db);
   if (f.dia !== hoje) {
-    if (hora >= 6) return;
-    f = { dia: hoje, passo: 0, inicio: t, corte: {}, feitos: f.feitos || {} };
+    // a primeira foto de todas sai na hora, para a importação e as fichas começarem; tirada no meio do dia, é
+    // parcial e não entra na XP ganha
+    if (hora >= 6 && f.dia) return;
+    f = { dia: hoje, passo: 0, inicio: t, corte: {}, feitos: f.feitos || {}, parciais: [...(f.parciais || []), ...(hora >= 6 ? [hoje] : [])].slice(-5) };
   }
   if (f.passo >= FOTO_PASSOS) return;
-  if (await gravadasHoje(db) > FOTO_ATE) { reg.passos.push('foto: freio de gravações'); return; }
+  if (await passouDoTeto(db, FOTO_ATE)) { reg.passos.push('foto: freio de gravações'); return; }
   for (let n = 0; n < FOTO_POR_MINUTO && f.passo < FOTO_PASSOS; n++) {
     const { mundo, voc, pagina, fimGrupo } = fotoPasso(f.passo);
     if (voc && f.corte[mundo] == null) { f.passo = fimGrupo; continue; }   // o ranking geral do mundo não veio: sem vocações
@@ -305,6 +334,88 @@ async function coletarFoto(env, db, reg) {
   await db.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind('foto', JSON.stringify(f)).run();
 }
 
+/* ---------- Fichas em rodízio (fase 3: tasks) ---------- */
+// Lê a ficha de quem está na foto mais nova, poucas por minuto e em ordem (cursor em estado/fichas_cursor): cada um
+// volta a cada dois dias, mais ou menos. Guarda os pontos de Huntsman e as tasks de criatura (concluídas, total e
+// abates), só quando mudam; os banimentos que a ficha mostrar; e a vocação e o nível no perfil.
+const lerCursor = async (db, k, dia) => { const e = await db.prepare('SELECT valor FROM estado WHERE chave = ?').bind(k).first(); let c = {}; try { c = JSON.parse((e && e.valor) || '{}'); } catch { /* recomeça */ } return c.dia === dia ? c : { dia, mundo: '', chave: '' }; };
+const gravarCursor = (db, k, c) => db.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind(k, JSON.stringify(c)).run();
+async function coletarFichas(env, db, reg) {
+  const dia = (await lerFoto(db)).dia;
+  if (!dia) return;
+  const c = await lerCursor(db, 'fichas_cursor', dia);
+  const lista = (await db.prepare('SELECT chave, nome, mundo FROM foto WHERE dia = ? AND (mundo, chave) > (?, ?) ORDER BY mundo, chave LIMIT ?').bind(dia, c.mundo, c.chave, FICHAS_POR_MINUTO).all()).results || [];
+  if (!lista.length) { await gravarCursor(db, 'fichas_cursor', { dia, mundo: '', chave: '' }); return; }   // fim da volta: recomeça
+  const tarefas = [], bans = [], perfis = [];
+  for (const p of lista) {
+    await dormir(1500);
+    const r = await pedir(env, 'player/' + p.nome);
+    if (r.status === 429) break;   // a mesma ficha no próximo minuto
+    c.mundo = p.mundo; c.chave = p.chave;
+    if (!r.ok) continue;           // trocou de nome ou foi apagado: segue
+    let j = null;
+    try { j = (await r.json()).player; } catch { /* resposta estranha: segue */ }
+    if (!j || !j.name) continue;
+    const ts = Array.isArray(j.tasks) ? j.tasks : [];
+    tarefas.push({ c: p.chave, n: j.name, m: p.mundo, p: Number(j.huntsman && j.huntsman.points) || 0, k: ts.filter(t => t && t.completed).length, t: ts.length,
+      a: ts.reduce((s, t) => s + Math.min(Number(t && t.progress) || 0, Number(t && t.kills) || 0), 0) });
+    for (const b of Array.isArray(j.bans) ? j.bans : []) bans.push({ c: p.chave, d: JSON.stringify(b), n: j.name, m: p.mundo });
+    perfis.push({ c: p.chave, v: j.vocation || null, l: Number(j.level) || null, e: null });
+  }
+  reg.passos.push('fichas: ' + tarefas.length);
+  const t = agora();
+  await db.batch([
+    tarefas.length ? db.prepare("INSERT INTO tarefas (chave, nome, mundo, pontos, concluidas, total, abates, atualizado) SELECT json_extract(value, '$.c'), json_extract(value, '$.n'), json_extract(value, '$.m'), json_extract(value, '$.p'), json_extract(value, '$.k'), json_extract(value, '$.t'), json_extract(value, '$.a'), ? FROM json_each(?) WHERE true " +
+      "ON CONFLICT(chave) DO UPDATE SET nome = excluded.nome, mundo = excluded.mundo, pontos = excluded.pontos, concluidas = excluded.concluidas, total = excluded.total, abates = excluded.abates, atualizado = excluded.atualizado " +
+      "WHERE nome IS NOT excluded.nome OR mundo IS NOT excluded.mundo OR pontos IS NOT excluded.pontos OR concluidas IS NOT excluded.concluidas OR total IS NOT excluded.total OR abates IS NOT excluded.abates").bind(t, JSON.stringify(tarefas)) : null,
+    bans.length ? db.prepare("INSERT OR IGNORE INTO bans (chave, dados, nome, mundo, visto) SELECT json_extract(value, '$.c'), json_extract(value, '$.d'), json_extract(value, '$.n'), json_extract(value, '$.m'), ? FROM json_each(?)").bind(t, JSON.stringify(bans)) : null,
+    guardarPerfil(db, perfis),
+    db.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind('fichas_cursor', JSON.stringify(c)),
+  ].filter(Boolean));
+}
+
+/* ---------- Importação da base ---------- */
+// O histórico (MediviaGeeks e MediviaThings, ver importar()) de quem está na foto mais nova e ainda não foi
+// importado, poucos por minuto, para não pesar nos sites deles. Anda pela foto com um cursor (estado/base_cursor);
+// a cada foto nova, uma volta nova pega só quem apareceu.
+async function importarBase(db, reg) {
+  const dia = (await lerFoto(db)).dia;
+  if (!dia) return;
+  const c = await lerCursor(db, 'base_cursor', dia);
+  if (c.fim) return;
+  if (await passouDoTeto(db, IMPORTA_ATE)) { reg.passos.push('base: freio de gravações'); return; }
+  const lista = (await db.prepare('SELECT f.chave, f.nome, f.mundo FROM foto f WHERE f.dia = ? AND (f.mundo, f.chave) > (?, ?) AND NOT EXISTS (SELECT 1 FROM importados WHERE chave = f.chave AND ' + IMPORTADO + ') ORDER BY f.mundo, f.chave LIMIT ?')
+    .bind(dia, c.mundo, c.chave, agora() - 3600, BASE_POR_MINUTO).all()).results || [];
+  if (!lista.length) c.fim = true;
+  let feitas = 0;
+  for (const p of lista) {
+    if (await importar(db, p.chave, p.nome, IMPORTA_ATE)) feitas++;   // se falhar, fica para a próxima volta
+    c.mundo = p.mundo; c.chave = p.chave;
+  }
+  reg.passos.push('base: ' + feitas + ' importados' + (c.fim ? ' (volta completa)' : ''));
+  await gravarCursor(db, 'base_cursor', c);
+}
+
+/* ---------- Ranking de tasks ---------- */
+// Os 100 primeiros do mundo em pontos de Huntsman, tasks de criatura concluídas ou abates nelas. Guardado 10 minutos.
+const TAREFAS_ORDEM = { pontos: 't.pontos DESC, t.concluidas DESC', concluidas: 't.concluidas DESC, t.abates DESC', abates: 't.abates DESC' };
+async function rankingTarefas(env, ctx, mundo, voc, tipo, cors) {
+  if (!env.DB) return json({ erro: 'banco D1 não ligado' }, 503, cors);
+  const chaveCache = new Request('https://api.medivialabs.com/cache/tarefas/' + mundo + '/' + voc + '/' + tipo);
+  const guardada = await caches.default.match(chaveCache);
+  if (guardada) { const out = new Response(guardada.body, guardada); for (const [k, v] of Object.entries(cors)) out.headers.set(k, v); return out; }
+  await preparar(env.DB);
+  const like = VOC_LIKE[voc] || [];
+  const filtro = like.length ? ' AND (' + like.map(() => 'p.vocacao LIKE ?').join(' OR ') + ')' : '';
+  const lista = ((await env.DB.prepare('SELECT t.nome, t.pontos, t.concluidas, t.total, t.abates, t.atualizado, p.vocacao, p.nivel FROM tarefas t LEFT JOIN perfil p ON p.chave = t.chave ' +
+    'WHERE t.mundo = ?' + filtro + ' ORDER BY ' + TAREFAS_ORDEM[tipo] + ' LIMIT 100').bind(mundo, ...like).all()).results || [])
+    .map(x => ({ nome: x.nome, vocacao: x.vocacao || null, nivel: x.nivel || null, pontos: x.pontos, concluidas: x.concluidas, total: x.total, abates: x.abates, atualizado: x.atualizado }));
+  const total = (await env.DB.prepare('SELECT COUNT(*) AS n FROM tarefas WHERE mundo = ?').bind(mundo).first() || {}).n || 0;
+  const res = json({ lidos: total, lista }, 200, cors, { 'Cache-Control': 'public, max-age=600' });
+  ctx.waitUntil(caches.default.put(chaveCache, res.clone()).catch(() => {}));
+  return res;
+}
+
 /* ---------- XP ganha ---------- */
 // Quem mais ganhou XP entre duas fotos do mundo: a mais nova e a de N dias antes (ou a mais antiga que houver, nos
 // primeiros dias). desde/ate são os dias das fotos; a XP é a dos dias desde .. ate - 1. Guardado 10 minutos.
@@ -315,7 +426,8 @@ async function ganhos(env, ctx, mundo, voc, dias, cors) {
   const guardada = await caches.default.match(chaveCache);
   if (guardada) { const out = new Response(guardada.body, guardada); for (const [k, v] of Object.entries(cors)) out.headers.set(k, v); return out; }
   await preparar(env.DB);
-  const feitos = ((await lerFoto(env.DB)).feitos || {})[mundo] || [];
+  const fo = await lerFoto(env.DB);
+  const feitos = ((fo.feitos || {})[mundo] || []).filter(d => !(fo.parciais || []).includes(d));
   const ate = feitos[0] || null;
   const alvo = ate ? new Date(Date.parse(ate + 'T00:00:00Z') - dias * 864e5).toISOString().slice(0, 10) : null;
   const antes = feitos.filter(d => d < ate);
@@ -386,7 +498,7 @@ const IMPORTADO = '(dias > 0 OR quando > ?)';
 async function importar(db, chave, nome, teto = IMPORTA_ATE) {
   const ja = await db.prepare('SELECT 1 AS x FROM importados WHERE chave = ? AND ' + IMPORTADO).bind(chave, agora() - 3600).first();
   if (ja) return true;
-  if (await gravadasHoje(db) > teto) return false;   // o dia já gravou demais: importa em outro dia, sem marcar nada
+  if (await passouDoTeto(db, teto)) return false;   // gravou demais: importa em outro dia, sem marcar nada
   let dias = 0, ate = '';
   try {
     const [rx, ro] = await Promise.all([pedirFora(GEEKS + 'playersexp?name=' + encodeURIComponent(nome)), pedirFora(GEEKS + 'onlinehistory?name=' + encodeURIComponent(nome) + '&includeCurrent=true')]);
@@ -594,15 +706,19 @@ async function atender(req, env, ctx) {
     const n = await env.DB.prepare('SELECT (SELECT COUNT(*) FROM online_agora) AS online, (SELECT COUNT(*) FROM sessoes) AS sessoes, (SELECT COUNT(*) FROM xp) AS xp, (SELECT COUNT(*) FROM personagens) AS acompanhados, (SELECT COUNT(*) FROM fila) AS fila, (SELECT COUNT(*) FROM skills) AS skills').first();
     const dia = d => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
     const g = d => env.DB.prepare('SELECT valor FROM estado WHERE chave = ?').bind('gravadas:' + dia(d)).first().then(x => Number(x && x.valor) || 0);
-    const gravadas = { hoje_utc: await g(0), ontem_utc: await g(1), limite_por_dia: 100000 };
+    const mes = await env.DB.prepare('SELECT SUM(CAST(valor AS INTEGER)) AS n FROM estado WHERE chave >= ? AND chave <= ?').bind('gravadas:' + dia(29), 'gravadas:' + dia(0)).first();
+    const gravadas = { hoje_utc: await g(0), ontem_utc: await g(1), ultimos_30_dias: Number(mes && mes.n) || 0, incluidas_por_mes: 50000000 };
     const f = await lerFoto(env.DB);
     const foto = f.dia ? { dia: f.dia, passo: f.passo + ' de ' + FOTO_PASSOS, mundos_prontos: Object.keys(f.feitos || {}).filter(m => (f.feitos[m] || [])[0] === f.dia).length } : 'ainda não tirada';
-    return json({ ultima: e ? JSON.parse(e.valor) : 'a coleta agendada ainda não rodou nenhuma vez', totais: n, gravadas, foto }, 200, cors);
+    const base = await env.DB.prepare('SELECT (SELECT COUNT(*) FROM importados) AS importados, (SELECT COUNT(*) FROM tarefas) AS fichas_lidas, (SELECT COUNT(*) FROM bans) AS bans').first();
+    return json({ ultima: e ? JSON.parse(e.valor) : 'a coleta agendada ainda não rodou nenhuma vez', totais: { ...n, ...base }, gravadas, foto }, 200, cors);
   }
   const rk = rota.match(new RegExp('^ranking\\/(' + MUNDO + ')\\/(all|none|mages|druids|archers|knights)\\/(level|maglevel|melee|distance|blocking|fishing|mining|cooking)\\/(10|[1-9])$'));
   if (rk) return ranking(env, ctx, rk[1], rk[2], rk[3], rk[4], cors);
   const gn = rota.match(/^ganhos\/([a-z]{3,20})\/(all|knights|archers|mages|druids)\/(1|7|30)$/);
   if (gn && MUNDOS_TODOS.includes(gn[1])) return ganhos(env, ctx, gn[1], gn[2], Number(gn[3]), cors);
+  const tf = rota.match(/^tarefas\/([a-z]{3,20})\/(all|knights|archers|mages|druids)\/(pontos|concluidas|abates)$/);
+  if (tf && MUNDOS_TODOS.includes(tf[1])) return rankingTarefas(env, ctx, tf[1], tf[2], tf[3], cors);
   const gm = rota.match(new RegExp('^guilda\\/(' + MUNDO + ')\\/([^/]{2,60})$'));
   if (gm) return guilda(env, ctx, gm[1], gm[2], cors);
   const hist = rota.match(/^historico\/([^/]{2,40})$/);
