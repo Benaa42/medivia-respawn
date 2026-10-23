@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo: Rankings, XP ganha</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Modelo da aba "XP ganha" da página Rankings (fase 2). Nomes inventados e números ilustrativos, menos o Bena. Nada aqui é publicado. */
+:root { --ground: #0f1314; --box: #171d1e; --card: #1e2627; --edge: #2c3637; --band: #1b3a2c; --title: #f1f5f3; --label: #c2cbc8; --faint: #8b9894; --amber: #f0ad4d; --value: #3ae374;
+  --gold-edge: rgba(240, 173, 77, 0.55); --gold-wash: rgba(240, 173, 77, 0.06); --gold-ink: #241703; --k: #ff7468; --a: #3ae374; --m: #a970ff; --d: #3cc6f0; --x: #8b9894;
+  --font-ui: "Onest", "Segoe UI", system-ui, sans-serif; --font-display: "Bricolage Grotesque", "Onest", sans-serif; }
+* { box-sizing: border-box; } body { margin: 0; background: var(--ground); color: var(--label); font: 400 14px/1.45 var(--font-ui); font-variant-numeric: tabular-nums; }
+h1, h2, h3, p { margin: 0; }
+.faixa { background: #0a0e0f; border-bottom: 1px solid var(--edge); font-size: 13px; } .faixa div { max-width: 1240px; margin: 0 auto; padding: 7px 20px; color: var(--faint); }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 18px 20px 60px; display: flex; flex-direction: column; gap: 18px; }
+.barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.marca { font: 800 28px var(--font-display); color: var(--title); } .marca b { color: var(--amber); font-weight: inherit; }
+.menu { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; border: 1px solid var(--gold-edge); border-radius: 999px; background: var(--gold-wash); }
+.menu span { padding: 8px 14px; border-radius: 999px; color: var(--title); font: 600 14px var(--font-ui); } .menu span.on { background: var(--amber); color: var(--gold-ink); }
+.menu span.novo::after { content: "novo"; margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: var(--band); color: var(--value); font-size: 10px; }
+.exemplo { font: 700 13px var(--font-ui); color: var(--amber); margin-top: 8px; }
+.quadro { background: var(--box); border-radius: 22px; padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 16px; }
+.filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 18px; }
+.campo, .grupo { display: flex; flex-direction: column; gap: 5px; } .campo > span:first-child, .grupo .rot { font-size: 12px; color: var(--faint); }
+.sel, .inp { padding: 8px 12px; border: 1px solid var(--edge); border-radius: 10px; background: var(--card); color: var(--title); font-weight: 600; min-width: 140px; }
+.inp { color: var(--faint); font-weight: 500; min-width: 220px; } .busca { margin-left: auto; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 999px; background: var(--card); }
+.seg b { padding: 6px 11px; border-radius: 999px; font: 600 13px var(--font-ui); color: var(--label); } .seg b.on { background: var(--title); color: var(--ground); }
+h2 { font: 800 22px var(--font-display); color: var(--title); display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; } h2 small { font: 500 13px var(--font-ui); color: var(--faint); }
+/* pódio dos três primeiros */
+.podio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; gap: 12px; max-width: 760px; margin: 0 auto; width: 100%; }
+.pod { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 12px 14px; border-radius: 16px; background: var(--card); text-align: center; }
+.pod.p1 { padding-top: 26px; background: linear-gradient(180deg, rgba(240,173,77,0.16), var(--card)); box-shadow: inset 0 0 0 1px var(--gold-edge); }
+.pod.p2 { background: linear-gradient(180deg, rgba(194,203,200,0.12), var(--card)); } .pod.p3 { background: linear-gradient(180deg, rgba(208,138,76,0.14), var(--card)); }
+.pod .pos { font: 800 15px var(--font-display); color: var(--faint); } .pod.p1 .pos { color: var(--amber); font-size: 18px; }
+.pod .nm { font: 800 18px var(--font-display); color: var(--title); } .pod.p1 .nm { font-size: 22px; }
+.pod .val { font: 800 26px/1 var(--font-display); color: var(--amber); } .pod.p1 .val { font-size: 32px; }
+.pod small { color: var(--faint); font-size: 12px; }
+.vc { display: inline-block; padding: 1px 9px; border: 1px solid; border-radius: 999px; font: 600 12px var(--font-ui); }
+.v-k { color: var(--k); border-color: color-mix(in srgb, var(--k) 45%, transparent); } .v-a { color: var(--a); border-color: color-mix(in srgb, var(--a) 45%, transparent); }
+.v-m { color: var(--m); border-color: color-mix(in srgb, var(--m) 45%, transparent); } .v-d { color: var(--d); border-color: color-mix(in srgb, var(--d) 45%, transparent); } .v-x { color: var(--x); border-color: var(--edge); }
+/* tabela */
+.tabwrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { padding: 6px 10px; border-bottom: 1px solid var(--edge); font: 500 12px var(--font-ui); color: var(--faint); text-align: right; white-space: nowrap; }
+td { padding: 7px 10px; border-bottom: 1px solid var(--edge); text-align: right; color: var(--title); white-space: nowrap; }
+th.l, td.l { text-align: left; } th.c, td.c { text-align: center; width: 48px; }
+td.pos { color: var(--faint); font-weight: 700; } td a { color: var(--amber); font-weight: 700; text-decoration: none; }
+td.g { color: var(--value); font-weight: 700; } td.f { color: var(--faint); }
+tr.meu td { background: var(--gold-wash); } tr.meu td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
+.eu { padding: 0 6px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 10px var(--font-ui); vertical-align: 1px; }
+.meupos { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--gold-edge); background: var(--gold-wash); color: var(--title); font-size: 14px; }
+.meupos b { color: var(--amber); }
+.pag { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--label); }
+.pgs { display: inline-flex; gap: 4px; } .pgs b { width: 30px; height: 30px; display: inline-grid; place-items: center; border-radius: 50%; background: var(--card); color: var(--label); font-weight: 600; } .pgs b.on { background: var(--amber); color: var(--gold-ink); }
+.nota-mock { font-size: 13px; color: var(--faint); }
+.etiqueta { position: fixed; right: 16px; bottom: 16px; padding: 6px 12px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 12px var(--font-ui); }
+@media (max-width: 760px) { .podio { grid-template-columns: 1fr; } .pod.p1 { order: -1; } .busca { margin-left: 0; } }
+/* XP ganha */
+td.xp { width: 34%; }
+.bxp { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.bxp i { flex: 1 1 auto; max-width: 260px; height: 8px; border-radius: 4px; background: var(--card); overflow: hidden; }
+.bxp i b { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, rgba(58,227,116,0.45), var(--value)); }
+.bxp span { min-width: 78px; color: var(--value); font-weight: 700; }
+.up { margin-left: 6px; padding: 0 6px; border-radius: 999px; background: var(--band); color: var(--value); font: 700 11px/1.6 var(--font-ui); }
+.pod .up { margin: 0; }
+@media (max-width: 760px) { .bxp i { display: none; } td.xp { width: auto; } .tab-xp th:nth-child(3), .tab-xp td:nth-child(3) { display: none; } .tab-xp th, .tab-xp td { padding: 6px 5px; font-size: 13px; } .tab-xp th.c, .tab-xp td.c { width: 28px; } .bxp span { min-width: 0; } .quadro { padding: 16px 12px 20px; } .wrap { padding-inline: 16px; } }
+</style></head><body>
+<div class="faixa"><div>Mapper da wiki ↗ · Novidades · Sugestões e problemas</div></div>
+<div class="wrap">
+  <div class="barra"><span class="marca">Medivia <b>Labs</b></span><nav class="menu"><span>Cronômetro</span><span>Analisador de hunt</span><span>Criaturas</span><span class="on novo">Rankings</span><span>Calculadora</span><span>Sorteio</span></nav></div>
+
+  <p class="exemplo">Exemplo 1: XP ganha ontem, todas as vocações</p>
+  <section class="quadro">
+    <div class="filtros">
+  <label class="campo"><span>Mundo</span><span class="sel">Pendulum ▾</span></label>
+  <div class="grupo"><span class="rot">Ranking</span><div class="seg"><b>Nível</b><b class="on">XP ganha</b><b>Magic level</b><b>Melee</b><b>Distance</b><b>Blocking</b><b>Fishing</b><b>Mining</b><b>Cooking</b></div></div>
+  <div class="grupo"><span class="rot">Período</span><div class="seg"><b class="on">Ontem</b><b class="">7 dias</b><b class="">30 dias</b></div></div>
+  <div class="grupo"><span class="rot">Vocação</span><div class="seg"><b class="on">Todas</b><b class="">Knights</b><b class="">Archers</b><b class="">Mages</b><b class="">Druids</b></div></div>
+  <label class="campo busca"><span>Achar no ranking</span><span class="inp">Nome do personagem</span></label>
+</div>
+    <h2>XP ganha em Pendulum <small>24/10/2026</small></h2>
+    <div class="podio"><div class="pod p2"><span class="pos">2º</span><b class="nm">Lyra Venn</b><span class="vc v-m">Mage</span><span class="val">+1 273kk</span><small>nível 928</small></div><div class="pod p1"><span class="pos">1º</span><b class="nm">Torvan Ashe</b><span class="vc v-a">Archer</span><span class="val">+1 382kk</span><small>nível 918</small><span class="up">+1</span></div><div class="pod p3"><span class="pos">3º</span><b class="nm">Kael Duskward</b><span class="vc v-a">Archer</span><span class="val">+1 143kk</span><small>nível 911</small></div></div>
+    <div class="tabwrap"><table class="tab-xp"><thead><tr><th class="c">#</th><th class="l">Personagem</th><th>Vocação</th><th>Nível</th><th>XP ganha</th></tr></thead><tbody>
+<tr class=""><td class="c pos">4</td><td class="l"><a href="#">Mira Solenne</a></td><td><span class="vc v-k">Knight</span></td><td>894</td><td class="xp"><div class="bxp"><i><b style="width:73.2%"></b></i><span>+1 011kk</span></div></td></tr>
+<tr class=""><td class="c pos">5</td><td class="l"><a href="#">Brann Holloway</a></td><td><span class="vc v-k">Knight</span></td><td>882<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:66.4%"></b></i><span>+917,3kk</span></div></td></tr>
+<tr class=""><td class="c pos">6</td><td class="l"><a href="#">Iskra Vale</a></td><td><span class="vc v-d">Druid</span></td><td>857</td><td class="xp"><div class="bxp"><i><b style="width:59.1%"></b></i><span>+816,4kk</span></div></td></tr>
+<tr class=""><td class="c pos">7</td><td class="l"><a href="#">Doran Pyke</a></td><td><span class="vc v-d">Druid</span></td><td>879</td><td class="xp"><div class="bxp"><i><b style="width:53.6%"></b></i><span>+741,5kk</span></div></td></tr>
+<tr class=""><td class="c pos">8</td><td class="l"><a href="#">Seline Marr</a></td><td><span class="vc v-m">Mage</span></td><td>866</td><td class="xp"><div class="bxp"><i><b style="width:47.9%"></b></i><span>+662,3kk</span></div></td></tr>
+<tr class=""><td class="c pos">9</td><td class="l"><a href="#">Tamsin Rook</a></td><td><span class="vc v-a">Archer</span></td><td>859<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:43.6%"></b></i><span>+603,0kk</span></div></td></tr>
+<tr class=""><td class="c pos">10</td><td class="l"><a href="#">Varo Quill</a></td><td><span class="vc v-d">Druid</span></td><td>845<span class="up">+2</span></td><td class="xp"><div class="bxp"><i><b style="width:39.0%"></b></i><span>+539,4kk</span></div></td></tr>
+<tr class=""><td class="c pos">11</td><td class="l"><a href="#">Elric Thorne</a></td><td><span class="vc v-k">Knight</span></td><td>815<span class="up">+2</span></td><td class="xp"><div class="bxp"><i><b style="width:35.2%"></b></i><span>+487,3kk</span></div></td></tr>
+<tr class=""><td class="c pos">12</td><td class="l"><a href="#">Nessa Frost</a></td><td><span class="vc v-a">Archer</span></td><td>811<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:31.9%"></b></i><span>+441,0kk</span></div></td></tr>
+<tr class=""><td class="c pos">13</td><td class="l"><a href="#">Orin Gale</a></td><td><span class="vc v-a">Archer</span></td><td>829</td><td class="xp"><div class="bxp"><i><b style="width:28.2%"></b></i><span>+389,6kk</span></div></td></tr>
+<tr class=""><td class="c pos">14</td><td class="l"><a href="#">Pell Ardent</a></td><td><span class="vc v-m">Mage</span></td><td>798<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:26.1%"></b></i><span>+360,5kk</span></div></td></tr>
+<tr class=""><td class="c pos">15</td><td class="l"><a href="#">Rhea Cinder</a></td><td><span class="vc v-a">Archer</span></td><td>797</td><td class="xp"><div class="bxp"><i><b style="width:23.4%"></b></i><span>+323,3kk</span></div></td></tr>
+<tr class=""><td class="c pos">16</td><td class="l"><a href="#">Sorin Ashby</a></td><td><span class="vc v-a">Archer</span></td><td>795</td><td class="xp"><div class="bxp"><i><b style="width:20.7%"></b></i><span>+285,7kk</span></div></td></tr>
+<tr class=""><td class="c pos">17</td><td class="l"><a href="#">Talia Wren</a></td><td><span class="vc v-k">Knight</span></td><td>786</td><td class="xp"><div class="bxp"><i><b style="width:18.9%"></b></i><span>+261,3kk</span></div></td></tr>
+<tr class=""><td class="c pos">18</td><td class="l"><a href="#">Ulric Stone</a></td><td><span class="vc v-d">Druid</span></td><td>750</td><td class="xp"><div class="bxp"><i><b style="width:17.1%"></b></i><span>+235,8kk</span></div></td></tr>
+<tr class=""><td class="c pos">19</td><td class="l"><a href="#">Vesna Lark</a></td><td><span class="vc v-m">Mage</span></td><td>756<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:15.0%"></b></i><span>+206,9kk</span></div></td></tr>
+<tr class=""><td class="c pos">20</td><td class="l"><a href="#">Wyn Hart</a></td><td><span class="vc v-k">Knight</span></td><td>754</td><td class="xp"><div class="bxp"><i><b style="width:13.7%"></b></i><span>+190,0kk</span></div></td></tr>
+<tr class=""><td class="c pos">21</td><td class="l"><a href="#">Yara Coil</a></td><td><span class="vc v-a">Archer</span></td><td>722</td><td class="xp"><div class="bxp"><i><b style="width:12.1%"></b></i><span>+167,5kk</span></div></td></tr>
+<tr class=""><td class="c pos">22</td><td class="l"><a href="#">Zev Morrow</a></td><td><span class="vc v-m">Mage</span></td><td>734</td><td class="xp"><div class="bxp"><i><b style="width:10.9%"></b></i><span>+151,1kk</span></div></td></tr>
+<tr class=""><td class="c pos">23</td><td class="l"><a href="#">Ansel Brook</a></td><td><span class="vc v-a">Archer</span></td><td>708</td><td class="xp"><div class="bxp"><i><b style="width:10.0%"></b></i><span>+138,1kk</span></div></td></tr>
+<tr class=""><td class="c pos">24</td><td class="l"><a href="#">Calla Thorn</a></td><td><span class="vc v-k">Knight</span></td><td>702<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:9.1%"></b></i><span>+125,5kk</span></div></td></tr>
+<tr class=""><td class="c pos">25</td><td class="l"><a href="#">Dax Ember</a></td><td><span class="vc v-k">Knight</span></td><td>696</td><td class="xp"><div class="bxp"><i><b style="width:8.1%"></b></i><span>+112,2kk</span></div></td></tr>
+</tbody></table></div>
+    <div class="pag"><span>Os 100 que mais ganharam, entre os 1.000 primeiros do ranking de nível</span></div>
+  </section>
+
+  <p class="exemplo">Exemplo 2: XP ganha em 7 dias, só archers, com o seu personagem na lista</p>
+  <section class="quadro">
+    <div class="filtros">
+  <label class="campo"><span>Mundo</span><span class="sel">Pendulum ▾</span></label>
+  <div class="grupo"><span class="rot">Ranking</span><div class="seg"><b>Nível</b><b class="on">XP ganha</b><b>Magic level</b><b>Melee</b><b>Distance</b><b>Blocking</b><b>Fishing</b><b>Mining</b><b>Cooking</b></div></div>
+  <div class="grupo"><span class="rot">Período</span><div class="seg"><b class="">Ontem</b><b class="on">7 dias</b><b class="">30 dias</b></div></div>
+  <div class="grupo"><span class="rot">Vocação</span><div class="seg"><b class="">Todas</b><b class="">Knights</b><b class="on">Archers</b><b class="">Mages</b><b class="">Druids</b></div></div>
+  <label class="campo busca"><span>Achar no ranking</span><span class="inp">Nome do personagem</span></label>
+</div>
+    <h2>XP ganha dos archers em Pendulum <small>de 24/10 a 30/10/2026</small></h2>
+    <div class="meupos"><span>Seu personagem, <b>Bena</b>, ganhou <b>+1 615kk</b> e está em <b>14º</b>.</span> <a href="#" style="color:var(--value);font-weight:700">Ir até ele</a></div>
+    <div class="podio"><div class="pod p2"><span class="pos">2º</span><b class="nm">Lyra Venn</b><span class="vc v-a">Archer</span><span class="val">+5 450kk</span><small>nível 922</small><span class="up">+1</span></div><div class="pod p1"><span class="pos">1º</span><b class="nm">Torvan Ashe</b><span class="vc v-a">Archer</span><span class="val">+6 083kk</span><small>nível 915</small><span class="up">+1</span></div><div class="pod p3"><span class="pos">3º</span><b class="nm">Kael Duskward</b><span class="vc v-a">Archer</span><span class="val">+4 843kk</span><small>nível 890</small></div></div>
+    <div class="tabwrap"><table class="tab-xp"><thead><tr><th class="c">#</th><th class="l">Personagem</th><th>Vocação</th><th>Nível</th><th>XP ganha</th></tr></thead><tbody>
+<tr class=""><td class="c pos">4</td><td class="l"><a href="#">Mira Solenne</a></td><td><span class="vc v-a">Archer</span></td><td>880</td><td class="xp"><div class="bxp"><i><b style="width:73.0%"></b></i><span>+4 441kk</span></div></td></tr>
+<tr class=""><td class="c pos">5</td><td class="l"><a href="#">Brann Holloway</a></td><td><span class="vc v-a">Archer</span></td><td>893</td><td class="xp"><div class="bxp"><i><b style="width:64.7%"></b></i><span>+3 937kk</span></div></td></tr>
+<tr class=""><td class="c pos">6</td><td class="l"><a href="#">Iskra Vale</a></td><td><span class="vc v-a">Archer</span></td><td>872</td><td class="xp"><div class="bxp"><i><b style="width:57.9%"></b></i><span>+3 522kk</span></div></td></tr>
+<tr class=""><td class="c pos">7</td><td class="l"><a href="#">Doran Pyke</a></td><td><span class="vc v-a">Archer</span></td><td>882<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:52.9%"></b></i><span>+3 220kk</span></div></td></tr>
+<tr class=""><td class="c pos">8</td><td class="l"><a href="#">Seline Marr</a></td><td><span class="vc v-a">Archer</span></td><td>860</td><td class="xp"><div class="bxp"><i><b style="width:47.3%"></b></i><span>+2 877kk</span></div></td></tr>
+<tr class=""><td class="c pos">9</td><td class="l"><a href="#">Tamsin Rook</a></td><td><span class="vc v-a">Archer</span></td><td>842</td><td class="xp"><div class="bxp"><i><b style="width:42.8%"></b></i><span>+2 605kk</span></div></td></tr>
+<tr class=""><td class="c pos">10</td><td class="l"><a href="#">Varo Quill</a></td><td><span class="vc v-a">Archer</span></td><td>826<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:37.7%"></b></i><span>+2 295kk</span></div></td></tr>
+<tr class=""><td class="c pos">11</td><td class="l"><a href="#">Elric Thorne</a></td><td><span class="vc v-a">Archer</span></td><td>816</td><td class="xp"><div class="bxp"><i><b style="width:34.0%"></b></i><span>+2 069kk</span></div></td></tr>
+<tr class=""><td class="c pos">12</td><td class="l"><a href="#">Nessa Frost</a></td><td><span class="vc v-a">Archer</span></td><td>816</td><td class="xp"><div class="bxp"><i><b style="width:31.3%"></b></i><span>+1 906kk</span></div></td></tr>
+<tr class=""><td class="c pos">13</td><td class="l"><a href="#">Orin Gale</a></td><td><span class="vc v-a">Archer</span></td><td>802</td><td class="xp"><div class="bxp"><i><b style="width:28.1%"></b></i><span>+1 712kk</span></div></td></tr>
+<tr class="meu"><td class="c pos">14</td><td class="l"><a href="#">Bena</a> <span class="eu">você</span></td><td><span class="vc v-a">Archer</span></td><td>671<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:26.6%"></b></i><span>+1 615kk</span></div></td></tr>
+<tr class=""><td class="c pos">15</td><td class="l"><a href="#">Pell Ardent</a></td><td><span class="vc v-a">Archer</span></td><td>797</td><td class="xp"><div class="bxp"><i><b style="width:25.0%"></b></i><span>+1 518kk</span></div></td></tr>
+<tr class=""><td class="c pos">16</td><td class="l"><a href="#">Rhea Cinder</a></td><td><span class="vc v-a">Archer</span></td><td>784</td><td class="xp"><div class="bxp"><i><b style="width:22.8%"></b></i><span>+1 388kk</span></div></td></tr>
+<tr class=""><td class="c pos">17</td><td class="l"><a href="#">Sorin Ashby</a></td><td><span class="vc v-a">Archer</span></td><td>787<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:20.5%"></b></i><span>+1 246kk</span></div></td></tr>
+<tr class=""><td class="c pos">18</td><td class="l"><a href="#">Talia Wren</a></td><td><span class="vc v-a">Archer</span></td><td>776</td><td class="xp"><div class="bxp"><i><b style="width:18.1%"></b></i><span>+1 104kk</span></div></td></tr>
+<tr class=""><td class="c pos">19</td><td class="l"><a href="#">Ulric Stone</a></td><td><span class="vc v-a">Archer</span></td><td>767</td><td class="xp"><div class="bxp"><i><b style="width:16.7%"></b></i><span>+1 014kk</span></div></td></tr>
+<tr class=""><td class="c pos">20</td><td class="l"><a href="#">Vesna Lark</a></td><td><span class="vc v-a">Archer</span></td><td>771</td><td class="xp"><div class="bxp"><i><b style="width:14.9%"></b></i><span>+906,9kk</span></div></td></tr>
+<tr class=""><td class="c pos">21</td><td class="l"><a href="#">Wyn Hart</a></td><td><span class="vc v-a">Archer</span></td><td>732</td><td class="xp"><div class="bxp"><i><b style="width:13.2%"></b></i><span>+800,2kk</span></div></td></tr>
+<tr class=""><td class="c pos">22</td><td class="l"><a href="#">Yara Coil</a></td><td><span class="vc v-a">Archer</span></td><td>753</td><td class="xp"><div class="bxp"><i><b style="width:12.0%"></b></i><span>+727,3kk</span></div></td></tr>
+<tr class=""><td class="c pos">23</td><td class="l"><a href="#">Zev Morrow</a></td><td><span class="vc v-a">Archer</span></td><td>738</td><td class="xp"><div class="bxp"><i><b style="width:10.7%"></b></i><span>+648,8kk</span></div></td></tr>
+<tr class=""><td class="c pos">24</td><td class="l"><a href="#">Ansel Brook</a></td><td><span class="vc v-a">Archer</span></td><td>709<span class="up">+1</span></td><td class="xp"><div class="bxp"><i><b style="width:9.8%"></b></i><span>+593,1kk</span></div></td></tr>
+<tr class=""><td class="c pos">25</td><td class="l"><a href="#">Calla Thorn</a></td><td><span class="vc v-a">Archer</span></td><td>721</td><td class="xp"><div class="bxp"><i><b style="width:8.9%"></b></i><span>+540,2kk</span></div></td></tr>
+</tbody></table></div>
+    <div class="pag"><span>Os 100 que mais ganharam, entre os 1.000 primeiros do ranking de nível</span></div>
+  </section>
+  <p class="nota-mock">No modelo, 25 linhas de cada lista; na página, as 100. Nomes inventados e números ilustrativos.</p>
+</div>
+<span class="etiqueta">MODELO</span>
+</body></html>
