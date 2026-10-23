@@ -845,7 +845,7 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-cm .gu-n { font-size: 15px; }
 .gu-cm .tn { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gu-pt { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
-.gu-feitas { font-size: 12px; color: var(--value); opacity: 0.85; }
+.gu-cm li.f .tn, .gu-cm li.f b { color: var(--value); }
 .gu-sem { font-size: 13px; color: var(--faint); }
 .gu-sem b { color: var(--label); font-weight: 600; }
 /* tabela cruzada: uma linha por criatura, uma coluna por membro */
@@ -11048,16 +11048,17 @@ function guTasks(tipo, M) {
             : b ? [b.r.name + ' · ', el('b', { text: persTempo(c.falta / b.kph) }), ' ', abrir(b)] : el('span', { class: 'nada', text: tr('gu.semResp') })));
       }))));
   };
-  // cartão de um membro: as pendentes com barra; as concluídas numa linha verde; o ponto dourado marca a task em comum
+  // cartão de um membro: as pendentes primeiro e depois as concluídas (nome e número em verde, barra cheia); o ponto
+  // dourado marca a task em comum
   const membro = m => {
     const h = ficha(m).huntsman[tipo], lista = dele(m).map(t => ({ t, e: estado(t) }));
     const pend = lista.filter(x => !x.e.feita), feitas = lista.filter(x => x.e.feita);
     return el('article', { class: 'gu-cm' },
       el('header', null, el('button', { class: 'gu-n ' + vocDe(m), type: 'button', text: m.nome, onclick: () => goTo('personagem/' + encodeURIComponent(m.nome)) }),
         el('span', { text: (h.difficulty && h.difficulty.name ? h.difficulty.name + ' · ' : '') + tr('gu.concluidas', { a: feitas.length, b: lista.length }) })),
-      pend.length ? el('ul', null, pend.map(({ t, e }) => el('li', null,
-        el('span', { class: 'tn' }, emComum.has(slug(t.name || '')) ? el('span', { class: 'gu-pt', title: tr('gu.comum') }) : null, t.name), barra(e), num(e), bonus(t)))) : null,
-      feitas.length ? el('p', { class: 'gu-feitas', text: '✓ ' + feitas.map(x => x.t.name).join(' · ') }) : null);
+      lista.length ? el('ul', null, pend.concat(feitas).map(({ t, e }) => el('li', { class: e.feita ? 'f' : null },
+        el('span', { class: 'tn' }, emComum.has(slug(t.name || '')) ? el('span', { class: 'gu-pt', title: tr('gu.comum') }) : null, t.name), barra(e),
+        el('b', { text: fmtInt(e.feita ? e.req : e.prog) + '/' + fmtInt(e.req) }), bonus(t)))) : null);
   };
   const comTasks = M.filter(m => dele(m).length), semTasks = M.filter(m => ficha(m) && !dele(m).length), semFicha = M.filter(m => gu.fichas.get(m.nome) === 'erro');
   const formato = ui.guFormato === 'tabela' ? 'tabela' : 'cartoes';
