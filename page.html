@@ -10920,7 +10920,9 @@ function renderPersonagem() {
       el('div', { class: 'pers-coluna' }, el('h3', null, tr('pers.semanais'), abertas.length ? el('small', { text: tr('pers.faltamN', { n: abertas.length, t: persTempo(soma7) }) }) : null),
         semanais.length ? semanais.map(x => x.el) : el('p', { class: 'support-note', text: tr('pers.nenhuma') }))));
   // Tasks do bestiário: em andamento (com o respawn), concluídas (em páginas) e factions
-  const andamento = tarefas.filter(t => !t.completed), concluidas = tarefas.filter(t => t.completed);
+  // em andamento: a mais perto de concluir primeiro (maior parte feita; no empate, a que falta menos abates)
+  const feito = t => (t.kills ? t.progress / t.kills : 0);
+  const andamento = tarefas.filter(t => !t.completed).sort((a, b) => feito(b) - feito(a) || (a.kills - a.progress) - (b.kills - b.progress)), concluidas = tarefas.filter(t => t.completed);
   const feitasSet = new Set(concluidas.map(t => t.name));
   const cab = pers.aba === 'andamento' ? [tr('pers.col.cri'), tr('pers.col.prog'), tr('pers.col.resp'), tr('pers.col.falta')] : [tr('pers.col.cri'), tr('pers.col.kills')];
   const tabela = el('table', { class: 'creatures-table' });
