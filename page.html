@@ -11081,7 +11081,7 @@ function guTasks(tipo, M) {
       el('header', null, el('h4', { text: c.nome }), el('span', { class: 'gu-qt', text: tr('gu.nMembros', { n: c.quem.length }) })),
       el('ul', null, c.quem.slice().sort((x, y) => (x.e.feita + x.e.pronta) - (y.e.feita + y.e.pronta)).map(({ m, t, e }) => el('li', { class: classe(e) },
         el('span', { class: 'qn' }, el('button', { class: 'quem ' + vocDe(m), type: 'button', text: m.nome, onclick: () => goTo('personagem/' + encodeURIComponent(m.nome)) }), huntTags(t, e)),
-        barra(e), el('b', { class: e.feita ? 'ok' : e.pronta ? 'pr' : null, text: e.feita ? '✓' : fmtInt(e.prog) + '/' + fmtInt(e.req) }), fim(t, e)))),
+        barra(e), el('b', { class: e.feita ? 'ok' : e.pronta ? 'pr' : null, text: fmtInt(e.feita ? e.req : e.prog) + '/' + fmtInt(e.req) }), fim(t, e)))),
       c.todas ? el('div', { class: 'gu-rod ok', text: tr('gu.todosFeitos') })
         : c.prontos ? el('div', { class: 'gu-rod pr', text: tr('gu.soEntregar') })
         : b ? el('div', { class: 'gu-rod' }, el('span', null, el('b', { text: b.r.name }), ' · ' + tr('gu.respGrupo', { k: Math.round(b.kph), n: c.quem.length })),
@@ -11100,7 +11100,7 @@ function guTasks(tipo, M) {
           el('td', { class: 'l cri' }, c.nome, ' ', el('span', { class: 'gu-qt', text: String(c.quem.length) })),
           colunas.map(m => {
             const q = c.quem.find(x => x.m === m);
-            return el('td', null, !q ? null : q.e.feita ? el('span', { class: 'ok', text: '✓' })
+            return el('td', null, !q ? null : q.e.feita ? el('span', { class: 'ok', text: fmtInt(q.e.req) + '/' + fmtInt(q.e.req) })
               : el('span', { class: 'pg' + (q.e.pronta ? ' pr' : ''), title: q.e.pronta ? tr('pers.pronta') : null, text: fmtInt(q.e.prog) + '/' + fmtInt(q.e.req) }));
           }),
           el('td', { class: 'l rs' }, c.todas ? el('span', { class: 'ok', text: tr('gu.todosFeitos') })
