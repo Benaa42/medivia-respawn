@@ -1245,7 +1245,6 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
       <input type="search" id="pers-nome" maxlength="40" autocomplete="off" spellcheck="false" placeholder="Nome do personagem" aria-label="Nome do personagem" data-i18n-attr="placeholder:pers.nome;aria-label:pers.nome">
       <button class="dlg go" type="button" id="pers-ver" data-i18n="pers.ver">Ver personagem</button>
       <button class="hunt-link" type="button" id="pers-meu" data-i18n="pers.meu">Guardar como meu personagem</button>
-      <span class="support-note" data-i18n="pers.fonte">Dados públicos da API oficial do Medivia, atualizados a cada 5 minutos.</span>
     </div>
     <p class="status" id="pers-status" role="status" hidden></p>
     <div class="pers-grade" id="pers-grade"></div>
@@ -1256,7 +1255,6 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
       <input type="search" id="gu-nome" maxlength="60" autocomplete="off" spellcheck="false" placeholder="Nome da guilda" aria-label="Nome da guilda" data-i18n-attr="placeholder:gu.nome;aria-label:gu.nome">
       <select id="gu-mundo" aria-label="Mundo" data-i18n-attr="aria-label:gu.mundo"><option value="pendulum">Pendulum</option><option value="destiny">Destiny</option><option value="legacy">Legacy</option></select>
       <button class="dlg go" type="button" id="gu-ver" data-i18n="gu.ver">Ver guilda</button>
-      <span class="support-note" data-i18n="gu.fonte">Membros da API oficial do Medivia; níveis e XP do histórico guardado de cada um.</span>
     </div>
     <p class="status" id="gu-status" role="status" hidden></p>
     <div class="pers-grade" id="gu-grade"></div>
@@ -1729,7 +1727,6 @@ const I18N = {
     'pers.ver': 'Ver personagem',
     'pers.meu': 'Guardar como meu personagem',
     'pers.meuOk': 'É o seu personagem: a página abre direto nele.',
-    'pers.fonte': 'Dados públicos da API oficial do Medivia, atualizados a cada 5 minutos.',
     'pers.vazio': 'Digite o nome de um personagem para ver nível, Huntsman, tasks e mortes.',
     'pers.carregando': 'Buscando {x}…',
     'pers.naoAchei': 'Não achei o personagem {x}.',
@@ -1751,7 +1748,6 @@ const I18N = {
     'pers.hist': 'Histórico de XP',
     'pers.histDesde': 'guardado desde {d}',
     'pers.histComeca': 'começa a contar hoje',
-    'pers.histNota': 'Valores em kk (milhões de XP). No computador, passe o mouse numa barra para ver o XP exato do dia; a linha tracejada é a média dos dias fechados.',
     'pers.recorde': 'Melhor dia',
     'pers.onlineTit': 'Histórico de tempo online',
     'pers.onlineMedia': 'Média por dia:',
@@ -1764,7 +1760,6 @@ const I18N = {
     'pers.media': 'Média por dia',
     'pers.onlineHoje': 'Online hoje',
     'pers.skills': 'Skills',
-    'pers.skillsNota': 'A API do Medivia não traz as skills na ficha: elas vêm dos rankings do mundo (os 1000 primeiros de cada skill), coletados aos poucos. Fora do ranking aparece —.',
     'pers.foraRanking': 'Fora dos 1000 primeiros do ranking',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
@@ -1772,11 +1767,9 @@ const I18N = {
     'pers.dex': 'Dexterity',
     'pers.str': 'Strength',
     'pers.am': 'Arcane Marksmanship',
-    'pers.spNota': 'Pela fórmula da wiki. As skills vêm do ranking quando o personagem está nele, e dá para trocar; o atributo é digitado e fica guardado neste navegador. Os fatores de dano de cada magia são os usados pela comunidade.',
     'pers.hunts': 'Huntsman',
     'pers.diaria': 'Diária: {x}',
     'pers.ritmo': 'Tempo calculado para',
-    'pers.ritmoNota': 'o melhor respawn do banco para cada criatura, no grupo e bônus escolhidos',
     'pers.diarias': 'DIÁRIAS',
     'pers.semanais': 'SEMANAIS',
     'pers.entregas': 'ENTREGAS',
@@ -1800,12 +1793,10 @@ const I18N = {
     'pers.mortes': 'Mortes recentes',
     'pers.col.quando': 'Quando',
     'pers.col.por': 'Por',
-    'pers.semMortes': 'Nenhuma morte ativa.',
-    'pers.mortesNota': 'A API mostra as mortes ainda ativas.',
+    'pers.semMortes': 'Nenhuma morte recente.',
     'gu.nome': 'Nome da guilda',
     'gu.mundo': 'Mundo',
     'gu.ver': 'Ver guilda',
-    'gu.fonte': 'Membros da API oficial do Medivia; níveis e XP do histórico guardado de cada um.',
     'gu.vazio': 'Digite o nome de uma guilda para ver os membros, quem está online e quanto cada um upou.',
     'gu.carregando': 'Buscando {x}…',
     'gu.naoAchei': 'Não achei a guilda {x} em {m}.',
@@ -1836,11 +1827,9 @@ const I18N = {
     'gu.col.d30': 'XP 30 dias',
     'gu.col.login': 'Último login',
     'gu.online': 'online',
-    'gu.ordemNota': 'Ordem por nível; clicar no título de qualquer coluna reordena. Quem está online agora fica com o ponto verde aceso.',
     'pers.vida': 'Vida',
     'pers.mana': 'Mana',
     'pers.cap': 'Capacidade',
-    'pers.vidaNota': 'Vida, mana e capacidade pelo nível, como na página Level da wiki, sem contar os equipamentos.',
     'pers.proxNivel': 'Para o nível {n}',
     'pers.share': 'Divide XP com',
     'pers.ganhos': 'Ganho de XP',
@@ -1863,7 +1852,6 @@ const I18N = {
     'pers.rodadas': '{n} rodadas',
     'pers.faltaSkill': 'digite o {s}',
     'pers.factions': 'Factions ({n})',
-    'pers.facNota': 'Cada faction conta as tasks do bestiário dela que já foram concluídas. Toque numa faction para ver as tasks.',
     'pers.porPag': 'Por página',
     'pers.faixa': '{a}–{b} de {t}',
     'pers.anterior': 'Página anterior',
@@ -2474,7 +2462,6 @@ const I18N = {
     'pers.ver': 'Show character',
     'pers.meu': 'Save as my character',
     'pers.meuOk': 'This is your character: the page opens on it.',
-    'pers.fonte': 'Public data from the official Medivia API, refreshed every 5 minutes.',
     'pers.vazio': 'Type a character name to see level, Huntsman, tasks and deaths.',
     'pers.carregando': 'Looking up {x}…',
     'pers.naoAchei': 'Character {x} was not found.',
@@ -2496,7 +2483,6 @@ const I18N = {
     'pers.hist': 'XP history',
     'pers.histDesde': 'recorded since {d}',
     'pers.histComeca': 'starts counting today',
-    'pers.histNota': 'Values in kk (millions of XP). On a computer, hover a bar to see the exact XP of the day; the dashed line is the average of the finished days.',
     'pers.recorde': 'Best day',
     'pers.onlineTit': 'Online time history',
     'pers.onlineMedia': 'Daily average:',
@@ -2509,7 +2495,6 @@ const I18N = {
     'pers.media': 'Daily average',
     'pers.onlineHoje': 'Online today',
     'pers.skills': 'Skills',
-    'pers.skillsNota': 'The Medivia API has no skills in the character data: they come from the world rankings (top 1000 of each skill), collected little by little. Outside the rankings it shows —.',
     'pers.foraRanking': 'Outside the top 1000 of the ranking',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
@@ -2517,11 +2502,9 @@ const I18N = {
     'pers.dex': 'Dexterity',
     'pers.str': 'Strength',
     'pers.am': 'Arcane Marksmanship',
-    'pers.spNota': 'From the wiki formula. Skills come from the rankings when the character is in them, and can be changed; the stat is typed and kept in this browser. The damage factors for each spell are the ones used by the community.',
     'pers.hunts': 'Huntsman',
     'pers.diaria': 'Daily: {x}',
     'pers.ritmo': 'Time worked out for',
-    'pers.ritmoNota': 'the best respawn in the bank for each creature, at the chosen group and bonus',
     'pers.diarias': 'DAILY',
     'pers.semanais': 'WEEKLY',
     'pers.entregas': 'DELIVERIES',
@@ -2545,12 +2528,10 @@ const I18N = {
     'pers.mortes': 'Recent deaths',
     'pers.col.quando': 'When',
     'pers.col.por': 'By',
-    'pers.semMortes': 'No active deaths.',
-    'pers.mortesNota': 'The API shows the deaths still active.',
+    'pers.semMortes': 'No recent deaths.',
     'gu.nome': 'Guild name',
     'gu.mundo': 'World',
     'gu.ver': 'Show guild',
-    'gu.fonte': 'Members from the official Medivia API; levels and XP from each one\'s saved history.',
     'gu.vazio': 'Type a guild name to see its members, who is online and how much each one leveled.',
     'gu.carregando': 'Looking up {x}…',
     'gu.naoAchei': 'Guild {x} was not found on {m}.',
@@ -2581,11 +2562,9 @@ const I18N = {
     'gu.col.d30': 'XP 30 days',
     'gu.col.login': 'Last login',
     'gu.online': 'online',
-    'gu.ordemNota': 'Sorted by level; click any column title to re-sort. Members online now have the green dot lit.',
     'pers.vida': 'Health',
     'pers.mana': 'Mana',
     'pers.cap': 'Capacity',
-    'pers.vidaNota': 'Health, mana and capacity from the level, as on the wiki Level page, without equipment.',
     'pers.proxNivel': 'To level {n}',
     'pers.share': 'Shares XP with',
     'pers.ganhos': 'Experience gained',
@@ -2608,7 +2587,6 @@ const I18N = {
     'pers.rodadas': '{n} ticks',
     'pers.faltaSkill': 'type the {s}',
     'pers.factions': 'Factions ({n})',
-    'pers.facNota': 'Each faction counts its completed bestiary tasks. Tap a faction to see the tasks.',
     'pers.porPag': 'Per page',
     'pers.faixa': '{a}–{b} of {t}',
     'pers.anterior': 'Previous page',
@@ -3219,7 +3197,6 @@ const I18N = {
     'pers.ver': 'Ver personaje',
     'pers.meu': 'Guardar como mi personaje',
     'pers.meuOk': 'Es tu personaje: la página abre directo en él.',
-    'pers.fonte': 'Datos públicos de la API oficial de Medivia, actualizados cada 5 minutos.',
     'pers.vazio': 'Escribe el nombre de un personaje para ver nivel, Huntsman, tasks y muertes.',
     'pers.carregando': 'Buscando {x}…',
     'pers.naoAchei': 'No encontré el personaje {x}.',
@@ -3241,7 +3218,6 @@ const I18N = {
     'pers.hist': 'Historial de XP',
     'pers.histDesde': 'guardado desde {d}',
     'pers.histComeca': 'empieza a contar hoy',
-    'pers.histNota': 'Valores en kk (millones de XP). En el ordenador, pasa el ratón por una barra para ver el XP exacto del día; la línea discontinua es la media de los días cerrados.',
     'pers.recorde': 'Mejor día',
     'pers.onlineTit': 'Historial de tiempo en línea',
     'pers.onlineMedia': 'Media por día:',
@@ -3254,7 +3230,6 @@ const I18N = {
     'pers.media': 'Media por día',
     'pers.onlineHoje': 'En línea hoy',
     'pers.skills': 'Skills',
-    'pers.skillsNota': 'La API de Medivia no trae las skills en la ficha: vienen de los rankings del mundo (los 1000 primeros de cada skill), recolectados poco a poco. Fuera del ranking aparece —.',
     'pers.foraRanking': 'Fuera de los 1000 primeros del ranking',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
@@ -3262,11 +3237,9 @@ const I18N = {
     'pers.dex': 'Dexterity',
     'pers.str': 'Strength',
     'pers.am': 'Arcane Marksmanship',
-    'pers.spNota': 'Por la fórmula de la wiki. Las skills vienen del ranking cuando el personaje está en él, y se pueden cambiar; el atributo se escribe y queda guardado en este navegador. Los factores de daño de cada magia son los usados por la comunidad.',
     'pers.hunts': 'Huntsman',
     'pers.diaria': 'Diaria: {x}',
     'pers.ritmo': 'Tiempo calculado para',
-    'pers.ritmoNota': 'el mejor respawn del banco para cada criatura, en el grupo y bonus elegidos',
     'pers.diarias': 'DIARIAS',
     'pers.semanais': 'SEMANALES',
     'pers.entregas': 'ENTREGAS',
@@ -3290,12 +3263,10 @@ const I18N = {
     'pers.mortes': 'Muertes recientes',
     'pers.col.quando': 'Cuándo',
     'pers.col.por': 'Por',
-    'pers.semMortes': 'Ninguna muerte activa.',
-    'pers.mortesNota': 'La API muestra las muertes aún activas.',
+    'pers.semMortes': 'Ninguna muerte reciente.',
     'gu.nome': 'Nombre del gremio',
     'gu.mundo': 'Mundo',
     'gu.ver': 'Ver gremio',
-    'gu.fonte': 'Miembros de la API oficial de Medivia; niveles y XP del historial guardado de cada uno.',
     'gu.vazio': 'Escribe el nombre de un gremio para ver los miembros, quién está en línea y cuánto subió cada uno.',
     'gu.carregando': 'Buscando {x}…',
     'gu.naoAchei': 'No encontré el gremio {x} en {m}.',
@@ -3326,11 +3297,9 @@ const I18N = {
     'gu.col.d30': 'XP 30 días',
     'gu.col.login': 'Último login',
     'gu.online': 'en línea',
-    'gu.ordemNota': 'Orden por nivel; haz clic en el título de cualquier columna para reordenar. Quien está en línea ahora tiene el punto verde encendido.',
     'pers.vida': 'Vida',
     'pers.mana': 'Maná',
     'pers.cap': 'Capacidad',
-    'pers.vidaNota': 'Vida, maná y capacidad por el nivel, como en la página Level de la wiki, sin contar el equipo.',
     'pers.proxNivel': 'Para el nivel {n}',
     'pers.share': 'Comparte XP con',
     'pers.ganhos': 'XP ganado',
@@ -3353,7 +3322,6 @@ const I18N = {
     'pers.rodadas': '{n} rondas',
     'pers.faltaSkill': 'escribe el {s}',
     'pers.factions': 'Facciones ({n})',
-    'pers.facNota': 'Cada facción cuenta sus tasks del bestiario completadas. Toca una facción para ver las tasks.',
     'pers.porPag': 'Por página',
     'pers.faixa': '{a}–{b} de {t}',
     'pers.anterior': 'Página anterior',
@@ -3964,7 +3932,6 @@ const I18N = {
     'pers.ver': 'Pokaż postać',
     'pers.meu': 'Zapisz jako moją postać',
     'pers.meuOk': 'To twoja postać: strona otwiera się od razu na niej.',
-    'pers.fonte': 'Publiczne dane z oficjalnego API Medivii, odświeżane co 5 minut.',
     'pers.vazio': 'Wpisz nazwę postaci, aby zobaczyć poziom, Huntsmana, taski i śmierci.',
     'pers.carregando': 'Szukam {x}…',
     'pers.naoAchei': 'Nie znaleziono postaci {x}.',
@@ -3986,7 +3953,6 @@ const I18N = {
     'pers.hist': 'Historia XP',
     'pers.histDesde': 'zapisywane od {d}',
     'pers.histComeca': 'liczy od dziś',
-    'pers.histNota': 'Wartości w kk (miliony XP). Na komputerze najedź na słupek, aby zobaczyć dokładne XP dnia; linia przerywana to średnia z zakończonych dni.',
     'pers.recorde': 'Najlepszy dzień',
     'pers.onlineTit': 'Historia czasu online',
     'pers.onlineMedia': 'Średnio dziennie:',
@@ -3999,7 +3965,6 @@ const I18N = {
     'pers.media': 'Średnio dziennie',
     'pers.onlineHoje': 'Online dziś',
     'pers.skills': 'Umiejętności',
-    'pers.skillsNota': 'API Medivii nie podaje umiejętności w danych postaci: pochodzą z rankingów świata (top 1000 każdej umiejętności), zbieranych stopniowo. Poza rankingiem widać —.',
     'pers.foraRanking': 'Poza top 1000 rankingu',
     'pers.sp': 'Spell power',
     'pers.ml': 'Magic level',
@@ -4007,11 +3972,9 @@ const I18N = {
     'pers.dex': 'Dexterity',
     'pers.str': 'Strength',
     'pers.am': 'Arcane Marksmanship',
-    'pers.spNota': 'Według wzoru z wiki. Umiejętności pochodzą z rankingów, gdy postać w nich jest, i można je zmienić; atrybut wpisujesz i zostaje w tej przeglądarce. Współczynniki obrażeń czarów to te używane przez społeczność.',
     'pers.hunts': 'Huntsman',
     'pers.diaria': 'Dzienne: {x}',
     'pers.ritmo': 'Czas liczony dla',
-    'pers.ritmoNota': 'najlepszy respawn z banku dla każdego stworzenia, przy wybranej grupie i bonusie',
     'pers.diarias': 'DZIENNE',
     'pers.semanais': 'TYGODNIOWE',
     'pers.entregas': 'DOSTAWY',
@@ -4035,12 +3998,10 @@ const I18N = {
     'pers.mortes': 'Ostatnie śmierci',
     'pers.col.quando': 'Kiedy',
     'pers.col.por': 'Przez',
-    'pers.semMortes': 'Brak aktywnych śmierci.',
-    'pers.mortesNota': 'API pokazuje wciąż aktywne śmierci.',
+    'pers.semMortes': 'Brak ostatnich śmierci.',
     'gu.nome': 'Nazwa gildii',
     'gu.mundo': 'Świat',
     'gu.ver': 'Pokaż gildię',
-    'gu.fonte': 'Członkowie z oficjalnego API Medivii; poziomy i XP z zapisanej historii każdego.',
     'gu.vazio': 'Wpisz nazwę gildii, aby zobaczyć członków, kto jest online i ile każdy zdobył.',
     'gu.carregando': 'Szukam {x}…',
     'gu.naoAchei': 'Nie znaleziono gildii {x} na {m}.',
@@ -4071,11 +4032,9 @@ const I18N = {
     'gu.col.d30': 'XP 30 dni',
     'gu.col.login': 'Ostatnie logowanie',
     'gu.online': 'online',
-    'gu.ordemNota': 'Sortowanie po poziomie; kliknij nagłówek kolumny, aby zmienić. Kto jest teraz online, ma zieloną kropkę.',
     'pers.vida': 'Życie',
     'pers.mana': 'Mana',
     'pers.cap': 'Udźwig',
-    'pers.vidaNota': 'Życie, mana i udźwig z poziomu, jak na stronie Level na wiki, bez ekwipunku.',
     'pers.proxNivel': 'Do poziomu {n}',
     'pers.share': 'Dzieli XP z',
     'pers.ganhos': 'Zdobyte doświadczenie',
@@ -4098,7 +4057,6 @@ const I18N = {
     'pers.rodadas': '{n} tur',
     'pers.faltaSkill': 'wpisz {s}',
     'pers.factions': 'Frakcje ({n})',
-    'pers.facNota': 'Każda frakcja liczy swoje ukończone taski bestiariusza. Dotknij frakcji, aby zobaczyć taski.',
     'pers.porPag': 'Na stronę',
     'pers.faixa': '{a}–{b} z {t}',
     'pers.anterior': 'Poprzednia strona',
@@ -10642,8 +10600,7 @@ function renderPersonagem() {
       linhaF(tr('pers.hoje'), somaF(1), 'g'),
       linhaF(tr('pers.ontem'), ganhoF.has(ontem) ? '+' + fmtInt(ganhoF.get(ontem)) : null, 'g'),
       linhaF(tr('pers.d7'), somaF(7), 'g'),
-      linhaF(tr('pers.d30'), somaF(30), 'g')),
-    el('p', { class: 'support-note', text: tr('pers.vidaNota') }));
+      linhaF(tr('pers.d30'), somaF(30), 'g')));
   // Histórico de XP: os últimos 30 dias de Brasília; sem dados, barras listradas
   const diaBr = t => new Date(t - 3 * 3600e3).toISOString().slice(0, 10);
   const hojeBr = diaBr(Date.now()), dias = [];
@@ -10686,7 +10643,6 @@ function renderPersonagem() {
         el('td', { text: d === hojeBr ? tr('pers.hoje') : persData(d, loc) }),
         el('td', { text: nivelDia.has(d) ? String(nivelDia.get(d)) : '—' }),
         el('td', { class: !ganho.has(d) || !ganho.get(d) ? 'none' : ganho.get(d) < 0 ? 'm' : 'g', text: ganho.has(d) ? (ganho.get(d) < 0 ? '−' + fmtInt(-ganho.get(d)) : '+' + fmtInt(ganho.get(d))) : '—' })))))),
-    el('p', { class: 'support-note', text: tr('pers.histNota') }),
     // Tempo online: gráfico de linha dos últimos 30 dias (14 no celular) com a média, e a tabela de todos os dias
     ...persOnline(onl, hojeBr, loc));
   // Skills: dos rankings do mundo que o Worker coleta (a API não traz skills na ficha); fora do top 1000 fica "—"
@@ -10698,8 +10654,7 @@ function renderPersonagem() {
       return PERS_SKILLS.slice().sort((a, b) => ((hs[b] && hs[b].valor) || 0) - ((hs[a] && hs[a].valor) || 0)).map(k => hs[k]
         ? el('div', null, el('span', { text: tr('pers.sk.' + k) }), el('i', null, el('em', { style: '--sk:' + PERS_SKILL_COR[k] + ';width:' + Math.max(3, Math.round(100 * hs[k].valor / maior)) + '%' })), el('b', { text: String(hs[k].valor) }))
         : el('div', { class: 'fora', title: tr('pers.foraRanking') }, el('span', { text: tr('pers.sk.' + k) }), el('i'), el('b', { text: '—' })));
-    })()),
-    el('p', { class: 'support-note', text: tr('pers.skillsNota') }));
+    })()));
   // Spell power (fórmula da wiki) e o dano de cada magia e runa da vocação
   const voc = String(p.vocation || '').toLowerCase();
   const vk = /knight/.test(voc) ? 'k' : /archer/.test(voc) ? 'a' : /druid/.test(voc) ? 'd' : /mage|sorcer/.test(voc) ? 'm' : 'x';
@@ -10751,8 +10706,7 @@ function renderPersonagem() {
       campo(tr('pers.' + tipo), 'at', null),
       vk === 'a' ? el('label', { class: 'toggle' }, el('input', { type: 'checkbox', checked: !!sp.am, onchange: e => { sp.am = e.target.checked; saveUi(); desenharMagias(); } }), el('span', { text: tr('pers.am') })) : null),
     el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table pers-magias' },
-      el('thead', null, el('tr', null, [tr('pers.col.magia'), tr('pers.col.min'), tr('pers.col.max'), tr('pers.col.media')].map((c, i) => el('th', { scope: 'col', class: i ? 'num' : null, text: c })))), corpo)), mais,
-    el('p', { class: 'support-note', text: tr('pers.spNota') }));
+      el('thead', null, el('tr', null, [tr('pers.col.magia'), tr('pers.col.min'), tr('pers.col.max'), tr('pers.col.media')].map((c, i) => el('th', { scope: 'col', class: i ? 'num' : null, text: c })))), corpo)), mais);
   // Huntsman: diárias, semanais e entregas, com o melhor respawn de cada criatura
   const seg = (lista, atual, pega) => el('span', { class: 'seg' }, lista.map(o => el('button', { type: 'button', text: o.t, 'aria-pressed': String(o.v === atual), onclick: () => { pega(o.v); renderPersonagem(); } })));
   const linha = t => {
@@ -10771,8 +10725,7 @@ function renderPersonagem() {
       hu.daily && hu.daily.difficulty ? el('small', { text: tr('pers.diaria', { x: hu.daily.difficulty.name }) }) : null),
     el('div', { class: 'pers-ritmo' }, el('span', { text: tr('pers.ritmo') }),
       seg(PARTIES.map(x => ({ v: x.mult, t: tr('party.' + x.mult) })), pers.party, v => { pers.party = v; }),
-      seg(PCTS.map(x => ({ v: x, t: x ? x + '%' : tr('xpb.off') })), pers.pct, v => { pers.pct = v; }),
-      el('span', { class: 'support-note', text: tr('pers.ritmoNota') })),
+      seg(PCTS.map(x => ({ v: x, t: x ? x + '%' : tr('xpb.off') })), pers.pct, v => { pers.pct = v; })),
     el('div', { class: 'pers-colunas' },
       el('div', { class: 'pers-coluna' }, el('h3', { text: tr('pers.diarias') }), diarias.length ? diarias.map(x => x.el) : el('p', { class: 'support-note', text: tr('pers.nenhuma') }),
         entregas.length ? el('h3', { text: tr('pers.entregas') }) : null,
@@ -10824,7 +10777,7 @@ function renderPersonagem() {
     el('div', { class: 'pers-abas' }, el('span', { class: 'unit-toggle' }, aba('andamento', andamento.length), aba('concluidas', concluidas.length), aba('factions', facsFeitas + '/' + PERS_FACTIONS.length)),
       pers.aba === 'factions' ? null : busca),
     pers.aba === 'factions' ? factions() : el('div', { class: 'creatures-wrap' }, tabela),
-    pers.aba === 'factions' ? el('p', { class: 'support-note', text: tr('pers.facNota') }) : rodape);
+    pers.aba === 'factions' ? null : rodape);
   // Mortes
   const mortes = p.deaths || [];
   const quem = d => [...new Set((d.killers || []).map(k => String(k.name || '').replace(/^(a|an) /i, '')))].join(', ');
@@ -10832,8 +10785,7 @@ function renderPersonagem() {
     mortes.length ? el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table pers-dias' },
       el('thead', null, el('tr', null, [tr('pers.col.quando'), tr('pers.nivel'), tr('pers.col.por')].map(c => el('th', { scope: 'col', text: c })))),
       el('tbody', null, mortes.map(d => el('tr', null, el('td', { text: persData(d.timestamp * 1000, loc, true) }),
-        el('td', { text: d.level }), el('td', { text: quem(d) })))))) : el('p', { class: 'support-note', text: tr('pers.semMortes') }),
-    el('p', { class: 'support-note', text: tr('pers.mortesNota') }));
+        el('td', { text: d.level }), el('td', { text: quem(d) })))))) : el('p', { class: 'support-note', text: tr('pers.semMortes') }));
   // a busca das tasks mantém o foco ao redesenhar só a tabela; ao redesenhar a página inteira, o foco volta para ela
   const focoBusca = document.activeElement && document.activeElement.closest && document.activeElement.closest('.pers-abas');
   g.replaceChildren(el('div', { class: 'pers-pilha' }, ficha, skills), hist, poder, mort, tasks, hunts);
@@ -10956,8 +10908,7 @@ function renderGuilda() {
         el('td', { class: 'q', text: m.online ? tr('gu.online') : m.ultimoLogin ? persData(m.ultimoLogin * 1000, loc, true) : '—' }));
     })));
   const membros = card('tres', el('h2', null, tr('gu.membrosTit'), el('small', { text: tr('gu.cliqueNome') })),
-    el('div', { class: 'creatures-wrap' }, tabela),
-    el('p', { class: 'support-note', text: tr('gu.ordemNota') }));
+    el('div', { class: 'creatures-wrap' }, tabela));
   g.replaceChildren(topo, rank, vocCard, membros);
 }
 $('#gu-ver').addEventListener('click', () => guCarregar($('#gu-nome').value));
