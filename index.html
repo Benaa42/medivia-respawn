@@ -929,6 +929,15 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .rk-bxp i b { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, rgba(58, 227, 116, 0.45), var(--value)); }
 .rk-bxp span { min-width: 78px; color: var(--value); font-weight: 700; }
 @media (max-width: 760px) { .rk-bxp i { display: none; } .rk-tab td.xp { width: auto; } .rk-tab-xp th:nth-child(3), .rk-tab-xp td:nth-child(3) { display: none; } .rk-tab-xp th, .rk-tab-xp td { padding: 6px 4px; font-size: 13px; } .rk-tab-xp th.c, .rk-tab-xp td.c { width: 28px; } .rk-bxp span { min-width: 0; } }
+/* Tasks: a coluna escolhida em verde, tasks concluídas com barra, os outros dois números no pódio */
+.rk-tab th.on { color: var(--title); }
+.rk-tab td.on { color: var(--value); font-weight: 700; }
+.rk-tk { display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.rk-tk i { width: 70px; height: 6px; border-radius: 3px; background: var(--card); overflow: hidden; }
+.rk-tk i b { display: block; height: 100%; border-radius: 3px; background: var(--value); }
+.rk-pod .extra { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px; color: var(--faint); font-size: 12px; }
+.rk-pod .extra b { color: var(--label); font-weight: 600; }
+@media (max-width: 760px) { .rk-tab-tk .opc { display: none; } .rk-tab-tk th, .rk-tab-tk td { padding: 6px 4px; font-size: 13px; } .rk-tab-tk th.c, .rk-tab-tk td.c { width: 28px; } .rk-tab-tk th { white-space: normal; } .rk-tk i { display: none; } }
 @media (max-width: 760px) { .rk-podio { grid-template-columns: 1fr; } .rk-pod.p1 { order: -1; } .rk-busca { margin-left: 0; } .rk-achar input { width: 100%; } .rk-busca, .rk-achar { width: 100%; } }
 .pers-busca input { flex: 1 1 240px; max-width: 360px; padding: 11px 14px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 15px var(--font-ui); }
 .pers-busca input:focus { outline: 2px solid var(--value); outline-offset: -1px; border-color: transparent; }
@@ -1989,6 +1998,22 @@ const I18N = {
     'rk.xpRodape': 'Os 100 que mais ganharam, entre os 1.000 primeiros do ranking de nível',
     'rk.xpVazio': 'Ainda sem dados para este período.',
     'rk.naoAcheiXp': '{x} não está entre os 100 que mais ganharam.',
+    'rk.tasks': 'Tasks',
+    'rk.ordenar': 'Ordenar por',
+    'rk.tk.pontos': 'Pontos de Huntsman',
+    'rk.tk.concluidas': 'Tasks concluídas',
+    'rk.tk.abates': 'Abates em tasks',
+    'rk.ord.abates': 'Abates',
+    'rk.tk.curto.pontos': 'pontos',
+    'rk.tk.curto.concluidas': 'tasks',
+    'rk.tk.curto.abates': 'abates',
+    'rk.seuTk': 'está em {p}º com {v} {r}.',
+    'rk.tkRodape': 'Os 100 primeiros',
+    'rk.tkVazio': 'Ainda sem dados neste mundo.',
+    'rk.naoAchei100': '{x} não está entre os 100 primeiros.',
+    'rk.tkm.pontos': 'pontos de Huntsman',
+    'rk.tkm.concluidas': 'tasks concluídas',
+    'rk.tkm.abates': 'abates em tasks',
     'pers.tag.shared': 'compartilhada',
     'pers.tag.locked': 'travada',
     'pers.tag.naoEscolhida': 'não escolhida',
@@ -2783,6 +2808,22 @@ const I18N = {
     'rk.xpRodape': 'The 100 who gained the most, among the top 1,000 of the level ranking',
     'rk.xpVazio': 'No data for this period yet.',
     'rk.naoAcheiXp': '{x} is not among the 100 who gained the most.',
+    'rk.tasks': 'Tasks',
+    'rk.ordenar': 'Sort by',
+    'rk.tk.pontos': 'Huntsman points',
+    'rk.tk.concluidas': 'Completed tasks',
+    'rk.tk.abates': 'Task kills',
+    'rk.ord.abates': 'Kills',
+    'rk.tk.curto.pontos': 'points',
+    'rk.tk.curto.concluidas': 'tasks',
+    'rk.tk.curto.abates': 'kills',
+    'rk.seuTk': 'is #{p} with {v} {r}.',
+    'rk.tkRodape': 'The top 100',
+    'rk.tkVazio': 'No data for this world yet.',
+    'rk.naoAchei100': '{x} is not in the top 100.',
+    'rk.tkm.pontos': 'Huntsman points',
+    'rk.tkm.concluidas': 'completed tasks',
+    'rk.tkm.abates': 'task kills',
     'pers.tag.shared': 'shared',
     'pers.tag.locked': 'locked',
     'pers.tag.naoEscolhida': 'not chosen',
@@ -3577,6 +3618,22 @@ const I18N = {
     'rk.xpRodape': 'Los 100 que más ganaron, entre los 1.000 primeros del ranking de nivel',
     'rk.xpVazio': 'Aún no hay datos para este período.',
     'rk.naoAcheiXp': '{x} no está entre los 100 que más ganaron.',
+    'rk.tasks': 'Tasks',
+    'rk.ordenar': 'Ordenar por',
+    'rk.tk.pontos': 'Puntos de Huntsman',
+    'rk.tk.concluidas': 'Tasks completadas',
+    'rk.tk.abates': 'Muertes en tasks',
+    'rk.ord.abates': 'Muertes',
+    'rk.tk.curto.pontos': 'puntos',
+    'rk.tk.curto.concluidas': 'tasks',
+    'rk.tk.curto.abates': 'muertes',
+    'rk.seuTk': 'está en el {p}º con {v} {r}.',
+    'rk.tkRodape': 'Los 100 primeros',
+    'rk.tkVazio': 'Aún no hay datos de este mundo.',
+    'rk.naoAchei100': '{x} no está entre los 100 primeros.',
+    'rk.tkm.pontos': 'puntos de Huntsman',
+    'rk.tkm.concluidas': 'tasks completadas',
+    'rk.tkm.abates': 'muertes en tasks',
     'pers.tag.shared': 'compartida',
     'pers.tag.locked': 'bloqueada',
     'pers.tag.naoEscolhida': 'no elegida',
@@ -4371,6 +4428,22 @@ const I18N = {
     'rk.xpRodape': '100 osób, które zdobyły najwięcej, spośród pierwszego 1000 rankingu poziomu',
     'rk.xpVazio': 'Brak danych dla tego okresu.',
     'rk.naoAcheiXp': '{x} nie ma wśród 100 osób, które zdobyły najwięcej.',
+    'rk.tasks': 'Taski',
+    'rk.ordenar': 'Sortuj według',
+    'rk.tk.pontos': 'Punkty Huntsmana',
+    'rk.tk.concluidas': 'Ukończone taski',
+    'rk.tk.abates': 'Zabicia w taskach',
+    'rk.ord.abates': 'Zabicia',
+    'rk.tk.curto.pontos': 'pkt',
+    'rk.tk.curto.concluidas': 'taski',
+    'rk.tk.curto.abates': 'zabić',
+    'rk.seuTk': 'jest na {p}. miejscu: {v} ({r}).',
+    'rk.tkRodape': 'Pierwsze 100',
+    'rk.tkVazio': 'Brak danych dla tego świata.',
+    'rk.naoAchei100': '{x} nie ma w pierwszej setce.',
+    'rk.tkm.pontos': 'punkty Huntsmana',
+    'rk.tkm.concluidas': 'ukończone taski',
+    'rk.tkm.abates': 'zabicia w taskach',
     'pers.tag.shared': 'wspólne',
     'pers.tag.locked': 'zablokowane',
     'pers.tag.naoEscolhida': 'niewybrane',
@@ -6215,7 +6288,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5, guMundo: 'pendulum', guFormato: 'cartoes', rkMundo: 'pendulum', rkSkill: 'level', rkVoc: 'all', rkPeriodo: 1 }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5, guMundo: 'pendulum', guFormato: 'cartoes', rkMundo: 'pendulum', rkSkill: 'level', rkVoc: 'all', rkPeriodo: 1, rkOrdem: 'pontos' }, lsGet(LS_UI, {}));
 // Bônus de XP: minutos de XP Boost da loja, golden premium (+5% no boost) e outros bônus em %, para a hunt inteira
 const XPB_MINS = [0, 30, 60, 90, 120, 180];
 {
@@ -11417,8 +11490,9 @@ $('#gu-mundo').addEventListener('change', e => { ui.guMundo = e.target.value; sa
    (os 1.000 primeiros de cada mundo, 100 por página), com a vocação e o nível de cada um completados pelo Worker
    (/ranking/{mundo}/{vocação}/{skill}/{página}). */
 const MUNDOS = ['pendulum', 'legacy', 'serenity', 'luminary', 'liberty', 'destiny', 'immensity', 'eternum', 'prosperity'];
-const RK_SKILLS = ['level', 'xp', 'maglevel', 'melee', 'distance', 'blocking', 'fishing', 'mining', 'cooking'];   // xp: XP ganha (fotos diárias)
+const RK_SKILLS = ['level', 'xp', 'tasks', 'maglevel', 'melee', 'distance', 'blocking', 'fishing', 'mining', 'cooking'];   // xp: XP ganha (fotos diárias); tasks: das fichas
 const RK_PERIODOS = [1, 7, 30];
+const RK_ORDENS = ['pontos', 'concluidas', 'abates'];
 const RK_VOCS = ['all', 'knights', 'archers', 'mages', 'druids'];
 const rk = { pagina: 1, dados: null, chave: '', carregando: false, alvo: '', achando: false, msg: '' };
 const rkMundo = () => MUNDOS.includes(ui.rkMundo) ? ui.rkMundo : 'pendulum';
@@ -11426,8 +11500,12 @@ const rkSkill = () => RK_SKILLS.includes(ui.rkSkill) ? ui.rkSkill : 'level';
 const rkVoc = () => RK_VOCS.includes(ui.rkVoc) ? ui.rkVoc : 'all';
 const mundoNome = m => m[0].toUpperCase() + m.slice(1);
 const rkPeriodo = () => RK_PERIODOS.includes(Number(ui.rkPeriodo)) ? Number(ui.rkPeriodo) : 1;
-// XP ganha: uma página só, os 100 que mais ganharam entre duas fotos do ranking de nível (/ganhos)
-const rkRota = p => rkSkill() === 'xp' ? 'ganhos/' + rkMundo() + '/' + rkVoc() + '/' + rkPeriodo() : 'ranking/' + rkMundo() + '/' + rkVoc() + '/' + rkSkill() + '/' + p;
+const rkOrdem = () => RK_ORDENS.includes(ui.rkOrdem) ? ui.rkOrdem : 'pontos';
+// XP ganha e tasks: uma página só, os 100 primeiros (/ganhos, /tarefas); os outros, 10 páginas do ranking oficial
+const rkUnica = () => rkSkill() === 'xp' || rkSkill() === 'tasks';
+const rkRota = p => rkSkill() === 'xp' ? 'ganhos/' + rkMundo() + '/' + rkVoc() + '/' + rkPeriodo()
+  : rkSkill() === 'tasks' ? 'tarefas/' + rkMundo() + '/' + rkVoc() + '/' + rkOrdem()
+  : 'ranking/' + rkMundo() + '/' + rkVoc() + '/' + rkSkill() + '/' + p;
 // uma página do ranking; o Worker guarda cada uma por 5 minutos
 async function rkBuscar(p) {
   const r = await fetch(API_MEDIVIA + rkRota(p));
@@ -11437,7 +11515,7 @@ async function rkBuscar(p) {
   return lista;
 }
 async function rkCarregar(p) {
-  rk.pagina = rkSkill() === 'xp' ? 1 : Math.min(10, Math.max(1, p || 1));
+  rk.pagina = rkUnica() ? 1 : Math.min(10, Math.max(1, p || 1));
   const chave = rkRota(rk.pagina);
   if (rk.chave !== chave) rk.dados = null;   // outro filtro ou página: a lista velha sai enquanto a nova carrega
   rk.chave = chave;
@@ -11460,7 +11538,7 @@ async function rkAchar(nome) {
   renderRankings();
   const alvo = slug(nome), chave = rkRota(0);
   try {
-    for (let p = 1; p <= (rkSkill() === 'xp' ? 1 : 10); p++) {
+    for (let p = 1; p <= (rkUnica() ? 1 : 10); p++) {
       if (rkRota(0) !== chave || pageNow !== 'rankings') return;
       const ini = Date.now();
       const lista = rk.dados && rk.chave === rkRota(p) ? rk.dados : await rkBuscar(p);
@@ -11474,7 +11552,7 @@ async function rkAchar(nome) {
       }
       if (Date.now() - ini > 250) await new Promise(r => setTimeout(r, 1100));
     }
-    rk.msg = tr(rkSkill() === 'xp' ? 'rk.naoAcheiXp' : 'rk.naoAchei', { x: nome });
+    rk.msg = tr(rkSkill() === 'xp' ? 'rk.naoAcheiXp' : rkSkill() === 'tasks' ? 'rk.naoAchei100' : 'rk.naoAchei', { x: nome });
   } catch (e) { rk.msg = tr(e.message === '429' ? 'pers.limite' : 'pers.erro'); }
   rk.achando = false;
   renderRankings();
@@ -11517,11 +11595,52 @@ function renderRkXp(g, partes, lista, loc) {
   partes.push(el('div', { class: 'rk-pag' }, el('span', { text: tr('rk.xpRodape') })));
   g.replaceChildren(...partes);
 }
+// Tasks: os 100 primeiros em pontos de Huntsman, tasks de criatura concluídas ou abates nelas (das fichas)
+function renderRkTasks(g, partes, lista, ordem) {
+  if (!lista.length) { partes.push(el('p', { class: 'support-note', text: tr('rk.tkVazio') })); g.replaceChildren(...partes); return; }
+  const meu = ui.meuPers ? slug(ui.meuPers) : '', alvo = rk.alvo ? slug(rk.alvo) : '';
+  const chip = h => el('span', { class: 'gu-vc v-' + (guVoc(h.vocacao) || 'x'), text: h.vocacao || '—' });
+  const abrir = h => goTo('personagem/' + encodeURIComponent(h.nome));
+  const val = (h, k) => k === 'concluidas' ? h.concluidas + '/' + h.total : fmtInt(h[k] || 0);
+  const outras = RK_ORDENS.filter(k => k !== ordem);
+  const iMeu = meu ? lista.findIndex(h => slug(h.nome) === meu) : -1;
+  if (iMeu >= 0) partes.push(el('div', { class: 'rk-meu' }, tr('rk.seuA') + ' ', el('b', { text: lista[iMeu].nome }), ' ' + tr('rk.seuTk', { p: iMeu + 1, v: val(lista[iMeu], ordem), r: tr('rk.tkm.' + ordem) }) + ' ',
+    el('button', { type: 'button', class: 'rk-ir', text: tr('rk.irAte'), onclick: () => { const l = $('#rk-grade tr.meu'); if (l) l.scrollIntoView({ block: 'center', behavior: 'smooth' }); } })));
+  if (lista.length >= 3) {
+    const pod = (h, pos) => el('button', { type: 'button', class: 'rk-pod p' + pos, onclick: () => abrir(h) },
+      el('span', { class: 'pos', text: pos + 'º' }), el('b', { class: 'nm', text: h.nome }), chip(h), el('span', { class: 'val', text: val(h, ordem) }),
+      el('small', { text: tr('rk.tkm.' + ordem) }),
+      el('span', { class: 'extra' }, outras.map(k => el('span', null, el('b', { text: val(h, k) }), ' ' + tr('rk.tk.curto.' + k)))));
+    partes.push(el('div', { class: 'rk-podio' }, pod(lista[1], 2), pod(lista[0], 1), pod(lista[2], 3)));
+  }
+  const ini = lista.length >= 3 ? 3 : 0;
+  const celula = (h, k) => {
+    const cls = k === ordem ? 'on' : 'opc';
+    if (k !== 'concluidas') return el('td', { class: cls, text: val(h, k) });
+    const pct = h.total ? Math.min(100, h.concluidas / h.total * 100) : 0;
+    return el('td', { class: cls }, el('span', { class: 'rk-tk' }, el('i', null, el('b', { style: 'width:' + pct.toFixed(0) + '%' })), val(h, k)));
+  };
+  partes.push(el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table rk-tab rk-tab-tk' },
+    el('thead', null, el('tr', null, el('th', { class: 'c', scope: 'col', text: '#' }), el('th', { class: 'l', scope: 'col', text: tr('gu.col.pers') }),
+      el('th', { class: 'l opc', scope: 'col', text: tr('pers.voc') }), el('th', { scope: 'col', text: tr('pers.nivel') }),
+      RK_ORDENS.map(k => el('th', { class: k === ordem ? 'on' : 'opc', scope: 'col', text: tr('rk.tk.' + k) })))),
+    el('tbody', null, lista.slice(ini).map((h, i) => {
+      const s = slug(h.nome), cls = [s === meu ? 'meu' : '', s === alvo ? 'alvo' : ''].filter(Boolean).join(' ');
+      return el('tr', { class: cls || null },
+        el('td', { class: 'c pos', text: String(ini + i + 1) }),
+        el('td', { class: 'l' }, el('button', { class: 'gu-n', type: 'button', text: h.nome, onclick: () => abrir(h) }), s === meu ? el('span', { class: 'rk-eu', text: tr('rk.voce') }) : null),
+        el('td', { class: 'l opc' }, chip(h)),
+        el('td', { text: h.nivel ? String(h.nivel) : '—' }),
+        RK_ORDENS.map(k => celula(h, k)));
+    })))));
+  partes.push(el('div', { class: 'rk-pag' }, el('span', { text: tr('rk.tkRodape') })));
+  g.replaceChildren(...partes);
+}
 function renderRankings() {
   const g = $('#rk-grade');
   if (!g) return;
   const loc = document.documentElement.lang || 'en', skill = rkSkill(), voc = rkVoc(), mundo = rkMundo();
-  const rotSkill = s => s === 'level' ? tr('pers.nivel') : s === 'xp' ? tr('rk.xp') : tr('pers.sk.' + s);
+  const rotSkill = s => s === 'level' ? tr('pers.nivel') : s === 'xp' ? tr('rk.xp') : s === 'tasks' ? tr('rk.tasks') : tr('pers.sk.' + s);
   const VB = { knights: 'k', archers: 'a', mages: 'm', druids: 'd' };
   const VN = { k: 'Knight', a: 'Archer', m: 'Mage', d: 'Druid' };
   const seg = (lista, atual, rot, pega) => el('span', { class: 'seg' }, lista.map(v => el('button', { type: 'button', text: rot(v), 'aria-pressed': String(v === atual), onclick: () => { pega(v); saveUi(); rk.alvo = ''; rkCarregar(1); } })));
@@ -11530,6 +11649,7 @@ function renderRankings() {
       el('select', { onchange: e => { ui.rkMundo = e.target.value; saveUi(); rk.alvo = ''; rkCarregar(1); } }, MUNDOS.map(m => el('option', { value: m, text: mundoNome(m), selected: m === mundo })))),
     el('div', { class: 'rk-campo' }, el('span', { text: tr('rk.ranking') }), seg(RK_SKILLS, skill, rotSkill, v => { ui.rkSkill = v; })),
     skill === 'xp' ? el('div', { class: 'rk-campo' }, el('span', { text: tr('rk.periodo') }), seg(RK_PERIODOS, rkPeriodo(), v => tr('rk.per.' + v), v => { ui.rkPeriodo = v; })) : null,
+    skill === 'tasks' ? el('div', { class: 'rk-campo' }, el('span', { text: tr('rk.ordenar') }), seg(RK_ORDENS, rkOrdem(), v => tr(v === 'abates' ? 'rk.ord.abates' : 'rk.tk.' + v), v => { ui.rkOrdem = v; })) : null,
     el('div', { class: 'rk-campo' }, el('span', { text: tr('pers.voc') }), seg(RK_VOCS, voc, v => tr('rk.voc.' + v), v => { ui.rkVoc = v; })),
     el('form', { class: 'rk-campo rk-busca', onsubmit: e => { e.preventDefault(); rkAchar(e.target.elements.nome.value); } },
       el('span', { text: tr('rk.achar') }),
@@ -11537,12 +11657,13 @@ function renderRankings() {
         el('button', { class: 'dlg', type: 'submit', text: tr('rk.acharBtn'), disabled: rk.achando }))));
   const titulo = skill === 'xp'
     ? el('h2', { class: 'rk-titulo' }, voc === 'all' ? tr('rk.tituloXp', { m: mundoNome(mundo) }) : tr('rk.tituloXpVoc', { v: tr('rk.vocDe.' + voc), m: mundoNome(mundo) }), rkDatas(rk.dados, loc))
-    : el('h2', { class: 'rk-titulo', text: voc === 'all' ? tr('rk.titulo', { r: rotSkill(skill), m: mundoNome(mundo) }) : tr('rk.tituloVoc', { r: rotSkill(skill), v: tr('rk.vocDe.' + voc), m: mundoNome(mundo) }) });
+    : (r => el('h2', { class: 'rk-titulo', text: voc === 'all' ? tr('rk.titulo', { r, m: mundoNome(mundo) }) : tr('rk.tituloVoc', { r, v: tr('rk.vocDe.' + voc), m: mundoNome(mundo) }) }))(skill === 'tasks' ? tr('rk.tk.' + rkOrdem()) : rotSkill(skill));
   const partes = [filtros, titulo];
   if (rk.msg) partes.push(el('p', { class: 'status', text: rk.msg }));
   const lista = rk.dados;
   if (!lista) { if (rk.carregando) partes.push(el('p', { class: 'support-note', text: tr('rk.carregando') })); g.replaceChildren(...partes); return; }
   if (skill === 'xp') { renderRkXp(g, partes, lista, loc); return; }
+  if (skill === 'tasks') { renderRkTasks(g, partes, lista, rkOrdem()); return; }
   const base = (rk.pagina - 1) * 100;
   const meu = ui.meuPers ? slug(ui.meuPers) : '', alvo = rk.alvo ? slug(rk.alvo) : '';
   const vb = h => guVoc(h.vocacao) || VB[voc] || null;
