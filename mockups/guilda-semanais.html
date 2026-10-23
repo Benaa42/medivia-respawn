@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo: aba Semanais da guilda</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Modelo da aba Semanais da guilda com as fichas reais da Kcteam (23/10/2026). Nada aqui é publicado. */
+:root { --ground: #0f1314; --box: #171d1e; --card: #1e2627; --edge: #2c3637; --band: #1b3a2c; --title: #f1f5f3; --label: #c2cbc8; --faint: #8b9894; --amber: #f0ad4d; --value: #3ae374;
+  --gold-edge: rgba(240, 173, 77, 0.55); --gold-wash: rgba(240, 173, 77, 0.06); --k: #ff7468; --a: #3ae374; --m: #a970ff; --d: #3cc6f0; --x: #8b9894;
+  --font-ui: "Onest", "Segoe UI", system-ui, sans-serif; --font-display: "Bricolage Grotesque", "Onest", sans-serif; }
+* { box-sizing: border-box; } body { margin: 0; background: #0a0d0e; color: var(--label); font: 400 14px/1.45 var(--font-ui); font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4, p, ul { margin: 0; } ul { padding: 0; list-style: none; }
+.pagina { max-width: 1320px; margin: 0 auto; padding: 26px 20px 60px; display: flex; flex-direction: column; gap: 30px; }
+.intro h1 { font: 800 28px var(--font-display); color: var(--title); } .intro p { margin-top: 6px; max-width: 90ch; }
+.prop > h2 { font: 800 22px var(--font-display); color: var(--title); display: flex; gap: 10px; align-items: baseline; }
+.prop > h2 span { font: 700 12px var(--font-ui); color: #241703; background: var(--amber); padding: 2px 10px; border-radius: 999px; }
+.prop > p { margin: 6px 0 12px; max-width: 90ch; }
+.quadro { background: var(--box); border-radius: 22px; padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+.abas { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--card); align-self: flex-start; }
+.abas span { padding: 6px 12px; border-radius: 999px; font: 600 13px var(--font-ui); color: var(--label); } .abas span.on { background: var(--title); color: var(--ground); }
+h3 { font: 800 17px var(--font-display); color: var(--title); display: flex; gap: 8px; align-items: baseline; } h3 small { font: 500 12px var(--font-ui); color: var(--faint); }
+.v-k { color: var(--k) !important; } .v-a { color: var(--a) !important; } .v-m { color: var(--m) !important; } .v-d { color: var(--d) !important; } .v-x { color: var(--x) !important; }
+.qt { padding: 1px 8px; border-radius: 999px; background: var(--band); color: var(--value); font: 700 11px var(--font-ui); white-space: nowrap; }
+.boost { padding: 0 5px; border-radius: 5px; background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--amber); font: 700 10px var(--font-ui); }
+.bar { display: block; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; } .bar em { display: block; height: 100%; background: var(--amber); border-radius: 999px; }
+b.ok, .ok { color: var(--value); font-weight: 700; } .nada { color: var(--faint); }
+/* A: cartões */
+.grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; align-items: start; }
+.cc, .cm { background: var(--card); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.cc header, .cm header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cc h4 { font: 700 15px var(--font-ui); color: var(--amber); } .cm h4 { font: 700 15px var(--font-ui); } .cm header span { font-size: 12px; color: var(--faint); }
+.cc li, .cm li { display: grid; grid-template-columns: minmax(0, 1fr) 70px 54px auto; align-items: center; gap: 8px; padding: 3px 0; }
+.cc li .quem { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc li b, .cm li b { text-align: right; color: var(--title); font-weight: 600; }
+.cc li.f { opacity: 0.55; } .cc li.f .bar em, .cm li.f .bar em { background: var(--value); }
+.rod { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-top: 8px; border-top: 1px solid var(--edge); font-size: 12.5px; }
+.rod b { color: var(--title); } .rod .tempo { color: var(--value); font-weight: 600; }
+.rod button { margin-left: auto; padding: 3px 10px; border: 0; border-radius: 999px; background: var(--band); color: var(--value); font: 700 12px var(--font-ui); }
+.rod.ok { color: var(--value); font-weight: 600; } .rod.nada { color: var(--faint); }
+.cc.feito { opacity: 0.6; }
+.cm .tn { display: flex; align-items: center; gap: 6px; color: var(--title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pt { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); flex: none; }
+.feitas { font-size: 12px; color: var(--value); opacity: 0.8; }
+.sem { font-size: 13px; color: var(--faint); } .sem b { color: var(--label); font-weight: 600; }
+/* B: tabela cruzada */
+.tabwrap { overflow-x: auto; }
+.cruz { width: 100%; border-collapse: collapse; font-size: 13px; }
+.cruz th { padding: 6px 8px; font: 600 12px var(--font-ui); text-align: center; border-bottom: 1px solid var(--edge); white-space: nowrap; }
+.cruz th.l, .cruz td.l { text-align: left; }
+.cruz td { padding: 7px 8px; border-bottom: 1px solid var(--edge); text-align: center; white-space: nowrap; }
+.cruz td.cri { font-weight: 700; color: var(--amber); }
+.cruz .pg { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--title); font-size: 12px; }
+.cruz td.rs { color: var(--label); } .cruz td.rs b { color: var(--value); }
+.cruz tr.feito { opacity: 0.55; }
+.cruz tbody tr:hover { background: var(--card); }
+.recomendo { padding: 14px 18px; border-radius: 14px; border: 1px solid var(--gold-edge); background: var(--gold-wash); color: var(--title); }
+</style></head><body><div class="pagina">
+<header class="intro"><h1>Aba Semanais da guilda: duas propostas</h1><p>Com as fichas reais da Kcteam. As duas separam o que é pendente do que já foi feito, usam barras de progresso e põem a sugestão de respawn num lugar só, embaixo de cada task. Os membros sem task viram uma linha só.</p></header>
+
+<section class="prop"><h2>Proposta A <span>cartões</span></h2>
+<p>Cada task em comum é um cartão: os membros em linhas, cada um com a barrinha e o número, e embaixo o respawn sugerido para o grupo. Em "Por membro", um cartão por pessoa com as pendentes primeiro; as concluídas viram uma linha verde no fim. O ponto dourado marca a task que é em comum.</p>
+<div class="quadro"><div class="abas"><span>Membros (13)</span><span>Diárias</span><span class="on">Semanais</span></div>
+<h3>Tasks em comum <small>13 tasks que mais de um membro tem</small></h3>
+<div class="grade"><article class="cc"><header><h4>Blight Omen</h4><span class="qt">4 membros</span></header>
+  <ul><li class=""><span class="quem v-m">Jonhsons Baby</span><i class="bar"><em style="width:0%"></em></i><b>0/108</b><span class="boost">+20%</span></li><li class=""><span class="quem v-d">Don Raydan</span><i class="bar"><em style="width:0%"></em></i><b>0/117</b><span class="boost">+30%</span></li><li class="f"><span class="quem v-d">Mary Sky</span><i class="bar"><em style="width:100%"></em></i><b class="ok">✓</b></li><li class="f"><span class="quem v-a">Bena</span><i class="bar"><em style="width:100%"></em></i><b class="ok">✓</b></li></ul><div class="rod"><span><b>Ghibli Undergrounds</b> · 318/h em grupo de 4</span><span class="tempo">todos em 22 min</span><button>Abrir no cronômetro</button></div></article>
+<article class="cc"><header><h4>Abysmor</h4><span class="qt">3 membros</span></header>
+  <ul><li class=""><span class="quem v-a">Dybas</span><i class="bar"><em style="width:0%"></em></i><b>0/49</b><span class="boost">+10%</span></li><li class=""><span class="quem v-m">Jonhsons Baby</span><i class="bar"><em style="width:0%"></em></i><b>0/45</b></li><li class=""><span class="quem v-d">Don Raydan</span><i class="bar"><em style="width:0%"></em></i><b>0/45</b></li></ul><div class="rod nada">Sem respawn no banco</div></article>
+<article class="cc"><header><h4>Centaur Warmaster</h4><span class="qt">3 membros</span></header>
+  <ul><li class=""><span class="quem v-m">Raydan</span><i class="bar"><em style="width:0%"></em></i><b>0/144</b><span class="boost">+20%</span></li><li class=""><span class="quem v-m">Jonhsons Baby</span><i class="bar"><em style="width:0%"></em></i><b>0/132</b><span class="boost">+10%</span></li><li class="f"><span class="quem v-k">Deik</span><i class="bar"><em style="width:100%"></em></i><b class="ok">✓</b></li></ul><div class="rod nada">Sem respawn no banco</div></article>
+<article class="cc"><header><h4>Abomination</h4><span class="qt">2 membros</span></header>
+  <ul><li class=""><span class="quem v-d">Don Raydan</span><i class="bar"><em style="width:0%"></em></i><b>0/130</b><span class="boost">+30%</span></li><li class=""><span class="quem v-k">Gazelino</span><i class="bar"><em style="width:0%"></em></i><b>0/100</b></li></ul><div class="rod nada">Sem respawn no banco</div></article>
+<article class="cc"><header><h4>Azure Mercenary</h4><span class="qt">2 membros</span></header>
+  <ul><li class=""><span class="quem v-a">Bena</span><i class="bar"><em style="width:0%"></em></i><b>0/65</b></li><li class="f"><span class="quem v-k">Deik</span><i class="bar"><em style="width:100%"></em></i><b class="ok">✓</b></li></ul><div class="rod"><span><b>Azure Mercenary Armory</b> · 149/h em grupo de 2</span><span class="tempo">todos em 26 min</span><button>Abrir no cronômetro</button></div></article>
+<article class="cc"><header><h4>Chaos Hydra</h4><span class="qt">2 membros</span></header>
+  <ul><li class=""><span class="quem v-m">Raydan</span><i class="bar"><em style="width:0%"></em></i><b>0/18</b><span class="boost">+20%</span></li><li class=""><span class="quem v-m">Jonhsons Baby</span><i class="bar"><em style="width:0%"></em></i><b>0/15</b></li></ul><div class="rod"><span><b>Chaos Hydra Island</b> · 31/h em grupo de 2</span><span class="tempo">todos em 35 min</span><button>Abrir no cronômetro</button></div></article>
+<article class="cc"><header><h4>Demon</h4><span class="qt">2 membros</span></header>
+  <ul><li class=""><span class="quem v-d">Mary Sky</span><i class="bar"><em style="width:0%"></em></i><b>0/208</b><span class="boost">+30%</span></li><li class=""><span class="quem v-k">Gazelino</span><i class="bar"><em style="width:0%"></em></i><b>0/160</b></li></ul><div class="rod nada">Sem respawn no banco</div></article>
+<article class="cc"><header><h4>Icon of Light</h4><span class="qt">2 membros</span></header>
+  <ul><li class=""><span class="quem v-k">Deik</span><i class="bar"><em style="width:0%"></em></i><b>0/45</b><span class="boost">+30%</span></li><li class=""><span class="quem v-k">Gazelino</span><i class="bar"><em style="width:0%"></em></i><b>0/35</b></li></ul><div class="rod nada">Sem respawn no banco</div></article>
+<article class="cc"><header><h4>Magma Dragon</h4><span class="qt">2 membros</span></header>
+  <ul><li class=""><span class="quem v-a">Bena</span><i class="bar"><em style="width:0%"></em></i><b>0/72</b><span class="boost">+20%</span></li><li class="f"><span class="quem v-k">Deik</span><i class="bar"><em style="width:100%"></em></i><b class="ok">✓</b></li></ul><div class="rod"><span><b>Obsidian Mountains</b> · 125/h em grupo de 2</span><span class="tempo">todos em 35 min</span><button>Abrir no cronômetro</button></div></article>
+<article class="cc"><header><h4>Malformis</h4><span class="qt">2 membros</span></header>
+  <ul><li class=""><span class="quem v-a">Dybas</span><i class="bar"><em style="width:0%"></em></i><b>0/38</b></li><li class=""><span class="quem v-k">Deik</span><i class="bar"><em style="width:0%"></em></i><b>0/38</b></li></ul><div class="rod"><span><b>Anchor Fort</b> · 74/h em grupo de 2</span><span class="tempo">todos em 31 min</span><button>Abrir no cronômetro</button></div></article>
+<article class="cc"><header><h4>Piranha</h4><span class="qt">2 membros</span></header>
+  <ul><li class=""><span class="quem v-d">Mary Sky</span><i class="bar"><em style="width:26%"></em></i><b>22/84</b><span class="boost">+20%</span></li><li class=""><span class="quem v-a">Bena</span><i class="bar"><em style="width:20%"></em></i><b>18/91</b><span class="boost">+30%</span></li></ul><div class="rod"><span><b>Northern Shallows</b> · 168/h em grupo de 2</span><span class="tempo">todos em 26 min</span><button>Abrir no cronômetro</button></div></article>
+<article class="cc"><header><h4>Storm Elemental</h4><span class="qt">2 membros</span></header>
+  <ul><li class=""><span class="quem v-d">Mary Sky</span><i class="bar"><em style="width:0%"></em></i><b>0/48</b><span class="boost">+20%</span></li><li class=""><span class="quem v-a">Bena</span><i class="bar"><em style="width:0%"></em></i><b>0/52</b><span class="boost">+30%</span></li></ul><div class="rod"><span><b>Cloud Island</b> · 92/h em grupo de 2</span><span class="tempo">todos em 34 min</span><button>Abrir no cronômetro</button></div></article>
+<article class="cc feito"><header><h4>Lightweaver</h4><span class="qt">2 membros</span></header>
+  <ul><li class="f"><span class="quem v-k">Deik</span><i class="bar"><em style="width:100%"></em></i><b class="ok">✓</b></li><li class="f"><span class="quem v-d">Mary Sky</span><i class="bar"><em style="width:100%"></em></i><b class="ok">✓</b></li></ul><div class="rod ok">Todos concluíram</div></article></div>
+<h3>Por membro</h3>
+<div class="grade"><article class="cm"><header><h4 class="v-a">Dybas</h4><span>0/9 concluídas</span></header>
+  <ul><li><span class="tn">Typhon</span><i class="bar"><em style="width:0%"></em></i><b>0/71</b><span class="boost">+30%</span></li><li><span class="tn">Corruptor</span><i class="bar"><em style="width:0%"></em></i><b>0/78</b><span class="boost">+30%</span></li><li><span class="tn">Blighted Dwarf</span><i class="bar"><em style="width:0%"></em></i><b>0/390</b><span class="boost">+30%</span></li><li><span class="tn">Sea Dragon</span><i class="bar"><em style="width:10%"></em></i><b>7/72</b><span class="boost">+20%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Abysmor</span><i class="bar"><em style="width:0%"></em></i><b>0/49</b><span class="boost">+10%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Malformis</span><i class="bar"><em style="width:0%"></em></i><b>0/38</b></li><li><span class="tn">Cursed Skull</span><i class="bar"><em style="width:0%"></em></i><b>0/84</b><span class="boost">+40%</span></li><li><span class="tn">Bloodscale Naga</span><i class="bar"><em style="width:0%"></em></i><b>0/60</b></li><li><span class="tn">Shadow Drake</span><i class="bar"><em style="width:0%"></em></i><b>0/98</b><span class="boost">+40%</span></li></ul>
+  </article>
+<article class="cm"><header><h4 class="v-m">Raydan</h4><span>0/7 concluídas</span></header>
+  <ul><li><span class="tn"><span class="pt" title="em comum"></span>Chaos Hydra</span><i class="bar"><em style="width:0%"></em></i><b>0/18</b><span class="boost">+20%</span></li><li><span class="tn">Darkwing</span><i class="bar"><em style="width:72%"></em></i><b>18/25</b></li><li><span class="tn">Tideshrimp</span><i class="bar"><em style="width:0%"></em></i><b>0/480</b><span class="boost">+20%</span></li><li><span class="tn">Shadow Knight</span><i class="bar"><em style="width:7%"></em></i><b>2/30</b></li><li><span class="tn">Ritualist</span><i class="bar"><em style="width:0%"></em></i><b>0/54</b><span class="boost">+20%</span></li><li><span class="tn">Ancient Dragon</span><i class="bar"><em style="width:0%"></em></i><b>0/72</b><span class="boost">+20%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Centaur Warmaster</span><i class="bar"><em style="width:0%"></em></i><b>0/144</b><span class="boost">+20%</span></li></ul>
+  </article>
+<article class="cm"><header><h4 class="v-m">Jonhsons Baby</h4><span>0/8 concluídas</span></header>
+  <ul><li><span class="tn">Crownscale Wyrm</span><i class="bar"><em style="width:10%"></em></i><b>6/60</b></li><li><span class="tn"><span class="pt" title="em comum"></span>Chaos Hydra</span><i class="bar"><em style="width:0%"></em></i><b>0/15</b></li><li><span class="tn">Vorana</span><i class="bar"><em style="width:23%"></em></i><b>90/384</b><span class="boost">+20%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Centaur Warmaster</span><i class="bar"><em style="width:0%"></em></i><b>0/132</b><span class="boost">+10%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Blight Omen</span><i class="bar"><em style="width:0%"></em></i><b>0/108</b><span class="boost">+20%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Abysmor</span><i class="bar"><em style="width:0%"></em></i><b>0/45</b></li><li><span class="tn">Spectralist</span><i class="bar"><em style="width:0%"></em></i><b>0/303</b><span class="boost">+10%</span></li><li><span class="tn">Ancient Watcher</span><i class="bar"><em style="width:0%"></em></i><b>0/176</b><span class="boost">+10%</span></li></ul>
+  </article>
+<article class="cm"><header><h4 class="v-k">Deik</h4><span>5/9 concluídas</span></header>
+  <ul><li><span class="tn">Bookwarden</span><i class="bar"><em style="width:0%"></em></i><b>0/170</b><span class="boost">+30%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Malformis</span><i class="bar"><em style="width:0%"></em></i><b>0/38</b></li><li><span class="tn">Black Widow</span><i class="bar"><em style="width:0%"></em></i><b>0/585</b><span class="boost">+30%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Icon of Light</span><i class="bar"><em style="width:0%"></em></i><b>0/45</b><span class="boost">+30%</span></li></ul>
+  <p class="feitas">✓ Centaur Warmaster · Lightweaver · Azure Mercenary · Ember Djinn · Magma Dragon</p></article>
+<article class="cm"><header><h4 class="v-d">Don Raydan</h4><span>0/7 concluídas</span></header>
+  <ul><li><span class="tn">Gorgon</span><i class="bar"><em style="width:0%"></em></i><b>0/300</b></li><li><span class="tn">Wormqueen</span><i class="bar"><em style="width:0%"></em></i><b>0/144</b><span class="boost">+20%</span></li><li><span class="tn">Enraged Shadow Phoenix</span><i class="bar"><em style="width:0%"></em></i><b>0/4</b></li><li><span class="tn"><span class="pt" title="em comum"></span>Abomination</span><i class="bar"><em style="width:0%"></em></i><b>0/130</b><span class="boost">+30%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Abysmor</span><i class="bar"><em style="width:0%"></em></i><b>0/45</b></li><li><span class="tn">Demorc</span><i class="bar"><em style="width:0%"></em></i><b>0/143</b><span class="boost">+30%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Blight Omen</span><i class="bar"><em style="width:0%"></em></i><b>0/117</b><span class="boost">+30%</span></li></ul>
+  </article>
+<article class="cm"><header><h4 class="v-d">Mary Sky</h4><span>2/8 concluídas</span></header>
+  <ul><li><span class="tn">Ashlord</span><i class="bar"><em style="width:0%"></em></i><b>0/80</b></li><li><span class="tn">Water Elemental</span><i class="bar"><em style="width:0%"></em></i><b>0/143</b><span class="boost">+30%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Demon</span><i class="bar"><em style="width:0%"></em></i><b>0/208</b><span class="boost">+30%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Piranha</span><i class="bar"><em style="width:26%"></em></i><b>22/84</b><span class="boost">+20%</span></li><li><span class="tn">Centaur Mystic</span><i class="bar"><em style="width:0%"></em></i><b>0/60</b><span class="boost">+20%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Storm Elemental</span><i class="bar"><em style="width:0%"></em></i><b>0/48</b><span class="boost">+20%</span></li></ul>
+  <p class="feitas">✓ Blight Omen · Lightweaver</p></article>
+<article class="cm"><header><h4 class="v-k">Gazelino</h4><span>0/6 concluídas</span></header>
+  <ul><li><span class="tn"><span class="pt" title="em comum"></span>Icon of Light</span><i class="bar"><em style="width:0%"></em></i><b>0/35</b></li><li><span class="tn">Sphinx</span><i class="bar"><em style="width:0%"></em></i><b>0/198</b><span class="boost">+10%</span></li><li><span class="tn">Cerberus</span><i class="bar"><em style="width:0%"></em></i><b>0/210</b></li><li><span class="tn"><span class="pt" title="em comum"></span>Demon</span><i class="bar"><em style="width:0%"></em></i><b>0/160</b></li><li><span class="tn"><span class="pt" title="em comum"></span>Abomination</span><i class="bar"><em style="width:0%"></em></i><b>0/100</b></li><li><span class="tn">Bronze Fungi</span><i class="bar"><em style="width:0%"></em></i><b>0/360</b><span class="boost">+20%</span></li></ul>
+  </article>
+<article class="cm"><header><h4 class="v-a">Bena</h4><span>2/9 concluídas</span></header>
+  <ul><li><span class="tn"><span class="pt" title="em comum"></span>Piranha</span><i class="bar"><em style="width:20%"></em></i><b>18/91</b><span class="boost">+30%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Magma Dragon</span><i class="bar"><em style="width:0%"></em></i><b>0/72</b><span class="boost">+20%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Storm Elemental</span><i class="bar"><em style="width:0%"></em></i><b>0/52</b><span class="boost">+30%</span></li><li><span class="tn">Abyssbinder</span><i class="bar"><em style="width:10%"></em></i><b>4/40</b></li><li><span class="tn">Enraged Phoenix</span><i class="bar"><em style="width:0%"></em></i><b>0/4</b></li><li><span class="tn">Skeleton Warlord</span><i class="bar"><em style="width:0%"></em></i><b>0/176</b><span class="boost">+10%</span></li><li><span class="tn"><span class="pt" title="em comum"></span>Azure Mercenary</span><i class="bar"><em style="width:0%"></em></i><b>0/65</b></li></ul>
+  <p class="feitas">✓ Runeguard · Blight Omen</p></article></div>
+<p class="sem">Sem tasks semanais: <b>Dihhzl, Shakechila, Vitu, Octany, Bandeido</b></p></div></section>
+
+<section class="prop"><h2>Proposta B <span>tabela cruzada</span></h2>
+<p>As tasks em comum numa tabela: uma linha por criatura e uma coluna por membro, com o progresso de cada um no cruzamento. Dá para ver de uma vez quem compartilha o quê. Embaixo, os mesmos cartões por membro da proposta A.</p>
+<div class="quadro"><div class="abas"><span>Membros (13)</span><span>Diárias</span><span class="on">Semanais</span></div>
+<h3>Tasks em comum</h3><div class="tabwrap"><table class="cruz"><thead><tr><th class="l">Task</th><th class="v-a">Dybas</th><th class="v-m">Raydan</th><th class="v-m">Jonhsons Baby</th><th class="v-k">Deik</th><th class="v-d">Don Raydan</th><th class="v-d">Mary Sky</th><th class="v-k">Gazelino</th><th class="v-a">Bena</th><th class="l">Melhor respawn</th></tr></thead><tbody>
+<tr class=""><td class="l cri">Blight Omen <span class="qt">4</span></td><td></td><td></td><td><span class="pg">0/108</span></td><td></td><td><span class="pg">0/117</span></td><td><span class="ok">✓</span></td><td></td><td><span class="ok">✓</span></td><td class="l rs">Ghibli Undergrounds · <b>22 min</b></td></tr>
+<tr class=""><td class="l cri">Abysmor <span class="qt">3</span></td><td><span class="pg">0/49</span></td><td></td><td><span class="pg">0/45</span></td><td></td><td><span class="pg">0/45</span></td><td></td><td></td><td></td><td class="l rs"><span class="nada">sem respawn no banco</span></td></tr>
+<tr class=""><td class="l cri">Centaur Warmaster <span class="qt">3</span></td><td></td><td><span class="pg">0/144</span></td><td><span class="pg">0/132</span></td><td><span class="ok">✓</span></td><td></td><td></td><td></td><td></td><td class="l rs"><span class="nada">sem respawn no banco</span></td></tr>
+<tr class=""><td class="l cri">Abomination <span class="qt">2</span></td><td></td><td></td><td></td><td></td><td><span class="pg">0/130</span></td><td></td><td><span class="pg">0/100</span></td><td></td><td class="l rs"><span class="nada">sem respawn no banco</span></td></tr>
+<tr class=""><td class="l cri">Azure Mercenary <span class="qt">2</span></td><td></td><td></td><td></td><td><span class="ok">✓</span></td><td></td><td></td><td></td><td><span class="pg">0/65</span></td><td class="l rs">Azure Mercenary Armory · <b>26 min</b></td></tr>
+<tr class=""><td class="l cri">Chaos Hydra <span class="qt">2</span></td><td></td><td><span class="pg">0/18</span></td><td><span class="pg">0/15</span></td><td></td><td></td><td></td><td></td><td></td><td class="l rs">Chaos Hydra Island · <b>35 min</b></td></tr>
+<tr class=""><td class="l cri">Demon <span class="qt">2</span></td><td></td><td></td><td></td><td></td><td></td><td><span class="pg">0/208</span></td><td><span class="pg">0/160</span></td><td></td><td class="l rs"><span class="nada">sem respawn no banco</span></td></tr>
+<tr class=""><td class="l cri">Icon of Light <span class="qt">2</span></td><td></td><td></td><td></td><td><span class="pg">0/45</span></td><td></td><td></td><td><span class="pg">0/35</span></td><td></td><td class="l rs"><span class="nada">sem respawn no banco</span></td></tr>
+<tr class=""><td class="l cri">Magma Dragon <span class="qt">2</span></td><td></td><td></td><td></td><td><span class="ok">✓</span></td><td></td><td></td><td></td><td><span class="pg">0/72</span></td><td class="l rs">Obsidian Mountains · <b>35 min</b></td></tr>
+<tr class=""><td class="l cri">Malformis <span class="qt">2</span></td><td><span class="pg">0/38</span></td><td></td><td></td><td><span class="pg">0/38</span></td><td></td><td></td><td></td><td></td><td class="l rs">Anchor Fort · <b>31 min</b></td></tr>
+<tr class=""><td class="l cri">Piranha <span class="qt">2</span></td><td></td><td></td><td></td><td></td><td></td><td><span class="pg">22/84</span></td><td></td><td><span class="pg">18/91</span></td><td class="l rs">Northern Shallows · <b>26 min</b></td></tr>
+<tr class=""><td class="l cri">Storm Elemental <span class="qt">2</span></td><td></td><td></td><td></td><td></td><td></td><td><span class="pg">0/48</span></td><td></td><td><span class="pg">0/52</span></td><td class="l rs">Cloud Island · <b>34 min</b></td></tr>
+<tr class="feito"><td class="l cri">Lightweaver <span class="qt">2</span></td><td></td><td></td><td></td><td><span class="ok">✓</span></td><td></td><td><span class="ok">✓</span></td><td></td><td></td><td class="l rs"><span class="ok">todos concluíram</span></td></tr>
+</tbody></table></div>
+<h3>Por membro</h3><p class="sem">(os mesmos cartões da proposta A)</p></div></section>
+
+<p class="recomendo"><b>Minha recomendação: A.</b> Cada cartão responde uma pergunta inteira (quem tem esta task, quanto falta e onde caçar), e funciona igual no celular. A tabela B é ótima para ver a correlação de relance, mas com muitos membros fica larga e no celular precisa rolar para o lado.</p>
+</div></body></html>

@@ -813,26 +813,60 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-abas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
 .gu-abas .unit-toggle { margin-left: 0; }
 .gu-abas .support-note { font-size: 13px; }
-.gu-sub { font: 700 15px var(--font-display); color: var(--title); margin-top: 4px; }
-.gu-comuns { display: flex; flex-direction: column; gap: 8px; }
-.gu-comum { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto; align-items: center; gap: 8px 16px; padding: 10px 14px; border-radius: var(--r-md); background: var(--card); }
-.gu-comum .cri { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-weight: 700; color: var(--amber); }
-.gu-comum .qt { padding: 1px 8px; border-radius: 999px; background: var(--band); color: var(--value); font: 700 12px var(--font-ui); }
-.gu-quem { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
-.gu-tk { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--box); font-size: 13px; color: var(--title); white-space: nowrap; }
-.gu-tk b { font-weight: 600; color: var(--label); font-variant-numeric: tabular-nums; }
-.gu-tk.feita { background: var(--band); }
-.gu-tk.feita b { color: var(--value); }
-.gu-tk .boost { padding: 0 5px; border-radius: 5px; background: var(--gold-wash); border: 1px solid var(--gold-edge); color: var(--amber); font: 700 10px var(--font-ui); }
-.gu-resp { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; color: var(--label); text-align: right; }
-.gu-resp button { padding: 3px 10px; border: 0; border-radius: 999px; background: var(--band); color: var(--value); font: 700 12px var(--font-ui); cursor: pointer; }
-.gu-resp .t { color: var(--value); font-weight: 600; }
-.gu-por { display: flex; flex-direction: column; }
-.gu-por > div { display: grid; grid-template-columns: minmax(0, 170px) minmax(0, 1fr); align-items: start; gap: 6px 14px; padding: 9px 0; border-bottom: 1px solid var(--edge); }
-.gu-por .quem { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
-.gu-por .quem small { font-size: 12px; color: var(--faint); }
-.gu-tk.comum { outline: 1px solid var(--gold-edge); }
-@media (max-width: 700px) { .gu-comum { grid-template-columns: 1fr; } .gu-resp { align-items: flex-start; text-align: left; } .gu-por > div { grid-template-columns: 1fr; } }
+.gu-sub { font: 700 15px var(--font-display); color: var(--title); margin-top: 4px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.gu-sub small { font: 500 12px var(--font-ui); color: var(--faint); }
+.gu-tasks { display: flex; flex-direction: column; gap: 12px; }
+.gu-cab { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 14px; }
+.gu-cab .unit-toggle { margin-left: 0; }
+/* cartões: as tasks em comum e os membros */
+.gu-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 12px; align-items: start; }
+.gu-cc, .gu-cm { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 12px 14px; border-radius: var(--r-md); background: var(--card); }
+.gu-cc header, .gu-cm header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.gu-cc h4 { font: 700 15px var(--font-ui); color: var(--amber); }
+.gu-cm header span { font-size: 12px; color: var(--faint); text-align: right; }
+.gu-cc ul, .gu-cm ul { margin: 0; padding: 0; list-style: none; }
+.gu-cc li, .gu-cm li { display: grid; grid-template-columns: minmax(0, 1fr) 64px 56px 40px; align-items: center; gap: 8px; padding: 3px 0; font-size: 14px; }
+.gu-cc li .quem { padding: 0; border: 0; background: none; font: 600 14px var(--font-ui); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.gu-cc li b, .gu-cm li b { text-align: right; color: var(--title); font-weight: 600; font-variant-numeric: tabular-nums; }
+.gu-cc li b.ok, .gu-cm li b.ok { color: var(--value); }
+.gu-cc li.f { opacity: 0.55; }
+.gu-bar { display: block; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; }
+.gu-bar em { display: block; height: 100%; border-radius: 999px; background: var(--amber); }
+.gu-cc li.f .gu-bar em { background: var(--value); }
+.gu-boost { justify-self: start; padding: 0 5px; border: 1px solid var(--gold-edge); border-radius: 5px; background: var(--gold-wash); color: var(--amber); font: 700 10px var(--font-ui); }
+.gu-qt { padding: 1px 8px; border-radius: 999px; background: var(--band); color: var(--value); font: 700 11px var(--font-ui); white-space: nowrap; }
+.gu-rod { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-top: 8px; border-top: 1px solid var(--edge); font-size: 12.5px; color: var(--label); }
+.gu-rod b { color: var(--title); }
+.gu-rod .tempo { color: var(--value); font-weight: 600; }
+.gu-rod button, .gu-cruz td.rs button { margin-left: auto; padding: 3px 10px; border: 0; border-radius: 999px; background: var(--band); color: var(--value); font: 700 12px var(--font-ui); cursor: pointer; }
+.gu-rod.ok { color: var(--value); font-weight: 600; }
+.gu-rod.nada { color: var(--faint); }
+.gu-cc.feito { opacity: 0.6; }
+.gu-cm .gu-n { font-size: 15px; }
+.gu-cm .tn { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gu-pt { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+.gu-feitas { font-size: 12px; color: var(--value); opacity: 0.85; }
+.gu-sem { font-size: 13px; color: var(--faint); }
+.gu-sem b { color: var(--label); font-weight: 600; }
+/* tabela cruzada: uma linha por criatura, uma coluna por membro */
+.gu-cruz { width: 100%; border-collapse: collapse; font-size: 13px; }
+.gu-cruz th { padding: 6px 8px; border-bottom: 1px solid var(--edge); font: 600 12px var(--font-ui); text-align: center; white-space: nowrap; }
+.gu-cruz td { padding: 7px 8px; border-bottom: 1px solid var(--edge); text-align: center; white-space: nowrap; color: var(--title); }
+.gu-cruz th.l, .gu-cruz td.l { text-align: left; }
+.gu-cruz td.cri { font-weight: 700; color: var(--amber); }
+.gu-cruz .pg { display: inline-block; padding: 1px 8px; border: 1px solid var(--gold-edge); border-radius: 999px; background: var(--gold-wash); font-size: 12px; }
+.gu-cruz .ok { color: var(--value); font-weight: 700; }
+.gu-cruz .nada { color: var(--faint); }
+.gu-cruz td.rs { color: var(--label); }
+.gu-cruz td.rs b { color: var(--value); }
+.gu-cruz td.rs button { margin-left: 8px; }
+.gu-cruz tr.feito { opacity: 0.55; }
+.gu-cruz tbody tr:hover { background: var(--card); }
+.gu-cruz th.v-k, .gu-cc .quem.v-k, .gu-cm .gu-n.v-k { color: var(--v-k); }
+.gu-cruz th.v-a, .gu-cc .quem.v-a, .gu-cm .gu-n.v-a { color: var(--v-a); }
+.gu-cruz th.v-m, .gu-cc .quem.v-m, .gu-cm .gu-n.v-m { color: var(--v-m); }
+.gu-cruz th.v-d, .gu-cc .quem.v-d, .gu-cm .gu-n.v-d { color: var(--v-d); }
+.gu-cruz th.v-x, .gu-cc .quem.v-x, .gu-cm .gu-n.v-x { color: var(--v-x); }
 @media (max-width: 980px) { .gu-numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .pers-busca input { flex: 1 1 240px; max-width: 360px; padding: 11px 14px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 15px var(--font-ui); }
 .pers-busca input:focus { outline: 2px solid var(--value); outline-offset: -1px; border-color: transparent; }
@@ -1851,6 +1885,16 @@ const I18N = {
     'gu.col.d30': 'XP 30 dias',
     'gu.col.login': 'Último login',
     'gu.online': 'online',
+    'gu.comumDesc': '{n} tasks que mais de um membro tem',
+    'gu.formato.cartoes': 'Cartões',
+    'gu.formato.tabela': 'Tabela',
+    'gu.col.task': 'Task',
+    'gu.col.resp': 'Melhor respawn',
+    'gu.respGrupo': '{k}/h em grupo de {n}',
+    'gu.todosEm': 'todos em {t}',
+    'gu.concluidas': '{a}/{b} concluídas',
+    'gu.semTasksLista': 'Sem tasks:',
+    'gu.semFichaLista': 'Fichas que não carregaram:',
     'gu.aba.membros': 'Membros ({n})',
     'gu.aba.diarias': 'Diárias',
     'gu.aba.semanais': 'Semanais',
@@ -1859,9 +1903,6 @@ const I18N = {
     'gu.semComum': 'Nenhuma task repetida entre os membros.',
     'gu.nMembros': '{n} membros',
     'gu.porMembro': 'Por membro',
-    'gu.semTask': 'sem tasks',
-    'gu.semFicha': 'ficha não carregou',
-    'gu.grupoTempo': '{r} · {k}/h em grupo de {n} · todos terminam em {t}',
     'gu.todosFeitos': 'todos concluíram',
     'gu.semResp': 'sem respawn no banco',
     'pers.vida': 'Vida',
@@ -2599,6 +2640,16 @@ const I18N = {
     'gu.col.d30': 'XP 30 days',
     'gu.col.login': 'Last login',
     'gu.online': 'online',
+    'gu.comumDesc': '{n} tasks more than one member has',
+    'gu.formato.cartoes': 'Cards',
+    'gu.formato.tabela': 'Table',
+    'gu.col.task': 'Task',
+    'gu.col.resp': 'Best respawn',
+    'gu.respGrupo': '{k}/h in a group of {n}',
+    'gu.todosEm': 'everyone in {t}',
+    'gu.concluidas': '{a}/{b} done',
+    'gu.semTasksLista': 'No tasks:',
+    'gu.semFichaLista': 'Sheets that did not load:',
     'gu.aba.membros': 'Members ({n})',
     'gu.aba.diarias': 'Daily',
     'gu.aba.semanais': 'Weekly',
@@ -2607,9 +2658,6 @@ const I18N = {
     'gu.semComum': 'No task is shared between members.',
     'gu.nMembros': '{n} members',
     'gu.porMembro': 'By member',
-    'gu.semTask': 'no tasks',
-    'gu.semFicha': 'sheet did not load',
-    'gu.grupoTempo': '{r} · {k}/h in a group of {n} · everyone done in {t}',
     'gu.todosFeitos': 'everyone is done',
     'gu.semResp': 'no respawn in the bank',
     'pers.vida': 'Health',
@@ -3347,6 +3395,16 @@ const I18N = {
     'gu.col.d30': 'XP 30 días',
     'gu.col.login': 'Último login',
     'gu.online': 'en línea',
+    'gu.comumDesc': '{n} tasks que tiene más de un miembro',
+    'gu.formato.cartoes': 'Tarjetas',
+    'gu.formato.tabela': 'Tabla',
+    'gu.col.task': 'Task',
+    'gu.col.resp': 'Mejor respawn',
+    'gu.respGrupo': '{k}/h en grupo de {n}',
+    'gu.todosEm': 'todos en {t}',
+    'gu.concluidas': '{a}/{b} completadas',
+    'gu.semTasksLista': 'Sin tasks:',
+    'gu.semFichaLista': 'Fichas que no cargaron:',
     'gu.aba.membros': 'Miembros ({n})',
     'gu.aba.diarias': 'Diarias',
     'gu.aba.semanais': 'Semanales',
@@ -3355,9 +3413,6 @@ const I18N = {
     'gu.semComum': 'Ninguna task se repite entre los miembros.',
     'gu.nMembros': '{n} miembros',
     'gu.porMembro': 'Por miembro',
-    'gu.semTask': 'sin tasks',
-    'gu.semFicha': 'la ficha no cargó',
-    'gu.grupoTempo': '{r} · {k}/h en grupo de {n} · todos terminan en {t}',
     'gu.todosFeitos': 'todos completaron',
     'gu.semResp': 'sin respawn en el banco',
     'pers.vida': 'Vida',
@@ -4095,6 +4150,16 @@ const I18N = {
     'gu.col.d30': 'XP 30 dni',
     'gu.col.login': 'Ostatnie logowanie',
     'gu.online': 'online',
+    'gu.comumDesc': '{n} tasków, które ma więcej niż jeden członek',
+    'gu.formato.cartoes': 'Karty',
+    'gu.formato.tabela': 'Tabela',
+    'gu.col.task': 'Task',
+    'gu.col.resp': 'Najlepszy respawn',
+    'gu.respGrupo': '{k}/h w grupie {n}',
+    'gu.todosEm': 'wszyscy w {t}',
+    'gu.concluidas': '{a}/{b} ukończone',
+    'gu.semTasksLista': 'Bez tasków:',
+    'gu.semFichaLista': 'Niewczytane postacie:',
     'gu.aba.membros': 'Członkowie ({n})',
     'gu.aba.diarias': 'Dzienne',
     'gu.aba.semanais': 'Tygodniowe',
@@ -4103,9 +4168,6 @@ const I18N = {
     'gu.semComum': 'Żaden task nie powtarza się między członkami.',
     'gu.nMembros': '{n} członków',
     'gu.porMembro': 'Według członka',
-    'gu.semTask': 'brak tasków',
-    'gu.semFicha': 'nie wczytano',
-    'gu.grupoTempo': '{r} · {k}/h w grupie {n} · wszyscy skończą w {t}',
     'gu.todosFeitos': 'wszyscy ukończyli',
     'gu.semResp': 'brak respawnu w banku',
     'pers.vida': 'Życie',
@@ -5926,7 +5988,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5, guMundo: 'pendulum' }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5, guMundo: 'pendulum', guFormato: 'cartoes' }, lsGet(LS_UI, {}));
 // Bônus de XP: minutos de XP Boost da loja, golden premium (+5% no boost) e outros bônus em %, para a hunt inteira
 const XPB_MINS = [0, 30, 60, 90, 120, 180];
 {
@@ -10934,56 +10996,80 @@ async function guCarregar(nome, recarga) {
   } catch (e) { guStatus('err', tr(e.message === '429' ? 'pers.limite' : 'pers.erro')); }
   renderGuilda();
 }
-// Tasks do Huntsman de todos (tipo: 'daily' ou 'weekly'): primeiro as que se repetem entre os membros, com o melhor
-// respawn para um grupo desse tamanho e o tempo para todos terminarem; depois as de cada membro.
+// Tasks do Huntsman de todos (tipo: 'daily' ou 'weekly'). Primeiro as que se repetem entre os membros: em cartões
+// (padrão) ou numa tabela cruzada (criatura × membro), com o melhor respawn para um grupo desse tamanho e o tempo para
+// todos terminarem. Depois um cartão por membro, com as pendentes primeiro e as concluídas numa linha no fim.
 function guTasks(tipo, M) {
+  const ficha = m => { const f = gu.fichas.get(m.nome); return f && f !== 'erro' ? f : null; };
+  const dele = m => { const f = ficha(m); return (f && f.huntsman && f.huntsman[tipo] && f.huntsman[tipo].tasks) || []; };
+  const estado = t => { const req = t.required || 0, prog = Math.min(req, t.progress || 0); return { req, prog, feita: !!t.completed || (req > 0 && prog >= req) }; };
   const porCriatura = new Map();
-  for (const m of M) {
-    const f = gu.fichas.get(m.nome);
-    const tarefas = f && f !== 'erro' && f.huntsman && f.huntsman[tipo] ? f.huntsman[tipo].tasks || [] : [];
-    for (const t of tarefas) {
-      const k = slug(t.name || '');
-      if (!k) continue;
-      if (!porCriatura.has(k)) porCriatura.set(k, { nome: t.name, quem: [] });
-      porCriatura.get(k).quem.push({ m, t });
-    }
+  for (const m of M) for (const t of dele(m)) {
+    const k = slug(t.name || '');
+    if (!k) continue;
+    if (!porCriatura.has(k)) porCriatura.set(k, { nome: t.name, quem: [] });
+    porCriatura.get(k).quem.push({ m, t, e: estado(t) });
   }
-  const temTasks = m => { const f = gu.fichas.get(m.nome); return f && f !== 'erro' && f.huntsman && f.huntsman[tipo] && (f.huntsman[tipo].tasks || []).length ? 1 : 0; };
-  const comuns = [...porCriatura.values()].filter(c => c.quem.length > 1).sort((a, b) => b.quem.length - a.quem.length || a.nome.localeCompare(b.nome));
+  // pendentes primeiro (mais membros antes); as que todos já concluíram vão para o fim
+  const comuns = [...porCriatura.values()].filter(c => c.quem.length > 1)
+    .map(c => ({ ...c, todas: c.quem.every(q => q.e.feita), falta: Math.max(0, ...c.quem.map(q => q.e.req - q.e.prog)) }))
+    .sort((a, b) => a.todas - b.todas || b.quem.length - a.quem.length || a.nome.localeCompare(b.nome));
   const emComum = new Set(comuns.map(c => slug(c.nome)));
-  const chip = (rot, t, marca) => {
-    const req = t.required || 0, prog = Math.min(req, t.progress || 0), feita = t.completed || (req && prog >= req);
-    return el('span', { class: 'gu-tk' + (feita ? ' feita' : '') + (marca ? ' comum' : '') }, rot, t.boost ? el('span', { class: 'boost', text: '+' + t.boost + '%' }) : null,
-      el('b', { text: feita ? '✓' : fmtInt(prog) + '/' + fmtInt(req) }));
+  const melhor = c => { const n = Math.min(4, c.quem.length); return persMelhor(c.nome, ui.pct, (PARTIES.find(p => p.n === n) || PARTIES[0]).mult); };
+  const barra = e => el('i', { class: 'gu-bar' }, el('em', { style: 'width:' + (e.req ? Math.round(100 * e.prog / e.req) : 0) + '%' }));
+  const num = e => el('b', { class: e.feita ? 'ok' : null, text: e.feita ? '✓' : fmtInt(e.prog) + '/' + fmtInt(e.req) });
+  const bonus = t => t.boost ? el('span', { class: 'gu-boost', text: '+' + t.boost + '%' }) : el('span');
+  const abrir = b => el('button', { type: 'button', text: tr('pers.abrir'), onclick: () => { select(b.r.id); goTo('timer'); } });
+  const vocDe = m => 'v-' + (guVoc(m.vocacao) || 'x');
+  // cartão de uma task em comum
+  const cartao = c => {
+    const b = c.todas ? null : melhor(c);
+    return el('article', { class: 'gu-cc' + (c.todas ? ' feito' : '') },
+      el('header', null, el('h4', { text: c.nome }), el('span', { class: 'gu-qt', text: tr('gu.nMembros', { n: c.quem.length }) })),
+      el('ul', null, c.quem.slice().sort((x, y) => x.e.feita - y.e.feita).map(({ m, t, e }) => el('li', { class: e.feita ? 'f' : null },
+        el('button', { class: 'quem ' + vocDe(m), type: 'button', text: m.nome, onclick: () => goTo('personagem/' + encodeURIComponent(m.nome)) }), barra(e), num(e), bonus(t)))),
+      c.todas ? el('div', { class: 'gu-rod ok', text: tr('gu.todosFeitos') })
+        : b ? el('div', { class: 'gu-rod' }, el('span', null, el('b', { text: b.r.name }), ' · ' + tr('gu.respGrupo', { k: Math.round(b.kph), n: c.quem.length })),
+          el('span', { class: 'tempo', text: tr('gu.todosEm', { t: persTempo(c.falta / b.kph) }) }), abrir(b))
+        : el('div', { class: 'gu-rod nada', text: tr('gu.semResp') }));
   };
-  const linhaComum = c => {
-    const falta = Math.max(0, ...c.quem.map(({ t }) => (t.required || 0) - Math.min(t.required || 0, t.progress || 0)));
-    const n = Math.min(4, c.quem.length), party = (PARTIES.find(p => p.n === n) || PARTIES[0]).mult;
-    const b = persMelhor(c.nome, ui.pct, party);
-    return el('div', { class: 'gu-comum' },
-      el('span', { class: 'cri' }, c.nome, el('span', { class: 'qt', text: tr('gu.nMembros', { n: c.quem.length }) })),
-      el('div', { class: 'gu-quem' }, c.quem.map(({ m, t }) => chip(m.nome, t))),
-      el('div', { class: 'gu-resp' },
-        !falta ? el('span', { class: 't', text: tr('gu.todosFeitos') })
-          : b ? [el('span', { text: tr('gu.grupoTempo', { r: b.r.name, k: Math.round(b.kph), n: c.quem.length, t: persTempo(falta / b.kph) }) }),
-            el('button', { type: 'button', text: tr('pers.abrir'), onclick: () => { select(b.r.id); goTo('timer'); } })]
-          : el('span', { class: 'none', text: tr('gu.semResp') })));
+  // a mesma informação numa tabela: uma linha por criatura, uma coluna por membro que tem alguma task em comum
+  const tabela = () => {
+    const colunas = M.filter(m => dele(m).some(t => emComum.has(slug(t.name || ''))));
+    return el('div', { class: 'creatures-wrap' }, el('table', { class: 'gu-cruz' },
+      el('thead', null, el('tr', null, el('th', { class: 'l', scope: 'col', text: tr('gu.col.task') }),
+        colunas.map(m => el('th', { scope: 'col', class: vocDe(m), text: m.nome })), el('th', { class: 'l', scope: 'col', text: tr('gu.col.resp') }))),
+      el('tbody', null, comuns.map(c => {
+        const b = c.todas ? null : melhor(c);
+        return el('tr', { class: c.todas ? 'feito' : null },
+          el('td', { class: 'l cri' }, c.nome, ' ', el('span', { class: 'gu-qt', text: String(c.quem.length) })),
+          colunas.map(m => { const q = c.quem.find(x => x.m === m); return el('td', null, !q ? null : q.e.feita ? el('span', { class: 'ok', text: '✓' }) : el('span', { class: 'pg', text: fmtInt(q.e.prog) + '/' + fmtInt(q.e.req) })); }),
+          el('td', { class: 'l rs' }, c.todas ? el('span', { class: 'ok', text: tr('gu.todosFeitos') })
+            : b ? [b.r.name + ' · ', el('b', { text: persTempo(c.falta / b.kph) }), ' ', abrir(b)] : el('span', { class: 'nada', text: tr('gu.semResp') })));
+      }))));
   };
+  // cartão de um membro: as pendentes com barra; as concluídas numa linha verde; o ponto dourado marca a task em comum
+  const membro = m => {
+    const h = ficha(m).huntsman[tipo], lista = dele(m).map(t => ({ t, e: estado(t) }));
+    const pend = lista.filter(x => !x.e.feita), feitas = lista.filter(x => x.e.feita);
+    return el('article', { class: 'gu-cm' },
+      el('header', null, el('button', { class: 'gu-n ' + vocDe(m), type: 'button', text: m.nome, onclick: () => goTo('personagem/' + encodeURIComponent(m.nome)) }),
+        el('span', { text: (h.difficulty && h.difficulty.name ? h.difficulty.name + ' · ' : '') + tr('gu.concluidas', { a: feitas.length, b: lista.length }) })),
+      pend.length ? el('ul', null, pend.map(({ t, e }) => el('li', null,
+        el('span', { class: 'tn' }, emComum.has(slug(t.name || '')) ? el('span', { class: 'gu-pt', title: tr('gu.comum') }) : null, t.name), barra(e), num(e), bonus(t)))) : null,
+      feitas.length ? el('p', { class: 'gu-feitas', text: '✓ ' + feitas.map(x => x.t.name).join(' · ') }) : null);
+  };
+  const comTasks = M.filter(m => dele(m).length), semTasks = M.filter(m => ficha(m) && !dele(m).length), semFicha = M.filter(m => gu.fichas.get(m.nome) === 'erro');
+  const formato = ui.guFormato === 'tabela' ? 'tabela' : 'cartoes';
+  const botao = (id, rot) => el('button', { type: 'button', text: rot, 'aria-pressed': String(formato === id), onclick: () => { ui.guFormato = id; saveUi(); renderGuilda(); } });
   return el('div', { class: 'gu-tasks' },
-    el('h3', { class: 'gu-sub', text: tr('gu.comum') }),
-    comuns.length ? el('div', { class: 'gu-comuns' }, comuns.map(linhaComum)) : el('p', { class: 'support-note', text: tr('gu.semComum') }),
+    el('div', { class: 'gu-cab' }, el('h3', { class: 'gu-sub' }, tr('gu.comum'), comuns.length ? el('small', { text: tr('gu.comumDesc', { n: comuns.length }) }) : null),
+      comuns.length ? el('span', { class: 'unit-toggle' }, botao('cartoes', tr('gu.formato.cartoes')), botao('tabela', tr('gu.formato.tabela'))) : null),
+    !comuns.length ? el('p', { class: 'support-note', text: tr('gu.semComum') }) : formato === 'tabela' ? tabela() : el('div', { class: 'gu-grade' }, comuns.map(cartao)),
     el('h3', { class: 'gu-sub', text: tr('gu.porMembro') }),
-    // quem tem tasks primeiro; sem tasks (ou sem ficha) no fim
-    el('div', { class: 'gu-por' }, M.slice().sort((a, b) => temTasks(b) - temTasks(a)).map(m => {
-      const f = gu.fichas.get(m.nome);
-      const h = f && f !== 'erro' && f.huntsman && f.huntsman[tipo];
-      const tarefas = h ? h.tasks || [] : [];
-      return el('div', null,
-        el('div', { class: 'quem' }, el('button', { class: 'gu-n', type: 'button', text: m.nome, onclick: () => goTo('personagem/' + encodeURIComponent(m.nome)) }),
-          h && h.difficulty && h.difficulty.name ? el('small', { text: h.difficulty.name }) : null),
-        el('div', { class: 'gu-quem' }, !f ? el('span', { class: 'none', text: '…' }) : f === 'erro' ? el('span', { class: 'none', text: tr('gu.semFicha') })
-          : tarefas.length ? tarefas.map(t => chip(t.name, t, emComum.has(slug(t.name || '')))) : el('span', { class: 'none', text: tr('gu.semTask') })));
-    })));
+    comTasks.length ? el('div', { class: 'gu-grade' }, comTasks.map(membro)) : null,
+    semTasks.length ? el('p', { class: 'gu-sem' }, tr('gu.semTasksLista') + ' ', el('b', { text: semTasks.map(m => m.nome).join(', ') })) : null,
+    semFicha.length ? el('p', { class: 'gu-sem' }, tr('gu.semFichaLista') + ' ', el('b', { text: semFicha.map(m => m.nome).join(', ') })) : null);
 }
 function renderGuilda() {
   const g = $('#gu-grade');
