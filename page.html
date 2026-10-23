@@ -938,6 +938,60 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .rk-pod .extra b { color: var(--label); font-weight: 600; }
 @media (max-width: 760px) { .rk-tab-tk .opc { display: none; } .rk-tab-tk th, .rk-tab-tk td { padding: 6px 4px; font-size: 13px; } .rk-tab-tk th.c, .rk-tab-tk td.c { width: 28px; } .rk-tab-tk th { white-space: normal; } .rk-tk i { display: none; } }
 @media (max-width: 760px) { .rk-podio { grid-template-columns: 1fr; } .rk-pod.p1 { order: -1; } .rk-busca { margin-left: 0; } .rk-achar input { width: 100%; } .rk-busca, .rk-achar { width: 100%; } }
+/* Mudanças: abas, resumo, tabelas e o histórico de nomes (também na ficha do personagem) */
+#page-mudancas { --v-k: #ff7468; --v-a: #3ae374; --v-m: #a970ff; --v-d: #3cc6f0; --v-x: #8b9894; }
+.mu-abas { display: flex; flex-wrap: wrap; gap: 6px; }
+.mu-abas button { display: inline-flex; align-items: baseline; gap: 8px; padding: 9px 16px; border: 0; border-radius: 999px; background: var(--card); color: var(--label); font: 700 14px var(--font-ui); cursor: pointer; }
+.mu-abas button small { color: var(--faint); font-weight: 500; font-size: 12px; }
+.mu-abas button[aria-pressed="true"] { background: var(--amber); color: var(--gold-ink); }
+.mu-abas button[aria-pressed="true"] small { color: var(--gold-ink); opacity: 0.75; }
+.mu-resumo { display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--faint); font-size: 13px; }
+.mu-resumo b { color: var(--title); font-size: 15px; }
+.mu-tab td.mu-data { color: var(--faint); font-weight: 500; text-align: left; }
+.mu-troca { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.mu-troca s { color: var(--faint); }
+.mu-seta { color: var(--faint); }
+.mu-dp .mu-seta { margin: 0 6px; }
+.mu-mundo { display: inline-block; padding: 1px 9px; border-radius: 999px; background: var(--card); color: var(--label); font: 600 12px var(--font-ui); }
+.mu-mundo.novo { background: var(--band); color: var(--value); }
+.mu-motivo { color: var(--title); }
+.mu-motivo.grave, .mu-prazo.perm { color: var(--v-k); }
+.mu-prazo { color: var(--faint); }
+.mu-prazo.perm { font-weight: 600; }
+.mu-ret { align-self: center; padding: 0 4px; color: var(--faint); }
+.mu-cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.mu-cab > span { color: var(--faint); font-size: 13px; }
+.mu-cadeia { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; }
+.mu-cadeia > .mu-seta { align-self: center; }
+.mu-elo { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 10px 14px; border: 0; border-radius: 12px; background: var(--card); color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.mu-elo b { color: var(--label); font-weight: 700; }
+.mu-elo small { color: var(--faint); font-size: 12px; }
+.mu-elo.achado { background: var(--gold-wash); box-shadow: inset 0 0 0 1px var(--gold-edge); }
+.mu-elo.achado b { color: var(--amber); }
+.mu-elo.atual { background: var(--band); }
+.mu-elo.atual b { color: var(--value); }
+.mu-tempo { display: flex; flex-direction: column; margin: 0; padding: 4px 0 4px 2px; list-style: none; }
+.mu-tempo li { position: relative; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: baseline; gap: 10px; padding: 6px 0; }
+.mu-tempo li::before { content: ""; position: absolute; left: 5px; top: 18px; bottom: -8px; width: 2px; background: var(--edge); }
+.mu-tempo li:last-child::before { display: none; }
+.mu-tempo .pt { width: 12px; height: 12px; border-radius: 50%; background: var(--card); box-shadow: inset 0 0 0 2px var(--faint); transform: translateY(2px); }
+.mu-tempo .atual .pt { background: var(--value); box-shadow: none; }
+.mu-tempo .nm { color: var(--label); font-weight: 600; overflow-wrap: anywhere; }
+.mu-tempo .atual .nm { color: var(--title); font-weight: 800; }
+.mu-tempo .nm.achado { color: var(--amber); }
+.mu-tempo .nm button { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; text-decoration-color: rgba(139, 152, 148, 0.5); text-underline-offset: 3px; cursor: pointer; }
+.mu-tempo .dt { color: var(--faint); font-size: 12px; white-space: nowrap; }
+.mu-caixa { padding: 12px 14px; border: 1px solid var(--edge); border-radius: 14px; background: var(--card); }
+.mu-caixa h3 { margin: 0 0 6px; color: var(--faint); font: 700 13px var(--font-ui); }
+.pers-aka { align-self: flex-start; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; padding: 0; border: 0; background: none; color: var(--faint); font: 500 13px var(--font-ui); text-align: left; cursor: pointer; }
+.pers-aka b { color: var(--label); font-weight: 600; }
+.pers-aka i { color: var(--amber); font-style: normal; }
+.mu-aviso { grid-column: 1 / -1; border: 1px solid var(--gold-edge); background: var(--gold-wash); color: var(--title); font-size: 15px; }
+.mu-aviso .grande { font: 800 22px var(--font-display); }
+.mu-aviso .grande b { color: var(--amber); }
+.mu-aviso .mu-tempo { max-width: 460px; }
+.mu-aviso .ir { align-self: flex-start; padding: 9px 18px; border: 0; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 800 14px var(--font-ui); cursor: pointer; }
+@media (max-width: 760px) { .mu-tab .opc { display: none; } .mu-tab th, .mu-tab td { padding: 6px 4px; font-size: 13px; } .mu-tab td.mu-data, .mu-tab td.mu-dp { white-space: normal; } .mu-cadeia { flex-direction: column; } .mu-cadeia > .mu-seta { transform: rotate(90deg); } }
 .pers-busca input { flex: 1 1 240px; max-width: 360px; padding: 11px 14px; border: 1px solid var(--edge); border-radius: var(--r-sm); background: var(--card); color: var(--title); font: 500 15px var(--font-ui); }
 .pers-busca input:focus { outline: 2px solid var(--value); outline-offset: -1px; border-color: transparent; }
 .pers-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
@@ -1391,6 +1445,10 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
     </div>
     <p class="status" id="gu-status" role="status" hidden></p>
     <div class="pers-grade" id="gu-grade"></div>
+  </section>
+
+  <section class="page" id="page-mudancas" hidden>
+    <div class="rk-quadro"><div class="rk-grade" id="mu-grade"></div></div>
   </section>
 
   <section class="page" id="page-rankings" hidden>
@@ -2013,6 +2071,42 @@ const I18N = {
     'rk.tkm.pontos': 'pontos de Huntsman',
     'rk.tkm.concluidas': 'tasks concluídas',
     'rk.tkm.abates': 'abates em tasks',
+    'mu.aba.nomes': 'Trocas de nome',
+    'mu.aba.transferencias': 'Transferências',
+    'mu.aba.banimentos': 'Banimentos',
+    'mu.todos': 'Todos',
+    'mu.para': 'Para o mundo',
+    'mu.tipo': 'Tipo',
+    'mu.tipo.all': 'Todos',
+    'mu.tipo.perm': 'Permanentes',
+    'mu.tipo.temp': 'Temporários',
+    'mu.procurar': 'Procurar',
+    'mu.carregando': 'Carregando…',
+    'mu.d7': 'nos últimos 7 dias',
+    'mu.d30': 'nos últimos 30 dias',
+    'mu.maisProcurado': 'Mais procurado no mês:',
+    'mu.maisBans': 'Mundo com mais bans no mês:',
+    'mu.col.data': 'Data',
+    'mu.col.troca': 'Nome antigo → nome novo',
+    'mu.col.dePara': 'De → para',
+    'mu.col.motivo': 'Motivo',
+    'mu.col.prazo': 'Prazo',
+    'mu.grave': 'Infração grave',
+    'mu.leve': 'Infração leve',
+    'mu.perm': 'permanente',
+    'mu.ate': 'até {d}',
+    'mu.desde': 'desde {d}',
+    'mu.periodo': '{a} a {b}',
+    'mu.atualDesde': 'atual, desde {d}',
+    'mu.vazio': 'Nada encontrado.',
+    'mu.hist': 'Histórico de nomes',
+    'mu.histInfo': '{n} nomes desde {d}',
+    'pers.jaSeChamou': 'Já se chamou',
+    'pers.eMais': 'e mais {n}',
+    'pers.nomesDeste': 'Nomes deste personagem',
+    'pers.agoraSeChama': '{x} agora se chama',
+    'pers.deixou': 'Este nome deixou de existir em {d}. O personagem já teve {n} nomes.',
+    'pers.abrir': 'Abrir {x}',
     'pers.tag.shared': 'compartilhada',
     'pers.tag.locked': 'travada',
     'pers.tag.naoEscolhida': 'não escolhida',
@@ -2823,6 +2917,42 @@ const I18N = {
     'rk.tkm.pontos': 'Huntsman points',
     'rk.tkm.concluidas': 'completed tasks',
     'rk.tkm.abates': 'task kills',
+    'mu.aba.nomes': 'Name changes',
+    'mu.aba.transferencias': 'Transfers',
+    'mu.aba.banimentos': 'Bans',
+    'mu.todos': 'All',
+    'mu.para': 'To world',
+    'mu.tipo': 'Type',
+    'mu.tipo.all': 'All',
+    'mu.tipo.perm': 'Permanent',
+    'mu.tipo.temp': 'Temporary',
+    'mu.procurar': 'Search',
+    'mu.carregando': 'Loading…',
+    'mu.d7': 'in the last 7 days',
+    'mu.d30': 'in the last 30 days',
+    'mu.maisProcurado': 'Most joined this month:',
+    'mu.maisBans': 'World with most bans this month:',
+    'mu.col.data': 'Date',
+    'mu.col.troca': 'Old name → new name',
+    'mu.col.dePara': 'From → to',
+    'mu.col.motivo': 'Reason',
+    'mu.col.prazo': 'Until',
+    'mu.grave': 'Major rule violation',
+    'mu.leve': 'Minor rule violation',
+    'mu.perm': 'permanent',
+    'mu.ate': 'until {d}',
+    'mu.desde': 'since {d}',
+    'mu.periodo': '{a} to {b}',
+    'mu.atualDesde': 'current, since {d}',
+    'mu.vazio': 'Nothing found.',
+    'mu.hist': 'Name history',
+    'mu.histInfo': '{n} names since {d}',
+    'pers.jaSeChamou': 'Formerly',
+    'pers.eMais': 'and {n} more',
+    'pers.nomesDeste': 'Names of this character',
+    'pers.agoraSeChama': '{x} is now called',
+    'pers.deixou': 'This name stopped existing on {d}. The character has had {n} names.',
+    'pers.abrir': 'Open {x}',
     'pers.tag.shared': 'shared',
     'pers.tag.locked': 'locked',
     'pers.tag.naoEscolhida': 'not chosen',
@@ -3633,6 +3763,42 @@ const I18N = {
     'rk.tkm.pontos': 'puntos de Huntsman',
     'rk.tkm.concluidas': 'tasks completadas',
     'rk.tkm.abates': 'muertes en tasks',
+    'mu.aba.nomes': 'Cambios de nombre',
+    'mu.aba.transferencias': 'Transferencias',
+    'mu.aba.banimentos': 'Baneos',
+    'mu.todos': 'Todos',
+    'mu.para': 'Al mundo',
+    'mu.tipo': 'Tipo',
+    'mu.tipo.all': 'Todos',
+    'mu.tipo.perm': 'Permanentes',
+    'mu.tipo.temp': 'Temporales',
+    'mu.procurar': 'Buscar',
+    'mu.carregando': 'Cargando…',
+    'mu.d7': 'en los últimos 7 días',
+    'mu.d30': 'en los últimos 30 días',
+    'mu.maisProcurado': 'Más elegido del mes:',
+    'mu.maisBans': 'Mundo con más baneos del mes:',
+    'mu.col.data': 'Fecha',
+    'mu.col.troca': 'Nombre antiguo → nombre nuevo',
+    'mu.col.dePara': 'De → a',
+    'mu.col.motivo': 'Motivo',
+    'mu.col.prazo': 'Plazo',
+    'mu.grave': 'Infracción grave',
+    'mu.leve': 'Infracción leve',
+    'mu.perm': 'permanente',
+    'mu.ate': 'hasta {d}',
+    'mu.desde': 'desde {d}',
+    'mu.periodo': '{a} a {b}',
+    'mu.atualDesde': 'actual, desde {d}',
+    'mu.vazio': 'No se encontró nada.',
+    'mu.hist': 'Historial de nombres',
+    'mu.histInfo': '{n} nombres desde {d}',
+    'pers.jaSeChamou': 'Antes se llamaba',
+    'pers.eMais': 'y {n} más',
+    'pers.nomesDeste': 'Nombres de este personaje',
+    'pers.agoraSeChama': '{x} ahora se llama',
+    'pers.deixou': 'Este nombre dejó de existir el {d}. El personaje ya tuvo {n} nombres.',
+    'pers.abrir': 'Abrir {x}',
     'pers.tag.shared': 'compartida',
     'pers.tag.locked': 'bloqueada',
     'pers.tag.naoEscolhida': 'no elegida',
@@ -4443,6 +4609,42 @@ const I18N = {
     'rk.tkm.pontos': 'punkty Huntsmana',
     'rk.tkm.concluidas': 'ukończone taski',
     'rk.tkm.abates': 'zabicia w taskach',
+    'mu.aba.nomes': 'Zmiany nazw',
+    'mu.aba.transferencias': 'Transfery',
+    'mu.aba.banimentos': 'Bany',
+    'mu.todos': 'Wszystkie',
+    'mu.para': 'Na świat',
+    'mu.tipo': 'Typ',
+    'mu.tipo.all': 'Wszystkie',
+    'mu.tipo.perm': 'Stałe',
+    'mu.tipo.temp': 'Czasowe',
+    'mu.procurar': 'Szukaj',
+    'mu.carregando': 'Wczytuję…',
+    'mu.d7': 'w ostatnich 7 dniach',
+    'mu.d30': 'w ostatnich 30 dniach',
+    'mu.maisProcurado': 'Najczęściej wybierany w miesiącu:',
+    'mu.maisBans': 'Świat z największą liczbą banów w miesiącu:',
+    'mu.col.data': 'Data',
+    'mu.col.troca': 'Stara nazwa → nowa nazwa',
+    'mu.col.dePara': 'Z → do',
+    'mu.col.motivo': 'Powód',
+    'mu.col.prazo': 'Do kiedy',
+    'mu.grave': 'Poważne naruszenie zasad',
+    'mu.leve': 'Drobne naruszenie zasad',
+    'mu.perm': 'na stałe',
+    'mu.ate': 'do {d}',
+    'mu.desde': 'od {d}',
+    'mu.periodo': '{a} – {b}',
+    'mu.atualDesde': 'obecna, od {d}',
+    'mu.vazio': 'Nic nie znaleziono.',
+    'mu.hist': 'Historia nazw',
+    'mu.histInfo': '{n} nazw od {d}',
+    'pers.jaSeChamou': 'Wcześniej',
+    'pers.eMais': 'i {n} więcej',
+    'pers.nomesDeste': 'Nazwy tej postaci',
+    'pers.agoraSeChama': '{x} nazywa się teraz',
+    'pers.deixou': 'Ta nazwa przestała istnieć {d}. Postać miała już {n} nazw.',
+    'pers.abrir': 'Otwórz {x}',
     'pers.tag.shared': 'wspólne',
     'pers.tag.locked': 'zablokowane',
     'pers.tag.naoEscolhida': 'niewybrane',
@@ -6287,7 +6489,7 @@ function initCloud() {
 }
 
 /* ---------- Estado da tela ---------- */
-const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5, guMundo: 'pendulum', guFormato: 'cartoes', rkMundo: 'pendulum', rkSkill: 'level', rkVoc: 'all', rkPeriodo: 1, rkOrdem: 'pontos' }, lsGet(LS_UI, {}));
+const ui = Object.assign({ id: null, pct: 10, party: 100, dur: 60, unit: 's', lang: null, tone: 'sino', loop: false, sound: true, volume: 60, tasks: {}, laps: {}, pause: 0, recent: [], raffleNames: '', disc: {}, duo: false, id2: null, pct2: null, raffleMode: 'names', room: null, rollName: '', huntExtra: {}, floatHide: {}, voice: false, bankTab: 'respawns', qty: {}, xpb: {}, meuPers: '', persSp: {}, persPorPag: 5, guMundo: 'pendulum', guFormato: 'cartoes', rkMundo: 'pendulum', rkSkill: 'level', rkVoc: 'all', rkPeriodo: 1, rkOrdem: 'pontos', muMundo: 'all', muVoc: 'all', muPara: 'all', muTipo: 'all' }, lsGet(LS_UI, {}));
 // Bônus de XP: minutos de XP Boost da loja, golden premium (+5% no boost) e outros bônus em %, para a hunt inteira
 const XPB_MINS = [0, 30, 60, 90, 120, 180];
 {
@@ -6477,6 +6679,7 @@ function setLang(lang) {
   if (pageNow === 'personagem') renderPersonagem();
   if (pageNow === 'guilda') renderGuilda();
   if (pageNow === 'rankings') renderRankings();
+  if (pageNow === 'mudancas') renderMudancas();
   voiceLang();
   if (pageNow === 'creatures') renderCreatures();
   if (pageNow === 'hunt') renderHunt();
@@ -10817,10 +11020,26 @@ async function persCarregar(nome) {
     const r = await fetch(API_MEDIVIA + 'player/' + encodeURIComponent(nome));
     if (r.status === 404) { pers.dados = null; persStatus('err', tr('pers.naoAchei', { x: nome })); renderPersonagem(); return; }
     if (!r.ok) throw new Error(String(r.status));
-    pers.dados = (await r.json()).player;
-    // o histórico vem depois da ficha: abrir a ficha é o que faz o Worker passar a acompanhar o personagem
-    const h = await fetch(API_MEDIVIA + 'historico/' + encodeURIComponent(pers.dados.name)).catch(() => null);
+    const j = await r.json();
+    pers.verNomes = false;
+    if (!j || !j.player) {
+      // o nome não existe: se trocou de nome, o histórico de nomes diz como ele se chama agora
+      pers.dados = null;
+      const c = await fetch(API_MEDIVIA + 'nomes/' + encodeURIComponent(nome)).then(x => x.ok ? x.json() : null).catch(() => null);
+      const tc = (c && c.trocas) || [];
+      pers.antigo = tc.length && slug(tc[tc.length - 1].novo) !== slug(nome) ? { nome, trocas: tc } : null;
+      persStatus(pers.antigo ? '' : 'err', pers.antigo ? '' : tr('pers.naoAchei', { x: nome }));
+      renderPersonagem();
+      return;
+    }
+    pers.dados = j.player; pers.antigo = null;
+    // o histórico vem depois da ficha: abrir a ficha é o que faz o Worker passar a acompanhar o personagem; junto, os
+    // nomes anteriores (só se a cadeia termina no nome de agora)
+    const [h, nm] = await Promise.all([fetch(API_MEDIVIA + 'historico/' + encodeURIComponent(pers.dados.name)).catch(() => null),
+      fetch(API_MEDIVIA + 'nomes/' + encodeURIComponent(pers.dados.name)).catch(() => null)]);
     pers.hist = h && h.ok ? await h.json() : null;
+    const nj = nm && nm.ok ? await nm.json().catch(() => null) : null, nt = (nj && nj.trocas) || [];
+    pers.nomes = nt.length && slug(nt[nt.length - 1].novo) === slug(pers.dados.name) ? nt : null;
     persStatus('', '');
     if (pageNow === 'personagem') { try { history.replaceState(null, '', location.pathname + location.search + '#character/' + encodeURIComponent(pers.dados.name)); } catch { /* o endereço fica como está */ } }
   } catch (e) { persStatus('err', tr(e.message === '429' ? 'pers.limite' : 'pers.erro')); }
@@ -11005,11 +11224,29 @@ function persOnline(onl, hojeBr, loc) {
         el('td', { text: d === hojeBr ? tr('pers.hoje') : persData(d, loc) }),
         el('td', null, el('span', { class: 'pers-hbar' }, el('i', { style: 'width:' + Math.min(100, Math.round(100 * (onl.get(d) || 0) / 86400)) + '%' })), hm(onl.get(d))))))))];
 }
+// "Já se chamou …": uma linha discreta abaixo do nome que abre a lista de todos os nomes do personagem
+function persAka(loc) {
+  if (!pers.nomes) return null;
+  const antes = muNomes(pers.nomes).slice(1);
+  return [el('button', { type: 'button', class: 'pers-aka', 'aria-expanded': String(!!pers.verNomes), onclick: () => { pers.verNomes = !pers.verNomes; renderPersonagem(); } },
+    tr('pers.jaSeChamou'), el('b', { text: antes.slice(0, 2).map(n => n.nome).join(', ') }), antes.length > 2 ? tr('pers.eMais', { n: antes.length - 2 }) : null, el('i', { text: pers.verNomes ? '▴' : '▾' })),
+  pers.verNomes ? el('div', { class: 'mu-caixa' }, el('h3', { text: tr('pers.nomesDeste') }), muTempo(pers.nomes, loc, null, true)) : null];
+}
 function renderPersonagem() {
   const g = $('#pers-grade');
   if (!g) return;
   const p = pers.dados, loc = document.documentElement.lang || 'en';
   setText($('#pers-meu'), tr(p && ui.meuPers && slug(ui.meuPers) === slug(p.name) ? 'pers.meuOk' : 'pers.meu'));
+  if (!p && pers.antigo) {
+    // um nome antigo: como ele se chama agora e todos os nomes dele
+    const tc = pers.antigo.trocas, atual = tc[tc.length - 1].novo, saiu = tc.slice().reverse().find(t => slug(t.antigo) === slug(pers.antigo.nome));
+    g.replaceChildren(el('section', { class: 'pers-cart mu-aviso' },
+      el('span', { class: 'grande' }, tr('pers.agoraSeChama', { x: pers.antigo.nome }) + ' ', el('b', { text: atual })),
+      el('span', { text: tr('pers.deixou', { d: saiu ? persData(saiu.quando * 1000, loc) : '—', n: tc.length + 1 }) }),
+      muTempo(tc, loc, pers.antigo.nome, false),
+      el('button', { type: 'button', class: 'ir', text: tr('pers.abrir', { x: atual }), onclick: () => persCarregar(atual) })));
+    return;
+  }
   if (!p) { g.replaceChildren(el('p', { class: 'support-note', text: tr('pers.vazio') })); return; }
   if (pers.party == null) pers.party = ui.party;
   if (pers.pct == null) pers.pct = ui.pct;
@@ -11033,6 +11270,7 @@ function renderPersonagem() {
       h ? el('span', { class: 'pers-chip' + (h.online ? ' on' : ''), text: tr(h.online ? 'pers.online' : 'pers.offline') }) : null,
       el('span', { class: 'pers-chip', text: p.world || '' }),
       p.premium ? el('span', { class: 'pers-chip ouro', text: tr('pers.premium') }) : null),
+    persAka(loc),
     el('div', { class: 'pers-linhas' },
       linhaF(tr('pers.nivel'), nv, 'g'),
       linhaF(tr('pers.xp'), fmtInt(xpAtual)),
@@ -11699,10 +11937,133 @@ function renderRankings() {
     el('span', { class: 'rk-pgs' }, Array.from({ length: 10 }, (_, i) => el('button', { type: 'button', text: String(i + 1), 'aria-pressed': String(rk.pagina === i + 1), onclick: () => { rkCarregar(i + 1); window.scrollTo({ top: g.offsetTop - 80, behavior: 'smooth' }); } })))));
   g.replaceChildren(...partes);
 }
-const PAGES = ['timer', 'hunt', 'creatures', 'calc', 'personagem', 'guilda', 'rankings'];   // personagem, guilda e rankings: sem botão no menu por enquanto
+/* ---------- Mudanças: trocas de nome, transferências e banimentos ----------
+   Página ainda escondida (sem botão no menu): abre por #name-changes, #transfers ou #bans (uma aba cada), e
+   #name-changes/{nome} já procura o nome. Os dados vêm do Worker (/mudancas e /nomes). */
+const MU_ABAS = ['nomes', 'transferencias', 'banimentos'];
+const MU_URL = { nomes: 'name-changes', transferencias: 'transfers', banimentos: 'bans' };
+const MU_DA_URL = { 'name-changes': 'nomes', transfers: 'transferencias', bans: 'banimentos' };
+const MU_TIPOS = ['all', 'perm', 'temp'];
+const mu = { aba: 'nomes', pagina: 1, q: '', dados: null, cadeia: null, chave: '', carregando: false, msg: '' };
+const muMundo = () => MUNDOS.includes(ui.muMundo) ? ui.muMundo : 'all';
+const muPara = () => MUNDOS.includes(ui.muPara) ? ui.muPara : 'all';
+const muTipo = () => MU_TIPOS.includes(ui.muTipo) ? ui.muTipo : 'all';
+function muRota() {
+  const p = new URLSearchParams();
+  if (mu.q) p.set('q', mu.q);
+  if (mu.aba === 'transferencias' && muPara() !== 'all') p.set('para', muPara());
+  if (mu.aba === 'banimentos' && muTipo() !== 'all') p.set('tipo', muTipo());
+  const qs = p.toString();
+  return 'mudancas/' + mu.aba + '/' + muMundo() + '/' + rkVoc2(ui.muVoc) + '/' + mu.pagina + (qs ? '?' + qs : '');
+}
+const rkVoc2 = v => RK_VOCS.includes(v) ? v : 'all';
+// a lista da aba e, na aba de nomes com uma busca, o histórico de nomes do que foi procurado
+async function muCarregar() {
+  const chave = muRota();
+  mu.chave = chave; mu.carregando = true; mu.dados = null; mu.cadeia = null;
+  renderMudancas();
+  try {
+    const [r, c] = await Promise.all([fetch(API_MEDIVIA + chave),
+      mu.aba === 'nomes' && mu.q ? fetch(API_MEDIVIA + 'nomes/' + encodeURIComponent(mu.q)).catch(() => null) : null]);
+    if (!r.ok) throw new Error(String(r.status));
+    const dados = await r.json(), cadeia = c && c.ok ? (await c.json()).trocas || [] : [];
+    if (mu.chave !== chave) return;
+    mu.dados = dados; mu.cadeia = cadeia.length ? cadeia : null; mu.msg = '';
+  } catch (e) { if (mu.chave === chave) mu.msg = tr(e.message === '429' ? 'pers.limite' : 'pers.erro'); }
+  if (mu.chave === chave) { mu.carregando = false; renderMudancas(); }
+}
+// Os nomes de uma cadeia de trocas, do mais novo para o mais antigo, com o período de cada um
+function muNomes(trocas) {
+  if (!trocas || !trocas.length) return [];
+  const l = [{ nome: trocas[0].antigo, desde: null, ate: trocas[0].quando }];
+  trocas.forEach((t, i) => l.push({ nome: t.novo, desde: t.quando, ate: trocas[i + 1] ? trocas[i + 1].quando : null }));
+  return l.reverse();
+}
+function muPeriodo(n, loc) {
+  const d = s => persData(s * 1000, loc);
+  return n.desde && n.ate ? tr('mu.periodo', { a: d(n.desde), b: d(n.ate) }) : n.ate ? tr('mu.ate', { d: d(n.ate) }) : n.desde ? tr('mu.desde', { d: d(n.desde) }) : '';
+}
+// Linha do tempo vertical dos nomes (ficha do personagem e aviso de nome antigo); destaque = o nome procurado
+function muTempo(trocas, loc, destaque, link) {
+  return el('ol', { class: 'mu-tempo' }, muNomes(trocas).map((n, i) => el('li', { class: i === 0 ? 'atual' : null },
+    el('span', { class: 'pt' }),
+    el('span', { class: 'nm' + (destaque && slug(n.nome) === slug(destaque) ? ' achado' : '') }, link && i > 0 ? el('button', { type: 'button', text: n.nome, onclick: () => goTo('name-changes/' + encodeURIComponent(n.nome)) }) : n.nome),
+    el('span', { class: 'dt', text: muPeriodo(n, loc) }))));
+}
+const muMotivo = m => /^major/i.test(m || '') ? { t: tr('mu.grave'), grave: true } : /^minor/i.test(m || '') ? { t: tr('mu.leve'), grave: false } : { t: m || '—', grave: false };
+function renderMudancas() {
+  const g = $('#mu-grade');
+  if (!g) return;
+  const loc = document.documentElement.lang || 'en', aba = mu.aba, d = mu.dados, voc = rkVoc2(ui.muVoc);
+  const tot = (d && d.totais) || {};
+  const abas = el('div', { class: 'mu-abas' }, MU_ABAS.map(a => el('button', { type: 'button', 'aria-pressed': String(a === aba), onclick: () => { if (a !== aba) { mu.q = ''; goTo(MU_URL[a]); } } },
+    tr('mu.aba.' + a), tot[a] != null ? el('small', { text: fmtInt(tot[a]) }) : null)));
+  const recarrega = () => { mu.pagina = 1; saveUi(); muCarregar(); };
+  const selMundo = (rot, atual, pega) => el('label', { class: 'rk-campo' }, el('span', { text: rot }),
+    el('select', { onchange: e => { pega(e.target.value); recarrega(); } }, ['all', ...MUNDOS].map(m => el('option', { value: m, text: m === 'all' ? tr('mu.todos') : mundoNome(m), selected: m === atual }))));
+  const seg = (lista, atual, rot, pega) => el('span', { class: 'seg' }, lista.map(v => el('button', { type: 'button', text: rot(v), 'aria-pressed': String(v === atual), onclick: () => { pega(v); recarrega(); } })));
+  const filtros = el('div', { class: 'rk-filtros' },
+    selMundo(tr('gu.mundo'), muMundo(), v => { ui.muMundo = v; }),
+    el('div', { class: 'rk-campo' }, el('span', { text: tr('pers.voc') }), seg(RK_VOCS, voc, v => tr('rk.voc.' + v), v => { ui.muVoc = v; })),
+    aba === 'transferencias' ? selMundo(tr('mu.para'), muPara(), v => { ui.muPara = v; }) : null,
+    aba === 'banimentos' ? el('div', { class: 'rk-campo' }, el('span', { text: tr('mu.tipo') }), seg(MU_TIPOS, muTipo(), v => tr('mu.tipo.' + v), v => { ui.muTipo = v; })) : null,
+    el('form', { class: 'rk-campo rk-busca', onsubmit: e => { e.preventDefault(); const q = e.target.elements.q.value.trim().slice(0, 40); mu.pagina = 1; if (aba === 'nomes') goTo('name-changes' + (q ? '/' + encodeURIComponent(q) : '')); else { mu.q = q; muCarregar(); } } },
+      el('span', { text: tr('mu.procurar') }),
+      el('span', { class: 'rk-achar' }, el('input', { name: 'q', type: 'search', maxlength: 40, autocomplete: 'off', spellcheck: false, placeholder: tr('pers.nome'), value: mu.q }),
+        el('button', { class: 'dlg', type: 'submit', text: tr('mu.procurar') }))));
+  const partes = [abas, filtros];
+  if (mu.msg) partes.push(el('p', { class: 'status', text: mu.msg }));
+  if (!d) { if (mu.carregando) partes.push(el('p', { class: 'support-note', text: tr('mu.carregando') })); g.replaceChildren(...partes); return; }
+  const resumo = el('div', { class: 'mu-resumo' }, el('span', null, el('b', { text: fmtInt(d.d7) }), ' ' + tr('mu.d7')), el('span', null, el('b', { text: fmtInt(d.d30) }), ' ' + tr('mu.d30')),
+    d.destaque && aba === 'transferencias' ? el('span', null, tr('mu.maisProcurado') + ' ', el('b', { text: mundoNome(d.destaque.mundo) }), ' (' + (d.destaque.n > 0 ? '+' : '') + d.destaque.n + ')') : null,
+    d.destaque && aba === 'banimentos' ? el('span', null, tr('mu.maisBans') + ' ', el('b', { text: mundoNome(d.destaque.mundo) }), ' (' + fmtInt(d.destaque.n) + ')') : null);
+  const data = s => el('td', { class: 'mu-data', text: persData(s * 1000, loc, true) });
+  const nomeBtn = n => el('button', { class: 'gu-n', type: 'button', text: n, onclick: () => goTo('personagem/' + encodeURIComponent(n)) });
+  const chip = v => el('span', { class: 'gu-vc v-' + (guVoc(v) || 'x'), text: v || '—' });
+  const mundoChip = (m, novo) => el('span', { class: 'mu-mundo' + (novo ? ' novo' : ''), text: m ? mundoNome(m) : '—' });
+  const th = (t, cls) => el('th', { class: cls || null, scope: 'col', text: t });
+  const linhaNome = x => el('tr', null, data(x.quando), el('td', { class: 'l' }, el('span', { class: 'mu-troca' }, el('s', { text: x.antigo }), el('span', { class: 'mu-seta', text: '→' }), nomeBtn(x.novo))),
+    el('td', { text: x.nivel ? String(x.nivel) : '—' }), el('td', { class: 'l opc' }, chip(x.vocacao)), el('td', { class: 'l opc' }, mundoChip(x.mundo)));
+  let tabela, lista = d.lista || [];
+  if (aba === 'nomes' && mu.cadeia) {
+    // histórico de nomes do que foi procurado: os blocos e a tabela com todas as trocas dele
+    const ns = muNomes(mu.cadeia).reverse(), ult = mu.cadeia[mu.cadeia.length - 1];
+    partes.push(el('div', { class: 'mu-cab' }, el('h2', { class: 'rk-titulo', text: tr('mu.hist') }),
+      el('span', { text: [ult.mundo ? mundoNome(ult.mundo) : '', ult.vocacao || '', tr('mu.histInfo', { n: ns.length, d: persData(mu.cadeia[0].quando * 1000, loc) })].filter(Boolean).join(' · ') })));
+    const elos = [];
+    ns.forEach((n, i) => {
+      if (i) elos.push(el('span', { class: 'mu-seta', text: '→' }));
+      const atual = i === ns.length - 1, achado = slug(n.nome) === slug(mu.q);
+      elos.push(el('button', { type: 'button', class: 'mu-elo' + (achado ? ' achado' : '') + (atual ? ' atual' : ''), onclick: () => goTo('personagem/' + encodeURIComponent(n.nome)) },
+        el('b', { text: n.nome }), el('small', { text: atual ? tr('mu.atualDesde', { d: persData(n.desde * 1000, loc) }) : muPeriodo(n, loc) })));
+    });
+    partes.push(el('div', { class: 'mu-cadeia' }, elos));
+    lista = mu.cadeia.slice().reverse();
+  } else partes.push(resumo);
+  if (!lista.length) { partes.push(el('p', { class: 'support-note', text: tr('mu.vazio') })); g.replaceChildren(...partes); return; }
+  if (aba === 'nomes') tabela = [el('tr', null, th(tr('mu.col.data'), 'l'), th(tr('mu.col.troca'), 'l'), th(tr('pers.nivel')), th(tr('pers.voc'), 'l opc'), th(tr('gu.mundo'), 'l opc')), lista.map(linhaNome)];
+  if (aba === 'transferencias') tabela = [el('tr', null, th(tr('mu.col.data'), 'l'), th(tr('gu.col.pers'), 'l'), th(tr('pers.nivel'), 'opc'), th(tr('pers.voc'), 'l opc'), th(tr('mu.col.dePara'), 'l')),
+    lista.map(x => el('tr', null, data(x.quando), el('td', { class: 'l' }, nomeBtn(x.nome)), el('td', { class: 'opc', text: x.nivel ? String(x.nivel) : '—' }), el('td', { class: 'l opc' }, chip(x.vocacao)),
+      el('td', { class: 'l mu-dp' }, mundoChip(x.de), el('span', { class: 'mu-seta', text: '→' }), mundoChip(x.para, true))))];
+  if (aba === 'banimentos') tabela = [el('tr', null, th(tr('mu.col.data'), 'l'), th(tr('gu.col.pers'), 'l'), th(tr('pers.nivel'), 'opc'), th(tr('pers.voc'), 'l opc'), th(tr('gu.mundo'), 'l opc'), th(tr('mu.col.motivo'), 'l opc'), th(tr('mu.col.prazo'), 'l')),
+    lista.map(x => { const m = muMotivo(x.motivo); return el('tr', null, data(x.quando), el('td', { class: 'l' }, nomeBtn(x.nome)), el('td', { class: 'opc', text: x.nivel ? String(x.nivel) : '—' }), el('td', { class: 'l opc' }, chip(x.vocacao)), el('td', { class: 'l opc' }, mundoChip(x.mundo)),
+      el('td', { class: 'l opc' }, el('span', { class: 'mu-motivo' + (m.grave ? ' grave' : ''), text: m.t })),
+      el('td', { class: 'l' }, el('span', { class: 'mu-prazo' + (x.ate ? '' : ' perm'), text: x.ate ? tr('mu.ate', { d: persData(x.ate * 1000, loc) }) : tr('mu.perm') }))); })];
+  partes.push(el('div', { class: 'creatures-wrap' }, el('table', { class: 'creatures-table rk-tab mu-tab' }, el('thead', null, tabela[0]), el('tbody', null, tabela[1]))));
+  // páginas de 50: as primeiras, a atual e as vizinhas, a última
+  if (!(aba === 'nomes' && mu.cadeia)) {
+    const total = d.total || 0, pags = Math.max(1, Math.ceil(total / 50)), a = mu.pagina;
+    const nums = [...new Set([1, a - 1, a, a + 1, pags].filter(n => n >= 1 && n <= pags))].sort((x, y) => x - y);
+    const botoes = [];
+    nums.forEach((n, i) => { if (i && n - nums[i - 1] > 1) botoes.push(el('span', { class: 'mu-ret', text: '…' })); botoes.push(el('button', { type: 'button', text: String(n), 'aria-pressed': String(n === a), onclick: () => { mu.pagina = n; muCarregar(); window.scrollTo({ top: g.offsetTop - 80, behavior: 'smooth' }); } })); });
+    partes.push(el('div', { class: 'rk-pag' }, el('span', { text: tr('pers.faixa', { a: fmtInt((a - 1) * 50 + 1), b: fmtInt((a - 1) * 50 + lista.length), t: fmtInt(total) }) }), el('span', { class: 'rk-pgs' }, botoes)));
+  }
+  g.replaceChildren(...partes);
+}
+const PAGES = ['timer', 'hunt', 'creatures', 'calc', 'personagem', 'guilda', 'rankings', 'mudancas'];   // personagem, guilda, rankings e mudanças: sem botão no menu por enquanto
 // Nome de cada página no endereço do navegador: sempre em inglês. Os nomes antigos em português continuam abrindo.
 const ROTA_URL = { personagem: 'character', guilda: 'guild' };
-const ROTA_PAGINA = { character: 'personagem', guild: 'guilda', personagem: 'personagem', guilda: 'guilda' };
+const ROTA_PAGINA = { character: 'personagem', guild: 'guilda', personagem: 'personagem', guilda: 'guilda', 'name-changes': 'mudancas', transfers: 'mudancas', bans: 'mudancas' };
 function goTo(route, push = true) {
   const [bruto, sub] = String(route || '').split('/');
   const name = ROTA_PAGINA[bruto] || bruto;
@@ -11727,13 +12088,20 @@ function goTo(route, push = true) {
     if (nome && (!pers.dados || slug(nome) !== slug(pers.dados.name))) persCarregar(nome); else renderPersonagem();
   }
   if (to === 'rankings') { if (!rk.dados || rk.chave !== rkRota(rk.pagina)) rkCarregar(rk.pagina); else renderRankings(); }
+  if (to === 'mudancas') {
+    // a aba vem do endereço (#name-changes, #transfers, #bans); #name-changes/{nome} já procura o nome
+    const aba = MU_DA_URL[bruto] || mu.aba;
+    let q = '';
+    try { q = sub ? decodeURIComponent(sub) : ''; } catch { q = ''; }
+    if (aba !== mu.aba || (aba === 'nomes' && q !== mu.q) || (!mu.dados && !mu.carregando)) { mu.aba = aba; if (aba === 'nomes') mu.q = q; mu.pagina = 1; muCarregar(); } else renderMudancas();
+  }
   if (to === 'guilda') {
     let nome = '';
     try { nome = sub ? decodeURIComponent(sub) : ''; } catch { nome = ''; }
     nome = nome || gu.nome;
     if (nome && (!gu.dados || slug(nome) !== slug(gu.dados.guilda.nome))) guCarregar(nome); else renderGuilda();
   }
-  const hash = to === 'timer' ? '' : '#' + (ROTA_URL[to] || to) + (to === 'personagem' && pers.dados ? '/' + encodeURIComponent(pers.dados.name) : to === 'guilda' && gu.dados ? '/' + encodeURIComponent(gu.dados.guilda.nome) : '');
+  const hash = to === 'timer' ? '' : '#' + (to === 'mudancas' ? MU_URL[mu.aba] + (mu.aba === 'nomes' && mu.q ? '/' + encodeURIComponent(mu.q) : '') : ROTA_URL[to] || to) + (to === 'personagem' && pers.dados ? '/' + encodeURIComponent(pers.dados.name) : to === 'guilda' && gu.dados ? '/' + encodeURIComponent(gu.dados.guilda.nome) : '');
   if (push && location.hash !== hash) { try { history.pushState(null, '', location.pathname + location.search + hash); } catch { /* o endereço fica como está */ } }
   if (was !== to) window.scrollTo(0, 0);
 }

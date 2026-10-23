@@ -13,6 +13,7 @@
 //                       concluídas e abates nelas, das fichas de quem está na foto
 //   /mudancas/{nomes|transferencias|banimentos}/{mundo|all}/{vocação}/{página}?q=&para=&tipo=  trocas de nome,
 //                       transferências de mundo e banimentos, 50 por página, com os totais de 7 e 30 dias
+//   /nomes/{nome}       o histórico de nomes de um personagem: as trocas em ordem, achadas por qualquer nome da cadeia
 //   /historico/{nome}   XP e tempo online por dia (horário de Brasília) e as skills dos rankings, do que a coleta guardou;
 //                       na primeira vez de cada personagem, importa o histórico que já existe (ver importar())
 //   /coleta             quando a coleta rodou pela última vez, o que fez ou o erro, e os totais do banco
@@ -89,7 +90,7 @@ const pedir = (env, rota) => fetch(API + rota.split('/').map(encodeURIComponent)
 /* ---------- Banco (D1) ---------- */
 // Versão das tabelas: troque ao criar ou mudar uma tabela abaixo. Com a versão já gravada em estado/esquema, preparar()
 // custa uma consulta só; o lote inteiro (cada comando conta no limite de ~50 operações por execução) roda uma vez.
-const ESQUEMA = '2026-10-23-mudancas';
+const ESQUEMA = '2026-10-23-nomes';
 let pronto = false;
 async function preparar(db) {
   if (pronto) return;
@@ -120,6 +121,8 @@ async function preparar(db) {
     db.prepare('CREATE TABLE IF NOT EXISTS bans (chave TEXT, dados TEXT, nome TEXT, mundo TEXT, visto INTEGER, PRIMARY KEY (chave, dados)) WITHOUT ROWID'),
     db.prepare('CREATE TABLE IF NOT EXISTS visto (chave TEXT PRIMARY KEY, nome TEXT, mundo TEXT, nivel INTEGER, vocacao TEXT, visto INTEGER) WITHOUT ROWID'),
     db.prepare('CREATE TABLE IF NOT EXISTS trocas_nome (id TEXT PRIMARY KEY, quando INTEGER, antigo TEXT, novo TEXT, mundo TEXT, nivel INTEGER, vocacao TEXT) WITHOUT ROWID'),
+    db.prepare('CREATE INDEX IF NOT EXISTS trocas_antigo ON trocas_nome (lower(antigo), quando)'),
+    db.prepare('CREATE INDEX IF NOT EXISTS trocas_novo ON trocas_nome (lower(novo), quando)'),
     db.prepare('CREATE TABLE IF NOT EXISTS transferencias (id TEXT PRIMARY KEY, quando INTEGER, nome TEXT, de TEXT, para TEXT, nivel INTEGER, vocacao TEXT) WITHOUT ROWID'),
     db.prepare('CREATE TABLE IF NOT EXISTS banimentos (id TEXT PRIMARY KEY, quando INTEGER, nome TEXT, mundo TEXT, nivel INTEGER, vocacao TEXT, motivo TEXT, ate INTEGER) WITHOUT ROWID'),
   ]);
@@ -564,7 +567,39 @@ async function mudancas(env, url, tipo, mundo, voc, pagina, cors) {
   let destaque = null;
   if (tipo === 'banimentos') destaque = await db.prepare('SELECT mundo, COUNT(*) AS n FROM banimentos' + (w ? w + ' AND' : ' WHERE') + ' quando > ? GROUP BY mundo ORDER BY n DESC LIMIT 1').bind(...args, t - 30 * 86400).first();
   if (tipo === 'transferencias') destaque = await db.prepare("SELECT m AS mundo, SUM(s) AS n FROM (SELECT para AS m, 1 AS s FROM transferencias WHERE quando > ? UNION ALL SELECT de AS m, -1 AS s FROM transferencias WHERE quando > ?) GROUP BY m ORDER BY n DESC LIMIT 1").bind(t - 30 * 86400, t - 30 * 86400).first();
-  return json({ total: (c && c.total) || 0, d7: (c && c.d7) || 0, d30: (c && c.d30) || 0, destaque: destaque && destaque.mundo ? destaque : null, lista }, 200, cors, { 'Cache-Control': 'public, max-age=300' });
+  const totais = await db.prepare('SELECT (SELECT COUNT(*) FROM trocas_nome) AS nomes, (SELECT COUNT(*) FROM transferencias) AS transferencias, (SELECT COUNT(*) FROM banimentos) AS banimentos').first();
+  return json({ total: (c && c.total) || 0, d7: (c && c.d7) || 0, d30: (c && c.d30) || 0, destaque: destaque && destaque.mundo ? destaque : null, totais, lista }, 200, cors, { 'Cache-Control': 'public, max-age=300' });
+}
+
+/* ---------- Histórico de nomes ---------- */
+// A cadeia de trocas de um personagem a partir de um nome qualquer dela. Começa na troca mais recente que deu esse
+// nome (sem ela, o nome é o primeiro conhecido); para trás, a troca que deu o nome anterior antes disso; para frente,
+// a primeira troca do nome depois disso. O tempo sempre anda, então um nome reaproveitado por outro personagem mais
+// tarde não entra na cadeia errada.
+async function cadeiaNomes(db, nome) {
+  const sel = 'SELECT quando, antigo, novo, mundo, nivel, vocacao FROM trocas_nome WHERE ';
+  const x = chaveNome(nome), trocas = [];
+  const deu = await db.prepare(sel + 'lower(novo) = ? ORDER BY quando DESC LIMIT 1').bind(x).first();
+  for (let cur = deu; cur && trocas.length < 40;) {
+    trocas.unshift(cur);
+    cur = await db.prepare(sel + 'lower(novo) = ? AND quando < ? ORDER BY quando DESC LIMIT 1').bind(chaveNome(cur.antigo), cur.quando).first();
+  }
+  for (let nm = x, t = deu ? deu.quando : 0; trocas.length < 80;) {
+    const prox = await db.prepare(sel + 'lower(antigo) = ? AND quando > ? ORDER BY quando LIMIT 1').bind(nm, t).first();
+    if (!prox) break;
+    trocas.push(prox); nm = chaveNome(prox.novo); t = prox.quando;
+  }
+  return trocas;
+}
+async function nomes(env, ctx, nome, cors) {
+  if (!env.DB) return json({ erro: 'banco D1 não ligado' }, 503, cors);
+  const chaveCache = new Request('https://api.medivialabs.com/cache/nomes/' + encodeURIComponent(chaveNome(nome)));
+  const guardada = await caches.default.match(chaveCache);
+  if (guardada) { const out = new Response(guardada.body, guardada); for (const [k, v] of Object.entries(cors)) out.headers.set(k, v); return out; }
+  await preparar(env.DB);
+  const res = json({ nome, trocas: await cadeiaNomes(env.DB, nome) }, 200, cors, { 'Cache-Control': 'public, max-age=600' });
+  ctx.waitUntil(caches.default.put(chaveCache, res.clone()).catch(() => {}));
+  return res;
 }
 
 /* ---------- Importação da base ---------- */
@@ -920,6 +955,8 @@ async function atender(req, env, ctx) {
   if (gm) return guilda(env, ctx, gm[1], gm[2], cors);
   const mu = rota.match(/^mudancas\/(nomes|transferencias|banimentos)\/([a-z]{3,20})\/(all|knights|archers|mages|druids)\/([1-9]\d{0,3})$/);
   if (mu && (mu[2] === 'all' || MUNDOS_TODOS.includes(mu[2]))) return mudancas(env, url, mu[1], mu[2], mu[3], Number(mu[4]), cors);
+  const nm = rota.match(/^nomes\/([^/]{2,40})$/);
+  if (nm) return nomes(env, ctx, nm[1], cors);
   const hist = rota.match(/^historico\/([^/]{2,40})$/);
   if (hist) return historico(env, hist[1], cors);
   if (!ROTAS.some(r => r.test(rota))) return json({ erro: 'endereço desconhecido' }, 404, cors);

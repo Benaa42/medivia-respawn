@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo: histórico de nomes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Modelo do histórico de nomes: na ficha do personagem, ao abrir um nome antigo e na busca da aba "Trocas de nome".
+   Be'na e Morthur Storm são reais (personagem antigo do usuário); os nomes depois do Be'na são inventados. Nada aqui é publicado. */
+:root { --ground: #0f1314; --box: #171d1e; --card: #1e2627; --edge: #2c3637; --band: #1b3a2c; --title: #f1f5f3; --label: #c2cbc8; --faint: #8b9894; --amber: #f0ad4d; --value: #3ae374;
+  --gold-edge: rgba(240, 173, 77, 0.55); --gold-wash: rgba(240, 173, 77, 0.06); --gold-ink: #241703; --m: #a970ff;
+  --font-ui: "Onest", "Segoe UI", system-ui, sans-serif; --font-display: "Bricolage Grotesque", "Onest", sans-serif; }
+* { box-sizing: border-box; } body { margin: 0; background: var(--ground); color: var(--label); font: 400 14px/1.45 var(--font-ui); font-variant-numeric: tabular-nums; }
+h1, h2, h3, p { margin: 0; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 18px 20px 60px; display: flex; flex-direction: column; gap: 18px; }
+.exemplo { font: 700 13px var(--font-ui); color: var(--amber); margin-top: 8px; }
+.duas { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 18px; align-items: start; }
+.quadro { background: var(--box); border-radius: 22px; padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.busca { display: flex; gap: 12px; align-items: center; } .inp { flex: 1; max-width: 360px; padding: 10px 14px; border: 1px solid var(--edge); border-radius: 10px; background: var(--card); color: var(--title); font-weight: 600; }
+.btn { padding: 9px 16px; border-radius: 999px; background: var(--card); color: var(--title); font-weight: 700; }
+/* ficha */
+.nome { font: 800 36px/1.05 var(--font-display); color: var(--title); }
+.chips { display: flex; gap: 6px; } .chips span { padding: 1px 9px; border-radius: 999px; background: var(--card); font: 600 12px var(--font-ui); color: var(--label); }
+.linha { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--edge); } .linha b { color: var(--title); }
+.aka { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; color: var(--faint); font: 500 13px var(--font-ui); cursor: pointer; }
+.aka b { color: var(--label); font-weight: 600; } .aka i { font-style: normal; color: var(--amber); }
+/* linha do tempo vertical */
+.tempo { list-style: none; margin: 0; padding: 4px 0 4px 2px; display: flex; flex-direction: column; }
+.tempo li { position: relative; display: grid; grid-template-columns: 18px 1fr auto; gap: 10px; align-items: baseline; padding: 6px 0; }
+.tempo li::before { content: ""; position: absolute; left: 5px; top: 18px; bottom: -8px; width: 2px; background: var(--edge); }
+.tempo li:last-child::before { display: none; }
+.tempo .pt { width: 12px; height: 12px; border-radius: 50%; background: var(--card); box-shadow: inset 0 0 0 2px var(--faint); transform: translateY(2px); }
+.tempo .atual .pt { background: var(--value); box-shadow: none; }
+.tempo .nm { color: var(--label); font-weight: 600; } .tempo .atual .nm { color: var(--title); font-weight: 800; }
+.tempo .dt { color: var(--faint); font-size: 12px; white-space: nowrap; }
+.tempo a { color: inherit; text-decoration: underline; text-decoration-color: rgba(139,152,148,.5); text-underline-offset: 3px; }
+.caixa { padding: 12px 14px; border: 1px solid var(--edge); border-radius: 14px; background: var(--card); }
+.caixa h3 { font: 700 13px var(--font-ui); color: var(--faint); margin-bottom: 6px; }
+/* nome antigo aberto */
+.aviso { display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; border: 1px solid var(--gold-edge); border-radius: 16px; background: var(--gold-wash); color: var(--title); font-size: 15px; }
+.aviso .grande { font: 800 22px var(--font-display); } .aviso b { color: var(--amber); }
+.aviso .ir { align-self: flex-start; padding: 9px 18px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font-weight: 800; }
+/* cadeia horizontal (aba de trocas de nome) */
+.cadeia { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; }
+.elo { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border-radius: 12px; background: var(--card); min-width: 0; }
+.elo b { color: var(--label); font-weight: 700; } .elo small { color: var(--faint); font-size: 12px; }
+.elo.achado { box-shadow: inset 0 0 0 1px var(--gold-edge); background: var(--gold-wash); } .elo.achado b { color: var(--amber); }
+.elo.atual { background: var(--band); } .elo.atual b { color: var(--value); }
+.seta { align-self: center; color: var(--faint); }
+.cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; } .cab h2 { font: 800 18px var(--font-display); color: var(--title); } .cab span { color: var(--faint); font-size: 13px; }
+.abas { display: flex; flex-wrap: wrap; gap: 6px; } .abas b { padding: 9px 16px; border-radius: 999px; background: var(--card); color: var(--label); font: 700 14px var(--font-ui); } .abas b.on { background: var(--amber); color: var(--gold-ink); }
+table { width: 100%; border-collapse: collapse; } th { padding: 6px 10px; border-bottom: 1px solid var(--edge); font: 500 12px var(--font-ui); color: var(--faint); text-align: left; }
+td { padding: 7px 10px; border-bottom: 1px solid var(--edge); color: var(--title); } td.f { color: var(--faint); } s { color: var(--faint); } td a { color: var(--amber); font-weight: 700; text-decoration: none; }
+.vc { display: inline-block; padding: 1px 9px; border: 1px solid color-mix(in srgb, var(--m) 45%, transparent); border-radius: 999px; color: var(--m); font: 600 12px var(--font-ui); }
+.nota-mock { font-size: 13px; color: var(--faint); }
+.etiqueta { position: fixed; right: 16px; bottom: 16px; padding: 6px 12px; border-radius: 999px; background: var(--amber); color: var(--gold-ink); font: 700 12px var(--font-ui); }
+@media (max-width: 860px) { .duas { grid-template-columns: 1fr; } .wrap { padding-inline: 16px; } .quadro { padding: 16px 14px 20px; } .seta { transform: rotate(90deg); } .cadeia { flex-direction: column; } .opc { display: none; } }
+</style></head><body>
+<div class="wrap">
+
+  <p class="exemplo">1. Ficha do personagem: uma linha discreta abaixo do nome, que abre a lista de nomes (fechada por padrão)</p>
+  <div class="duas">
+    <section class="quadro">
+      <h1 class="nome">Draemor</h1>
+      <div class="chips"><span>Offline</span><span>Pendulum</span></div>
+      <button class="aka" type="button">Já se chamou <b>Drae, Thorn Vale</b> e mais 3 <i>▾</i></button>
+      <div class="caixa">
+        <h3>Nomes deste personagem</h3>
+        <ol class="tempo">
+          <li class="atual"><span class="pt"></span><span class="nm">Draemor</span><span class="dt">desde 20/08/2026</span></li>
+          <li><span class="pt"></span><span class="nm"><a href="#">Drae</a></span><span class="dt">18/08 a 20/08/2026</span></li>
+          <li><span class="pt"></span><span class="nm"><a href="#">Thorn Vale</a></span><span class="dt">28/07 a 18/08/2026</span></li>
+          <li><span class="pt"></span><span class="nm"><a href="#">Rune Whisper</a></span><span class="dt">18/07 a 28/07/2026</span></li>
+          <li><span class="pt"></span><span class="nm"><a href="#">Be'na</a></span><span class="dt">06/08/2025 a 18/07/2026</span></li>
+          <li><span class="pt"></span><span class="nm"><a href="#">Morthur Storm</a></span><span class="dt">até 06/08/2025</span></li>
+        </ol>
+      </div>
+      <div class="linha"><span>Nível</span><b style="color:var(--value)">429</b></div>
+      <div class="linha"><span>Experiência</span><b>1 607 466 636</b></div>
+      <div class="linha"><span>Vocação</span><b>High Mage</b></div>
+    </section>
+    <p class="nota-mock" style="align-self:center">A linha "Já se chamou…" só aparece quando o personagem tem nomes anteriores. Fechada, ocupa uma linha só; aberta, mostra a lista do mais novo para o mais antigo, com o período de cada nome. Clicar num nome antigo abre a busca dele na aba de trocas de nome.</p>
+  </div>
+
+  <p class="exemplo">2. Abrindo um nome antigo (hoje a página diz, errado, que não conseguiu falar com a API)</p>
+  <section class="quadro">
+    <div class="busca"><span class="inp">Be'na</span><span class="btn">Ver personagem</span></div>
+    <div class="aviso">
+      <span class="grande">Be'na agora se chama <b>Draemor</b></span>
+      <span>Este nome deixou de existir em 18/07/2026. O personagem já teve 6 nomes.</span>
+      <ol class="tempo" style="max-width:420px">
+        <li class="atual"><span class="pt"></span><span class="nm">Draemor</span><span class="dt">desde 20/08/2026</span></li>
+        <li><span class="pt"></span><span class="nm">Drae</span><span class="dt">18/08 a 20/08/2026</span></li>
+        <li><span class="pt"></span><span class="nm">Thorn Vale</span><span class="dt">28/07 a 18/08/2026</span></li>
+        <li><span class="pt"></span><span class="nm">Rune Whisper</span><span class="dt">18/07 a 28/07/2026</span></li>
+        <li><span class="pt"></span><span class="nm" style="color:var(--amber)">Be'na</span><span class="dt">06/08/2025 a 18/07/2026</span></li>
+        <li><span class="pt"></span><span class="nm">Morthur Storm</span><span class="dt">até 06/08/2025</span></li>
+      </ol>
+      <span class="ir">Abrir Draemor</span>
+    </div>
+    <p class="nota-mock">Se o nome não existe e não há troca registrada: "Nenhum personagem com esse nome" (sem falar em erro da API).</p>
+  </section>
+
+  <p class="exemplo">3. Aba "Trocas de nome": ao procurar um nome, o histórico completo dele aparece acima da tabela</p>
+  <section class="quadro">
+    <div class="abas"><b class="on">Trocas de nome</b><b>Transferências</b><b>Banimentos</b></div>
+    <div class="busca"><span class="inp">Be'na</span></div>
+    <div class="cab"><h2>Histórico de nomes</h2><span>Pendulum · High Mage · 6 nomes desde 06/08/2025</span></div>
+    <div class="cadeia">
+      <div class="elo"><b>Morthur Storm</b><small>até 06/08/2025</small></div><span class="seta">→</span>
+      <div class="elo achado"><b>Be'na</b><small>06/08/2025 a 18/07/2026</small></div><span class="seta">→</span>
+      <div class="elo"><b>Rune Whisper</b><small>18/07 a 28/07</small></div><span class="seta">→</span>
+      <div class="elo"><b>Thorn Vale</b><small>28/07 a 18/08</small></div><span class="seta">→</span>
+      <div class="elo"><b>Drae</b><small>18/08 a 20/08</small></div><span class="seta">→</span>
+      <div class="elo atual"><b>Draemor</b><small>atual, desde 20/08/2026</small></div>
+    </div>
+    <table><thead><tr><th>Data</th><th>Nome antigo → nome novo</th><th class="opc">Nível</th><th class="opc">Vocação</th></tr></thead><tbody>
+      <tr><td class="f">20/08/2026 14:02</td><td><s>Drae</s> → <a href="#">Draemor</a></td><td class="opc">424</td><td class="opc"><span class="vc">High Mage</span></td></tr>
+      <tr><td class="f">18/08/2026 09:41</td><td><s>Thorn Vale</s> → <a href="#">Drae</a></td><td class="opc">424</td><td class="opc"><span class="vc">High Mage</span></td></tr>
+      <tr><td class="f">28/07/2026 22:15</td><td><s>Rune Whisper</s> → <a href="#">Thorn Vale</a></td><td class="opc">416</td><td class="opc"><span class="vc">High Mage</span></td></tr>
+      <tr><td class="f">18/07/2026 19:30</td><td><s>Be'na</s> → <a href="#">Rune Whisper</a></td><td class="opc">416</td><td class="opc"><span class="vc">Mage</span></td></tr>
+      <tr><td class="f">06/08/2025 11:12</td><td><s>Morthur Storm</s> → <a href="#">Be'na</a></td><td class="opc">384</td><td class="opc"><span class="vc">High Mage</span></td></tr>
+    </tbody></table>
+    <p class="nota-mock">A busca acha o personagem por qualquer um dos nomes (antigo, intermediário ou o atual) e a tabela mostra todas as trocas dele. Sem busca, a aba é a lista do mockup aprovado.</p>
+  </section>
+</div>
+<span class="etiqueta">MODELO</span>
+</body></html>
