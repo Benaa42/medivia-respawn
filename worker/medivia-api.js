@@ -266,13 +266,17 @@ async function painelApoio(req, env, cors) {
 const GEEKS = 'https://mediviageeks.com/api/';
 const THINGS = 'https://mediviathings-native.fly.dev/v1/';
 const pedirFora = url => fetch(url, { headers: { Accept: 'application/json', 'User-Agent': 'MediviaLabs/1.0 (+https://medivialabs.com)' } });
+// Importado de vez: com dias trazidos, ou sem nenhum há menos de uma hora (aí tenta de novo; o MediviaGeeks pode estar fora
+// ou o banco pode ter recusado a gravação). Devolve true quando o personagem fica importado.
+const IMPORTADO = '(dias > 0 OR quando > ?)';
 async function importar(db, chave, nome) {
-  const ja = await db.prepare('SELECT 1 AS x FROM importados WHERE chave = ?').bind(chave).first();
-  if (ja) return;
+  const ja = await db.prepare('SELECT 1 AS x FROM importados WHERE chave = ? AND ' + IMPORTADO).bind(chave, agora() - 3600).first();
+  if (ja) return true;
   let dias = 0, ate = '';
   try {
     const [rx, ro] = await Promise.all([pedirFora(GEEKS + 'playersexp?name=' + encodeURIComponent(nome)), pedirFora(GEEKS + 'onlinehistory?name=' + encodeURIComponent(nome) + '&includeCurrent=true')]);
-    const xp = rx.ok ? await rx.json() : [];
+    if (!rx.ok) return false;   // MediviaGeeks fora: tenta na próxima vez, sem marcar nada
+    const xp = await rx.json();
     const on = ro.ok ? await ro.json() : {};
     // só o último ano: cada dia é uma linha gravada, e o plano gratuito aceita 100 mil por dia
     const corte = diaBr(agora() - IMPORTA_DIAS * 86400);
@@ -285,7 +289,7 @@ async function importar(db, chave, nome) {
     if (linhasOn.length) await db.prepare("INSERT OR REPLACE INTO online_importado (chave, dia, segundos) SELECT ?, json_extract(value, '$.d'), json_extract(value, '$.s') FROM json_each(?)").bind(chave, JSON.stringify(linhasOn)).run();
     dias = linhasXp.length;
     ate = linhasXp.map(x => x.d).sort().pop() || '';
-  } catch { /* sem o MediviaGeeks: fica só a nossa coleta */ }
+  } catch { return false; /* resposta estranha ou o banco recusou: tenta na próxima vez */ }
   try {
     const rt = await pedirFora(THINGS + 'characters/search?name=' + encodeURIComponent(nome));
     const ch = rt.ok ? ((await rt.json()).character || {}) : {};
@@ -296,6 +300,7 @@ async function importar(db, chave, nome) {
     if (lista.length) await db.prepare("INSERT OR IGNORE INTO skills (chave, skill, valor, quando) SELECT ?, json_extract(value, '$.k'), json_extract(value, '$.v'), ? FROM json_each(?)").bind(chave, agora(), JSON.stringify(lista)).run();
   } catch { /* sem o MediviaThings: as skills chegam pelo nosso ranking */ }
   await db.prepare('INSERT OR REPLACE INTO importados (chave, quando, ate, dias) VALUES (?, ?, ?, ?)').bind(chave, agora(), ate, dias).run();
+  return true;
 }
 
 /* ---------- Guilda ---------- */
@@ -338,10 +343,12 @@ async function guilda(env, ctx, mundo, nome, cors) {
   let gravou = true;
   try { await db.prepare("INSERT OR IGNORE INTO personagens (chave, nome, mundo, desde, visto) SELECT json_extract(value, '$.c'), json_extract(value, '$.n'), ?, ?, ? FROM json_each(?)").bind(mundo, agora(), agora(), lista).run(); } catch { gravou = false; }
   // histórico que já existe: poucos membros por vez
-  const ja = new Set(((await db.prepare('SELECT chave FROM importados WHERE chave IN ' + dentro).bind(lista).all()).results || []).map(x => x.chave));
+  const ja = new Set(((await db.prepare('SELECT chave FROM importados WHERE ' + IMPORTADO + ' AND chave IN ' + dentro).bind(agora() - 3600, lista).all()).results || []).map(x => x.chave));
   const pendentes = membros.filter(m => !ja.has(m.chave));
-  if (gravou) { try { for (const m of pendentes.slice(0, IMPORTA_POR_VEZ)) await importar(db, m.chave, m.nome); } catch { gravou = false; } }
-  const faltam = gravou ? Math.max(0, pendentes.length - IMPORTA_POR_VEZ) : 0;
+  let feitas = 0;
+  if (gravou) { try { for (const m of pendentes.slice(0, IMPORTA_POR_VEZ)) if (await importar(db, m.chave, m.nome)) feitas++; } catch { gravou = false; } }
+  // se nenhuma importação da rodada deu certo, a página não pede de novo (tenta na próxima vez que for aberta)
+  const faltam = gravou && feitas ? Math.max(0, pendentes.length - IMPORTA_POR_VEZ) : 0;
   // quem está online agora no mundo (a lista da API vale para qualquer mundo, não só os da coleta)
   const on = await apiCache(env, ctx, 'online/' + mundo);
   const online = new Map(((on.ok && on.dados.players) || []).map(p => [chaveNome(p.name), p]));
