@@ -828,7 +828,7 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-cc li .quem { padding: 0; border: 0; background: none; font: 600 14px var(--font-ui); text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .gu-cc li b, .gu-cm li b { text-align: right; color: var(--title); font-weight: 600; font-variant-numeric: tabular-nums; }
 .gu-cc li b.ok, .gu-cm li b.ok { color: var(--value); }
-.gu-cc li.f { opacity: 0.55; }
+.gu-cc li.f b { color: var(--value); }
 .gu-bar { display: block; height: 6px; border-radius: 999px; background: #2c3637; overflow: hidden; }
 .gu-bar em { display: block; height: 100%; border-radius: 999px; background: var(--amber); }
 .gu-cc li.f .gu-bar em { background: var(--value); }
@@ -840,7 +840,9 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-rod button, .gu-cruz td.rs button { margin-left: auto; padding: 3px 10px; border: 0; border-radius: 999px; background: var(--band); color: var(--value); font: 700 12px var(--font-ui); cursor: pointer; }
 .gu-rod.ok { color: var(--value); font-weight: 600; }
 .gu-rod.nada { color: var(--faint); }
-.gu-cc.feito { opacity: 0.6; }
+/* task em comum que todos concluíram: brilho normal, contorno verde */
+.gu-cc.feito { box-shadow: inset 0 0 0 1px rgba(58, 227, 116, 0.4); }
+.gu-cc.feito h4 { color: var(--value); }
 .gu-cm .gu-n { font-size: 15px; }
 .gu-cm .tn { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gu-pt { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
@@ -866,7 +868,7 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-cruz td.rs { color: var(--label); }
 .gu-cruz td.rs b { color: var(--value); }
 .gu-cruz td.rs button { margin-left: 8px; }
-.gu-cruz tr.feito { opacity: 0.55; }
+.gu-cruz tr.feito td.cri { color: var(--value); }
 .gu-cruz tbody tr:hover { background: var(--card); }
 .gu-cruz th.v-k, .gu-cc .quem.v-k, .gu-cm .gu-n.v-k { color: var(--v-k); }
 .gu-cruz th.v-a, .gu-cc .quem.v-a, .gu-cm .gu-n.v-a { color: var(--v-a); }
