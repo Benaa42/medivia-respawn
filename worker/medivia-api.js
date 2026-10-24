@@ -90,7 +90,7 @@ const pedir = (env, rota) => fetch(API + rota.split('/').map(encodeURIComponent)
 /* ---------- Banco (D1) ---------- */
 // Versão das tabelas: troque ao criar ou mudar uma tabela abaixo. Com a versão já gravada em estado/esquema, preparar()
 // custa uma consulta só; o lote inteiro (cada comando conta no limite de ~50 operações por execução) roda uma vez.
-const ESQUEMA = '2026-10-23-nomes';
+const ESQUEMA = '2026-10-24-bans';
 let pronto = false;
 async function preparar(db) {
   if (pronto) return;
@@ -137,6 +137,16 @@ async function preparar(db) {
       db.prepare('ALTER TABLE ' + t + '_n RENAME TO ' + t),
     ]);
   }
+  // Uma vez só: os banimentos achados nas fichas antes de 24/10 ficaram com a data da leitura (o campo added não era
+  // lido). Saem e voltam montados das fichas guardadas na tabela bans, com a data certa.
+  if (!(await db.prepare('SELECT 1 AS x FROM estado WHERE chave = ?').bind('limpeza:bans-added').first())) await db.batch([
+    db.prepare("DELETE FROM banimentos WHERE id LIKE 'f:%'"),
+    db.prepare("INSERT OR IGNORE INTO banimentos (id, quando, nome, mundo, nivel, vocacao, motivo, ate) SELECT 'f:' || b.chave || ':' || CAST(json_extract(b.dados, '$.added') AS INTEGER), " +
+      "json_extract(b.dados, '$.added'), b.nome, lower(b.mundo), p.nivel, p.vocacao, substr(COALESCE(json_extract(b.dados, '$.comment'), ''), 1, 120), NULLIF(json_extract(b.dados, '$.expires'), 0) " +
+      "FROM bans b LEFT JOIN perfil p ON p.chave = b.chave WHERE json_extract(b.dados, '$.added') > 0 " +
+      "AND NOT EXISTS (SELECT 1 FROM banimentos x WHERE lower(x.nome) = b.chave AND x.quando BETWEEN json_extract(b.dados, '$.added') - 172800 AND json_extract(b.dados, '$.added') + 172800)"),
+    db.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind('limpeza:bans-added', String(agora())),
+  ]);
   await db.prepare('INSERT OR REPLACE INTO estado (chave, valor) VALUES (?, ?)').bind('esquema', ESQUEMA).run();
   pronto = true;
 }
@@ -393,8 +403,8 @@ async function coletarFichas(env, db, reg, fonte) {
       a: ts.reduce((s, t) => s + Math.min(Number(t && t.progress) || 0, Number(t && t.kills) || 0), 0) });
     for (const b of Array.isArray(j.bans) ? j.bans : []) {
       bans.push({ c: p.chave, d: JSON.stringify(b), n: j.name, m: p.mundo });
-      // o formato do banimento na API ainda não foi visto: aceita os nomes de campo mais prováveis
-      const quando = segundos(b && (b.time || b.timestamp || b.created_at || b.created || b.date || b.start)) || agora();
+      // na API: { added, expires (0 = permanente), comment }; os outros nomes ficam de reserva
+      const quando = segundos(b && (b.added || b.time || b.timestamp || b.created_at || b.created || b.date || b.start)) || agora();
       banidos.push({ i: 'f:' + p.chave + ':' + quando, c: p.chave, q: quando, n: j.name, m: String(j.world || p.mundo || '').toLowerCase(), l: Number(j.level) || null, v: j.vocation || null,
         r: String((b && (b.comment || b.reason || b.type || b.description)) || '').slice(0, 120), a: segundos(b && (b.expires || b.expires_at || b.expiresAt || b.until || b.end)) || null });
     }
