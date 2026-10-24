@@ -834,6 +834,10 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-bar em { display: block; height: 100%; border-radius: 999px; background: var(--amber); }
 .gu-cc li.f .gu-bar em { background: var(--value); }
 .gu-boost { justify-self: start; padding: 0 5px; border: 1px solid var(--gold-edge); border-radius: 5px; background: var(--gold-wash); color: var(--amber); font: 700 10px var(--font-ui); }
+/* quem compartilhou a task em comum (a API marca shared em quem compartilhou, sem dizer com quem) */
+.gu-comp { display: flex; align-items: center; gap: 6px; margin-top: -4px; color: var(--faint); font-size: 12px; }
+.gu-comp svg { flex: none; width: 13px; height: 13px; color: var(--value); }
+.gu-comp b { color: var(--label); font-weight: 600; }
 .gu-qt { padding: 1px 8px; border-radius: 999px; background: var(--band); color: var(--value); font: 700 11px var(--font-ui); white-space: nowrap; }
 .gu-rod { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-top: 8px; border-top: 1px solid var(--edge); font-size: 12.5px; color: var(--label); }
 .gu-rod b { color: var(--title); }
@@ -850,7 +854,9 @@ em.v-k { background: var(--v-k); } em.v-a { background: var(--v-a); } em.v-m { b
 .gu-cm li.f .tn, .gu-cm li.f b { color: var(--value); }
 .gu-cm li.p .nm, .gu-cc li b.pr, .gu-cm li b.pr, .gu-rod.pr, .gu-cruz .pr { color: var(--amber); }
 .gu-cc li.ne, .gu-cm li.ne { opacity: 0.5; }
-.gu-cc .qn { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; }
+.gu-cc .qn { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; min-width: 0; overflow: hidden; }
+/* o nome não encolhe até sumir: com etiquetas demais, elas descem para a linha de baixo */
+.gu-cc .qn .quem { flex: 0 1 auto; max-width: 100%; }
 .gu-cm .tn { flex-wrap: wrap; row-gap: 2px; white-space: normal; }   /* as etiquetas descem quando não cabem ao lado do nome */
 .gu-cm .tn .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gu-entregar { justify-self: start; padding: 0 6px; border-radius: 5px; background: var(--amber); color: var(--gold-ink); font: 700 10px var(--font-ui); white-space: nowrap; }
@@ -2131,6 +2137,8 @@ const I18N = {
     'gu.comum': 'Tasks em comum',
     'gu.semComum': 'Nenhuma task repetida entre os membros.',
     'gu.nMembros': '{n} membros',
+    'gu.compEntre': 'Compartilhada entre {x}',
+    'gu.compUm': '{x} compartilhou esta task',
     'gu.porMembro': 'Por membro',
     'gu.todosFeitos': 'todos concluíram',
     'gu.semResp': 'sem respawn no banco',
@@ -2977,6 +2985,8 @@ const I18N = {
     'gu.comum': 'Shared tasks',
     'gu.semComum': 'No task is shared between members.',
     'gu.nMembros': '{n} members',
+    'gu.compEntre': 'Shared between {x}',
+    'gu.compUm': '{x} shared this task',
     'gu.porMembro': 'By member',
     'gu.todosFeitos': 'everyone is done',
     'gu.semResp': 'no respawn in the bank',
@@ -3823,6 +3833,8 @@ const I18N = {
     'gu.comum': 'Tasks en común',
     'gu.semComum': 'Ninguna task se repite entre los miembros.',
     'gu.nMembros': '{n} miembros',
+    'gu.compEntre': 'Compartida entre {x}',
+    'gu.compUm': '{x} compartió esta task',
     'gu.porMembro': 'Por miembro',
     'gu.todosFeitos': 'todos completaron',
     'gu.semResp': 'sin respawn en el banco',
@@ -4669,6 +4681,8 @@ const I18N = {
     'gu.comum': 'Wspólne taski',
     'gu.semComum': 'Żaden task nie powtarza się między członkami.',
     'gu.nMembros': '{n} członków',
+    'gu.compEntre': 'Współdzielona przez {x}',
+    'gu.compUm': 'Udostępniona przez {x}',
     'gu.porMembro': 'Według członka',
     'gu.todosFeitos': 'wszyscy ukończyli',
     'gu.semResp': 'brak respawnu w banku',
@@ -11011,18 +11025,25 @@ $('#calc-clear').addEventListener('click', () => {
 const API_MEDIVIA = 'https://api.medivialabs.com/';
 const pers = { nome: '', dados: null, hist: null, party: null, pct: null, aba: 'andamento', busca: '', pag: 0, facAberta: null, magPag: 0 };
 function persStatus(kind, text) { const e = $('#pers-status'); e.hidden = !text; e.dataset.kind = kind || ''; setText(e, text || ''); }
-async function persCarregar(nome) {
+// silencioso: a atualização automática (sem aviso de carregando, sem mexer na busca; se falhar, fica o que já estava)
+async function persCarregar(nome, silencioso) {
   nome = String(nome || '').trim().replace(/\s+/g, ' ').slice(0, 40);
   if (!nome) return;
+  if (silencioso && pers.carregando) return;
   pers.nome = nome;
-  $('#pers-nome').value = nome;
-  persStatus('busy', tr('pers.carregando', { x: nome }));
+  pers.carregando = true;
+  try { await persBuscar(nome, silencioso); } finally { pers.carregando = false; pers.atualizado = Date.now(); }
+}
+async function persBuscar(nome, silencioso) {
+  if (!silencioso) { $('#pers-nome').value = nome; persStatus('busy', tr('pers.carregando', { x: nome })); }
   try {
     const r = await fetch(API_MEDIVIA + 'player/' + encodeURIComponent(nome));
+    if (silencioso && !r.ok) return;
     if (r.status === 404) { pers.dados = null; persStatus('err', tr('pers.naoAchei', { x: nome })); renderPersonagem(); return; }
     if (!r.ok) throw new Error(String(r.status));
     const j = await r.json();
-    pers.verNomes = false;
+    if (silencioso && (!j || !j.player || pageNow !== 'personagem' || !pers.dados || slug(j.player.name) !== slug(pers.dados.name))) return;   // trocou de página ou de personagem no meio
+    if (!silencioso) pers.verNomes = false;
     if (!j || !j.player) {
       // o nome não existe: se trocou de nome, o histórico de nomes diz como ele se chama agora
       pers.dados = null;
@@ -11041,11 +11062,27 @@ async function persCarregar(nome) {
     pers.hist = h && h.ok ? await h.json() : null;
     const nj = nm && nm.ok ? await nm.json().catch(() => null) : null, nt = (nj && nj.trocas) || [];
     pers.nomes = nt.length && slug(nt[nt.length - 1].novo) === slug(pers.dados.name) ? nt : null;
-    persStatus('', '');
+    if (!silencioso) persStatus('', '');
     if (pageNow === 'personagem') { try { history.replaceState(null, '', location.pathname + location.search + '#character/' + encodeURIComponent(pers.dados.name)); } catch { /* o endereço fica como está */ } }
-  } catch (e) { persStatus('err', tr(e.message === '429' ? 'pers.limite' : 'pers.erro')); }
-  renderPersonagem();
+  } catch (e) { if (silencioso) return; persStatus('err', tr(e.message === '429' ? 'pers.limite' : 'pers.erro')); }
+  if (silencioso) persRedesenhar(); else renderPersonagem();
 }
+// Redesenha sem perder onde a pessoa estava: as caixas com rolagem própria (tabelas de XP e de tempo online) voltam ao
+// mesmo ponto
+function persRedesenhar() {
+  const g = $('#pers-grade');
+  const rolados = g ? [...g.querySelectorAll('*')].map((e, i) => [i, e.scrollTop, e.scrollLeft]).filter(x => x[1] || x[2]) : [];
+  renderPersonagem();
+  if (!g) return;
+  const todos = g.querySelectorAll('*');
+  for (const [i, t, l] of rolados) if (todos[i]) { todos[i].scrollTop = t; todos[i].scrollLeft = l; }
+}
+// A cada 5 minutos, com a página do personagem aberta e visível, busca a ficha de novo (a API e o Worker guardam cada
+// ficha 5 minutos); ao voltar para a aba depois disso, também
+const PERS_ATUALIZA_MS = 5 * 60e3;
+const persAtualiza = () => { if (pageNow === 'personagem' && pers.dados && document.visibilityState === 'visible' && Date.now() - (pers.atualizado || 0) >= PERS_ATUALIZA_MS - 5e3) persCarregar(pers.dados.name, true); };
+setInterval(persAtualiza, 30e3);
+document.addEventListener('visibilitychange', persAtualiza);
 // Nome da task no plural ("Drake Lords", "Phoenixes") para o nome da criatura
 const persSingular = n => String(n).replace(/ies$/i, 'y').replace(/ves$/i, 'f').replace(/(x|ch|sh|ss)es$/i, '$1').replace(/s$/i, '');
 // O respawn do banco que mata a criatura mais rápido, no grupo e bônus escolhidos na página
@@ -11576,11 +11613,21 @@ function guTasks(tipo, M) {
   const abrir = b => el('button', { type: 'button', text: tr('pers.abrir'), onclick: () => { select(b.r.id); goTo('timer'); } });
   const vocDe = m => 'v-' + (guVoc(m.vocacao) || 'x');
   const classe = e => e.feita ? 'f' : e.pronta ? 'p' : e.naoEscolhida ? 'ne' : null;
+  // quem do cartão compartilhou a task: com dois ou mais, "Compartilhada entre A e B"; com um só, "A compartilhou"
+  const juntar = l => { try { return new Intl.ListFormat(document.documentElement.lang || 'en', { type: 'conjunction' }).format(l); } catch { return l.join(', '); } };
+  const compartilhada = c => {
+    const quem = c.quem.filter(q => q.t.shared).map(q => q.m.nome);
+    if (!quem.length) return null;
+    const icone = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>', 'image/svg+xml').documentElement;
+    const [a, b] = tr(quem.length > 1 ? 'gu.compEntre' : 'gu.compUm', { x: '\u0000' }).split('\u0000');
+    return el('div', { class: 'gu-comp' }, document.importNode(icone, true), el('span', null, a, el('b', { text: juntar(quem) }), b));
+  };
   // cartão de uma task em comum
   const cartao = c => {
     const b = c.prontos ? null : melhor(c);
     return el('article', { class: 'gu-cc' + (c.todas ? ' feito' : '') },
       el('header', null, el('h4', { text: c.nome }), el('span', { class: 'gu-qt', text: tr('gu.nMembros', { n: c.quem.length }) })),
+      compartilhada(c),
       el('ul', null, c.quem.slice().sort((x, y) => (x.e.feita + x.e.pronta) - (y.e.feita + y.e.pronta)).map(({ m, t, e }) => el('li', { class: classe(e) },
         el('span', { class: 'qn' }, el('button', { class: 'quem ' + vocDe(m), type: 'button', text: m.nome, onclick: () => goTo('personagem/' + encodeURIComponent(m.nome)) }), huntTags(t, e)),
         barra(e), el('b', { class: e.feita ? 'ok' : e.pronta ? 'pr' : null, text: fmtInt(e.feita ? e.req : e.prog) + '/' + fmtInt(e.req) }), fim(t, e)))),
